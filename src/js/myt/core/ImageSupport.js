@@ -8,11 +8,13 @@
             prevent multiple requests being made for the same image URL. */
         openQueryCache = {},
         
+        getSizeFromCache = imgUrl => sizeCache[imgUrl],
+        
         /*  Loads an image to measure its size. */
         loadImageAndMeasureIt = imageView => {
             const imgUrl = imageView.imageUrl;
             if (imageView.calculateNaturalSize && imgUrl) {
-                const cachedSize = sizeCache[imgUrl];
+                const cachedSize = getSizeFromCache(imgUrl);
                 if (cachedSize) {
                     // Cache hit
                     imageView.setNaturalWidth(cachedSize.width);
@@ -114,6 +116,12 @@
         
         @class */
     pkg.ImageSupport = new JS.Module('ImageSupport', {
+        // Class Methods and Attributes ////////////////////////////////////////
+        extend: {
+            getSizeFromCache: getSizeFromCache
+        },
+        
+        
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.Node */
         initNode: function(parent, attrs) {

@@ -1,45 +1,53 @@
 (pkg => {
     let globalKeys,
         
-        /*  A map of keycodes of the keys currently pressed down. */
+        /*  A map of codes of the keys currently pressed down. */
         keysDown = {};
     
     const G = pkg.global,
         globalFocus = G.focus,
         
         isFirefox = BrowserDetect.browser === 'Firefox',
-        KEYCODE_TAB = 9,
-        KEYCODE_SHIFT = 16,
-        KEYCODE_CONTROL = 17,
-        KEYCODE_ALT = 18,
-        KEYCODE_Z = 90,
-        KEYCODE_COMMAND = isFirefox ? 224 : 91,
-        KEYCODE_RIGHT_COMMAND = isFirefox ? 224 : 93,
         
-        getKeyCodeFromEvent = event => pkg.KeyObservable.getKeyCodeFromEvent(event),
+        CODE_TAB = 'Tab',
+        CODE_SHIFT_LEFT = 'ShiftLeft',
+        CODE_SHIFT_RIGHT = 'ShiftRight',
+        CODE_ALT_LEFT = 'AltLeft',
+        CODE_ALT_RIGHT = 'AltRight',
+        CODE_CONTROL_LEFT = 'ControlLeft',
+        CODE_CONTROL_RIGHT = 'ControlRight',
+        CODE_META_LEFT = isFirefox ? 'OSLeft' : 'MetaLeft',
+        CODE_META_RIGHT = isFirefox ? 'OSRight' : 'MetaRight',
+        CODE_BACKSPACE = 'Backspace',
+        
+        getCodeFromEvent = pkg.KeyObservable.getCodeFromEvent,
+        
+        isShiftCode = code => code === CODE_SHIFT_LEFT || code === CODE_SHIFT_RIGHT,
+        isControlCode = code => code === CODE_CONTROL_LEFT || code === CODE_CONTROL_RIGHT,
+        isAltCode = code => code === CODE_ALT_LEFT || code === CODE_ALT_RIGHT,
         
         /*  Tests if a key is currently pressed down or not. Returns true if 
             the key is down, false otherwise.
-                param keyCode:number the key to test. */
-        isKeyDown = keyCode => !!keysDown[keyCode],
+                param code:string the key code to test. */
+        isKeyDown = code => !!keysDown[code],
         
         /*  Tests if the 'shift' key is down. */
-        isShiftKeyDown = () => isKeyDown(KEYCODE_SHIFT),
+        isShiftKeyDown = () => isKeyDown(CODE_SHIFT_LEFT) || isKeyDown(CODE_SHIFT_RIGHT),
         
         /*  Tests if the 'control' key is down. */
-        isControlKeyDown = () => isKeyDown(KEYCODE_CONTROL),
+        isControlKeyDown = () => isKeyDown(CODE_CONTROL_LEFT) || isKeyDown(CODE_CONTROL_RIGHT),
         
         /*  Tests if the 'alt' key is down. */
-        isAltKeyDown = () => isKeyDown(KEYCODE_ALT),
+        isAltKeyDown = () => isKeyDown(CODE_ALT_LEFT) || isKeyDown(CODE_ALT_RIGHT),
         
-        /*  Tests if the 'command' key is down. */
-        isCommandKeyDown = () => isKeyDown(KEYCODE_COMMAND) || isKeyDown(KEYCODE_RIGHT_COMMAND),
+        /*  Tests if the 'meta'/'command' key is down. */
+        isMetaKeyDown = () => isKeyDown(CODE_META_LEFT) || isKeyDown(CODE_META_RIGHT),
         
         ignoreFocusTrap = () => isAltKeyDown(),
         
-        shouldPreventDefault = (keyCode, targetElem) => {
-            switch (keyCode) {
-                case 8: // Backspace
+        shouldPreventDefault = (code, targetElem) => {
+            switch (code) {
+                case CODE_BACKSPACE: // Backspace
                     // Catch backspace since it navigates the history. Allow 
                     // it to go through for text input elements though.
                     const nodeName = targetElem.nodeName;
@@ -48,7 +56,7 @@
                         (nodeName === 'INPUT' && (targetElem.type === 'text' || targetElem.type === 'password')) ||
                         (nodeName === 'DIV' && targetElem.contentEditable === 'true' && targetElem.firstChild)
                     );
-                case 9: // Tab
+                case CODE_TAB: // Tab
                     // Tab navigation is handled by the framework.
                     return true;
             }
@@ -69,118 +77,17 @@
         focus traversal keys are used.
         
         Events:
-            keydown:number fired when a key is pressed down. The value is the
-                keycode of the key pressed down.
-            keypress:number fired when a key is pressed. The value is the
-                keycode of the key pressed.
-            keyup:number fired when a key is released up. The value is the
-                keycode of the key released up.
-        
-        Keycodes:
-            backspace          8
-            tab                9
-            enter             13
-            shift             16
-            ctrl              17
-            alt               18
-            pause/break       19
-            caps lock         20
-            escape            27
-            spacebar          32
-            page up           33
-            page down         34
-            end               35
-            home              36
-            left arrow        37
-            up arrow          38
-            right arrow       39
-            down arrow        40
-            insert            45
-            delete            46
-            0                 48
-            1                 49
-            2                 50
-            3                 51
-            4                 52
-            5                 53
-            6                 54
-            7                 55
-            8                 56
-            9                 57
-            a                 65
-            b                 66
-            c                 67
-            d                 68
-            e                 69
-            f                 70
-            g                 71
-            h                 72
-            i                 73
-            j                 74
-            k                 75
-            l                 76
-            m                 77
-            n                 78
-            o                 79
-            p                 80
-            q                 81
-            r                 82
-            s                 83
-            t                 84
-            u                 85
-            v                 86
-            w                 87
-            x                 88
-            y                 89
-            z                 90
-            left window key   91
-            right window key  92
-            select key        93
-            numpad 0          96
-            numpad 1          97
-            numpad 2          98
-            numpad 3          99
-            numpad 4         100
-            numpad 5         101
-            numpad 6         102
-            numpad 7         103
-            numpad 8         104
-            numpad 9         105
-            multiply         106
-            add              107
-            subtract         109
-            decimal point    110
-            divide           111
-            f1               112
-            f2               113
-            f3               114
-            f4               115
-            f5               116
-            f6               117
-            f7               118
-            f8               119
-            f9               120
-            f10              121
-            f11              122
-            f12              123
-            num lock         144
-            scroll lock      145
-            semi-colon       186
-            equal sign       187
-            comma            188
-            dash             189
-            period           190
-            forward slash    191
-            grave accent     192
-            open bracket     219
-            back slash       220
-            close braket     221
-            single quote     222
+            keydown:string fired when a key is pressed down. The value is the
+                code of the key pressed down.
+            keypress:string fired when a key is pressed. The value is the
+                code of the key pressed.
+            keyup:string fired when a key is released up. The value is the
+                code of the key released up.
         
         @class */
     new JS.Singleton('GlobalKeys', {
         include: [
-            pkg.DomElementProxy, 
+            pkg.DomElementProxy,
             pkg.DomObservable,
             pkg.DomObserver,
             pkg.KeyObservable,
@@ -193,14 +100,26 @@
         initialize: function() {
             G.register('keys', globalKeys = this);
             
-            // Constants
-            globalKeys.KEYCODE_TAB = KEYCODE_TAB;
-            globalKeys.KEYCODE_SHIFT = KEYCODE_SHIFT;
-            globalKeys.KEYCODE_CONTROL = KEYCODE_CONTROL;
-            globalKeys.KEYCODE_ALT = KEYCODE_ALT;
-            globalKeys.KEYCODE_Z = KEYCODE_Z;
-            globalKeys.KEYCODE_COMMAND = KEYCODE_COMMAND;
-            globalKeys.KEYCODE_RIGHT_COMMAND = KEYCODE_RIGHT_COMMAND;
+            // Exposed Key Code Constants
+            globalKeys.CODE_ENTER = 'Enter'; // Was KeyCode 13
+            globalKeys.CODE_ESC = 'Escape'; // Was KeyCode 27
+            globalKeys.CODE_SPACE = 'Space'; // Was Keycode 32
+            globalKeys.CODE_ARROW_LEFT = 'ArrowLeft'; // Was Keycode 37
+            globalKeys.CODE_ARROW_UP = 'ArrowUp'; // Was Keycode 38
+            globalKeys.CODE_ARROW_RIGHT = 'ArrowRight'; // Was Keycode 39
+            globalKeys.CODE_ARROW_DOWN = 'ArrowDown'; // Was Keycode 40
+            globalKeys.CODE_DELETE = 'Delete'; // Was Keycode 46
+            globalKeys.CODE_BACKSPACE = CODE_BACKSPACE; // Was Keycode 8
+            ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'].forEach(key => {
+                globalKeys['CODE_' + key] = 'Key' + key;
+            });
+            ['1','2','3','4','5','6','7','8','9','0'].forEach(key => {
+                globalKeys['CODE_' + key] = 'Digit' + key;
+            });
+            
+            globalKeys.ARROW_KEYS = [globalKeys.CODE_ARROW_LEFT, globalKeys.CODE_ARROW_UP, globalKeys.CODE_ARROW_RIGHT, globalKeys.CODE_ARROW_DOWN];
+            globalKeys.LIST_KEYS = [globalKeys.CODE_ENTER, globalKeys.CODE_SPACE, globalKeys.CODE_ESC].concat(globalKeys.ARROW_KEYS);
+            
             
             globalKeys.setDomElement(document);
             globalKeys.attachTo(globalFocus, '__hndl_focused', 'focused');
@@ -215,14 +134,17 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        isKeyDown: isKeyDown,
         isShiftKeyDown: isShiftKeyDown,
         isControlKeyDown: isControlKeyDown,
         isAltKeyDown: isAltKeyDown,
-        isCommandKeyDown: isCommandKeyDown,
+        isMetaKeyDown: isMetaKeyDown,
+        
+        isShiftCode: isShiftCode,
+        isControlCode: isControlCode,
+        isAltCode: isAltCode,
         
         /** Tests if the platform specific "accelerator" key is down. */
-        isAcceleratorKeyDown: () => BrowserDetect.os === 'Mac' ? isCommandKeyDown() : isControlKeyDown(),
+        isAcceleratorKeyDown: () => BrowserDetect.os === 'Mac' ? isMetaKeyDown() : isControlKeyDown(),
         
         ignoreFocusTrap: ignoreFocusTrap,
         
@@ -247,21 +169,20 @@
             @param {!Object} event
             @returns {undefined} */
         __hndl_keydown: event => {
-            const keyCode = getKeyCodeFromEvent(event),
+            const code = getCodeFromEvent(event),
                 domEvent = event.value;
-            if (shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
+            if (shouldPreventDefault(code, domEvent.target)) domEvent.preventDefault();
             
-            // Keyup events do not fire when command key is down so 
-            // fire a keyup event immediately. Not an issue for other 
-            // meta keys: shift, ctrl and option.
-            if (isCommandKeyDown() && keyCode !== KEYCODE_SHIFT && keyCode !== KEYCODE_CONTROL && keyCode !== KEYCODE_ALT) {
-                globalKeys.fireEvent('keydown', keyCode);
-                globalKeys.fireEvent('keyup', keyCode);
+            // Keyup events do not fire when command key is down so fire a keyup event immediately. 
+            // Not an issue for other meta keys: shift, ctrl and option.
+            if (isMetaKeyDown() && !isShiftCode(code) && !isControlCode(code) && !isAltCode(code)) {
+                globalKeys.fireEvent('keydown', code);
+                globalKeys.fireEvent('keyup', code);
             } else {
-                keysDown[keyCode] = true;
+                keysDown[code] = true;
                 
                 // Check for 'tab' key and do focus traversal.
-                if (keyCode === KEYCODE_TAB) {
+                if (code === CODE_TAB) {
                     const ift = ignoreFocusTrap();
                     if (isShiftKeyDown()) {
                         globalFocus.prev(ift);
@@ -270,7 +191,7 @@
                     }
                 }
                 
-                globalKeys.fireEvent('keydown', keyCode);
+                globalKeys.fireEvent('keydown', code);
             }
         },
         
@@ -278,18 +199,18 @@
             @param {!Object} event
             @returns {undefined} */
         __hndl_keypress: event => {
-            globalKeys.fireEvent('keypress', getKeyCodeFromEvent(event));
+            globalKeys.fireEvent('keypress', getCodeFromEvent(event));
         },
         
         /** @private
             @param {!Object} event
             @returns {undefined} */
         __hndl_keyup: event => {
-            const keyCode = getKeyCodeFromEvent(event),
+            const code = getCodeFromEvent(event),
                 domEvent = event.value;
-            if (shouldPreventDefault(keyCode, domEvent.target)) domEvent.preventDefault();
-            keysDown[keyCode] = false;
-            globalKeys.fireEvent('keyup', keyCode);
+            if (shouldPreventDefault(code, domEvent.target)) domEvent.preventDefault();
+            keysDown[code] = false;
+            globalKeys.fireEvent('keyup', code);
         }
     });
 })(myt);

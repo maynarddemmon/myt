@@ -1,6 +1,8 @@
 (pkg => {
     const JSClass = JS.Class,
         
+        GlobalKeys = pkg.global.keys,
+        
         STATE_COLLAPSED = 0,
         STATE_RESTORED_JUST_COLLAPSED = 1,
         STATE_RESTORED_JUST_EXPANDED = 2,
@@ -59,14 +61,7 @@
                 defAttr(attrs, 'expansionState', STATE_RESTORED_JUST_EXPANDED);
                 defAttr(attrs, 'focusIndicator', false);
                 defAttr(attrs, 'repeatKeyDown', true);
-                defAttr(attrs, 'activationKeys', [
-                    37, // left arrow
-                    38, // up arrow
-                    39, // right arrow
-                    40, // down arrow
-                    13, // enter
-                    32  // spacebar
-                ]);
+                defAttr(attrs, 'activationKeys', [GlobalKeys.CODE_ARROW_LEFT, GlobalKeys.CODE_ARROW_UP, GlobalKeys.CODE_ARROW_RIGHT, GlobalKeys.CODE_ARROW_DOWN, GlobalKeys.CODE_ENTER, GlobalKeys.CODE_SPACE]);
                 
                 if (attrs.axis === 'y') {
                     defAttr(attrs, 'height', 6);
@@ -163,9 +158,17 @@
                 // Determine nudge direction
                 let dir = 0;
                 switch (key) {
-                    case 37: case 38: dir = -1; break;
-                    case 39: case 40: dir = 1; break;
-                    case 13: case 32: default:
+                    case GlobalKeys.CODE_ARROW_UP:
+                    case GlobalKeys.CODE_ARROW_LEFT:
+                        dir = -1;
+                        break;
+                    case GlobalKeys.CODE_ARROW_DOWN:
+                    case GlobalKeys.CODE_ARROW_RIGHT:
+                        dir = 1;
+                        break;
+                    case GlobalKeys.CODE_ENTER:
+                    case GlobalKeys.CODE_SPACE:
+                    default:
                         self.doPrimaryAction();
                         return;
                 }

@@ -209,7 +209,7 @@
             
             /** @private */
             _handleKeyDown: event => {
-                if (pkg.KeyObservable.getKeyCodeFromEvent(event) === 13) colorPicker._submitInput();
+                if (pkg.KeyObservable.isEnterKeyEvent(event)) colorPicker._submitInput();
             },
             
             /** @private */

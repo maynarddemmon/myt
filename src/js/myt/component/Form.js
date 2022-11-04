@@ -5,10 +5,11 @@
         JSModule = JS.Module,
         G = pkg.global,
         GlobalFocus = G.focus,
+        GlobalKeys = G.keys,
         
         defAttr = pkg.AccessorSupport.defAttr,
         
-        getKeyCodeFromEvent = pkg.KeyObservable.getKeyCodeFromEvent,
+        KeyObservable = pkg.KeyObservable,
         
         DEFAULT_ATTR = 'runForDefault',
         ROLLBACK_ATTR = 'runForRollback',
@@ -1090,14 +1091,14 @@
                 @param {!Object} event
                 @returns {undefined} */
             __hndlKeyDown: function(event) {
-                if (getKeyCodeFromEvent(event) === 13) this.invokeAccelerator(ACCELERATOR_ACCEPT);
+                if (KeyObservable.isEnterKeyEvent(event)) this.invokeAccelerator(ACCELERATOR_ACCEPT);
             },
             
             /** @private
                 @param {!Object} event
                 @returns {undefined} */
             __hndlKeyUp: function(event) {
-                if (getKeyCodeFromEvent(event) === 27) this.invokeAccelerator(ACCELERATOR_REJECT);
+                if (KeyObservable.isEscKeyEvent(event)) this.invokeAccelerator(ACCELERATOR_REJECT);
             },
             
             /** @overrides myt.FocusObservable */
@@ -1278,20 +1279,20 @@
         },
         
         /** @overrides myt.ListViewAnchor. */
-        doActivationKeyDown: function(key, isRepeat) {
-            if (key === 27 && !this._isShown) {
+        doActivationKeyDown: function(code, isRepeat) {
+            if (code === GlobalKeys.CODE_ESC && !this._isShown) {
                 this.invokeAccelerator(ACCELERATOR_REJECT);
             } else {
-                this.callSuper(key, isRepeat);
+                this.callSuper(code, isRepeat);
             }
         },
         
         /** @overrides myt.ListViewAnchor. */
-        doActivationKeyUp: function(key) {
-            if (key === 13 && !this._isShown) {
+        doActivationKeyUp: function(code) {
+            if (code === GlobalKeys.CODE_ENTER && !this._isShown) {
                 this.invokeAccelerator(ACCELERATOR_ACCEPT);
             } else {
-                this.callSuper(key);
+                this.callSuper(code);
             }
         },
         

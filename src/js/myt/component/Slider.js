@@ -3,6 +3,8 @@
         mathMin = Math.min,
         mathMax = Math.max,
         
+        GlobalKeys = pkg.global.keys,
+        
         View = pkg.View,
         
         defAttr = pkg.AccessorSupport.defAttr,
@@ -17,12 +19,7 @@
                     height = attrs.height = parent.thumbHeight;
                 attrs.roundedCorners = mathMin(height, width) / 2;
                 attrs.repeatKeyDown = true;
-                attrs.activationKeys = [
-                    37, // left arrow
-                    38, // up arrow
-                    39, // right arrow
-                    40 // down arrow
-                ];
+                attrs.activationKeys = GlobalKeys.ARROW_KEYS;
                 attrs.activeColor = '#bbb';
                 attrs.readyColor = '#ccc';
                 attrs.hoverColor = '#ddd';
@@ -95,23 +92,23 @@
             },
             
             /** @overrides myt.Button. */
-            doActivationKeyDown: function(key, isRepeat) {
+            doActivationKeyDown: function(code, isRepeat) {
                 const parent = this.parent;
-                switch (key) {
-                    case 37: // Left
+                switch (code) {
+                    case GlobalKeys.CODE_ARROW_LEFT:
                         parent.nudgeValueLeft(this);
                         break;
-                    case 38: // Up
+                    case GlobalKeys.CODE_ARROW_UP:
                         parent.nudgeValueUp(this);
                         break;
-                    case 39: // Right
+                    case GlobalKeys.CODE_ARROW_RIGHT:
                         parent.nudgeValueRight(this);
                         break;
-                    case 40: // Down
+                    case GlobalKeys.CODE_ARROW_DOWN:
                         parent.nudgeValueDown(this);
                         break;
                 }
-                this.callSuper(key, isRepeat);
+                this.callSuper(code, isRepeat);
             }
         }),
         

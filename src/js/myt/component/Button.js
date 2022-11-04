@@ -3,6 +3,7 @@
         JSModule = JS.Module,
         
         View = pkg.View,
+        KeyActivation = pkg.KeyActivation,
         
         defAttr = pkg.AccessorSupport.defAttr,
         
@@ -27,7 +28,7 @@
                 pkg.UpdateableUI, 
                 pkg.Disableable, 
                 pkg.MouseOverAndDown, 
-                pkg.KeyActivation
+                KeyActivation
             ],
             
             
@@ -63,21 +64,20 @@
             
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.KeyActivation. */
-            doActivationKeyDown: function(key, isRepeat) {
-                // Prevent unnecessary UI updates when the activation 
-                // key is repeating.
+            doActivationKeyDown: function(code, isRepeat) {
+                // Prevent unnecessary UI updates when the activation key is repeating.
                 if (!isRepeat) this.updateUI();
             },
             
             /** @overrides myt.KeyActivation. */
-            doActivationKeyUp: function(key) {
-                this.callSuper(key);
+            doActivationKeyUp: function(code) {
+                this.callSuper(code);
                 this.updateUI();
             },
             
             /** @overrides myt.KeyActivation. */
-            doActivationKeyAborted: function(key) {
-                this.callSuper(key);
+            doActivationKeyAborted: function(code) {
+                this.callSuper(code);
                 this.updateUI();
             },
             
@@ -98,7 +98,7 @@
                         self.__restoreCursor = null;
                     }
                     
-                    if (self.activateKeyDown !== -1 || self.mouseDown) {
+                    if (self.activateKeyDown !== KeyActivation.NO_KEY_DOWN || self.mouseDown) {
                         self.drawActiveState();
                     } else if (self.focused) {
                         self.drawFocusedState();

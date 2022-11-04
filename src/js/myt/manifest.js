@@ -63,7 +63,7 @@ JS.Packages(function() {
         .requires('myt.View','myt.FlexBoxSupport','myt.TextSupport','myt.PaddedTextSupport','myt.ImageSupport','myt.SizeToDom');
     file(MYT_COMPONENT_ROOT + 'Behavior.js'        )
         .provides('myt.Activateable','myt.UpdateableUI','myt.Disableable','myt.KeyActivation','myt.MouseOver','myt.MouseDown','myt.MouseOverAndDown','myt.Draggable')
-        .requires('myt.global.mouse','myt.global.idle','myt.global.dragManager','myt.AccessorSupport','myt.MouseObservable','myt.KeyObservable','myt.FocusObservable','myt.Geometry');
+        .requires('myt.global.keys','myt.global.mouse','myt.global.idle','myt.global.dragManager','myt.AccessorSupport','myt.MouseObservable','myt.KeyObservable','myt.FocusObservable','myt.Geometry');
     file(MYT_COMPONENT_ROOT + 'Button.js'          )
         .provides('myt.Button','myt.SimpleButtonStyle','myt.SimpleButton','myt.SimpleTextButton','myt.TextButton')
         .requires('myt.UpdateableUI','myt.MouseOverAndDown','myt.KeyActivation','myt.Disableable','myt.View','myt.Image','myt.Text','myt.PaddedText');
@@ -92,9 +92,9 @@ JS.Packages(function() {
             'myt.InfiniteList','myt.InfiniteListRow','myt.SelectableInfiniteList','myt.SelectableInfiniteListRow','myt.SimpleSelectableInfiniteListRow',
             'myt.InfiniteGrid','myt.InfiniteGridRow','myt.InfiniteGridHeader','myt.SelectableInfiniteGrid','myt.SelectableInfiniteGridRow','myt.SimpleSelectableInfiniteGridRow'
         )
-        .requires('myt.Reusable','myt.Selectable','myt.SimpleButton','myt.GridController','myt.global.focus');
+        .requires('myt.Reusable','myt.Selectable','myt.SimpleButton','myt.GridController','myt.global.focus','myt.global.keys');
     file(MYT_COMPONENT_ROOT + 'ListView.js'        ).provides('myt.ListView','myt.ListViewAnchor','myt.ListViewItemMixin','myt.ListViewSeparator','myt.ListViewItem')
-        .requires('myt.FloatingPanel','myt.FloatingPanelAnchor','myt.SimpleTextButton','myt.global.focus');
+        .requires('myt.FloatingPanel','myt.FloatingPanelAnchor','myt.SimpleTextButton','myt.global.focus','myt.global.keys');
     file(MYT_COMPONENT_ROOT + 'ModelMixins.js'     ).provides('myt.ValueComponent','myt.RangeComponent','myt.BoundedValueComponent','myt.BoundedRangeComponent').requires('myt');
     file(MYT_COMPONENT_ROOT + 'NativeInput.js'     )
         .provides('myt.NativeInputWrapper','myt.BaseInputText','myt.InputText','myt.ComboBox','myt.InputTextArea','myt.EditableText','myt.InputSelect','myt.InputSelectOption')

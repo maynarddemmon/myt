@@ -1,11 +1,14 @@
 (pkg => {
     const JSModule = JS.Module,
         
-        GlobalFocus = pkg.global.focus,
+        G = pkg.global,
+        GlobalFocus = G.focus,
         
         makeEmptyEvent = () => {
             return {source:null, type:null, value:null};
         },
+        
+        getCodeFromEvent = event => event.value.code,
         
         /** Generates Key Events and passes them on to one or more event 
             observers. Requires myt.DomObservable as a super mixin.
@@ -24,10 +27,16 @@
                 /** The common key event that gets reused. */
                 EVENT: makeEmptyEvent(),
                 
-                /** Gets the key code from the provided key event.
+                getKeyFromEvent: event => event.value.key,
+                
+                /** Gets the code from the provided key event.
                     @param {!Object} event Event value is a dom event.
-                    @returns {number} The keycode from the event. */
-                getKeyCodeFromEvent: event => event.value.keyCode || event.value.charCode
+                    @returns {number} The code from the event. */
+                getCodeFromEvent: getCodeFromEvent,
+                
+                isEnterKeyEvent: event => getCodeFromEvent(event) === G.keys.CODE_ENTER,
+                isEscKeyEvent: event => getCodeFromEvent(event) === G.keys.CODE_ESC,
+                isShiftKeyEvent: event => G.keys.isShiftCode(getCodeFromEvent(event))
             },
             
             

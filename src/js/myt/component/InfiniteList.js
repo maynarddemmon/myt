@@ -6,7 +6,10 @@
         mathMax = math.max,
         
         View = pkg.View,
-        GlobalFocus = pkg.global.focus,
+        
+        G = pkg.global,
+        GlobalFocus = G.focus,
+        GlobalKeys = G.keys,
         
         defAttr = pkg.AccessorSupport.defAttr,
         
@@ -416,7 +419,7 @@
                 defAttr(attrs, 'hoverColor', '#eee');
                 defAttr(attrs, 'readyColor', '#fff');
                 defAttr(attrs, 'focusIndicator', false);
-                defAttr(attrs, 'activationKeys', [13,27,32,37,38,39,40]);
+                defAttr(attrs, 'activationKeys', GlobalKeys.LIST_KEYS);
                 
                 this.callSuper(parent, attrs);
             },
@@ -452,28 +455,28 @@
                 this.infiniteOwner.setSelectedRow(this);
             },
             
-            doActivationKeyDown: function(key, isRepeat) {
+            doActivationKeyDown: function(code, isRepeat) {
                 const owner = this.infiniteOwner,
                     model = this.model;
-                switch (key) {
-                    case 27: // Escape
+                switch (code) {
+                    case GlobalKeys.CODE_ESC:
                         if (this.selected) owner.setSelectedRow();
                         break;
-                    case 37: // Left
-                    case 38: // Up
+                    case GlobalKeys.CODE_ARROW_LEFT:
+                    case GlobalKeys.CODE_ARROW_UP:
                         owner.selectPrevRowForModel(model);
                         break;
-                    case 39: // Right
-                    case 40: // Down
+                    case GlobalKeys.CODE_ARROW_RIGHT:
+                    case GlobalKeys.CODE_ARROW_DOWN:
                         owner.selectNextRowForModel(model);
                         break;
                 }
             },
             
-            doActivationKeyUp: function(key) {
-                switch (key) {
-                    case 13: // Enter
-                    case 32: // Space
+            doActivationKeyUp: function(code) {
+                switch (code) {
+                    case GlobalKeys.CODE_ENTER:
+                    case GlobalKeys.CODE_SPACE:
                         this.doActivated();
                         break;
                 }

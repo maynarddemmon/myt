@@ -3,6 +3,8 @@
         mathMin = Math.min,
         isArray = Array.isArray,
         
+        GlobalKeys = pkg.global.keys,
+        
         SizeToDom = pkg.SizeToDom,
         View = pkg.View,
         Disableable = pkg.Disableable,
@@ -250,7 +252,7 @@
                 // Filter for allowed characters
                 const domEvent = event.value,
                     allowedChars = this.allowedChars;
-                if (allowedChars && allowedChars.indexOf(String.fromCharCode(domEvent.which)) === -1) domEvent.preventDefault();
+                if (allowedChars && allowedChars.indexOf(pkg.KeyObservable.getKeyFromEvent(event)) === -1) domEvent.preventDefault();
                 
                 this.filterInputPress(domEvent);
             },
@@ -460,7 +462,7 @@
             @returns {undefined} */
         __cleanInput: function(event) {
             // Prevent enter key from inserting a div
-            if (pkg.KeyObservable.getKeyCodeFromEvent(event) === 13) {
+            if (pkg.KeyObservable.isEnterKeyEvent(event)) {
                 event.value.preventDefault();
                 
                 // Instead, insert a linefeed if wrapping is allowed.
@@ -651,7 +653,7 @@
         initNode: function(parent, attrs) {
             this.filterItems = true;
             
-            defAttr(attrs, 'activationKeys', [13,27,38,40]);
+            defAttr(attrs, 'activationKeys', [GlobalKeys.CODE_ENTER, GlobalKeys.CODE_ESC, GlobalKeys.CODE_ARROW_UP, GlobalKeys.CODE_ARROW_DOWN]);
             defAttr(attrs, 'bgColor', '#fff');
             defAttr(attrs, 'borderWidth', 1);
             defAttr(attrs, 'borderStyle', 'solid');

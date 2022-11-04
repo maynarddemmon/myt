@@ -7,7 +7,9 @@
         
         defAttr = pkg.AccessorSupport.defAttr,
         
-        getKeyCodeFromEvent = event => pkg.KeyObservable.getKeyCodeFromEvent(event),
+        NO_KEY_DOWN = '',
+        
+        getCodeFromEvent = event => pkg.KeyObservable.getCodeFromEvent(event),
         getMouseFromEvent = event => pkg.MouseObservable.getMouseFromEvent(event);
     
     /** Adds the capability for an myt.View to be "activated". A doActivated 
@@ -109,8 +111,8 @@
                 activate this component. Note: The value is not copied so
                 modification of the array outside the scope of this object 
                 will effect behavior.
-            activateKeyDown:number the keycode of the activation key that 
-                is currently down. This will be -1 when no key is down.
+            activateKeyDown:string the key code of the activation key that is 
+                currently down. This will be empty string when no key is down.
             repeatKeyDown:boolean Indicates if doActivationKeyDown will be 
                 called for repeated keydown events or not. Defaults to false.
         
@@ -118,9 +120,9 @@
     pkg.KeyActivation = new JSModule('KeyActivation', {
         // Class Methods and Attributes ////////////////////////////////////////
         extend: {
-            /** The default activation keys are enter (13) and 
-                spacebar (32). */
-            ACTIVATION_KEYS: [13,32]
+            /** The default activation keys are enter and spacebar. */
+            ACTIVATION_KEYS: [GlobalKeys.CODE_ENTER,GlobalKeys.CODE_SPACE],
+            NO_KEY_DOWN: NO_KEY_DOWN
         },
         
         
@@ -129,7 +131,7 @@
         initNode: function(parent, attrs) {
             const self = this;
             
-            self.activateKeyDown = -1;
+            self.activateKeyDown = NO_KEY_DOWN;
             
             defAttr(attrs, 'activationKeys', pkg.KeyActivation.ACTIVATION_KEYS);
             
@@ -153,17 +155,17 @@
             @returns {undefined} */
         __hndlKeyDown: function(event) {
             if (!this.disabled) {
-                if (this.activateKeyDown === -1 || this.repeatKeyDown) {
-                    const keyCode = getKeyCodeFromEvent(event),
+                if (this.activateKeyDown === NO_KEY_DOWN || this.repeatKeyDown) {
+                    const code = getCodeFromEvent(event),
                         keys = this.activationKeys;
                     let i = keys.length;
                     while (i) {
-                        if (keyCode === keys[--i]) {
-                            if (this.activateKeyDown === keyCode) {
-                                this.doActivationKeyDown(keyCode, true);
+                        if (code === keys[--i]) {
+                            if (this.activateKeyDown === code) {
+                                this.doActivationKeyDown(code, true);
                             } else {
-                                this.activateKeyDown = keyCode;
-                                this.doActivationKeyDown(keyCode, false);
+                                this.activateKeyDown = code;
+                                this.doActivationKeyDown(code, false);
                             }
                             event.value.preventDefault();
                             return;
@@ -178,12 +180,12 @@
             @returns {undefined} */
         __hndlKeyPress: function(event) {
             if (!this.disabled) {
-                const keyCode = getKeyCodeFromEvent(event);
-                if (this.activateKeyDown === keyCode) {
+                const code = getCodeFromEvent(event);
+                if (this.activateKeyDown === code) {
                     const keys = this.activationKeys;
                     let i = keys.length;
                     while (i) {
-                        if (keyCode === keys[--i]) {
+                        if (code === keys[--i]) {
                             event.value.preventDefault();
                             return;
                         }
@@ -197,14 +199,14 @@
             @returns {undefined} */
         __hndlKeyUp: function(event) {
             if (!this.disabled) {
-                const keyCode = getKeyCodeFromEvent(event);
-                if (this.activateKeyDown === keyCode) {
+                const code = getCodeFromEvent(event);
+                if (this.activateKeyDown === code) {
                     const keys = this.activationKeys;
                     let i = keys.length;
                     while (i) {
-                        if (keyCode === keys[--i]) {
-                            this.activateKeyDown = -1;
-                            this.doActivationKeyUp(keyCode);
+                        if (code === keys[--i]) {
+                            this.activateKeyDown = NO_KEY_DOWN;
+                            this.doActivationKeyUp(code);
                             event.value.preventDefault();
                             return;
                         }
@@ -219,8 +221,8 @@
         __doDomBlur: function(event) {
             if (!this.disabled) {
                 const keyThatWasDown = this.activateKeyDown;
-                if (keyThatWasDown !== -1) {
-                    this.activateKeyDown = -1;
+                if (keyThatWasDown !== NO_KEY_DOWN) {
+                    this.activateKeyDown = NO_KEY_DOWN;
                     this.doActivationKeyAborted(keyThatWasDown);
                 }
             }
@@ -228,25 +230,25 @@
         
         /** Called when an activation key is pressed down. Default 
             implementation does nothing.
-            @param key:number the keycode that is down.
+            @param code:string the key code that is down.
             @param isRepeat:boolean Indicates if this is a key repeat event 
                 or not.
             @returns {undefined} */
-        doActivationKeyDown: (key, isRepeat) => {/* Subclasses to implement as needed. */},
+        doActivationKeyDown: (code, isRepeat) => {/* Subclasses to implement as needed. */},
         
         /** Called when an activation key is release up. This executes the
             'doActivated' method by default. 
-            @param key:number the keycode that is up.
+            @param code:string the keycode that is up.
             @returns {undefined} */
-        doActivationKeyUp: function(key) {
+        doActivationKeyUp: function(code) {
             this.doActivated();
         },
         
         /** Called when focus is lost while an activation key is down. Default 
             implementation does nothing.
-            @param key:number the keycode that is down.
+            @param code:string the keycode that is down.
             @returns {undefined} */
-        doActivationKeyAborted: key => {/* Subclasses to implement as needed. */}
+        doActivationKeyAborted: code => {/* Subclasses to implement as needed. */}
     });
     
     /** Provides a 'mouseOver' attribute that tracks mouse over/out state. 
@@ -632,7 +634,7 @@
             @param {!Object} event
             @returns {undefined} */
         __watchForAbort: function(event) {
-            if (event.value === 27) this.stopDrag(event, true);
+            if (event.value === GlobalKeys.CODE_ESC) this.stopDrag(event, true);
         },
         
         /** @private

@@ -2,11 +2,13 @@
     const JSClass = JS.Class,
         JSModule = JS.Module,
         
-        GlobalFocus = pkg.global.focus,
+        G = pkg.global,
+        GlobalFocus = G.focus,
+        GlobalKeys = G.keys,
         
         defAttr = pkg.AccessorSupport.defAttr,
         
-        ACTIVATION_KEYS = [13,27,32,37,38,39,40],
+        LIST_KEYS = GlobalKeys.LIST_KEYS,
         
         updateItems = listView => {
             const cfg = listView.itemConfig || [],
@@ -246,7 +248,7 @@
             
             // Assume this will be mixed onto something that implements 
             // myt.KeyActivation since it probably will.
-            defAttr(attrs, 'activationKeys', ACTIVATION_KEYS);
+            defAttr(attrs, 'activationKeys', LIST_KEYS);
             
             this.callSuper(parent, attrs);
         },
@@ -282,40 +284,40 @@
         },
         
         /** @overrides myt.KeyActivation. */
-        doActivationKeyDown: function(key, isRepeat) {
+        doActivationKeyDown: function(code, isRepeat) {
             // Close for escape key.
-            if (key === 27) {
+            if (code === GlobalKeys.CODE_ESC) {
                 this.hideFloatingPanel();
             } else {
                 // Select first/last if the list view is already open
-                switch (key) {
-                    case 37: // Left
-                    case 38: // Up
+                switch (code) {
+                    case GlobalKeys.CODE_ARROW_LEFT:
+                    case GlobalKeys.CODE_ARROW_UP:
                         this.selectLastItem();
                         break;
-                    case 39: // Right
-                    case 40: // Down
+                    case GlobalKeys.CODE_ARROW_RIGHT:
+                    case GlobalKeys.CODE_ARROW_DOWN:
                         this.selectFirstItem();
                         break;
                 }
-                this.callSuper(key, isRepeat);
+                this.callSuper(code, isRepeat);
             }
         },
         
         /** @overrides myt.KeyActivation. */
-        doActivationKeyUp: function(key) {
+        doActivationKeyUp: function(code) {
             // Abort for escape key.
-            if (key !== 27) {
-                this.callSuper(key);
+            if (code !== GlobalKeys.CODE_ESC) {
+                this.callSuper(code);
                 
                 // Select first/last after list view is open.
-                switch (key) {
-                    case 37: // Left
-                    case 38: // Up
+                switch (code) {
+                    case GlobalKeys.CODE_ARROW_LEFT:
+                    case GlobalKeys.CODE_ARROW_UP:
                         this.selectLastItem();
                         break;
-                    case 39: // Right
-                    case 40: // Down
+                    case GlobalKeys.CODE_ARROW_RIGHT:
+                    case GlobalKeys.CODE_ARROW_DOWN:
                         this.selectFirstItem();
                         break;
                 }
@@ -353,7 +355,7 @@
             defAttr(attrs, 'readyColor', '#eee');
             defAttr(attrs, 'inset', 8);
             defAttr(attrs, 'outset', 8);
-            defAttr(attrs, 'activationKeys', ACTIVATION_KEYS);
+            defAttr(attrs, 'activationKeys', LIST_KEYS);
             
             this.callSuper(parent, attrs);
         },
@@ -377,22 +379,22 @@
         },
         
         /** @overrides myt.KeyActivation. */
-        doActivationKeyDown: function(key, isRepeat) {
-            switch (key) {
-                case 27: // Escape
+        doActivationKeyDown: function(code, isRepeat) {
+            switch (code) {
+                case GlobalKeys.CODE_ESC:
                     this.listView.owner.hideFloatingPanel();
                     return;
-                case 37: // Left
-                case 38: // Up
+                case GlobalKeys.CODE_ARROW_LEFT:
+                case GlobalKeys.CODE_ARROW_UP:
                     GlobalFocus.prev();
                     break;
-                case 39: // Right
-                case 40: // Down
+                case GlobalKeys.CODE_ARROW_RIGHT:
+                case GlobalKeys.CODE_ARROW_DOWN:
                     GlobalFocus.next();
                     break;
             }
             
-            this.callSuper(key, isRepeat);
+            this.callSuper(code, isRepeat);
         }
     });
     
