@@ -5,11 +5,11 @@
         
         defAttr = pkg.AccessorSupport.defAttr;
     
-    /** A base class for flex box views.
+    /** A base class for flexbox views.
         
         @class */
-    pkg.FlexBox = new JSClass('FlexBox', View, {
-        include: [pkg.FlexBoxSupport]
+    pkg.Flexbox = new JSClass('Flexbox', View, {
+        include: [pkg.FlexboxSupport]
     });
     
     /** A view for an iframe. This component also listens to global mousedown

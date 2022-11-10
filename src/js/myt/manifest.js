@@ -40,7 +40,7 @@ JS.Packages(function() {
     file(MYT_CORE_ROOT + 'SizeToDom.js'       )
         .provides('myt.SizeToDom','myt.SizeWidthToDom','myt.SizeHeightToDom').requires('myt.TransformSupport');
     file(MYT_CORE_ROOT + 'TextSupport.js'     ).provides('myt.TextSupport','myt.PaddedTextSupport').requires('myt.SizeToDom');
-    file(MYT_CORE_ROOT + 'FlexBoxSupport.js'  ).provides('myt.FlexBoxSupport','myt.FlexBoxChildSupport').requires('myt');
+    file(MYT_CORE_ROOT + 'FlexboxSupport.js'  ).provides('myt.FlexboxSupport','myt.FlexboxChildSupport').requires('myt');
     
     // Core : Globals
     const MYT_GLOBALS_ROOT = MYT_CORE_ROOT + 'globals/';
@@ -59,8 +59,8 @@ JS.Packages(function() {
     const MYT_COMPONENT_ROOT = MYT_ROOT + 'component/';
     file(MYT_COMPONENT_ROOT + 'Annulus.js'         ).provides('myt.Annulus').requires('myt.BackView');
     file(MYT_COMPONENT_ROOT + 'BAG.js'             ).provides('myt.BAG','myt.BAGMembership').requires('myt.Node');
-    file(MYT_COMPONENT_ROOT + 'BaseViews.js'       ).provides('myt.FlexBox','myt.Frame','myt.Markup','myt.Text','myt.PaddedText','myt.Image','myt.BackView')
-        .requires('myt.View','myt.FlexBoxSupport','myt.TextSupport','myt.PaddedTextSupport','myt.ImageSupport','myt.SizeToDom');
+    file(MYT_COMPONENT_ROOT + 'BaseViews.js'       ).provides('myt.Flexbox','myt.Frame','myt.Markup','myt.Text','myt.PaddedText','myt.Image','myt.BackView')
+        .requires('myt.View','myt.FlexboxSupport','myt.TextSupport','myt.PaddedTextSupport','myt.ImageSupport','myt.SizeToDom');
     file(MYT_COMPONENT_ROOT + 'Behavior.js'        )
         .provides('myt.Activateable','myt.UpdateableUI','myt.Disableable','myt.KeyActivation','myt.MouseOver','myt.MouseDown','myt.MouseOverAndDown','myt.Draggable')
         .requires('myt.global.keys','myt.global.mouse','myt.global.idle','myt.global.dragManager','myt.AccessorSupport','myt.MouseObservable','myt.KeyObservable','myt.FocusObservable','myt.Geometry');
@@ -132,7 +132,7 @@ JS.Packages(function() {
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
         'myt.Cookie','myt.LocalStorage',
         'myt.global.error','myt.global.keys','myt.global.touch',
-        'myt.FlexBoxChildSupport','myt.FlexBox','myt.Text','myt.Image','myt.Markup','myt.Frame',
+        'myt.FlexboxChildSupport','myt.Flexbox','myt.Text','myt.Image','myt.Markup','myt.Frame',
         'myt.SizeToParent','myt.SizeToWindow',
         'myt.Animator','myt.StateMachine','myt.Replicator',
         'myt.WrappingLayout','myt.ResizeLayout','myt.AlignedLayout',

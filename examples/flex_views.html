@@ -9,49 +9,95 @@
     JS.require('myt.all', function() {this.init();});
     
     function init() {
-        var counter = 0;
-            M = myt,
-            rootView = new M.View(null, {bgColor:'#666666'}, [M.RootView, M.SizeToWindow]);
+        let counter = 0;
         
-        var ViewSquare = new JS.Class('Square', M.View, {
-            include: [M.FlexBoxChildSupport],
-            initNode:function(parent, attrs) {
-                this.callSuper(parent, Object.assign({width:75, height:75, bgColor:'#cccccc'}, attrs));
-                
-                var txt1 = new M.Text(this, {text:'box', align:'right', y:5});
-                var txt2 = new M.Text(this, {text:'' + counter++, align:'right', y:25});
-                
-                this.attachToDom(this, 'doClick', 'click');
-            },
-            doClick: function(event) {
-                if (this.alignSelf === 'stretch') {
-                    this.setAlignSelf('');
-                    this.setWidth(75);
-                } else {
-                    this.setAlignSelf('stretch');
-                    this.setWidth(null);
+        const M = myt,
+            View = M.View,
+            Text = M.Text,
+            
+            rootView = new View(null, {bgColor:'#333'}, [M.RootView, M.SizeToWindow]),
+            
+            ViewSquare = new JS.Class('Square', View, {
+                include: [M.FlexboxChildSupport],
+                initNode:function(parent, attrs) {
+                    this.callSuper(parent, Object.assign({width:35, height:35, bgColor:'#ccc'}, attrs));
+                    
+                    const txt1 = new Text(this, {text:'box', align:'right', y:0}),
+                        txt2 = new Text(this, {text:'' + counter++, align:'right', y:18});
+                    
+                    this.attachToDom(this, 'doClick', 'click');
+                    this.attachToDom(this, 'doDoubleClick', 'dblclick');
+                },
+                doClick: function(event) {
+                    if (this.alignSelf === 'stretch' || !this.alignSelf) {
+                        this.setAlignSelf('end');
+                    } else if (this.alignSelf === 'end') {
+                        this.setAlignSelf('center');
+                    } else if (this.alignSelf === 'center') {
+                        this.setAlignSelf('start');
+                    } else if (this.alignSelf === 'start') {
+                        this.setAlignSelf('stretch');
+                    }
+                },
+                doDoubleClick: function(event) {
+                    this.setIgnoreFlex(!this.ignoreFlex());
                 }
-            }
-        });
+            }),
+            
+            Container = new JS.Class('Container', M.Flexbox, {
+                initNode:function(parent, attrs) {
+                    this.callSuper(parent, Object.assign({bgColor:'#666', x:10, y:10, width:250, height:250}, attrs));
+                }
+            });
         
-        var Container = new JS.Class('Container', M.FlexBox, {
-            initNode:function(parent, attrs) {
-                this.callSuper(parent, Object.assign({bgColor:'#999999', x:10, y:10, width:250, height:250}, attrs));
-            }
-        });
-        
-        var f1 = new Container(rootView, {
-            flexDirection:'column', justifyContent:'space-evenly',
-            percentOfParentWidth:100, percentOfParentWidthOffset:-20
+        const f1 = new Container(rootView, {
+            direction:'column', justifyContent:'spaceEvenly',
+            rowGap:5, columnGap:1,
+            percentOfParentWidth:50
         }, [M.SizeToParent]);
-        new ViewSquare(f1);
-        new ViewSquare(f1, {alignSelf:'stretch', width:null});
-        new ViewSquare(f1);
+        new ViewSquare(f1, {grow:1, bgColor:'#aaa'});
+        new ViewSquare(f1, {alignSelf:'stretch', grow:1, bgColor:'#ccc'});
+        new ViewSquare(f1, {bgColor:'#eee'});
+        new ViewSquare(f1, {ignoreFlex:true, bgColor:'#f00', x:35, y:110, width:50, height:50});
         
-        var f2 = new Container(rootView, {y:270});
-        new ViewSquare(f2);
-        new ViewSquare(f2);
-        new ViewSquare(f2);
+        let x = 10;
+        ['start','end','center','spaceBetween','spaceAround','spaceEvenly'].forEach(justifyContent => {
+            const container = new Container(rootView, {
+                x:x, y:270, width:180, height:150,
+                flexboxPaused:true,
+                columnGap:5, direction:'rowReverse', justifyContent:justifyContent
+            });
+            new ViewSquare(container, {bgColor:'#aaa'});
+            new ViewSquare(container, {bgColor:'#ccc', width:70});
+            new ViewSquare(container, {bgColor:'#eee'});
+            container.setFlexboxPaused(false);
+            x += 190;
+        });
+        
+        x = 10;
+        ['start','end','center','spaceBetween','spaceAround','spaceEvenly','stretch'].forEach(justifyContent => {
+            const container = new Container(rootView, {
+                x:x, y:430, width:180, height:200,
+                flexboxPaused:true,
+                columnGap:2, rowGap:1, wrap:'wrapReverse',
+                direction:'row', justifyContent:justifyContent,
+                alignContent:justifyContent
+            });
+            new ViewSquare(container, {bgColor:'#aaa'});
+            new ViewSquare(container, {bgColor:'#ccc', width:70, height:40});
+            new ViewSquare(container, {bgColor:'#eee', height:70});
+            new ViewSquare(container, {bgColor:'#9ff'});
+            new ViewSquare(container, {bgColor:'#bff', width:90});
+            new ViewSquare(container, {bgColor:'#dff', grow:1});
+            new ViewSquare(container, {bgColor:'#aaa', height:40});
+            new ViewSquare(container, {bgColor:'#ccc', width:70});
+            new ViewSquare(container, {bgColor:'#eee'});
+            
+            window['foo_' + justifyContent] = new ViewSquare(container, {ignoreFlex:true, bgColor:'#f00', x:35, y:50, width:50, height:50});
+            
+            container.setFlexboxPaused(false);
+            x += 190;
+        });
     }
 </script>
 </body></html>

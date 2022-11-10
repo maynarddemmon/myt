@@ -404,6 +404,20 @@
             return this.subviews || (this.subviews = []);
         },
         
+        /** Get an array of the subviews in the lexical order of the dom.
+            @returns {!Array} */
+        getSubviewsInLexicalOrder: function() {
+            const self = this,
+                retval = [],
+                children = self.getIDE().children,
+                len = children.length;
+            for (let i = 0; i < len;) {
+                const sv = children[i++].model;
+                if (sv && sv.parent === self) retval.push(sv);
+            }
+            return retval;
+        },
+        
         /** Gets the views that are our siblings.
             @returns {!Array} of myt.View or undefined if this view 
                 is orphaned. */
@@ -1092,15 +1106,24 @@
             this.parent.sendSubviewInFrontOf(this, sv);
         },
         
+        /** Called whenever the subviews are reordered in the DOM using
+            one of the reordering functions of myt.View.
+            @param {?Object} sv The subview that was reorderd or null
+                if no specific subview can be determined.
+            @returns {undefined} */
+        doSubviewsReorderedInDom: sv => {/* Subclasses to implement. */},
+        
         /** Sends the provided subview to the back.
             @param {!Object} sv - The subview of this view to bring to front.
             @returns {undefined} */
         bringSubviewToFront: function(sv) {
-            if (sv && sv.parent === this) {
-                const innerElem = this.getIDE();
+            const self = this;
+            if (sv && sv.parent === self) {
+                const innerElem = self.getIDE();
                 if (sv.getODE() !== innerElem.lastChild) {
                     retainFocusDuringDomUpdate(sv, () => {
                         innerElem.appendChild(sv.getODE());
+                        self.doSubviewsReorderedInDom(sv);
                     });
                 }
             }
@@ -1111,11 +1134,13 @@
                 to back.
             @returns {undefined} */
         sendSubviewToBack: function(sv) {
-            if (sv && sv.parent === this) {
-                const innerElem = this.getIDE();
+            const self = this;
+            if (sv && sv.parent === self) {
+                const innerElem = self.getIDE();
                 if (sv.getODE() !== innerElem.firstChild) {
                     retainFocusDuringDomUpdate(sv, () => {
                         innerElem.insertBefore(sv.getODE(), innerElem.firstChild);
+                        self.doSubviewsReorderedInDom(sv);
                     });
                 }
             }
@@ -1128,10 +1153,12 @@
                 sub myt.View behind.
             @returns {undefined} */
         sendSubviewBehind: function(sv, existing) {
-            if (sv && existing && sv.parent === this && existing.parent === this) {
-                const innerElem = this.getIDE();
+            const self = this;
+            if (sv && existing && sv.parent === self && existing.parent === self) {
+                const innerElem = self.getIDE();
                 retainFocusDuringDomUpdate(sv, () => {
                     innerElem.insertBefore(sv.getODE(), existing.getODE());
+                    self.doSubviewsReorderedInDom(sv);
                 });
             }
         },
@@ -1143,9 +1170,13 @@
                 in front of.
             @returns {undefined} */
         sendSubviewInFrontOf: function(sv, existing) {
-            if (sv && existing && sv.parent === this && existing.parent === this) {
-                this.sendSubviewBehind(sv, existing);
-                this.sendSubviewBehind(existing, sv);
+            const self = this;
+            if (sv && existing && sv.parent === self && existing.parent === self) {
+                const innerElem = self.getIDE();
+                retainFocusDuringDomUpdate(sv, () => {
+                    innerElem.insertBefore(sv.getODE(), existing.getODE().nextSibling);
+                    self.doSubviewsReorderedInDom(sv);
+                });
             }
         },
         
@@ -1180,6 +1211,8 @@
                 
                 // Put this dom element back in the dom
                 if (parentElem) parentElem.insertBefore(outerElem, nextDe);
+                
+                self.doSubviewsReorderedInDom(null);
             });
         },
         
