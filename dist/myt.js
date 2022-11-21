@@ -4367,6 +4367,13 @@ new JS.Singleton('GlobalTouch', {
                 return isRowDirection ? this.isCompactHeight() : this.isCompactWidth();
             },
             
+            setUpdateAgain: function(v) {
+                this._updateAgain = v;
+            },
+            isUpdateAgain: function() {
+                return this._updateAgain;
+            },
+            
             updateFlexboxLayout: function() {
                 const flexbox = this;
                 if (flexbox.isOKToUpdateLayout()) {
@@ -4626,6 +4633,11 @@ new JS.Singleton('GlobalTouch', {
                         });
                         
                         flexbox.__isUpdatingFlexboxLayout = false;
+                        
+                        if (flexbox.isUpdateAgain()) {
+                            flexbox.setUpdateAgain(false);
+                            flexbox.updateFlexboxLayout();
+                        }
                     } else {
                         flexbox.setTotalBasisWidth(0);
                         flexbox.setTotalBasisHeight(0);
