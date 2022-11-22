@@ -433,23 +433,7 @@
                                 }
                             });
                             
-                            // HACK: Baseline alignment can cause things to shift out of bounds. 
-                            // This compensates for situations where items get shifted left/above 
-                            // the bounds of the flow. It pulls them back down/right. This is not
-                            // a solution for all cases, but this does greatly improve the most
-                            // common use case when items are "text blocks" that get shifted up
-                            // to bring their baseline into alignment with the middle of the flow.
-                            if (baselineOccurred) {
-                                let underage = 0;
-                                items.forEach(item => {
-                                    underage = mathMax(underage, crossPositionOffset - item[isRowDirection ? 'y' : 'x']);
-                                });
-                                if (underage > 0) {
-                                    items.forEach(item => {
-                                        adjustPositionAttrOnChild(item, isNotRowDirection, underage);
-                                    });
-                                }
-                            }
+                            if (baselineOccurred) flexbox.updateFlexboxLayoutBaselineAdjustment(items, isRowDirection, crossPositionOffset);
                         });
                         
                         flexbox.__isUpdatingFlexboxLayout = false;
@@ -463,7 +447,9 @@
                         flexbox.setTotalBasisHeight(0);
                     }
                 }
-            }
+            },
+            
+            updateFlexboxLayoutBaselineAdjustment: (items, isRowDirection, crossPositionOffset) => {}
         });
     
     /** Adds support for flex box child behavior to a myt.View.
