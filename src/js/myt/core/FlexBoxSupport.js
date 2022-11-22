@@ -161,6 +161,9 @@
             isCompactOnCrossAxis: function(isRowDirection) {
                 return isRowDirection ? this.isCompactHeight() : this.isCompactWidth();
             },
+            isWrapNotAllowed: function() {
+                return this.wrap === 'nowrap';
+            },
             
             setUpdateAgain: function(v) {
                 this._updateAgain = v;
@@ -192,8 +195,7 @@
                             crossGap = isRowDirection ? flexbox.rowGap : flexbox.columnGap,
                             crossFlexboxSize = isRowDirection ? flexboxHeight : flexboxWidth,
                             
-                            wrap = flexbox.wrap,
-                            noWrap = wrap === 'nowrap',
+                            noWrap = flexbox.isWrapNotAllowed(),
                             
                             justifyContent = flexbox.justifyContent,
                             alignItems = flexbox.alignItems,
@@ -272,7 +274,7 @@
                         // Flip the order of the flows and shift the position of each so that it is
                         // offset from the bottom/right
                         const flowLen = flows.length;
-                        if (flowLen > 1 && wrap === 'wrapReverse') {
+                        if (flowLen > 1 && flexbox.wrap === 'wrapReverse') {
                             flows.forEach(flow => {flow.crossPos = crossPos - (flow.crossPos + flow.crossSize);});
                             flows.reverse();
                         }
