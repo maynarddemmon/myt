@@ -29,7 +29,7 @@
                     this.attachToDom(this, 'doDoubleClick', 'dblclick');
                 },
                 doClick: function(event) {
-                    if (this.alignSelf === 'stretch' || !this.alignSelf) {
+                    if (this.alignSelf === 'baseline' || !this.alignSelf) {
                         this.setAlignSelf('end');
                     } else if (this.alignSelf === 'end') {
                         this.setAlignSelf('center');
@@ -37,11 +37,15 @@
                         this.setAlignSelf('start');
                     } else if (this.alignSelf === 'start') {
                         this.setAlignSelf('stretch');
+                    } else if (this.alignSelf === 'stretch') {
+                        this.setAlignSelf('baseline');
                     }
                 },
                 doDoubleClick: function(event) {
                     this.setIgnoreFlex(!this.ignoreFlex());
-                }
+                },
+                
+                getFlexBaselineOffset: isRowDirection => isRowDirection ? 10 : 20,
             }),
             
             Container = new JS.Class('Container', M.Flexbox, {

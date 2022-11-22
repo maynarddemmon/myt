@@ -4619,8 +4619,11 @@ new JS.Singleton('GlobalTouch', {
                                         updateSizeAttrOnChild(item, isNotRowDirection, getChildBasisSize(item, isNotRowDirection), false);
                                         break;
                                     case 'center':
-                                    case 'baseline': // FIXME: how to really implement baseline?
                                         updatePositionAttrOnChild(item, isNotRowDirection, crossPositionOffset + (crossSize - getChildBasisSize(item, isNotRowDirection)) / 2);
+                                        updateSizeAttrOnChild(item, isNotRowDirection, getChildBasisSize(item, isNotRowDirection), false);
+                                        break;
+                                    case 'baseline':
+                                        updatePositionAttrOnChild(item, isNotRowDirection, crossPositionOffset + (crossSize - getChildBasisSize(item, isNotRowDirection)) / 2 + item.getFlexBaselineOffset(isRowDirection));
                                         updateSizeAttrOnChild(item, isNotRowDirection, getChildBasisSize(item, isNotRowDirection), false);
                                         break;
                                     case 'stretch':
@@ -4753,6 +4756,10 @@ new JS.Singleton('GlobalTouch', {
         getFlexBasisHeight: function() {
             return this.__basisHeight == null ? this.height : this.__basisHeight;
         },
+        
+        /** Subclasses should override this to provide a more appropriate
+            baseline offset as needed. */
+        getFlexBaselineOffset: isRowDirection => 0,
         
         setIgnoreFlex: function(v) {
             if (this.__ignoreFlex !== v) {
