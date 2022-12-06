@@ -223,7 +223,7 @@
                                 currentFlow.items.length > 0 &&
                                 
                                 // If the next child would overflow then make a new flow
-                                pos + (itemCount === 0 ? 0 : mainGap) + childBasisSize >= mainFlexboxSize
+                                pos + (itemCount === 0 ? 0 : mainGap) + childBasisSize > mainFlexboxSize
                             ) {
                                 currentFlow.extraSize = mainFlexboxSize - pos;
                                 crossPos += currentFlow.crossSize + crossGap;
