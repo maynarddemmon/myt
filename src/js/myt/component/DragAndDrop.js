@@ -300,7 +300,7 @@
             a drop target.
             @param dropTarget:myt.DropTarget The target that was dragged over.
             @returns {undefined} */
-        notifyDragEnter: function(dropTarget) {
+        notifyDragEntering: function(dropTarget) {
             this.setDropTarget(dropTarget);
         },
         
@@ -308,7 +308,7 @@
             a drop target.
             @param dropTarget:myt.DropTarget The target that was dragged out of.
             @returns {undefined} */
-        notifyDragLeave: function(dropTarget) {
+        notifyDragLeaving: function(dropTarget) {
             this.setDropTarget();
         },
         
@@ -403,7 +403,7 @@
             being dragged that has a matching drag group.
             @param {!Object} dropable - The myt.Dropable being dragged.
             @returns {undefined} */
-        notifyDragStart: function(dropable) {
+        notifyAutoScrollerDragStart: function(dropable) {
             const ide = this.getIDE();
             if (ide.scrollHeight > ide.clientHeight || ide.scrollWidth > ide.clientWidth) {
                 this.attachToDom(globalMouse, '__hndlMove', 'mousemove', true);
@@ -415,7 +415,7 @@
             @param {!Object} dropable - The myt.Dropable no longer 
                 being dragged.
             @returns {undefined} */
-        notifyDragStop: function(dropable) {
+        notifyAutoScrollerDragStop: function(dropable) {
             this.detachFromDom(globalMouse, '__hndlMove', 'mousemove', true);
             
             resetVScroll(this);

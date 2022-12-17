@@ -21,7 +21,7 @@
             if (existingOverView !== v) {
                 if (existingOverView) {
                     existingOverView.notifyDragLeave(dragView);
-                    if (!dragView.destroyed) dragView.notifyDragLeave(existingOverView);
+                    if (!dragView.destroyed) dragView.notifyDragLeaving(existingOverView);
                     fireGlobalDragManagerEvent('dragLeave', existingOverView);
                 }
                 
@@ -29,7 +29,7 @@
                 
                 if (v) {
                     v.notifyDragEnter(dragView);
-                    if (!dragView.destroyed) dragView.notifyDragEnter(v);
+                    if (!dragView.destroyed) dragView.notifyDragEntering(v);
                     fireGlobalDragManagerEvent('dragEnter', existingOverView);
                 }
             }
@@ -40,20 +40,25 @@
             if (existingDragView !== v) {
                 dragView = v;
                 
-                let funcName, 
-                    eventName,
-                    func = target => {target[funcName](existingDragView);};
                 if (v) {
                     existingDragView = v;
-                    funcName = 'notifyDragStart';
-                    eventName = 'startDrag';
+                    
+                    filterList(existingDragView, dropTargets).forEach(target => {
+                        target.notifyDragStart(existingDragView);
+                    });
+                    filterList(existingDragView, autoScrollers).forEach(target => {
+                        target.notifyAutoScrollerDragStart(existingDragView);
+                    });
+                    fireGlobalDragManagerEvent('startDrag', v);
                 } else {
-                    funcName = 'notifyDragStop';
-                    eventName = 'stopDrag';
+                    filterList(existingDragView, dropTargets).forEach(target => {
+                        target.notifyDragStop(existingDragView);
+                    });
+                    filterList(existingDragView, autoScrollers).forEach(target => {
+                        target.notifyAutoScrollerDragStop(existingDragView);
+                    });
+                    fireGlobalDragManagerEvent('stopDrag', v);
                 }
-                filterList(existingDragView, dropTargets).forEach(func);
-                filterList(existingDragView, autoScrollers).forEach(func);
-                fireGlobalDragManagerEvent(eventName, v);
             }
         },
         
