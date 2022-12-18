@@ -71,6 +71,8 @@
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides */
             initNode: function(parent, attrs) {
+                this.__IS_FLEXBOX_SUPPORT = true; // Optimize FlexboxChildSupport.isChildOfFlexbox
+                
                 this.rowGap = this.columnGap = 0;
                 if (this.direction == null) this.direction = 'row';
                 this.wrap = 'nowrap';
@@ -464,8 +466,6 @@
         Private Attributes:
             __ignoreFlex:boolean - When true, this View is ignored by the
                 flexbox parent.
-            __parentIsFlexbox:boolean - Indicates if the parent of this View
-                is a flexbox or not.
             __basisWidth:number - The preferred width of this View for
                 calculating the size of this View in a flexbox. This value
                 gets set whenever the flexbox layout changes the width of this
@@ -480,12 +480,6 @@
         @class */
     pkg.FlexboxChildSupport = new JSModule('FlexboxChildSupport', {
         // Accessors ///////////////////////////////////////////////////////////
-        /** @overrides */
-        setParent: function(v) {
-            this.__parentIsFlexbox = null;
-            this.callSuper(v);
-        },
-        
         /** @overrides */
         setVisible: function(v) {
             if (this.visible !== v) {
@@ -607,8 +601,7 @@
         
         // Methods /////////////////////////////////////////////////////////////
         isChildOfFlexbox: function() {
-            if (this.__parentIsFlexbox == null) this.__parentIsFlexbox = this.parent && this.parent.isA(FlexboxSupport);
-            return this.__parentIsFlexbox;
+            return !!(this.parent && this.parent.__IS_FLEXBOX_SUPPORT);
         },
         
         isFlexUpdateInProgress: function() {return this.__isFlexUpdate;},
