@@ -62,13 +62,14 @@
             // returned in the font family name. Seems OK to just do it for
             // all fonts since double quotes in a font name is most likely
             // going to be confusing anyhow.
-            const fontName = fontFace.family.split('"').join('') + ' ' + fontFace.weight;
-            
-            if (!fontLoaded[fontName]) {
-                fontLoaded[fontName] = true;
-                const targets = fontTargets[fontName] || [];
-                while (targets.length) notifyInstanceThatFontLoaded(targets.pop());
-            }
+            const familyName = fontFace.family.split('"').join('');
+            [familyName, familyName + ' ' + fontFace.weight].forEach(fontName => {
+                if (!fontLoaded[fontName]) {
+                    fontLoaded[fontName] = true;
+                    const targets = fontTargets[fontName] || [];
+                    while (targets.length) notifyInstanceThatFontLoaded(targets.pop());
+                }
+            });
         },
         
         notifyInstanceThatFontLoaded = instance => {
