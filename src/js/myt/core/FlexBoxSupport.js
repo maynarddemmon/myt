@@ -461,9 +461,11 @@
                         
                         flexbox.__isUpdatingFlexboxLayout = false;
                         
-                        if (flexbox.isUpdateAgain()) {
+                        if (flexbox.isUpdateAgain() && !flexbox.__UPDATE_AGAIN_LOOP_PROTECTION) {
                             flexbox.setUpdateAgain(false);
+                            flexbox.__UPDATE_AGAIN_LOOP_PROTECTION = true;
                             flexbox.updateFlexboxLayout();
+                            flexbox.__UPDATE_AGAIN_LOOP_PROTECTION = false;
                         }
                     } else {
                         flexbox.setTotalBasisWidth(0);
