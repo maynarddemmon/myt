@@ -4416,12 +4416,14 @@ new JS.Singleton('GlobalTouch', {
                             maxPos = 0,
                             crossPos = 0,
                             itemCount = 0,
-                            currentFlow = {items:[], growCount:0, extraSize:0, crossPos:crossPos, crossSize:0};
+                            currentFlow = {items:[], shrinkCount:0, shrinkBasis:0, growCount:0, extraSize:0, crossPos:crossPos, crossSize:0};
                         const flows = [currentFlow];
                         
                         for (let i = 0; i < len;) {
                             const child = children[i++],
-                                childBasisSize = getChildBasisSize(child, isRowDirection);
+                                childBasisSize = getChildBasisSize(child, isRowDirection),
+                                childShrink = child.shrink,
+                                childGrow = child.grow;
                             
                             if (
                                 // We can only make new flows if we're wrapping
@@ -4440,13 +4442,17 @@ new JS.Singleton('GlobalTouch', {
                                 // Make next flow
                                 pos = 0;
                                 itemCount = 0;
-                                currentFlow = {items:[], growCount:0, extraSize:0, crossPos:crossPos, crossSize:0};
+                                currentFlow = {items:[], shrinkCount:0, shrinkBasis:0, growCount:0, extraSize:0, crossPos:crossPos, crossSize:0};
                                 flows.push(currentFlow);
                             }
                             
                             if (itemCount !== 0) pos += mainGap;
                             
-                            if (child.grow > 0) currentFlow.growCount += child.grow;
+                            if (childShrink > 0 && childBasisSize > 0) {
+                                currentFlow.shrinkCount += childShrink;
+                                currentFlow.shrinkBasis += childBasisSize * childShrink;
+                            }
+                            if (childGrow > 0) currentFlow.growCount += childGrow;
                             currentFlow.crossSize = mathMax(currentFlow.crossSize, getChildBasisSize(child, isNotRowDirection));
                             
                             updatePositionAttrOnChild(child, isRowDirection, pos);
@@ -4608,6 +4614,21 @@ new JS.Singleton('GlobalTouch', {
                                             break;
                                     }
                                 }
+                            } else if (extraSize < 0 && flow.shrinkCount > 0) {
+                                // Try to zero out extraSize using shrink.
+                                const shrinkBasis = flow.shrinkBasis;
+                                let shrinkAmountTotal = 0;
+                                // See: https://www.madebymike.com.au/writing/understanding-flexbox/ for math
+                                items.forEach(item => {
+                                    // Shift items as we go so we don't have to loop over the items again.
+                                    if (shrinkAmountTotal < 0) adjustPositionAttrOnChild(item, isRowDirection, shrinkAmountTotal);
+                                    
+                                    const shrinkAmount = (item.shrink * getChildBasisSize(item, isRowDirection) / shrinkBasis) * mathMax(extraSize, -shrinkBasis);
+                                    if (shrinkAmount < 0) {
+                                        updateSizeAttrOnChild(item, isRowDirection, shrinkAmount, true);
+                                        shrinkAmountTotal += shrinkAmount;
+                                    }
+                                });
                             }
                             
                             // Align Items along cross-axis. */
@@ -4784,6 +4805,17 @@ new JS.Singleton('GlobalTouch', {
                 this.grow = v;
                 if (this.inited) {
                     this.fireEvent('grow', v);
+                    this.updateFlexboxLayoutFromChild();
+                }
+            }
+        },
+        
+        setShrink: function(v) {
+            v = mathMax(0, v);
+            if (this.shrink !== v) {
+                this.shrink = v;
+                if (this.inited) {
+                    this.fireEvent('shrink', v);
                     this.updateFlexboxLayoutFromChild();
                 }
             }
