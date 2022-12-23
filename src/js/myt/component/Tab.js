@@ -222,14 +222,9 @@
             /** @overrides myt.View */
             subnodeRemoved: function(node) {
                 if (node.isA(Tab)) {
-                    const tabs = this.__tabs;
-                    let i = tabs.length;
-                    while (i) {
-                        if (tabs[--i] === node) {
-                            tabs.splice(i, 1);
-                            break;
-                        }
-                    }
+                    const tabs = this.__tabs,
+                        idx = tabs.indexOf(node);
+                    if (idx > -1) tabs.splice(idx, 1);
                 }
                 this.callSuper(node);
             }

@@ -164,13 +164,11 @@
                 const actives = getActiveObjArray(this);
                 let warningType;
                 if (actives) {
-                    let i = actives.length;
-                    while (i) {
-                        if (actives[--i] === obj) {
-                            actives.splice(i, 1);
-                            this.callSuper(obj);
-                            return;
-                        }
+                    const idx = actives.indexOf(obj);
+                    if (idx > -1) {
+                        actives.splice(idx, 1);
+                        this.callSuper(obj);
+                        return;
                     }
                     warningType = 'inactive';
                 } else {

@@ -216,7 +216,7 @@
                 let curParent = self.parent;
                 if (curParent) {
                     let idx = curParent.getSubnodeIndex(self);
-                    if (idx >= 0) {
+                    if (idx > -1) {
                         if (self.name) removeNameRef(curParent, self);
                         curParent.subnodes.splice(idx, 1);
                         curParent.subnodeRemoved(self);

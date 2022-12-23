@@ -404,7 +404,7 @@
             
             notifyRemoveHdr: function(columnHeader) {
                 const idx = this.getHdrIndex(columnHeader);
-                if (idx >= 0) {
+                if (idx > -1) {
                     this.columnHeaders.splice(idx, 1);
                     if (columnHeader.visible && columnHeader.last) this.setLastColumn(this.getPrevHdr(columnHeader));
                     this.fixupResizerCursors();
@@ -491,7 +491,7 @@
             
             notifyRemoveRow: function(row) {
                 const idx = this.getRowIndex(row);
-                if (idx >= 0) this.rows.splice(idx, 1);
+                if (idx > -1) this.rows.splice(idx, 1);
             },
             
             fitHeadersToWidth: function() {

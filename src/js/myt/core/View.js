@@ -967,7 +967,7 @@
             let idx;
             if (node instanceof pkg.View) {
                 idx = this.getSubviewIndex(node);
-                if (idx >= 0) {
+                if (idx > -1) {
                     this.fireEvent('subviewRemoved', node);
                     node.removeDomElement();
                     this.subviews.splice(idx, 1);
@@ -975,7 +975,7 @@
                 }
             } else if (node instanceof pkg.Layout) {
                 idx = this.getLayoutIndex(node);
-                if (idx >= 0) {
+                if (idx > -1) {
                     this.fireEvent('layoutRemoved', node);
                     this.layouts.splice(idx, 1);
                     this.layoutRemoved(node);

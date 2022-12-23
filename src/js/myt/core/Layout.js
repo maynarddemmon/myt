@@ -46,13 +46,13 @@
         moveSubview = (layout, sv, target, after) => {
             const curIdx = layout.getSubviewIndex(sv),
                 svs = layout.subviews;
-            if (curIdx >= 0) {
+            if (curIdx > -1) {
                 let targetIdx = layout.getSubviewIndex(target);
                 
                 // Remove from current index
                 svs.splice(curIdx, 1);
                 
-                if (targetIdx >= 0) {
+                if (targetIdx > -1) {
                     // Move before or after the target
                     if (curIdx < targetIdx) --targetIdx;
                     svs.splice(targetIdx + (after ? 1 : 0), 0, sv);
@@ -256,7 +256,7 @@
                 if (this.ignore(sv)) return -1;
                 
                 const idx = this.getSubviewIndex(sv);
-                if (idx >= 0) {
+                if (idx > -1) {
                     this.stopMonitoringSubview(sv);
                     this.subviews.splice(idx, 1);
                     if (!this.locked) this.update();

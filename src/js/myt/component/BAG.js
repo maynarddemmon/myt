@@ -110,14 +110,9 @@
                 @returns {undefined} */
             unregister: function(node) {
                 if (node) {
-                    const nodes = this.__nodes;
-                    let i = nodes.length;
-                    while (i) {
-                        if (node === nodes[--i]) {
-                            nodes.splice(i, 1);
-                            break;
-                        }
-                    }
+                    const nodes = this.__nodes,
+                        idx = nodes.indexOf(node);
+                    if (idx > -1) nodes.splice(idx, 1);
                     
                     if (this.trueNode === node) this.setTrueNode(null);
                     

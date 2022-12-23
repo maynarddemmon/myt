@@ -43,14 +43,10 @@
             @param {!Object} rootToRemove - The RootView to remove.
             @returns {undefined} */
         removeRoot: rootToRemove => {
-            let i = roots.length;
-            while (i) {
-                const root = roots[--i];
-                if (root === rootToRemove) {
-                    roots.splice(i, 1);
-                    globalRootViewRegistry.fireEvent('rootRemoved', root);
-                    break;
-                }
+            const idx = roots.indexOf(rootToRemove);
+            if (idx > -1) {
+                roots.splice(idx, 1);
+                globalRootViewRegistry.fireEvent('rootRemoved', rootToRemove);
             }
         }
     });

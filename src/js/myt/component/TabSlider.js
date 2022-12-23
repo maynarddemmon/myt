@@ -369,14 +369,11 @@
                     /** @overrides myt.View */
                     subnodeRemoved: function(node) {
                         if (node instanceof TabSlider) {
-                            const tabSliders = self._tabSliders;
-                            let i = tabSliders.length;
-                            while (i) {
-                                if (tabSliders[--i] === node) {
-                                    self.detachFrom(node, 'updateLayout', 'selected');
-                                    tabSliders.splice(i, 1);
-                                    break;
-                                }
+                            const tabSliders = self._tabSliders,
+                                idx = tabSliders.indexOf(node);
+                            if (idx > -1) {
+                                self.detachFrom(node, 'updateLayout', 'selected');
+                                tabSliders.splice(idx, 1);
                             }
                         }
                         this.callSuper(node);

@@ -138,13 +138,8 @@
             @param {!Object} autoScroller - The myt.AutoScroller to unregister.
             @returns {undefined} */
         unregisterAutoScroller: autoScroller => {
-            let i = autoScrollers.length;
-            while (i) {
-                if (autoScrollers[--i] === autoScroller) {
-                    autoScrollers.splice(i, 1);
-                    break;
-                }
-            }
+            const idx = autoScrollers.indexOf(autoScroller);
+            if (idx > -1) autoScrollers.splice(idx, 1);
         },
         
         /** Registers the provided drop target to receive notifications.
@@ -158,13 +153,8 @@
             @param {!Object} dropTarget - The myt.DropTarget to unregister.
             @returns {undefined} */
         unregisterDropTarget: dropTarget => {
-            let i = dropTargets.length;
-            while (i) {
-                if (dropTargets[--i] === dropTarget) {
-                    dropTargets.splice(i, 1);
-                    break;
-                }
-            }
+            const idx = dropTargets.indexOf(dropTarget);
+            if (idx > -1) dropTargets.splice(idx, 1);
         },
         
         /** Called by a myt.Dropable when a drag starts.

@@ -5244,13 +5244,11 @@ myt.Destructible = new JS.Module('Destructible', {
                 const actives = getActiveObjArray(this);
                 let warningType;
                 if (actives) {
-                    let i = actives.length;
-                    while (i) {
-                        if (actives[--i] === obj) {
-                            actives.splice(i, 1);
-                            this.callSuper(obj);
-                            return;
-                        }
+                    const idx = actives.indexOf(obj);
+                    if (idx > -1) {
+                        actives.splice(idx, 1);
+                        this.callSuper(obj);
+                        return;
                     }
                     warningType = 'inactive';
                 } else {
@@ -5601,7 +5599,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 let curParent = self.parent;
                 if (curParent) {
                     let idx = curParent.getSubnodeIndex(self);
-                    if (idx >= 0) {
+                    if (idx > -1) {
                         if (self.name) removeNameRef(curParent, self);
                         curParent.subnodes.splice(idx, 1);
                         curParent.subnodeRemoved(self);
@@ -5984,13 +5982,13 @@ myt.Destructible = new JS.Module('Destructible', {
         moveSubview = (layout, sv, target, after) => {
             const curIdx = layout.getSubviewIndex(sv),
                 svs = layout.subviews;
-            if (curIdx >= 0) {
+            if (curIdx > -1) {
                 let targetIdx = layout.getSubviewIndex(target);
                 
                 // Remove from current index
                 svs.splice(curIdx, 1);
                 
-                if (targetIdx >= 0) {
+                if (targetIdx > -1) {
                     // Move before or after the target
                     if (curIdx < targetIdx) --targetIdx;
                     svs.splice(targetIdx + (after ? 1 : 0), 0, sv);
@@ -6194,7 +6192,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 if (this.ignore(sv)) return -1;
                 
                 const idx = this.getSubviewIndex(sv);
-                if (idx >= 0) {
+                if (idx > -1) {
                     this.stopMonitoringSubview(sv);
                     this.subviews.splice(idx, 1);
                     if (!this.locked) this.update();
@@ -7926,7 +7924,7 @@ myt.Destructible = new JS.Module('Destructible', {
             let idx;
             if (node instanceof pkg.View) {
                 idx = this.getSubviewIndex(node);
-                if (idx >= 0) {
+                if (idx > -1) {
                     this.fireEvent('subviewRemoved', node);
                     node.removeDomElement();
                     this.subviews.splice(idx, 1);
@@ -7934,7 +7932,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 }
             } else if (node instanceof pkg.Layout) {
                 idx = this.getLayoutIndex(node);
-                if (idx >= 0) {
+                if (idx > -1) {
                     this.fireEvent('layoutRemoved', node);
                     this.layouts.splice(idx, 1);
                     this.layoutRemoved(node);
@@ -9481,14 +9479,10 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {!Object} rootToRemove - The RootView to remove.
             @returns {undefined} */
         removeRoot: rootToRemove => {
-            let i = roots.length;
-            while (i) {
-                const root = roots[--i];
-                if (root === rootToRemove) {
-                    roots.splice(i, 1);
-                    globalRootViewRegistry.fireEvent('rootRemoved', root);
-                    break;
-                }
+            const idx = roots.indexOf(rootToRemove);
+            if (idx > -1) {
+                roots.splice(idx, 1);
+                globalRootViewRegistry.fireEvent('rootRemoved', rootToRemove);
             }
         }
     });
@@ -11294,13 +11288,8 @@ new JS.Singleton('GlobalMouse', {
             @param {!Object} autoScroller - The myt.AutoScroller to unregister.
             @returns {undefined} */
         unregisterAutoScroller: autoScroller => {
-            let i = autoScrollers.length;
-            while (i) {
-                if (autoScrollers[--i] === autoScroller) {
-                    autoScrollers.splice(i, 1);
-                    break;
-                }
-            }
+            const idx = autoScrollers.indexOf(autoScroller);
+            if (idx > -1) autoScrollers.splice(idx, 1);
         },
         
         /** Registers the provided drop target to receive notifications.
@@ -11314,13 +11303,8 @@ new JS.Singleton('GlobalMouse', {
             @param {!Object} dropTarget - The myt.DropTarget to unregister.
             @returns {undefined} */
         unregisterDropTarget: dropTarget => {
-            let i = dropTargets.length;
-            while (i) {
-                if (dropTargets[--i] === dropTarget) {
-                    dropTargets.splice(i, 1);
-                    break;
-                }
-            }
+            const idx = dropTargets.indexOf(dropTarget);
+            if (idx > -1) dropTargets.splice(idx, 1);
         },
         
         /** Called by a myt.Dropable when a drag starts.
@@ -13459,14 +13443,9 @@ new JS.Singleton('GlobalMouse', {
                 @returns {undefined} */
             unregister: function(node) {
                 if (node) {
-                    const nodes = this.__nodes;
-                    let i = nodes.length;
-                    while (i) {
-                        if (node === nodes[--i]) {
-                            nodes.splice(i, 1);
-                            break;
-                        }
-                    }
+                    const nodes = this.__nodes,
+                        idx = nodes.indexOf(node);
+                    if (idx > -1) nodes.splice(idx, 1);
                     
                     if (this.trueNode === node) this.setTrueNode(null);
                     
@@ -14423,14 +14402,11 @@ new JS.Singleton('GlobalMouse', {
                     /** @overrides myt.View */
                     subnodeRemoved: function(node) {
                         if (node instanceof TabSlider) {
-                            const tabSliders = self._tabSliders;
-                            let i = tabSliders.length;
-                            while (i) {
-                                if (tabSliders[--i] === node) {
-                                    self.detachFrom(node, 'updateLayout', 'selected');
-                                    tabSliders.splice(i, 1);
-                                    break;
-                                }
+                            const tabSliders = self._tabSliders,
+                                idx = tabSliders.indexOf(node);
+                            if (idx > -1) {
+                                self.detachFrom(node, 'updateLayout', 'selected');
+                                tabSliders.splice(idx, 1);
                             }
                         }
                         this.callSuper(node);
@@ -14753,14 +14729,9 @@ new JS.Singleton('GlobalMouse', {
             /** @overrides myt.View */
             subnodeRemoved: function(node) {
                 if (node.isA(Tab)) {
-                    const tabs = this.__tabs;
-                    let i = tabs.length;
-                    while (i) {
-                        if (tabs[--i] === node) {
-                            tabs.splice(i, 1);
-                            break;
-                        }
-                    }
+                    const tabs = this.__tabs,
+                        idx = tabs.indexOf(node);
+                    if (idx > -1) tabs.splice(idx, 1);
                 }
                 this.callSuper(node);
             }
@@ -21301,7 +21272,7 @@ new JS.Singleton('GlobalMouse', {
             
             notifyRemoveHdr: function(columnHeader) {
                 const idx = this.getHdrIndex(columnHeader);
-                if (idx >= 0) {
+                if (idx > -1) {
                     this.columnHeaders.splice(idx, 1);
                     if (columnHeader.visible && columnHeader.last) this.setLastColumn(this.getPrevHdr(columnHeader));
                     this.fixupResizerCursors();
@@ -21388,7 +21359,7 @@ new JS.Singleton('GlobalMouse', {
             
             notifyRemoveRow: function(row) {
                 const idx = this.getRowIndex(row);
-                if (idx >= 0) this.rows.splice(idx, 1);
+                if (idx > -1) this.rows.splice(idx, 1);
             },
             
             fitHeadersToWidth: function() {
