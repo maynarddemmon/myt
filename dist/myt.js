@@ -9893,7 +9893,7 @@ myt.Destructible = new JS.Module('Destructible', {
         toUnitRange = (num, max) => {
             if (typeof num === 'string') {
                 if (num.endsWith('%')) {
-                    num = parseFloat(num.substring(0, num.length - 1)) * max / 100;
+                    num = parseFloat(num.slice(0, -1)) * max / 100;
                 } else {
                     return 0;
                 }
