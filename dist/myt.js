@@ -4478,7 +4478,7 @@ new JS.Singleton('GlobalTouch', {
                                 },
                                 null
                             );
-                            if (minExtraSize > 0) flows.forEach(flow => {flow.extraSize -= minExtraSize;});
+                            if (minExtraSize !== 0) flows.forEach(flow => {flow.extraSize -= minExtraSize;});
                         }
                         
                         // Total Basis Sizes
@@ -4615,6 +4615,7 @@ new JS.Singleton('GlobalTouch', {
                                     }
                                 }
                             } else if (extraSize < 0 && flow.shrinkCount > 0) {
+                                console.log('extra', extraSize);
                                 // Try to zero out extraSize using shrink.
                                 const shrinkBasis = flow.shrinkBasis;
                                 let shrinkAmountTotal = 0;
@@ -4629,6 +4630,7 @@ new JS.Singleton('GlobalTouch', {
                                         shrinkAmountTotal += shrinkAmount;
                                     }
                                 });
+                                console.log('total', extraSize);
                             }
                             
                             // Align Items along cross-axis. */

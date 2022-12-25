@@ -272,7 +272,7 @@
                                 },
                                 null
                             );
-                            if (minExtraSize > 0) flows.forEach(flow => {flow.extraSize -= minExtraSize;});
+                            if (minExtraSize !== 0) flows.forEach(flow => {flow.extraSize -= minExtraSize;});
                         }
                         
                         // Total Basis Sizes
