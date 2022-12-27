@@ -535,17 +535,18 @@
                     to block subsequent calls.
                 @returns {!Function} - The debounced function. */
             debounce: function(func, wait, immediate) {
+                const timeoutKey = '__DBTO' + '_' + this.generateGuid();
                 return function() {
                     const context = this,
-                        timeout = context.__DBTO,
+                        timeout = context[timeoutKey],
                         args = arguments,
                         later = function() {
-                            context.__DBTO = null;
+                            context[timeoutKey] = null;
                             if (!immediate) func.apply(context, args);
                         },
                         callNow = immediate && !timeout;
                     clearTimeout(timeout);
-                    context.__DBTO = setTimeout(later, wait);
+                    context[timeoutKey] = setTimeout(later, wait);
                     if (callNow) func.apply(context, args);
                 };
             },

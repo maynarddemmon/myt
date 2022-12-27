@@ -1045,17 +1045,18 @@ Date.prototype.format = Date.prototype.format || (() => {
                     to block subsequent calls.
                 @returns {!Function} - The debounced function. */
             debounce: function(func, wait, immediate) {
+                const timeoutKey = '__DBTO' + '_' + this.generateGuid();
                 return function() {
                     const context = this,
-                        timeout = context.__DBTO,
+                        timeout = context[timeoutKey],
                         args = arguments,
                         later = function() {
-                            context.__DBTO = null;
+                            context[timeoutKey] = null;
                             if (!immediate) func.apply(context, args);
                         },
                         callNow = immediate && !timeout;
                     clearTimeout(timeout);
-                    context.__DBTO = setTimeout(later, wait);
+                    context[timeoutKey] = setTimeout(later, wait);
                     if (callNow) func.apply(context, args);
                 };
             },
@@ -4615,7 +4616,6 @@ new JS.Singleton('GlobalTouch', {
                                     }
                                 }
                             } else if (extraSize < 0 && flow.shrinkCount > 0) {
-                                console.log('extra', extraSize);
                                 // Try to zero out extraSize using shrink.
                                 const shrinkBasis = flow.shrinkBasis;
                                 let shrinkAmountTotal = 0;
@@ -4630,7 +4630,6 @@ new JS.Singleton('GlobalTouch', {
                                         shrinkAmountTotal += shrinkAmount;
                                     }
                                 });
-                                console.log('total', extraSize);
                             }
                             
                             // Align Items along cross-axis. */
