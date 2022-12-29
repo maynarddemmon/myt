@@ -26,14 +26,17 @@
             @returns {undefined} */
         resetHScroll = autoScroller => {resetScroll(autoScroller, 'Left', 'Right');},
         
-        /** Adds drag group support to drag and drop related classes.
+        /** Adds drag group and drop group support to drag and drop related classes. Drag groups
+            are used to mark the thing being dragged around. Drop groups are used to mark the
+            things that can accept a thing dropped on them.
             
             Private Attributes:
-                __dgs:object The keys are the set of drag groups this 
-                    view supports. By default the special drag group of '*' 
-                    which accepts all drag groups is defined.
-                __any:boolean The precalculated return value for the
-                    acceptAnyDragGroup method.
+                __dgs:object The keys are the set of drag groups this view supports. By default the 
+                    special drag group of '*' which accepts all drag groups is defined.
+                __anyDG:boolean The precalculated return value for the acceptAnyDragGroup method.
+                __drpgs:object The keys are the set of drop groups this view supports. By default 
+                    the special drop group of '*' which accepts all drop groups is defined.
+                __anyDRPG:boolean The precalculated return value for the acceptAnyDropGroup method.
             
             @class */
         DragGroupSupport = pkg.DragGroupSupport = new JSModule('DragGroupSupport', {
@@ -41,7 +44,8 @@
             /** @overrides */
             initNode: function(parent, attrs) {
                 this.__dgs = {'*':true};
-                this.__any = true;
+                this.__drpgs = {'*':true};
+                this.__anyDG = this.__anyDRPG = true;
                 
                 this.callSuper(parent, attrs);
             },
@@ -51,11 +55,21 @@
             setDragGroups: function(v) {
                 const newDragGroups = this.__dgs = {};
                 for (const dragGroup in v) newDragGroups[dragGroup] = true;
-                this.__any = newDragGroups.hasOwnProperty(ANY_GROUP);
+                this.__anyDG = newDragGroups.hasOwnProperty(ANY_GROUP);
             },
             
             getDragGroups: function() {
                 return this.__dgs;
+            },
+            
+            setDropGroups: function(v) {
+                const newDropGroups = this.__drpgs = {};
+                for (const dropGroup in v) newDropGroups[dropGroup] = true;
+                this.__anyDRPG = newDropGroups.hasOwnProperty(ANY_GROUP);
+            },
+            
+            getDropGroups: function() {
+                return this.__drpgs;
             },
             
             
@@ -66,7 +80,7 @@
             addDragGroup: function(dragGroup) {
                 if (dragGroup) {
                     this.__dgs[dragGroup] = true;
-                    if (dragGroup === ANY_GROUP) this.__any = true;
+                    if (dragGroup === ANY_GROUP) this.__anyDG = true;
                 }
             },
             
@@ -76,16 +90,40 @@
             removeDragGroup: function(dragGroup) {
                 if (dragGroup) {
                     delete this.__dgs[dragGroup];
-                    if (dragGroup === ANY_GROUP) this.__any = false;
+                    if (dragGroup === ANY_GROUP) this.__anyDG = false;
                 }
             },
             
-            /** Determines if this drop target will accept drops from any 
-                drag group.
-                @returns boolean: True if any drag group will be accepted, 
-                    false otherwise. */
-            acceptAnyDragGroup: function() {
-                return this.__any;
+            /** Determines if this drop target will accept drops from any drag group.
+                @returns boolean: True if any drag group will be accepted, false otherwise. */
+            isAnyDragGroup: function() {
+                return this.__anyDG;
+            },
+            
+            /** Adds the provided dropGroup to the dropGroups.
+                @param dropGroup:string The droup group to add.
+                @returns {undefined} */
+            addDropGroup: function(dropGroup) {
+                if (dropGroup) {
+                    this.__drpgs[dropGroup] = true;
+                    if (dropGroup === ANY_GROUP) this.__anyDRPG = true;
+                }
+            },
+            
+            /** Removes the provided dropGroup from the dropGroups.
+                @param dropGroup:string The drop group to remove.
+                @returns {undefined} */
+            removeDropGroup: function(dropGroup) {
+                if (dropGroup) {
+                    delete this.__drpgs[dropGroup];
+                    if (dropGroup === ANY_GROUP) this.__anyDRPG = false;
+                }
+            },
+            
+            /** Determines if this drop target will accept drops from any drop group.
+                @returns boolean: True if any drop group will be accepted, false otherwise. */
+            isAnyDropGroup: function() {
+                return this.__anyDRPG;
             }
         });
     

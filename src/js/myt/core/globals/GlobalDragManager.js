@@ -62,16 +62,16 @@
             }
         },
         
-        /*  Filters the provided array of myt.DragGroupSupport items for 
-            the provided myt.Dropable. Returns an array of the matching 
-            list items.
+        /*  Filters the provided array of myt.DragGroupSupport items for the provided myt.Dropable. 
+            Returns an array of the matching list items.
             @param {!Object} dropable
             @param {!Array} list
             @returns {!Array} */
         filterList = (dropable, list) => {
             if (dropable.destroyed) {
                 return [];
-            } else if (dropable.acceptAnyDragGroup()) {
+            } else if (dropable.isAnyDragGroup()) {
+                // Dropable can be anything in the list will accept it.
                 return list;
             } else {
                 const retval = [],
@@ -79,10 +79,11 @@
                 let i = list.length;
                 while (i) {
                     const item = list[--i];
-                    if (item.acceptAnyDragGroup()) {
+                    if (item.isAnyDropGroup()) {
+                        // List item will is any drop group so all Dropables are valid.
                         retval.push(item);
                     } else {
-                        const targetGroups = item.getDragGroups();
+                        const targetGroups = item.getDropGroups();
                         for (const dragGroup in dragGroups) {
                             if (targetGroups[dragGroup]) {
                                 retval.push(item);
