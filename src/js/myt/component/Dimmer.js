@@ -1,4 +1,7 @@
 (pkg => {
+    /*  Tracks how many ModalPanel instances are currently open. */
+    let openModalPanelCount = 0;
+    
     const JSClass = JS.Class,
         SizeToParent = pkg.SizeToParent,
         View = pkg.View,
@@ -163,7 +166,11 @@
                 MARGIN_BOTTOM:40,
                 
                 /** The default margin right. */
-                MARGIN_RIGHT:40
+                MARGIN_RIGHT:40,
+                
+                getOpenModalPanelCount: () => openModalPanelCount,
+                
+                hasOpenModalPanels: () => openModalPanelCount > 0
             },
             
             
@@ -226,6 +233,20 @@
             setMarginRight: function(v) {this.marginRight = v;},
             
             setPaddingX: function(v) {this.paddingX = v;},
-            setPaddingY: function(v) {this.paddingY = v;}
+            setPaddingY: function(v) {this.paddingY = v;},
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @overrides myt.Dimmer */
+            show: function() {
+                this.callSuper();
+                openModalPanelCount++;
+            },
+            
+            /** @overrides myt.Dimmer */
+            hide: function(ignoreRestoreFocus) {
+                this.callSuper(ignoreRestoreFocus);
+                openModalPanelCount = Math.max(0, openModalPanelCount - 1);
+            }
         });
 })(myt);
