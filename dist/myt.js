@@ -4423,8 +4423,8 @@ new JS.Singleton('GlobalTouch', {
                         for (let i = 0; i < len;) {
                             const child = children[i++],
                                 childBasisSize = getChildBasisSize(child, isRowDirection),
-                                childShrink = child.shrink,
-                                childGrow = child.grow;
+                                childShrink = child.getShrink(),
+                                childGrow = child.getGrow();
                             
                             if (
                                 // We can only make new flows if we're wrapping
@@ -4563,7 +4563,7 @@ new JS.Singleton('GlobalTouch', {
                                         // Shift items as we go so we don't have to loop over the items again.
                                         if (growAmountTotal > 0) adjustPositionAttrOnChild(item, isRowDirection, growAmountTotal);
                                         
-                                        const growAmount = item.grow * amountPerGrow;
+                                        const growAmount = item.getGrow() * amountPerGrow;
                                         if (growAmount > 0) {
                                             updateSizeAttrOnChild(item, isRowDirection, growAmount, true);
                                             growAmountTotal += growAmount;
@@ -4624,7 +4624,7 @@ new JS.Singleton('GlobalTouch', {
                                     // Shift items as we go so we don't have to loop over the items again.
                                     if (shrinkAmountTotal < 0) adjustPositionAttrOnChild(item, isRowDirection, shrinkAmountTotal);
                                     
-                                    const shrinkAmount = (item.shrink * getChildBasisSize(item, isRowDirection) / shrinkBasis) * mathMax(extraSize, -shrinkBasis);
+                                    const shrinkAmount = (item.getShrink() * getChildBasisSize(item, isRowDirection) / shrinkBasis) * mathMax(extraSize, -shrinkBasis);
                                     if (shrinkAmount < 0) {
                                         updateSizeAttrOnChild(item, isRowDirection, shrinkAmount, true);
                                         shrinkAmountTotal += shrinkAmount;
@@ -4813,6 +4813,8 @@ new JS.Singleton('GlobalTouch', {
             }
         },
         
+        getGrow: function() {return this.grow;},
+        
         setShrink: function(v) {
             v = mathMax(0, v);
             if (this.shrink !== v) {
@@ -4823,6 +4825,8 @@ new JS.Singleton('GlobalTouch', {
                 }
             }
         },
+        
+        getShrink: function() {return this.shrink;},
         
         setAlignSelf: function(v) {
             if (this.alignSelf !== v) {
