@@ -1673,6 +1673,14 @@ Date.prototype.format = Date.prototype.format || (() => {
             return v == null ? undefined : this.decodeQueryParam(v);
         },
         
+        setQueryParam: function(name, value) {
+            this.queryPairs[encodeURIComponent(name)] = encodeURIComponent(value);
+        },
+        
+        removeQueryParam: function(name) {
+            delete this.queryPairs[name];
+        },
+        
         getPathParts: function(allowEmpties) {
             const parts = this.path.split('/');
             
