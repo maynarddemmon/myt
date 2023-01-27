@@ -374,7 +374,10 @@
             },
             
             // Accessors ///////////////////////////////////////////////////////
-            setPassword: function(v) {this.password = v;}
+            setPassword: function(v) {
+                this.set('password', v, true);
+                if (this.inited) this.getIDE().type = v ? 'password' : 'text';
+            }
         });
     
     /** Text content that can be edited.
