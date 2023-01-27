@@ -85,8 +85,7 @@
                 // Prevent inadvertent loops
                 this.incrementLockedCounter();
                 
-                const p = this.parent;
-                if (!p.isBeingDestroyed) {
+                if (!this.parent.isBeingDestroyed) {
                     const svs = this.subviews, 
                         len = svs.length,
                         axis = this.axis;
@@ -99,7 +98,7 @@
                             const sv = svs[--i];
                             if (sv.visible) max = Math.max(max, sv.x + (sv.boundsWidth > 0 ? sv.boundsWidth : 0));
                         }
-                        p.setWidth(max + this.paddingX);
+                        this.updateSize(max + this.paddingX, true);
                     }
                     if (axis !== 'x') {
                         i = len;
@@ -108,12 +107,16 @@
                             const sv = svs[--i];
                             if (sv.visible) max = Math.max(max, sv.y + (sv.boundsHeight > 0 ? sv.boundsHeight : 0));
                         }
-                        p.setHeight(max + this.paddingY);
+                        this.updateSize(max + this.paddingY, false);
                     }
                 }
                 
                 this.decrementLockedCounter();
             }
+        },
+        
+        updateSize: function(v, isWidth) {
+            this.parent[isWidth ? 'setWidth' : 'setHeight'](v);
         },
         
         /** @overrides myt.Layout

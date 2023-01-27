@@ -300,7 +300,9 @@
             
             
             // Accessors ///////////////////////////////////////////////////////
-            setErrorMessages: function(v) {this.errorMessages = v;},
+            setErrorMessages: function(v) {
+                this.set('errorMessages', v, true);
+            },
             
             getFullId: function() {
                 const ids = [this.id];

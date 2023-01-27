@@ -164,7 +164,7 @@
         isValid: function(value, config, errorMessages) {
             if (value && this.fieldA.getValue() === this.fieldB.getValue()) return true;
             
-            if (errorMessages) errorMessages.push('Field "' + this.fieldA.key + '" must be equal to field "' + this.fieldB.key + '".');
+            if (errorMessages) errorMessages.push('The field "' + this.fieldA.key + '" must be equal to the field "' + this.fieldB.key + '".');
             return false;
         }
     });
@@ -192,13 +192,13 @@
             
             // Test min
             if (min !== undefined && min > len) {
-                if (errorMessages) errorMessages.push('Value must not be less than ' + min + '.');
+                if (errorMessages) errorMessages.push('The value must not be less than ' + min + ' characters long.');
                 return false;
             }
             
             // Test max
             if (max !== undefined && max < len) {
-                if (errorMessages) errorMessages.push('Value must not be greater than ' + max + '.');
+                if (errorMessages) errorMessages.push('The value must not be greater than ' + max + ' characters long.');
                 return false;
             }
             
