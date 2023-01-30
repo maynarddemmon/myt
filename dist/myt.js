@@ -18634,7 +18634,7 @@ new JS.Singleton('GlobalMouse', {
         }
     });
     
-    pkg.loadCSSFonts(['https://use.fontawesome.com/releases/v5.0.8/css/all.css']);
+    pkg.loadCSSFonts(['https://use.fontawesome.com/releases/v5.15.4/css/all.css']);
 })(myt);
 
 
