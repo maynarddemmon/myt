@@ -512,7 +512,7 @@ Date.prototype.format = Date.prototype.format || (() => {
     /*
      * http://github.com/maynarddemmon/myt
      * Maynard Demmon <maynarddemmon@gmail.com>
-     * @copyright Copyright (c) 2012-2022 Maynard Demmon and contributors
+     * @copyright Copyright (c) 2012-2023 Maynard Demmon and contributors
      * Myt: A simple javascript UI framework
      * Version: 20220118.1318
      * MIT License
@@ -559,19 +559,17 @@ Date.prototype.format = Date.prototype.format || (() => {
         /* Font functionality */
         fontTargets = {},
         fontLoaded = {
-            // Empty entry is so that notifyInstanceThatFontLoaded will get 
-            // triggered for registerForFontNotification when an empty
-            // font name is provided. This should be done when a built in
-            // font will be used.
+            // Empty entry is so that notifyInstanceThatFontLoaded will get triggered for 
+            // registerForFontNotification when an empty font name is provided. This should be 
+            // done when a built in font will be used.
             '':true
         },
         docFonts = documentElem.fonts,
         
         notifyFontLoaded = fontFace => {
-            // Fix for Firefox and FontAwesome because of double quotes 
-            // returned in the font family name. Seems OK to just do it for
-            // all fonts since double quotes in a font name is most likely
-            // going to be confusing anyhow.
+            // Fix for Firefox and FontAwesome because of double quotes returned in the font family 
+            // name. Seems OK to just do it for all fonts since double quotes in a font name is 
+            // most likely going to be confusing anyhow.
             const familyName = fontFace.family.split('"').join('');
             [familyName, familyName + ' ' + fontFace.weight].forEach(fontName => {
                 if (!fontLoaded[fontName]) {
@@ -601,8 +599,7 @@ Date.prototype.format = Date.prototype.format || (() => {
         },
         
         myt = pkg.myt = {
-            /** A version number based on the time this distribution of 
-                myt was created. */
+            /** A version number based on the time this distribution of myt was created. */
             version:20220118.1318,
             
             /** Generates a globally unique id, (GUID).
@@ -612,10 +609,10 @@ Date.prototype.format = Date.prototype.format || (() => {
             /** Adds an event listener to a dom element. 
                 @param {!Object} elem - The DomElement to listen to.
                 @param {string} type - The name of the event to listen to.
-                @param {!Function} callback - The callback function that will 
-                    be registered for the event.
-                @param {boolean} [capture]  - Indicates if the listener is 
-                    registered during the capture phase or bubble phase.
+                @param {!Function} callback - The callback function that will be registered for 
+                    the event.
+                @param {boolean} [capture] - Indicates if the listener is registered during the 
+                    capture phase or bubble phase.
                 @param {boolean} passive
                 @returns {undefined} */
             addEventListener: (elem, type, callback, capture, passive) => {
@@ -628,24 +625,23 @@ Date.prototype.format = Date.prototype.format || (() => {
             /** Removes an event listener from a dom element. 
                 @param elem:DomElement The dom element to listen to.
                 @param {string} type - The name of the event to listen to.
-                @param {!Function} callback - The callback function that will 
-                    be registered for the event.
-                @param {boolean} [capture] indicates if the listener is 
-                    registered during the capture phase or bubble phase.
+                @param {!Function} callback - The callback function that will be registered for 
+                    the event.
+                @param {boolean} [capture] indicates if the listener is registered during the 
+                    capture phase or bubble phase.
                 @returns {undefined} */
             removeEventListener: (elem, type, callback, capture) => {
                 elem.removeEventListener(type, callback, capture || false);
             },
             
-            /** Takes a '.' separated string such as "foo.bar.baz" and resolves 
-                it into the value found at that location relative to a starting 
-                scope. If no scope is provided global scope is used.
-                @param {string|?Array} objName - The name to resolve or an 
-                    array of path parts in descending order.
-                @param {?Object} [scope] - The scope to resolve from. If not
-                    provided global scope is used.
-                @returns {?Object} The referenced object or undefined if 
-                    resolution failed. */
+            /** Takes a '.' separated string such as "foo.bar.baz" and resolves it into the value 
+                found at that location relative to a starting scope. If no scope is provided global 
+                scope is used.
+                @param {string|?Array} objName - The name to resolve or an array of path parts in 
+                    descending order.
+                @param {?Object} [scope] - The scope to resolve from. If not provided global scope 
+                    is used.
+                @returns {?Object} The referenced object or undefined if resolution failed. */
             resolveName: (objName, scope) => {
                 if (!objName || objName.length === 0) return undefined;
                 
@@ -663,12 +659,11 @@ Date.prototype.format = Date.prototype.format || (() => {
                 return scope;
             },
             
-            /** Resolves a provided string into a JS.Class object. If a 
-                non-string value is provided it is verified to be a JS.Class 
-                object.
+            /** Resolves a provided string into a JS.Class object. If a non-string value is 
+                provided it is verified to be a JS.Class object.
                 @param {*} value - The value to resolve and/or verify.
-                @returns {?Function} - A JS.Class or null if the string could 
-                    not be resolved or the value was not a JS.Class object. */
+                @returns {?Function} - A JS.Class or null if the string could not be resolved or 
+                    the value was not a JS.Class object. */
             resolveClassname: value => {
                 if (typeof value === 'string') value = myt.resolveName(value);
                 
@@ -677,21 +672,18 @@ Date.prototype.format = Date.prototype.format || (() => {
             },
             
             /** Gets the file extension from a file name.
-                @param {string} fileName - The filename to extract the 
-                    extension from.
-                @returns {string) The file extension or null if a falsy 
-                    fileName argument was provided. */
+                @param {string} fileName - The filename to extract the extension from.
+                @returns {string) The file extension or null if a falsy fileName argument was 
+                    provided. */
             getExtension: fileName => fileName ? fileName.split('.')[1] : null,
             
             /** Dynamically load a script into the dom.
                 @param {string} src - The URL to the script file.
-                @param {?Function} [callback] - A function that will be called
-                    when the script loads.
-                @param {boolean} [noCacheBust] - If true, not cacheBust query
-                    param will be added. Defaults to undefined which is 
-                    equivalent to false.
-                @returns {?Object} The created script element or null if the 
-                    script has already been loaded. */
+                @param {?Function} [callback] - A function called when the script loads.
+                @param {boolean} [noCacheBust] - If true, not cacheBust query param will be added. 
+                    Defaults to undefined which is equivalent to false.
+                @returns {?Object} The created script element or null if the script has already 
+                    been loaded. */
             loadScript: function(src, callback, noCacheBust) {
                 // Prevent reloading the same script
                 const loadedScripts = this._loadedScripts || (this._loadedScripts = {});
@@ -712,8 +704,8 @@ Date.prototype.format = Date.prototype.format || (() => {
                                 // Prevent refiring callback
                                 fired = true;
                                 
-                                // Prevent later events from this script for
-                                // example if the src is changed.
+                                // Prevent later events from this script. For example, if the src 
+                                // is changed.
                                 scriptElem.onload = scriptElem.onreadystatechange = null;
                                 
                                 callback();
@@ -721,8 +713,8 @@ Date.prototype.format = Date.prototype.format || (() => {
                         };
                     }
                     
-                    // Must set src AFTER adding onreadystatechange listener 
-                    // otherwise we’ll miss the loaded event for cached scripts
+                    // Must set src AFTER adding onreadystatechange listener otherwise we’ll miss 
+                    // the loaded event for cached scripts
                     scriptElem.src = src + (noCacheBust ? '' : (src.indexOf('?') >= 0 ? '&' : '?') + 'cacheBust=' + Date.now());
                     
                     headElem.appendChild(scriptElem);
@@ -732,11 +724,9 @@ Date.prototype.format = Date.prototype.format || (() => {
             },
             
             /** A wrapper on myt.global.error.notify
-                @param {string|?Error} err - The error or message to dump 
-                    stack for.
-                @param {string} [type] - The type of console message to write.
-                    Allowed values are 'error', 'warn', 'log' and 'debug'. 
-                    Defaults to 'error'.
+                @param {string|?Error} err - The error or message to dump stack for.
+                @param {string} [type] - The type of console message to write. Allowed values are 
+                    'error', 'warn', 'log' and 'debug'. Defaults to 'error'.
                 @returns {undefined} */
             dumpStack: (err, type) => {
                 let msg;
@@ -748,17 +738,14 @@ Date.prototype.format = Date.prototype.format || (() => {
             },
             
             // Random numbers
-            /** Generates a random number between 0 (inclusive) and 
-                1 (exclusive)
-                @param {?Function} [func] - A distribution function for the
-                    random numbers. The function should map a number between 0 
-                    and 1 to another number between 0 (inclusive) and 1 
-                    (exclusive). If not provided a flat distribution will be 
+            /** Generates a random number between 0 (inclusive) and 1 (exclusive)
+                @param {?Function} [func] - A distribution function for the random numbers. The 
+                    function should map a number between 0 and 1 to another number between 0 
+                    (inclusive) and 1 (exclusive). If not provided a flat distribution will be 
                     used. Example functions:
-                        - function(v) {return v * v;} will skew the value 
-                          towards 0.
-                        - function(v) {return 0.9999999999 - v * v;} will skew 
-                          the value towards a value very close to 1.
+                        - function(v) {return v * v;} will skew the value towards 0.
+                        - function(v) {return 0.9999999999 - v * v;} will skew the value towards a 
+                          value very close to 1.
                 @returns {number} a random number between 0 and almost 1. */
             getRandom: func => {
                 const v = math.random();
@@ -766,24 +753,20 @@ Date.prototype.format = Date.prototype.format || (() => {
                 return func ? mathMax(0, mathMin(func(v), 0.9999999999)) : v;
             },
             
-            /** @returns a random number between min (inclusive) and 
-                max (exclusive).
+            /** @returns a random number between min (inclusive) and max (exclusive).
                 @param {number} min - the minimum value returned.
                 @param {number} max - the maximum value returned.
-                @param {?Function} [func] - A distribution function. 
-                    See myt.getRandom for more info.
+                @param {?Function} [func] - A distribution function. See myt.getRandom for more.
                 @returns {number} a number between min and max. */
             getRandomArbitrary: (min, max, func) => {
                 const actualMin = mathMin(min, max);
                 return myt.getRandom(func) * (mathMax(min, max) - actualMin) + actualMin;
             },
             
-            /** Generates a random integer between min (inclusive) and 
-                max (inclusive).
+            /** Generates a random integer between min (inclusive) and max (inclusive).
                 @param {number} min - the minimum value returned.
                 @param {number} max - the maximum value returned.
-                @param {?Function} [func] - A distribution function. 
-                    See myt.getRandom for more info.
+                @param {?Function} [func] - A distribution function. See myt.getRandom for more.
                 @returns {number} a number between min and max. */
             getRandomInt: (min, max, func) => {
                 const actualMin = mathMin(min, max);
@@ -794,9 +777,8 @@ Date.prototype.format = Date.prototype.format || (() => {
             /** Tests if two floats are essentially equal to each other.
                 @param {number} a - A float
                 @param {number} b - A float
-                @param {number} [epsilon] - The percent of difference of the
-                    smaller magnitude number allowed between a and b. 
-                    Defaults to 0.000001 if not provided.
+                @param {number} [epsilon] - The percent of difference of the smaller magnitude 
+                    number allowed between a and b. Defaults to 0.000001 if not provided.
                 @returns {boolean} true if equal, false otherwise. */
             areFloatsEqual: (a, b, epsilon) => {
                 const absA = mathAbs(a),
@@ -804,8 +786,8 @@ Date.prototype.format = Date.prototype.format || (() => {
                 return mathAbs(a - b) <= (absA > absB ? absB : absA) * (epsilon == null ? 0.000001 : mathAbs(epsilon));
             },
             
-            /** Tests if two array are equal. For a more complete deep equal
-                implementation use underscore.js
+            /** Tests if two array are equal. For a more complete deep equal implementation 
+                use underscore.js
                 @param {?Array} a
                 @param {?Array} b
                 @returns {boolean} */
@@ -837,7 +819,7 @@ Date.prototype.format = Date.prototype.format || (() => {
             
             // DOM
             /** Gets the dom element of the provided tagname and index.
-                @param {string} [tagname] - The name of the tag to search for.
+                @param {string} [tagname] - The name of the tag to search for. 
                     Defaults to 'body' if not provided
                 @param {number} [index] - The index of the tag to get. 
                     Defaults to 0 if not provided.
@@ -955,14 +937,15 @@ Date.prototype.format = Date.prototype.format || (() => {
                 };
             },
             
-            /** Gets an alphanumeric sort function for sorting Objects by a 
-                named property. Object property values that are falsy are
-                coerced to "" if fixNonStrings is false.
-                @param {string} propName
+            /** Gets an alphanumeric sort function for sorting Objects by a named property or
+                Arrays by an index. Object property values that are falsy are coerced to "" if 
+                fixNonStrings is false.
+                @param {string|number} propName - The name of the property to sort by or an index
+                    if the things being sorted are Arrays.
                 @param {boolean} ascending
                 @param {boolean} caseInsensitive
-                @param {boolean} fixNonStrings When true non-string values will
-                    be converted to strings by concatenating them with "".
+                @param {boolean} fixNonStrings When true non-string values will be converted to 
+                    strings by concatenating them with "".
                 @returns {!Function} */
             getAlphaObjSortFunc: memoize((propName, ascending, caseInsensitive, fixNonStrings) => {
                 const order = ascending ? 1 : -1;
@@ -974,8 +957,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                         if (typeof a !== 'string') a = '' + a;
                         if (typeof b !== 'string') b = '' + b;
                     } else {
-                        // Otherwise, only fix falsy values, typically null 
-                        // or undefined.
+                        // Otherwise, only fix falsy values, typically null or undefined.
                         a = a || '';
                         b = b || '';
                     }
@@ -987,9 +969,8 @@ Date.prototype.format = Date.prototype.format || (() => {
                 };
             }),
             
-            /** Gets a numeric sort function for sorting Objects by a 
-                named property. Object property values that are falsy are 
-                coerced to 0.
+            /** Gets a numeric sort function for sorting Objects by a named property. Object 
+                property values that are falsy are coerced to 0.
                 @param {string} propName
                 @param {boolean} ascending
                 @returns {!Function} */
@@ -1006,10 +987,9 @@ Date.prototype.format = Date.prototype.format || (() => {
             // Misc
             /** Format a number between 0 and 1 as a percentage.
                 @param {number} num The number to convert.
-                @param {number} [fixed] The number of decimal places to use 
-                    during formatting. If the percentage is a whole number 
-                    no decimal places will be used. 
-                    For example 0.55781 -> 55.78% and 0.55 -> 55%
+                @param {number} [fixed] The number of decimal places to use during formatting. If 
+                    the percentage is a whole number no decimal places will be used. For example,
+                    0.55781 -> 55.78% and 0.55 -> 55%
                 @returns {string} */
             formatAsPercentage: (num, fixed=2) => {
                 if (typeof num === 'number') {
@@ -1017,8 +997,8 @@ Date.prototype.format = Date.prototype.format || (() => {
                     const percent = math.round(mathMax(0, mathMin(1, num)) * mathPow(10, 2+fixed)) / mathPow(10, fixed);
                     return (percent % 1 === 0 ? percent : percent.toFixed(fixed)) + '%';
                 } else if (typeof num === 'string') {
-                    // Assume a string passed to this function is already
-                    // correctly formatted so pass it through unchanged.
+                    // Assume a string passed to this function is already correctly formatted so 
+                    // pass it through unchanged.
                     return num;
                 } else {
                     console.warn('formatAsPercentage: expects a number');
@@ -1031,18 +1011,16 @@ Date.prototype.format = Date.prototype.format || (() => {
                 @returns {!Function} - The memoized function. */
             memoize: memoize,
             
-            /** Returns a function that wraps the provided function and that, 
-                as long as it continues to be invoked, will not invoke the 
-                wrapped function. The wrapped function will be called after the 
-                returned function stops being called for "wait" milliseconds. 
-                If "immediate" is passed, the wrapped function will be invoked 
-                on the leading edge instead of the trailing edge.
+            /** Returns a function that wraps the provided function and that, as long as it 
+                continues to be invoked, will not invoke the wrapped function. The wrapped function 
+                will be called after the returned function stops being called for "wait" 
+                milliseconds. If "immediate" is passed, the wrapped function will be invoked on the 
+                leading edge instead of the trailing edge.
                 @param {!Function} func - The function to wrap.
-                @param {number} [wait] - The time in millis to delay 
-                    invocation by. If not provided 0 is used.
-                @param {boolean} [immediate] - If true the function will be
-                    invoked immediately and then the wait time will be used 
-                    to block subsequent calls.
+                @param {number} [wait] - The time in millis to delay invocation by. If not 
+                    provided 0 is used.
+                @param {boolean} [immediate] - If true the function will be invoked immediately and 
+                    then the wait time will be used to block subsequent calls.
                 @returns {!Function} - The debounced function. */
             debounce: function(func, wait, immediate) {
                 const timeoutKey = '__DBTO' + '_' + this.generateGuid();
@@ -1061,22 +1039,18 @@ Date.prototype.format = Date.prototype.format || (() => {
                 };
             },
             
-            /** Mixes threshold counter functionality with a fixed threshold 
-                onto the provided scope. A threshold is exceeded when the
-                counter value equals the threshold value.
-                @param {!Object|!Function} scope - Either an myt.Observable,
-                    JS.Class or JS.Module to mix onto.
+            /** Mixes threshold counter functionality with a fixed threshold onto the provided 
+                scope. A threshold is exceeded when the counter value equals the threshold value.
+                @param {!Object|!Function} scope - Either an myt.Observable, JS.Class or JS.Module 
+                    to mix onto.
                 @param {number} thresholdValue - The fixed threshold value.
-                @param {string} exceededAttrName - The name of the boolean 
-                    attribute that will indicate if the threshold is exceeded 
-                    or not.
-                @param {string} [counterAttrName] - The name of the number
-                    attribute that will get adjusted up and down. If not 
-                    provided the 'exceeded' attribute name will be used 
-                    with 'Counter' appended to it. For example if the exceeded
-                    attribute was 'locked' this would be 'lockedCounter'.
-                @returns {boolean} - True if creation succeeded, 
-                    false otherwise. */
+                @param {string} exceededAttrName - The name of the boolean attribute that will 
+                    indicate if the threshold is exceeded or not.
+                @param {string} [counterAttrName] - The name of the number attribute that will get 
+                    adjusted up and down. If not provided the 'exceeded' attribute name will be 
+                    used with 'Counter' appended to it. For example if the exceeded attribute was 
+                    'locked' this would be 'lockedCounter'.
+                @returns {boolean} - True if creation succeeded, false otherwise. */
             createFixedThresholdCounter: (scope, thresholdValue, exceededAttrName, counterAttrName) => {
                 const genNameFunc = myt.AccessorSupport.generateName,
                     isModuleOrClass = typeof scope === 'function' || scope instanceof JS.Module,
@@ -1149,14 +1123,13 @@ Date.prototype.format = Date.prototype.format || (() => {
                             if (raw) {
                                 successFunc(response);
                             } else {
-                                // Throw application errors to the catch 
-                                // clause below
+                                // Throw application errors to the catch clause below
                                 if (response.success === false) throw new FetchError(200, url, response.message);
                                 successFunc(response.data);
                             }
                         } catch (ex) {
-                            // Ensure errors from successFunc get rethrown as
-                            // FetchError with the original stack trace.
+                            // Ensure errors from successFunc get rethrown as FetchError with the 
+                            // original stack trace.
                             const fetchError = new FetchError(200, url, ex.message);
                             fetchError.stack = ex.stack;
                             throw fetchError;
@@ -1197,9 +1170,8 @@ Date.prototype.format = Date.prototype.format || (() => {
                         if (args.length > 1) {
                             // Process each {{plural:$n|single|multiple}} replacement
                             for (const m of value.matchAll(/\{\{plural:\$(.*?)\|(.*?)\|(.*?)\}\}/g)) {
-                                // Don't be tempted to do a replace all in the 
-                                // next line. The matchAll handles them. 
-                                // The use of == lets us handle 1 and '1' 
+                                // Don't be tempted to do a replace all in the next line. The 
+                                // matchAll handles them. The use of == lets us handle 1 and '1' 
                                 // for single.
                                 value = value.replace(m[0], m[args[parseInt(m[1])] == 1 ? 2 : 3]);
                             }
