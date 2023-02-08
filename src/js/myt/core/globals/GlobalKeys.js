@@ -53,7 +53,7 @@
                     const nodeName = targetElem.nodeName;
                     return !(
                         nodeName === 'TEXTAREA' || 
-                        (nodeName === 'INPUT' && (targetElem.type === 'text' || targetElem.type === 'password')) ||
+                        (nodeName === 'INPUT' && (targetElem.type === 'text' || targetElem.type === 'number' || targetElem.type === 'password')) ||
                         (nodeName === 'DIV' && targetElem.contentEditable === 'true' && targetElem.firstChild)
                     );
                 case CODE_TAB: // Tab
