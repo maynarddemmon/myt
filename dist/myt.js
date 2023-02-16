@@ -651,7 +651,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                     len = parts.length;
                 for (let i = 0; i < len; i++) {
                     scope = scope[parts[i]];
-                    if (scope === undefined) {
+                    if (scope == null) {
                         console.warn('resolveName failed for', objName, 'at part', i, parts[i]);
                         return undefined;
                     }
