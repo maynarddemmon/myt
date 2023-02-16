@@ -44,10 +44,10 @@
             createSetterFunction: (target, attrName) => {
                 const setterName = generateSetterName(attrName);
                 if (target[setterName]) console.log('Overwriting setter', setterName);
-                target[setterName] = v => {
-                    if (target[attrName] !== v) {
-                        target[attrName] = v;
-                        if (target.inited) target.fireEvent(attrName, v);
+                target[setterName] = function(v) {
+                    if (this[attrName] !== v) {
+                        this[attrName] = v;
+                        if (this.inited) this.fireEvent(attrName, v);
                     }
                 };
             },
@@ -60,7 +60,7 @@
             createGetterFunction: (target, attrName) => {
                 const getterName = generateGetterName(attrName);
                 if (target[getterName]) console.log('Overwriting getter', getterName);
-                target[getterName] = () => target[attrName];
+                target[getterName] = function() {return this[attrName];};
             },
             
             defAttr: defAttr
