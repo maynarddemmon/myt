@@ -5732,6 +5732,14 @@ myt.Destructible = new JS.Module('Destructible', {
             if (klass) return this.searchAncestors(node => node instanceof klass);
         },
         
+        /** Find the youngest ancestor Node that includes the JS.Module.
+            @param {?Object} jsmodule - The JS.Module to search for.
+            @returns {?Object} - The myt.Node or undefined if no klass is 
+                provided or match found. */
+        searchAncestorsForModule: function(jsmodule) {
+            if (jsmodule) return this.searchAncestors(node => node.isA(jsmodule));
+        },
+        
         /** Get the youngest ancestor of this Node for which the matcher 
             function returns true. This is a simple wrapper around 
             myt.Node.getMatchingAncestor(this, matcherFunc).
