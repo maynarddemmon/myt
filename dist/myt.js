@@ -22160,6 +22160,15 @@ new JS.Singleton('GlobalMouse', {
                 return Object.values(this._visibleRowsByIdx || {});
             },
             
+            getVisibleRowForModel: function(model) {
+                const rows = this.getVisibleRows();
+                let i = rows.length;
+                while (i) {
+                    const row = rows[--i];
+                    if (row.model === model) return row;
+                }
+            },
+            
             
             // Methods /////////////////////////////////////////////////////////
             /** @returns {undefined} */
@@ -22181,9 +22190,10 @@ new JS.Singleton('GlobalMouse', {
             
             getFilterFunction: () => {/* Unimplemented which means don't filter anything out. */},
             
-            scrollModelIntoView: function(model) {
+            scrollModelIntoView: function(model, doFocus) {
                 const self = this,
                     idx = self.getIndexOfModelInData(model);
+                let retval = false;
                 if (idx >= 0) {
                     const rowExtent = self._rowExtent,
                         viewportTop = getDomScrollTop(self),
@@ -22194,14 +22204,27 @@ new JS.Singleton('GlobalMouse', {
                     // Only scroll if not overlapping visible area.
                     if (rowTop <= viewportTop) {
                         setDomScrollTop(self, rowTop);
-                        return true;
+                        retval = true;
                     } else if (rowBottom >= viewportBottom) {
                         setDomScrollTop(self, rowBottom - self.height);
-                        return true;
+                        retval = true;
+                    }
+                    
+                    if (doFocus) {
+                        clearTimeout(self._focusTimerId);
+                        const row = self.getVisibleRowForModel(model);
+                        if (row) {
+                            row.focus();
+                        } else {
+                            self._focusTimerId = setTimeout(() => {
+                                const row = self.getVisibleRowForModel(model);
+                                if (row) row.focus();
+                            }, 50);
+                        }
                     }
                 }
                 
-                return false;
+                return retval;
             },
             
             isModelInData: function(model) {
@@ -22496,7 +22519,7 @@ new JS.Singleton('GlobalMouse', {
                 this.set('selectedRowModel', v, true);
                 
                 // Scroll the selected row into view
-                this.scrollModelIntoView(this.selectedRowModel);
+                this.scrollModelIntoView(this.selectedRowModel, false);
             },
             
             
