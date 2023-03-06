@@ -22076,9 +22076,8 @@ new JS.Singleton('GlobalMouse', {
                 _listData:array The data for the rows in the list.
                 _startIdx:int The index into the data of the first row shown
                 _endIdx:int The index into the data of the last row shown
-                _visibleRowsByIdx:object A cache of what rows are currently 
-                    shown by the index of the data for the row. This is 
-                    provides faster performance when refreshing the list.
+                _visibleRowsByIdx:object A cache of what rows are currently shown by the index of 
+                    the data for the row. This provides faster performance when refreshing the list.
                 _listView:myt.View The view that contains the rows in the list.
                 _itemPool:myt.TrackActivesPool The pool for row views.
             
@@ -22211,15 +22210,11 @@ new JS.Singleton('GlobalMouse', {
                     }
                     
                     if (doFocus) {
-                        clearTimeout(self._focusTimerId);
                         const row = self.getVisibleRowForModel(model);
                         if (row) {
                             row.focus();
                         } else {
-                            self._focusTimerId = setTimeout(() => {
-                                const row = self.getVisibleRowForModel(model);
-                                if (row) row.focus();
-                            }, 50);
+                            self._focusToModel = model;
                         }
                     }
                 }
@@ -22317,15 +22312,15 @@ new JS.Singleton('GlobalMouse', {
                     // Just refresh since we won't move the scroll position
                     self.refreshListUI();
                 } else {
-                    // Updating the scroll position triggers a refreshListUI 
-                    // via the DOM scroll event
+                    // Updating the scroll position triggers a refreshListUI via the DOM 
+                    // scroll event.
                     setDomScrollTop(self, 0);
                 }
             },
             
             putRowBackInPool: function(row) {
-                // Clear or reassign focus since the row will get reused and 
-                // the reused row will likely not be the appropriate focus.
+                // Clear or reassign focus since the row will get reused and the reused row will 
+                // likely not be the appropriate focus.
                 const currentFocus = GlobalFocus.focusedView;
                 if (currentFocus && currentFocus.isDescendantOf(row)) {
                     const focusTrap = this.getFocusTrap();
@@ -22355,13 +22350,13 @@ new JS.Singleton('GlobalMouse', {
                 if (self._startIdx !== startIdx || self._endIdx !== endIdx || forceFullReset) {
                     const rowWidth = self.width,
                         rowHeight = self.rowHeight,
-                        visibleRowsByIdx = self._visibleRowsByIdx;
+                        visibleRowsByIdx = self._visibleRowsByIdx,
+                        focusToModel = self._focusToModel;
                     
                     self._startIdx = startIdx;
                     self._endIdx = endIdx;
                     
-                    // Put all visible rows that are not within the idx range 
-                    // back into the pool
+                    // Put all visible rows that are not within the idx range back into the pool
                     for (const idx in visibleRowsByIdx) {
                         if (idx < startIdx || idx >= endIdx) {
                             self.putRowBackInPool(visibleRowsByIdx[idx]);
@@ -22399,9 +22394,13 @@ new JS.Singleton('GlobalMouse', {
                         
                         row.notifyRefreshed();
                         
-                        // Maintain tab ordering by updating the underlying 
-                        // dom order.
+                        // Maintain tab ordering by updating the underlying dom order.
                         row.bringToFront();
+                        
+                        if (focusToModel && self.areModelsEqual(focusToModel, model)) {
+                            row.focus();
+                            self._focusToModel = null;
+                        }
                     }
                 }
             },
@@ -22553,12 +22552,11 @@ new JS.Singleton('GlobalMouse', {
             /** @overrides */
             resetListUI: function(preserveScroll, forceFullReset) {
                 if (this.isModelInData(this.selectedRowModel)) {
-                    // Only clear the selected row since it's still in the 
-                    // data and thus may be shown again.
+                    // Only clear the selected row since it's still in the data and thus may be 
+                    // shown again.
                     clearSelectedRow(this);
                 } else {
-                    // Clear the row and model since the model can no longer 
-                    // be shown.
+                    // Clear the row and model since the model can no longer be shown.
                     this.setSelectedRow();
                 }
                 
