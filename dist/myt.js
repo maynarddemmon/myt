@@ -3535,20 +3535,16 @@ new JS.Singleton('GlobalError', {
                 @param {!Object} event
                 @returns {undefined} */
             __doFocus: function(event) {
-                if (!this.focused) {
-                    this.setFocused(true);
-                    this.doFocus();
-                }
+                if (!this.focused) this.setFocused(true);
+                this.doFocus();
             },
             
             /** @private
                 @param {!Object} event
                 @returns {undefined} */
             __doBlur: function(event) {
-                if (this.focused) {
-                    this.doBlur();
-                    this.setFocused(false);
-                }
+                this.doBlur();
+                if (this.focused) this.setFocused(false);
             },
             
             /** @returns {undefined} */
