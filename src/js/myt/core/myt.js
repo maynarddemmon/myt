@@ -483,7 +483,7 @@
                 @returns {string} */
             formatAsPercentage: (num, fixed=2) => {
                 if (typeof num === 'number') {
-                    fixed = mathMax(16, mathMin(0, fixed));
+                    fixed = mathMin(16, mathMax(0, fixed));
                     const percent = math.round(mathMax(0, mathMin(1, num)) * mathPow(10, 2+fixed)) / mathPow(10, fixed);
                     return (percent % 1 === 0 ? percent : percent.toFixed(fixed)) + '%';
                 } else if (typeof num === 'string') {

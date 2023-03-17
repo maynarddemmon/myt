@@ -109,7 +109,7 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'SizeToChildren.js'  ).provides('myt.SizeToChildren').requires('myt.Layout');
     file(MYT_COMPONENT_ROOT + 'SizeToParent.js'    ).provides('myt.SizeToParent'  ).requires('myt.View');
     file(MYT_COMPONENT_ROOT + 'SizeToWindow.js'    ).provides('myt.SizeToWindow','myt.SizeToWindowWidth','myt.SizeToWindowHeight').requires('myt.RootView','myt.global.windowResize');
-    file(MYT_COMPONENT_ROOT + 'Slider.js'          ).provides('myt.BaseSlider','myt.Slider','myt.RangeSlider')
+    file(MYT_COMPONENT_ROOT + 'Slider.js'          ).provides('myt.BaseSlider','myt.Slider','myt.RangeSlider','myt.LabelSlider')
         .requires('myt.View','myt.Draggable','myt.Disableable','myt.BoundedValueComponent','myt.BoundedRangeComponent','myt.SimpleButton');
     file(MYT_COMPONENT_ROOT + 'Spinner.js'         ).provides('myt.Spinner').requires('myt.View');
     file(MYT_COMPONENT_ROOT + 'StateMachine.js'    ).provides('myt.StateMachine').requires('myt.Node');

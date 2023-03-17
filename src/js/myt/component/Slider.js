@@ -1,7 +1,9 @@
 (pkg => {
     const JSClass = JS.Class,
-        mathMin = Math.min,
-        mathMax = Math.max,
+        
+        math = Math,
+        mathMin = math.min,
+        mathMax = math.max,
         
         GlobalKeys = pkg.global.keys,
         
@@ -440,6 +442,64 @@
         /** @overrides myt.BaseSlider */
         _nudge: function(thumb, up) {
             this.setValue(this.getValue() + this.nudgeAmount * (up ? 1 : -1));
+        }
+    });
+    
+    /** @class */
+    pkg.LabelSlider = new JSClass('LabelSlider', pkg.Slider, {
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            const self = this;
+            
+            defAttr(attrs, 'labelX', 8);
+            defAttr(attrs, 'labelY', 2);
+            defAttr(attrs, 'labelFontSize', '12px');
+            defAttr(attrs, 'labelColor', '#000');
+            defAttr(attrs, 'flipThreshold', math.round((attrs.maxValue - attrs.minValue) / 2) || 0);
+            
+            self.quickSet(['labelX','labelY','labelFontSize','labelColor','flipThreshold'], attrs);
+            
+            self.callSuper(parent, attrs);
+            
+            const labelX = self.labelX;
+            self.labelTxt = new pkg.Text(self, {
+                x:labelX, y:self.labelY, textColor:self.labelColor, fontSize:self.labelFontSize
+            }, [{
+                initNode: function(parent, attrs) {
+                    this.targetX = labelX;
+                    this.callSuper(parent, attrs);
+                },
+                updateX: function(noAnim) {
+                    const sliderValue = self.getValue(),
+                        targetX = sliderValue >= self.flipThreshold ? labelX : self.width - this.width - labelX;
+                    if (this.targetX !== targetX) {
+                        this.targetX = targetX;
+                        this.stopActiveAnimators('x');
+                        if (noAnim) {
+                            this.setX(targetX);
+                        } else {
+                            this.animate({attribute:'x', to:targetX, duration:250});
+                        }
+                    }
+                }
+            }]);
+            self.syncTo(self, 'setText', 'value');
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** @overrides */
+        setWidth: function(v, suppressEvent) {
+            this.callSuper(v, suppressEvent);
+            if (this.labelTxt) this.labelTxt.updateX(true);
+        },
+        
+        setText: function(event, noAnim) {
+            const labelTxt = this.labelTxt;
+            if (labelTxt) {
+                labelTxt.setText(event.value);
+                labelTxt.updateX(noAnim);
+            }
         }
     });
 })(myt);

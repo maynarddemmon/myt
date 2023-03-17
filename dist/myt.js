@@ -993,7 +993,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                 @returns {string} */
             formatAsPercentage: (num, fixed=2) => {
                 if (typeof num === 'number') {
-                    fixed = mathMax(16, mathMin(0, fixed));
+                    fixed = mathMin(16, mathMax(0, fixed));
                     const percent = math.round(mathMax(0, mathMin(1, num)) * mathPow(10, 2+fixed)) / mathPow(10, fixed);
                     return (percent % 1 === 0 ? percent : percent.toFixed(fixed)) + '%';
                 } else if (typeof num === 'string') {
@@ -18619,12 +18619,13 @@ new JS.Singleton('GlobalMouse', {
         colorPicker,
         
         isEmpty,
-        initialColorHex,
+        supportsAlphaChannel,
         currentColorHex,
         
         currentHue = 0,
         currentSaturation = 0,
         currentValue = 0,
+        currentOpacity = 255,
         
         selectionPalette = [],
         defaultPalette,
@@ -18636,6 +18637,7 @@ new JS.Singleton('GlobalMouse', {
         hueThumb,
         inputView,
         currentColorButton,
+        alphaChannelSlider,
         
         // DatePicker
         localeData,
@@ -18715,6 +18717,12 @@ new JS.Singleton('GlobalMouse', {
         DOM_CLASS_CHECKERBOARD = 'mytCheckerboardPattern',
         CHECKMARK = makeTag(['check']),
         
+        initializePaletteLookup = palette => {
+            palette.forEach(color => {
+                if (color && color.length === 7) color += 'ff';
+                paletteLookup[color] = true;
+            });
+        },
         paletteLookup = {},
         
         hsvToHex = (h, s, v) => Color.makeColorFromHSV(h * 360, s * 100, v * 100).getHtmlHexString(),
@@ -18723,11 +18731,17 @@ new JS.Singleton('GlobalMouse', {
         Swatch = new JSClass('Swatch', View, {
             include:[Button],
             initNode: function(parent, attrs) {
-                attrs.width = attrs.height = 16;
+                const size = attrs.width = attrs.height = 16;
                 attrs.border = BORDER_999;
+                attrs.domClass = DOM_CLASS_CHECKERBOARD;
+                
+                const bgColor = attrs.bgColor;
+                
                 this.callSuper(parent, attrs);
                 
-                if (this.bgColor === currentColorHex) {
+                this.colorView = new View(this, {width:size, height:size, bgColor:bgColor});
+                
+                if (bgColor === currentColorHex) {
                     const color = Color.makeColorFromHexString(currentColorHex);
                     new pkg.Text(this, {
                         x:2, y:2, text:CHECKMARK, fontSize:'12px', 
@@ -18736,10 +18750,12 @@ new JS.Singleton('GlobalMouse', {
                 }
             },
             setBgColor: function(v) {
-                this.callSuper(v);
+                if (this.colorView) this.colorView.setBgColor(v);
                 this.setTooltip(v);
             },
-            doActivated: function() {colorPicker.setColor(this.bgColor);},
+            doActivated: function() {
+                colorPicker.setColor(this.colorView.bgColor);
+            },
             drawHoverState: function() {this.setBorder(BORDER_333);},
             drawReadyState: function() {this.setBorder(BORDER_999);}
         }),
@@ -18749,12 +18765,16 @@ new JS.Singleton('GlobalMouse', {
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
                 colorPicker = this;
+                colorPicker._isReady = false;
                 
-                initialColorHex = attrs.color || TRANSPARENT;
+                let initialColorHex = attrs.color || TRANSPARENT;
                 delete attrs.color;
                 
+                supportsAlphaChannel = attrs.alphaChannel || false;
+                delete attrs.alphaChannel;
+                
                 defaultPalette = attrs.palette || [];
-                defaultPalette.forEach(color => {paletteLookup[color] = true;});
+                initializePaletteLookup(defaultPalette);
                 delete attrs.palette;
                 
                 isEmpty = initialColorHex === TRANSPARENT;
@@ -18796,31 +18816,61 @@ new JS.Singleton('GlobalMouse', {
                     x:315, width:24, height:24, border:BORDER_333, tooltip:'Set to transparent.', domClass:DOM_CLASS_CHECKERBOARD
                 }, [Button, {doActivated: () => {colorPicker.setColor(TRANSPARENT);}}]);
                 
-                inputView = new pkg.InputText(colorPicker, {x:236, y:146, width:105, height:25, roundedCorners:3, textColor:'#333', border:BORDER_333, maxLength:11});
+                let y = 146;
+                
+                // Alpha Channel Row
+                if (supportsAlphaChannel) {
+                    alphaChannelSlider = new pkg.LabelSlider(colorPicker, {
+                        x:170, y:y, width:139 + 26 + 6,
+                        minValue:0, maxValue:255, flipThreshold:55, labelColor:'#fff'
+                    }, [{
+                        setText: function(event, noAnim) {
+                            let v = event.value;
+                            
+                            if (v == null || isNaN(v)) v = 0;
+                            
+                            event.value = pkg.formatAsPercentage(v / 255, 0);
+                            this.callSuper(event, true);
+                            
+                            currentOpacity = v;
+                            if (colorPicker._isReady) {
+                                isEmpty = false;
+                                colorPicker.updateUI();
+                            }
+                        }
+                    }]);
+                    
+                    y += 23;
+                }
+                
+                // Selection Row
+                inputView = new pkg.InputText(colorPicker, {
+                    x:236, y:y, width:105, height:25, roundedCorners:3, textColor:'#333', border:BORDER_333, maxLength:11,
+                    fontFamily:'monospace'
+                });
                 colorPicker.attachToDom(inputView, '_submitInput', 'blur');
                 colorPicker.attachToDom(inputView, '_handleKeyDown', 'keydown');
                 inputView.getIDS().paddingLeft = '6px';
                 
-                const initialColorContainer = new View(colorPicker, {x:170, y:146, width:60, height:23, border:BORDER_333});
+                const initialColorContainer = new View(colorPicker, {
+                    x:170, y:y, width:60, height:23, border:BORDER_333, domClass:DOM_CLASS_CHECKERBOARD
+                });
                 new View(initialColorContainer, {
                     width:30, height:23, focusIndicator:false,
-                    bgColor:initialColorHex, domClass:isEmpty ? DOM_CLASS_CHECKERBOARD : ''
+                    bgColor:initialColorHex
                 }, [Button, {doActivated: () => {colorPicker.setColor(initialColorHex);}}]);
-                currentColorButton = new View(initialColorContainer, {x:30, width:30, height:23}, [{
-                    setBgColor: function(v) {
-                        this.callSuper(v);
-                        this[(v === TRANSPARENT ? 'add' : 'remove') + 'DomClass'](DOM_CLASS_CHECKERBOARD);
-                    }
-                }]);
+                currentColorButton = new View(initialColorContainer, {x:30, width:30, height:23});
                 
                 // Load Palette
                 const savedPalette = LocalStorage.getItem(LOCAL_STORAGE_KEY);
                 if (savedPalette) {
                     selectionPalette = savedPalette.split(';');
-                    selectionPalette.forEach(color => {paletteLookup[color] = true;});
+                    initializePaletteLookup(selectionPalette);
                 }
                 
                 colorPicker.setColor(initialColorHex);
+                
+                colorPicker._isReady = true;
             },
             
             /** @private */
@@ -18844,7 +18894,23 @@ new JS.Singleton('GlobalMouse', {
             },
             
             setColor: color => {
-                if (color && color !== TRANSPARENT) {
+                const colorIsNotTransparent = color && color !== TRANSPARENT;
+                
+                // Extract alpha channel
+                if (supportsAlphaChannel) {
+                    let alpha = 'ff';
+                    if (colorIsNotTransparent && color.length > 7) {
+                        alpha = color.substring(7,9);
+                        color = color.substring(0,7);
+                    }
+                    alphaChannelSlider.setValue(parseInt(alpha, 16));
+                } else {
+                    if (colorIsNotTransparent && color.length > 7) {
+                        color = color.substring(0,7);
+                    }
+                }
+                
+                if (colorIsNotTransparent) {
                     const newHsv = (Color.makeColorFromHexString(color)).getHSV();
                     currentHue = newHsv.h / 360;
                     currentSaturation = newHsv.s;
@@ -18853,10 +18919,22 @@ new JS.Singleton('GlobalMouse', {
                 } else {
                     isEmpty = true;
                 }
+                
                 colorPicker.updateUI();
             },
             
-            getColor: () => isEmpty ? TRANSPARENT : hsvToHex(currentHue, currentSaturation, currentValue),
+            getColor: () => {
+                if (isEmpty) {
+                    return TRANSPARENT;
+                } else {
+                    let opacityPart = '';
+                    if (supportsAlphaChannel) {
+                        opacityPart = currentOpacity.toString(16);
+                        if (opacityPart.length < 2) opacityPart = '0' + opacityPart;
+                    }
+                    return hsvToHex(currentHue, currentSaturation, currentValue) + opacityPart;
+                }
+            },
             
             updateUI: () => {
                 const isNotEmpty = !isEmpty;
@@ -18882,8 +18960,16 @@ new JS.Singleton('GlobalMouse', {
                 const subs = paletteContainer.getSubviews();
                 let i = subs.length;
                 while (i) subs[--i].destroy();
-                defaultPalette.forEach(color => {new Swatch(paletteContainer, {bgColor:color});});
-                selectionPalette.forEach(color => {new Swatch(paletteContainer, {bgColor:color});});
+                const alreadyAdded = {};
+                (defaultPalette.concat(selectionPalette)).forEach(color => {
+                    if (supportsAlphaChannel || color.length === 7) {
+                        if (color.length === 7) color += 'ff';
+                        if (!alreadyAdded[color]) {
+                            new Swatch(paletteContainer, {bgColor:color});
+                            alreadyAdded[color] = true;
+                        }
+                    }
+                });
             }, 50)
         }),
         
@@ -19318,7 +19404,8 @@ new JS.Singleton('GlobalMouse', {
                     cancelTxt:'Cancel',
                     confirmTxt:'Choose',
                     titleText:'Choose a Color',
-                    color:'#000'
+                    color:'#000000',
+                    alphaChannel:false
                 },
                 
                 /** Defaults used in a date picker dialog. */
@@ -19687,9 +19774,10 @@ new JS.Singleton('GlobalMouse', {
                     x:ModalPanel.PADDING_X,
                     y:ModalPanel.PADDING_Y + 24,
                     width:337,
-                    height:177,
+                    height:177 + (opts.alphaChannel ? 23 : 0),
                     color:opts.color,
-                    palette:['#000','#111','#222','#333','#444','#555','#666','#777','#888','#999','#aaa','#bbb','#ccc','#ddd','#eee','#fff']
+                    alphaChannel:opts.alphaChannel,
+                    palette:['#000000','#111111','#222222','#333333','#444444','#555555','#666666','#777777','#888888','#999999','#aaaaaa','#bbbbbb','#cccccc','#dddddd','#eeeeee','#ffffff']
                 });
                 self.show();
                 closeBtn.setVisible(true);
@@ -20164,8 +20252,10 @@ new JS.Singleton('GlobalMouse', {
 
 (pkg => {
     const JSClass = JS.Class,
-        mathMin = Math.min,
-        mathMax = Math.max,
+        
+        math = Math,
+        mathMin = math.min,
+        mathMax = math.max,
         
         GlobalKeys = pkg.global.keys,
         
@@ -20604,6 +20694,64 @@ new JS.Singleton('GlobalMouse', {
         /** @overrides myt.BaseSlider */
         _nudge: function(thumb, up) {
             this.setValue(this.getValue() + this.nudgeAmount * (up ? 1 : -1));
+        }
+    });
+    
+    /** @class */
+    pkg.LabelSlider = new JSClass('LabelSlider', pkg.Slider, {
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            const self = this;
+            
+            defAttr(attrs, 'labelX', 8);
+            defAttr(attrs, 'labelY', 2);
+            defAttr(attrs, 'labelFontSize', '12px');
+            defAttr(attrs, 'labelColor', '#000');
+            defAttr(attrs, 'flipThreshold', math.round((attrs.maxValue - attrs.minValue) / 2) || 0);
+            
+            self.quickSet(['labelX','labelY','labelFontSize','labelColor','flipThreshold'], attrs);
+            
+            self.callSuper(parent, attrs);
+            
+            const labelX = self.labelX;
+            self.labelTxt = new pkg.Text(self, {
+                x:labelX, y:self.labelY, textColor:self.labelColor, fontSize:self.labelFontSize
+            }, [{
+                initNode: function(parent, attrs) {
+                    this.targetX = labelX;
+                    this.callSuper(parent, attrs);
+                },
+                updateX: function(noAnim) {
+                    const sliderValue = self.getValue(),
+                        targetX = sliderValue >= self.flipThreshold ? labelX : self.width - this.width - labelX;
+                    if (this.targetX !== targetX) {
+                        this.targetX = targetX;
+                        this.stopActiveAnimators('x');
+                        if (noAnim) {
+                            this.setX(targetX);
+                        } else {
+                            this.animate({attribute:'x', to:targetX, duration:250});
+                        }
+                    }
+                }
+            }]);
+            self.syncTo(self, 'setText', 'value');
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** @overrides */
+        setWidth: function(v, suppressEvent) {
+            this.callSuper(v, suppressEvent);
+            if (this.labelTxt) this.labelTxt.updateX(true);
+        },
+        
+        setText: function(event, noAnim) {
+            const labelTxt = this.labelTxt;
+            if (labelTxt) {
+                labelTxt.setText(event.value);
+                labelTxt.updateX(noAnim);
+            }
         }
     });
 })(myt);

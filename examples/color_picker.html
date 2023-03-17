@@ -13,7 +13,7 @@
         
         new myt.Dialog(rootView, {name:'dialog'});
         
-        const btn = new myt.SimpleButton(rootView, {
+        new myt.SimpleButton(rootView, {
             x:10, y:10, width:50, height:20,
             activeColor:'#999999', hoverColor:'#bbbbbb', readyColor:'#aaaaaa'
         }, [{
@@ -34,6 +34,34 @@
                         }
                     },{
                         color:rootView.bgColor
+                    }
+                );
+                this.callSuper();
+            }
+        }]);
+        
+        new myt.SimpleButton(rootView, {
+            x:10, y:40, width:50, height:20,
+            activeColor:'#999999', hoverColor:'#bbbbbb', readyColor:'#aaaaaa',
+        }, [{
+            doActivated: function() {
+                this.parent.dialog.showColorPicker(
+                    function(action, color) {
+                        switch(action) {
+                            case 'closeBtn':
+                                console.log("cancelled");
+                                break;
+                            case 'cancelBtn':
+                                console.log("cancelled");
+                                break;
+                            case 'confirmBtn':
+                                console.log("confirmed", color);
+                                rootView.setBgColor(color);
+                                break;
+                        }
+                    },{
+                        color:rootView.bgColor,
+                        alphaChannel:true
                     }
                 );
                 this.callSuper();
