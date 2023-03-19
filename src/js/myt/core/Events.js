@@ -181,6 +181,7 @@
                                 }
                             } catch (err) {
                                 pkg.dumpStack(err);
+                                console.log('Additional context', methodName, observer);
                             }
                         }
                     }
