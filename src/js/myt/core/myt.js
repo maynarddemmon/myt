@@ -96,6 +96,11 @@
                 @returns {number} */
             generateGuid: () => ++GUID_COUNTER,
             
+            /** Creates a non-secure hash of a string.
+                @param {string} s - The string to hash.
+                @returns {number} */
+            hash: s => s.split('').reduce((a, b) => {a = ((a << 5) - a) + b.charCodeAt(0); return a&a;}, 0),
+            
             /** Adds an event listener to a dom element. 
                 @param {!Object} elem - The DomElement to listen to.
                 @param {string} type - The name of the event to listen to.
