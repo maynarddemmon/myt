@@ -109,13 +109,29 @@
         
         toString: function(originalRawQuery) {
             const self = this,
-                protocol = self.protocol,
-                host = self.host,
-                userInfo = self.userInfo,
-                port = self.port,
                 path = self.path,
                 query = originalRawQuery ? (self.query ? '?' + self.query : '') : self.getQuery(),
                 anchor = self.anchor;
+            let s = self.toStringThroughPort();
+            
+            if (path) {
+                s += path;
+            } else if (self.host && (query || anchor)) {
+                s += '/';
+            }
+            
+            if (query) s += query;
+            if (anchor) s += '#' + anchor;
+            
+            return s;
+        },
+        
+        toStringThroughPort: function() {
+            const self = this,
+                protocol = self.protocol,
+                host = self.host,
+                userInfo = self.userInfo,
+                port = self.port;
             let s = '';
             
             if (protocol) s += protocol + '://';
@@ -125,15 +141,6 @@
                 s += host;
                 if (port) s += ':' + port;
             }
-            
-            if (path) {
-                s += path;
-            } else if (host && (query || anchor)) {
-                s += '/';
-            }
-            
-            if (query) s += query;
-            if (anchor) s += '#' + anchor;
             
             return s;
         }
