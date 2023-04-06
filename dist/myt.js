@@ -17953,7 +17953,7 @@ new JS.Singleton('GlobalMouse', {
             
             // Methods /////////////////////////////////////////////////////////
             filterFiles: function(file) {
-                if (ImageUploader.isImageFile(file)) {
+                if (ImageUploader.isImageFile(file) || this.allowNonImages) {
                     // Remove existing file
                     while (this.files.length > 0) this.removeFile(this.files[0]);
                     return this.callSuper(file);
@@ -17961,7 +17961,8 @@ new JS.Singleton('GlobalMouse', {
             },
             
             addFile: function(file) {
-                const self = this;
+                const self = this,
+                    isImageFile = ImageUploader.isImageFile(file);
                 
                 self.callSuper(file);
                 
@@ -17979,10 +17980,18 @@ new JS.Singleton('GlobalMouse', {
                     };
                     img.src = src;
                 };
-                if (file.size === -1) {
-                    readImageFunc(file.serverPath);
-                } else if (FileReader !== undefined && ImageUploader.isImageFile(file)) {
-                    Uploader.readFile(file, event => {readImageFunc(event.target.result);});
+                if (isImageFile) {
+                    if (file.size === -1) {
+                        readImageFunc(file.serverPath);
+                    } else if (FileReader !== undefined && ImageUploader.isImageFile(file)) {
+                        Uploader.readFile(file, event => {readImageFunc(event.target.result);});
+                    }
+                } else {
+                    if (file.size === -1) {
+                        self.updateImage(file, image, file.serverPath);
+                    } else if (FileReader !== undefined) {
+                        Uploader.readFile(file, event => {self.updateImage(file, image, event.target.result);});
+                    }
                 }
             },
             
