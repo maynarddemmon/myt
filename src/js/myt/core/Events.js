@@ -153,7 +153,13 @@
                 const event = {source:self, type:type, value:value}, // Inlined from this.createEvent
                     activeEventTypes = self.__aet || (self.__aet = {});
                 if (activeEventTypes[type] === true) {
-                    pkg.global.error.notifyWarn('eventLoop', 'Abort refiring event:' + type);
+                    pkg.global.error.notify(
+                        'warn', 'eventLoop', 'Abort refiring event:' + type, null, {
+                            observable:self,
+                            type:type,
+                            value:value
+                        }
+                    );
                 } else {
                     // Mark event type as "active"
                     activeEventTypes[type] = true;
