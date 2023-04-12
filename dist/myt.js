@@ -13093,6 +13093,16 @@ new JS.Singleton('GlobalMouse', {
             }
         },
         
+        focusToLastItem: function() {
+            const item = this.getLastFocusableItem();
+            if (item) item.focus();
+        },
+        
+        focusToFirstItem: function() {
+            const item = this.getFirstFocusableItem();
+            if (item) item.focus();
+        },
+        
         updateItemWidth: (item, width) => {
             item.setWidth(width);
         },
@@ -13170,11 +13180,11 @@ new JS.Singleton('GlobalMouse', {
                 switch (code) {
                     case GlobalKeys.CODE_ARROW_LEFT:
                     case GlobalKeys.CODE_ARROW_UP:
-                        this.selectLastItem();
+                        this.focusToLastItem();
                         break;
                     case GlobalKeys.CODE_ARROW_RIGHT:
                     case GlobalKeys.CODE_ARROW_DOWN:
-                        this.selectFirstItem();
+                        this.focusToFirstItem();
                         break;
                 }
                 this.callSuper(code, isRepeat);
@@ -13191,30 +13201,24 @@ new JS.Singleton('GlobalMouse', {
                 switch (code) {
                     case GlobalKeys.CODE_ARROW_LEFT:
                     case GlobalKeys.CODE_ARROW_UP:
-                        this.selectLastItem();
+                        this.focusToLastItem();
                         break;
                     case GlobalKeys.CODE_ARROW_RIGHT:
                     case GlobalKeys.CODE_ARROW_DOWN:
-                        this.selectFirstItem();
+                        this.focusToFirstItem();
                         break;
                 }
             }
         },
         
-        selectLastItem: function() {
+        focusToLastItem: function() {
             const fp = this.getFloatingPanel();
-            if (fp && fp.isShown()) {
-                const item = fp.getLastFocusableItem();
-                if (item) item.focus();
-            }
+            if (fp && fp.isShown()) fp.focusToLastItem();
         },
         
-        selectFirstItem: function() {
+        focusToFirstItem: function() {
             const fp = this.getFloatingPanel();
-            if (fp && fp.isShown()) {
-                const item = fp.getFirstFocusableItem();
-                if (item) item.focus();
-            }
+            if (fp && fp.isShown()) fp.focusToFirstItem();
         }
     });
     
