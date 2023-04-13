@@ -12894,7 +12894,9 @@ new JS.Singleton('GlobalMouse', {
                 itemsLen = items.length,
                 defaultItemClass = listView.defaultItemClass,
                 contentView = listView.getContentView(), 
-                layouts = contentView.getLayouts();
+                layouts = contentView.getLayouts(),
+                fixedWidth = listView.fixedWidth,
+                isFixedWidth = fixedWidth > 0;
             
             // Lock layouts during reconfiguration
             layouts.forEach(layout => {layout.incrementLockedCounter();});
@@ -12907,6 +12909,11 @@ new JS.Singleton('GlobalMouse', {
             
             // Reconfigure list
             let i = 0;
+            const itemAttrs = {listView:listView};
+            if (isFixedWidth) {
+                itemAttrs.width = fixedWidth;
+                itemAttrs.enableEllipsis = true;
+            }
             for (; cfgLen > i; ++i) {
                 const cfgItem = cfg[i],
                     cfgClass = cfgItem.klass || defaultItemClass,
@@ -12920,7 +12927,7 @@ new JS.Singleton('GlobalMouse', {
                 }
                 
                 // Create a new item if no item exists
-                if (!item) item = items[i] = new cfgClass(contentView, {listView:listView});
+                if (!item) item = items[i] = new cfgClass(contentView, Object.assign({}, itemAttrs));
                 
                 // Apply config to item
                 if (item) {
@@ -12936,12 +12943,17 @@ new JS.Singleton('GlobalMouse', {
             // Performance: Put back in dom.
             parentElem.insertBefore(ode, nextDe);
             
-            // Measure width. Must be in dom at this point.
-            let minWidth = listView.minWidth;
-            for (i = 0; cfgLen > i;) {
-                const item = items[i++];
-                item.syncToDom();
-                minWidth = Math.max(minWidth, item.getMinimumWidth());
+            let minWidth;
+            if (isFixedWidth) {
+                minWidth = fixedWidth;
+            } else {
+                // Measure width. Must be in dom at this point.
+                minWidth = listView.minWidth;
+                for (i = 0; cfgLen > i;) {
+                    const item = items[i++];
+                    item.syncToDom();
+                    minWidth = Math.max(minWidth, item.getMinimumWidth());
+                }
             }
             
             // Delete any remaining items
@@ -12949,7 +12961,9 @@ new JS.Singleton('GlobalMouse', {
             items.length = cfgLen;
             
             // Resize items and contentView
-            for (i = 0; cfgLen > i;) listView.updateItemWidth(items[i++], minWidth);
+            if (!isFixedWidth) {
+                for (i = 0; cfgLen > i;) listView.updateItemWidth(items[i++], minWidth);
+            }
             listView.updateContentWidth(contentView, minWidth);
             
             // Unlock layouts and update
@@ -13225,7 +13239,7 @@ new JS.Singleton('GlobalMouse', {
     /** An item in an myt.ListView
         
         @class */
-    pkg.ListViewItem = new JSClass('ListViewItem', pkg.SimpleTextButton, {
+    pkg.ListViewItem = new JSClass('ListViewItem', pkg.TextButton, {
         include: [ListViewItemMixin],
         
         
@@ -13234,24 +13248,39 @@ new JS.Singleton('GlobalMouse', {
             defAttr(attrs, 'activeColor', '#bbb');
             defAttr(attrs, 'hoverColor', '#fff');
             defAttr(attrs, 'readyColor', '#eee');
-            defAttr(attrs, 'inset', 8);
-            defAttr(attrs, 'outset', 8);
+            defAttr(attrs, 'paddingLeft', 8);
+            defAttr(attrs, 'paddingRight', 8);
+            defAttr(attrs, 'textAlign', 'left');
+            defAttr(attrs, 'roundedCorners', 0);
             defAttr(attrs, 'activationKeys', LIST_KEYS);
+            defAttr(attrs, 'focusIndicator', true);
+            
+            const enableEllipsis = this.__enableEllipsis = attrs.enableEllipsis;
+            delete attrs.enableEllipsis;
             
             this.callSuper(parent, attrs);
+            
+            this.addDomClass('mytButtonText');
+            if (enableEllipsis) this.enableEllipsis();
         },
         
         
         // Methods /////////////////////////////////////////////////////////////
+        /** @overrides myt.TextSupport */
+        setText: function(v) {
+            this.callSuper(v);
+            if (this.__enableEllipsis) this.setTooltip(this.text);
+        },
+        
         /** @overrides myt.ListViewItemMixin */
         syncToDom: function() {
-            this.textView.getIDS().width = 'auto';
-            this.textView.sizeViewToDom();
+            this.getIDS().width = 'auto';
+            this.sizeViewToDom();
         },
         
         /** @overrides myt.ListViewItemMixin */
         getMinimumWidth: function() {
-            return this.inset + (this.textView.visible && this.text ? Math.ceil(this.textView.measureNoWrapWidth()) : 0) + this.outset;
+            return Math.ceil(this.measureNoWrapWidth());
         },
         
         /** @overrides myt.Button */
