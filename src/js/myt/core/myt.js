@@ -170,7 +170,7 @@
                 @param {string} fileName - The filename to extract the extension from.
                 @returns {string) The file extension or null if a falsy fileName argument was 
                     provided. */
-            getExtension: fileName => fileName ? fileName.split('.')[1] : null,
+            getExtension: fileName => fileName ? fileName.split('.').pop() : null,
             
             /** Dynamically load a script into the dom.
                 @param {string} src - The URL to the script file.
