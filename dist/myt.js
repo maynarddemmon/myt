@@ -883,15 +883,21 @@ Date.prototype.format = Date.prototype.format || (() => {
             /** @param {?Array} fontUrls
                 @returns {undefined} */
             loadCSSFonts: fontUrls => {
-                (fontUrls || []).forEach(fontUrl => {
-                    const link = createElement('link');
-                    link.rel = 'stylesheet';
-                    link.href = fontUrl;
-                    headElem.appendChild(link);
-                });
+                (fontUrls || []).forEach(myt.createStylesheetLink);
             },
             
             // CSS
+            /** Creates a "link" dom element.
+                @param {string} [href] The href attribute for the link.
+                @returns {!Object} */
+            createStylesheetLink: href => {
+                const link = createElement('link');
+                link.rel = 'stylesheet';
+                if (href) link.href = href;
+                headElem.appendChild(link);
+                return link;
+            },
+            
             /** Creates a "style" dom element.
                 @returns {!Object} */
             createStylesheet: () => {
@@ -8593,6 +8599,7 @@ myt.Destructible = new JS.Module('Destructible', {
             textOverflow:string
             textAlign:string
             whiteSpace:string
+            overflowWrap:string
             wordWrap:string
             textIndent:string
             textTransform:string
@@ -8615,9 +8622,9 @@ myt.Destructible = new JS.Module('Destructible', {
                 Supported values: 'left', 'right', 'center', 'justify', 
                 'inherit'.
             whiteSpace:string How white space is handled. Supported values: 
-                'normal', 'nowrap', 'pre', 'pre-line', 'pre-wrap', 'inherit'.
+                'normal', 'nowrap', 'pre', 'pre-wrap', 'pre-line', 'break-spaces', inherit'.
             wordWrap:string How line wrapping is done. Supported 
-                values: 'break-word', 'normal'.
+                values: 'anywhere', 'break-word', 'normal'.
             textIndent:string How text gets indented. Supported values: '20px', 
                 '10%', 'inherit'.
             textTransform:string Transformation performed on the text during
@@ -8659,7 +8666,7 @@ myt.Destructible = new JS.Module('Destructible', {
             // Height can change with width change when wrapping occurs.
             if (v !== 'auto') {
                 const ws = this.whiteSpace;
-                if (ws === 'normal' || ws === 'pre-line' || ws === 'pre-wrap') {
+                if (ws === 'normal' || ws === 'pre-line' || ws === 'pre-wrap' || ws === 'break-spaces') {
                     this.sizeViewToDom();
                 }
             }

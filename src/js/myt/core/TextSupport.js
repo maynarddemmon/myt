@@ -27,6 +27,7 @@
             textOverflow:string
             textAlign:string
             whiteSpace:string
+            overflowWrap:string
             wordWrap:string
             textIndent:string
             textTransform:string
@@ -49,9 +50,9 @@
                 Supported values: 'left', 'right', 'center', 'justify', 
                 'inherit'.
             whiteSpace:string How white space is handled. Supported values: 
-                'normal', 'nowrap', 'pre', 'pre-line', 'pre-wrap', 'inherit'.
+                'normal', 'nowrap', 'pre', 'pre-wrap', 'pre-line', 'break-spaces', inherit'.
             wordWrap:string How line wrapping is done. Supported 
-                values: 'break-word', 'normal'.
+                values: 'anywhere', 'break-word', 'normal'.
             textIndent:string How text gets indented. Supported values: '20px', 
                 '10%', 'inherit'.
             textTransform:string Transformation performed on the text during
@@ -93,7 +94,7 @@
             // Height can change with width change when wrapping occurs.
             if (v !== 'auto') {
                 const ws = this.whiteSpace;
-                if (ws === 'normal' || ws === 'pre-line' || ws === 'pre-wrap') {
+                if (ws === 'normal' || ws === 'pre-line' || ws === 'pre-wrap' || ws === 'break-spaces') {
                     this.sizeViewToDom();
                 }
             }

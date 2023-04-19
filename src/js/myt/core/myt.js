@@ -373,15 +373,21 @@
             /** @param {?Array} fontUrls
                 @returns {undefined} */
             loadCSSFonts: fontUrls => {
-                (fontUrls || []).forEach(fontUrl => {
-                    const link = createElement('link');
-                    link.rel = 'stylesheet';
-                    link.href = fontUrl;
-                    headElem.appendChild(link);
-                });
+                (fontUrls || []).forEach(myt.createStylesheetLink);
             },
             
             // CSS
+            /** Creates a "link" dom element.
+                @param {string} [href] The href attribute for the link.
+                @returns {!Object} */
+            createStylesheetLink: href => {
+                const link = createElement('link');
+                link.rel = 'stylesheet';
+                if (href) link.href = href;
+                headElem.appendChild(link);
+                return link;
+            },
+            
             /** Creates a "style" dom element.
                 @returns {!Object} */
             createStylesheet: () => {
