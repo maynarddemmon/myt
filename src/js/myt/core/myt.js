@@ -81,10 +81,10 @@
         dictionaries = {},
         
         memoize = func => {
-            return function() {
-                const hash = JSON.stringify(arguments),
-                    cache = func.__cache || (func.__cache = {});
-                return (hash in cache) ? cache[hash] : cache[hash] = func.apply(this, arguments);
+            const cache = {};
+            return (...args) => {
+                const hash = JSON.stringify(args);
+                return hash in cache ? cache[hash] : cache[hash] = func(...args);
             };
         },
         
