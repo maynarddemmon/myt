@@ -203,48 +203,8 @@ Date.prototype.format = Date.prototype.format || (() => {
 })();
 
 
-((exports) => {
-    const extendObj = (destination, source) => {
-            if (destination && source) {
-                for (const field in source) {
-                    if (destination[field] !== source[field] && !destination.hasOwnProperty(field)) {
-                        destination[field] = source[field];
-                    }
-                }
-            }
-            return destination;
-        },
-        
-        makeClass = (parent) => {
-            const constructor = function() {
-                    return this.initialize ? this.initialize.apply(this, arguments) || this : this;
-                },
-                bridge = function() {};
-            bridge.prototype = (parent || Object).prototype;
-            constructor.prototype = new bridge();
-            return constructor;
-        },
-        
-        /*  Gets the ancestor classes array.
-            @param {?Array} [list] - An array of ancestors that will have
-                ancestor classes pushed onto. If not provided a new array will
-                be created.
-            @returns {!Array} */
-        ancestorClasses = (module, list) => {
-            const cachable = !list;
-            if (cachable && module.__anc__) return module.__anc__.slice();
-            
-            list = list || [];
-            const inc = module.__inc__,
-                n = inc.length;
-            for (let i = 0; i < n;) ancestorClasses(inc[i++], list);
-            
-            if (!list.includes(module)) list.push(module);
-            
-            if (cachable) module.__anc__ = list.slice();
-            return list;
-        },
-        
+(exports => {
+    const 
         /*  Gets an array of JS.Methods for the provided method name.
             @param {string} name - The name of the method to lookup.
             @returns {!Array} An array of JS.Methods from the ancestors chain. */
@@ -252,10 +212,26 @@ Date.prototype.format = Date.prototype.format || (() => {
             const cached = module.__mct__[name];
             if (cached) return cached.slice();
             
-            const ancestors = ancestorClasses(module), 
-                n = ancestors.length,
+            // Get the ancestor classes array
+            let ancestors;
+            const cachedAncestors = module.__anc__;
+            if (cachedAncestors) {
+                ancestors = cachedAncestors.slice();
+            } else {
+                ancestors = [];
+                const walk = theModule => {
+                    const includes = theModule.__inc__,
+                        len = includes.length;
+                    for (let i = 0; i < len;) walk(includes[i++]);
+                    if (!ancestors.includes(theModule)) ancestors.push(theModule);
+                };
+                walk(module);
+                module.__anc__ = ancestors.slice();
+            }
+            
+            const len = ancestors.length,
                 methods = [];
-            for (let i = 0; i < n;) {
+            for (let i = 0; i < len;) {
                 const fns = ancestors[i++].__fns__;
                 if (fns.hasOwnProperty(name)) methods.push(fns[name]);
             }
@@ -279,7 +255,7 @@ Date.prototype.format = Date.prototype.format || (() => {
                             while (i) params[--i] = theArgs[i];
                             
                             if (--stackIndex === 0) delete this.callSuper;
-                            const returnValue = methods[stackIndex].apply(this, params);
+                            const returnValue = methods[stackIndex].callable.apply(this, params);
                             this.callSuper = _super;
                             stackIndex++;
                             
@@ -313,8 +289,8 @@ Date.prototype.format = Date.prototype.format || (() => {
             if (target) {
                 const inc = module.__inc__,
                     fns = module.__fns__,
-                    n = inc.length;
-                for (let i = 0; i < n;) resolveModule(inc[i++], host);
+                    len = inc.length;
+                for (let i = 0; i < len;) resolveModule(inc[i++], host);
                 
                 for (const key in fns) {
                     // Compile method
@@ -326,120 +302,100 @@ Date.prototype.format = Date.prototype.format || (() => {
             }
         },
         
-        eigenFunc = (target) => {
-            return target.__meta__ ? target.__meta__ : (target.__meta__ = new Module('', null, {_target:target})).include(target.klass, {_rslv:false});
+        eigenFunc = target => target.__meta__ ? target.__meta__ : (target.__meta__ = new Module('', null, {_target:target})).include(target.klass, {_rslv:false}),
+        ignore = value => typeof value !== 'function' || (value.__fns__ && value.__inc__),
+        
+        makeClass = parent => {
+            const constructor = function() {
+                    return this.initialize ? this.initialize.apply(this, arguments) || this : this;
+                },
+                bridge = function() {};
+            bridge.prototype = (parent || Object).prototype;
+            constructor.prototype = new bridge();
+            return constructor;
         },
         
-        ignore = (value) => typeof value !== 'function' || (value.__fns__ && value.__inc__),
-        Method = exports.Method = makeClass(),
         createMethod = (module, name, callable) => (callable && callable.__inc__ && callable.__fns__) || typeof callable !== 'function' ? callable : new Method(module, name, callable),
+        
+        Method = makeClass(),
         Module = exports.Module = makeClass();
     
-    extendObj(Method.prototype, {
-        initialize: function(module, name, callable) {
-            this.module = module;
-            this.name = name;
-            this.callable = callable;
-            this.__hs = typeof callable === 'function' && callable.toString().indexOf('callSuper') !== -1;
-        },
+    Method.prototype.initialize = function(module, name, callable) {
+        this.module = module;
+        this.name = name;
+        this.callable = callable;
         
-        call: function(...args) {
-            return this.callable(...args);
-        },
-        
-        apply: function(receiver, args) {
-            return this.callable.apply(receiver, args);
-        }
-    });
+        // Indicates if this Method has a super call or not.
+        this.__hs = callable.toString().indexOf('callSuper') !== -1;
+    };
     
-    extendObj(Module.prototype, {
-        initialize: function(name, methods, options) {
-            this.__inc__ = [];
-            this.__dep__ = [];
-            this.__fns__ = {};
-            this.__tgt__ = (options || {})._target;
-            this.__anc__ = null;
-            this.__mct__ = {};
-            
-            this.__displayName = name;
-            
-            this.include(methods, {_rslv:false});
-        },
+    const moduleProto = Module.prototype;
+    moduleProto.initialize = function(name, methods, options) {
+        this.__inc__ = [];
+        this.__dep__ = [];
+        this.__fns__ = {};
+        this.__tgt__ = (options || {})._target;
+        //this.__anc__ = null;
+        this.__mct__ = {};
         
-        /** Adds a single named method to a JS.Class/JS.Module. If you’re modifying 
-            a class, the method instantly becomes available in instances of the 
-            class, and in its subclasses.
-            @param {string} name - The name of the method to add.
-            @param {!Function} callable - The method implementation.
-            @param {?Object} [options]
-            @returns {undefined} */
-        define: function(name, callable, options) {
-            this.__fns__[name] = createMethod(this, name, callable);
-            if ((options || {})._rslv !== false) resolveModule(this);
-        },
+        this.__displayName = name;
         
-        /** Mixes in a module to this module.
-            @param {!Function} module - The JS.Module to mix in.
-            @param {?Object} [options]
-            @returns {!Function) this JS.Module. */
-        include: function(module, options) {
-            if (module) {
-                if (module.__fns__ && module.__inc__) {
-                    this.__inc__.push(module);
-                    module.__dep__.push(this);
-                } else {
-                    const extend  = module.extend,
-                        include = module.include,
+        this.include(methods, {_rslv:false});
+    };
+    /*  Mixes a module into this module.
+        @param {!Function} module - The JS.Module to mix in.
+        @param {?Object} [options]
+        @returns {!Function) this JS.Module. */
+    moduleProto.include = function(module, options) {
+        if (module) {
+            if (module.__fns__ && module.__inc__) {
+                this.__inc__.push(module);
+                module.__dep__.push(this);
+            } else {
+                const extend  = module.extend,
+                    include = module.include;
+                if (extend && ignore(extend)) this.extend(extend);
+                if (include && ignore(include)) {
+                    const len = include.length,
                         resolveFalse = {_rslv:false};
-                    if (ignore(extend)) {
-                        const mixins = [].concat(extend);
-                        for (let i = 0, n = mixins.length; i < n;) this.extend(mixins[i++]);
-                    }
-                    if (ignore(include)) {
-                        const mixins = [].concat(include);
-                        for (let i = 0, n = mixins.length; i < n;) this.include(mixins[i++], resolveFalse);
-                    }
-                    for (const field in module) {
-                        if (module.hasOwnProperty(field)) {
-                            const value = module[field];
-                            if ((field === 'extend' || field === 'include') && ignore(value)) continue;
-                            this.define(field, value, resolveFalse);
-                        }
-                    }
+                    for (let i = 0; i < len;) this.include(include[i++], resolveFalse);
                 }
-                
-                if ((options || {})._rslv !== false) resolveModule(this);
+                for (const field of Object.keys(module)) {
+                    const value = module[field];
+                    if ((field === 'extend' || field === 'include') && ignore(value)) continue;
+                    
+                    // Adds a single named method to a JS.Class/JS.Module. If you’re 
+                    // modifying a class, the method instantly becomes available in 
+                    // instances of the class, and in its subclasses.
+                    this.__fns__[field] = createMethod(this, field, value);
+                }
             }
-            return this;
-        },
-        
-        /** Checks if this module includes the provided module.
-            @param {!Function} module - The module to check for.
-            @returns {boolean} True if the module is included, otherwise false. */
-        includes: function(module) {
-            if (module === this) return true;
             
-            const inc = this.__inc__, 
-                n = inc.length;
-            for (let i = 0; i < n;) {
-                if (inc[i++].includes(module)) return true;
-            }
-            return false;
-        },
-        
-        /** Extracts a single named method from a module.
-            @param {string} name - The name of the method to extract.
-            @return {!Function) The extracted JS.Method. */
-        instanceMethod: function(name) {
-            return lookup(this, name).pop();
+            if ((options || {})._rslv !== false) resolveModule(this);
         }
-    });
+        return this;
+    };
+    /*  Checks if this module includes the provided module.
+        @param {!Function} module - The module to check for.
+        @returns {boolean} True if the module is included, otherwise false. */
+    moduleProto.includes = function(module) {
+        if (module === this) return true;
+        
+        const inc = this.__inc__, 
+            len = inc.length;
+        for (let i = 0; i < len;) {
+            if (inc[i++].includes(module)) return true;
+        }
+        return false;
+    };
+    /*  Extracts a single named method from a module.
+        @param {string} name - The name of the method to extract.
+        @return {!Function) The extracted JS.Method. */
+    moduleProto.instanceMethod = function(name) {
+        return lookup(this, name).pop();
+    };
     
     const Kernel = new Module('Kernel', {
-        equals: function(other) {
-            return this === other;
-        },
-        
         extend: function(module, options) {
             if (module) eigenFunc(this).include(module, {_rslv:(options || {})._rslv});
             return this;
@@ -453,44 +409,52 @@ Date.prototype.format = Date.prototype.format || (() => {
         }
     });
     
-    const Class = exports.Class = makeClass(Module);
-    extendObj(Class.prototype, {
-        initialize: function(name, parent, methods, options) {
-            if (typeof parent !== 'function') {
-                options = methods;
-                methods = parent;
-                parent  = Object;
-            }
-            
-            Module.prototype.initialize.call(this, name);
-            
-            const resolve = (options || {})._rslv,
-                resolveFalse = {_rslv:false},
-                klass = makeClass(parent);
-            extendObj(klass, this);
-            klass.prototype.constructor = klass.prototype.klass = klass;
-            eigenFunc(klass).include(parent.__meta__, {_rslv:resolve});
-            klass.__tgt__ = klass.prototype;
-            
-            const parentModule = parent === Object ? {} : (parent.__fns__ ? parent : new Module(parent.prototype, resolveFalse));
-            klass.include(Kernel, resolveFalse).include(parentModule, resolveFalse).include(methods, resolveFalse);
-            
-            if (resolve !== false) resolveModule(klass);
-            
-            return klass;
+    const Class = exports.Class = makeClass(Module),
+        classProto = Class.prototype;
+    classProto.initialize = function(name, parent, methods, options) {
+        if (typeof parent !== 'function') {
+            options = methods;
+            methods = parent;
+            parent  = Object;
         }
-    });
+        
+        Module.prototype.initialize.call(this, name);
+        
+        const resolve = (options || {})._rslv,
+            resolveFalse = {_rslv:false},
+            klass = makeClass(parent);
+        
+        // The klass extends from this.
+        for (const field in this) {
+            if (klass[field] !== this[field] && !klass.hasOwnProperty(field)) klass[field] = this[field];
+        }
+        
+        klass.prototype.constructor = klass.prototype.klass = klass;
+        eigenFunc(klass).include(parent.__meta__, {_rslv:resolve});
+        klass.__tgt__ = klass.prototype;
+        
+        const parentModule = parent === Object ? {} : (parent.__fns__ ? parent : new Module(parent.prototype, resolveFalse));
+        klass.include(Kernel, resolveFalse).include(parentModule, resolveFalse).include(methods, resolveFalse);
+        
+        if (resolve !== false) resolveModule(klass);
+        
+        return klass;
+    };
     
     const classify = (klass, parent) => {
         klass.__inc__ = [];
         klass.__dep__ = [];
         const proto = klass.__tgt__ = klass.prototype,
             methods = klass.__fns__ = {};
-        for (const field in proto) {
-            if (proto.hasOwnProperty(field)) methods[field] = createMethod(klass, field, proto[field]);
-        }
+            
+        for (const field of Object.keys(proto)) methods[field] = createMethod(klass, field, proto[field]);
         proto.constructor = proto.klass = klass;
-        extendObj(klass, Class.prototype);
+        
+        // The klass extends from Class.prototype.
+        for (const field in classProto) {
+            if (klass[field] !== classProto[field] && !klass.hasOwnProperty(field)) klass[field] = classProto[field];
+        }
+        
         klass.include(parent);
         klass.constructor = klass.klass = Class;
     };
@@ -506,7 +470,7 @@ Date.prototype.format = Date.prototype.format || (() => {
     exports.Singleton = new Class('Singleton', {
         initialize: (name, parent, methods) => new (new Class(name, parent, methods))
     });
-})(global.JS || (global.JS = {}));
+})(global.JS = {});
 
 (pkg => {
     /*
