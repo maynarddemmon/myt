@@ -4777,7 +4777,13 @@ new JS.Singleton('GlobalTouch', {
         isFlexUpdateInProgress: function() {return this.__isFlexUpdate;},
         
         updateFlexboxLayoutFromChild: function() {
-            if (this.inited && !this.ignoreFlex() && !this.isFlexUpdateInProgress() && this.isChildOfFlexbox()) this.parent.updateFlexboxLayout();
+            if (this.inited && !this.ignoreFlex() && this.isChildOfFlexbox()) {
+                if (this.isFlexUpdateInProgress()) {
+                    this.parent.setUpdateAgain(true);
+                } else {
+                    this.parent.updateFlexboxLayout();
+                }
+            }
         }
     });
 })(myt);
