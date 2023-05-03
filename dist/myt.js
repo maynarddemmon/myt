@@ -5209,7 +5209,7 @@ myt.Destructible = new JS.Module('Destructible', {
                         }
                         return retval;
                     }
-                    return actives.concat();
+                    return actives.slice();
                 }
                 return [];
             },
@@ -15503,7 +15503,7 @@ new JS.Singleton('GlobalMouse', {
         /** The options are just the subviews.
             @returns an array of options for this select list. */
         getOptions: function() {
-            return this.getSubviews().concat();
+            return this.getSubviews().slice();
         },
         
         /** @overrides myt.NativeInputWrapper
@@ -16661,7 +16661,7 @@ new JS.Singleton('GlobalMouse', {
                 @returns array of error messages strings. */
             getAllErrorMessages: function() {
                 const subForms = this.__sf;
-                let msgs = (this.errorMessages || []).concat();
+                let msgs = (this.errorMessages || []).slice();
                 for (const id in subForms) msgs = msgs.concat(subForms[id].getAllErrorMessages());
                 return msgs;
             },
@@ -18541,7 +18541,7 @@ new JS.Singleton('GlobalMouse', {
                 if (typeof props === 'string') {
                     props = props.split(' ');
                 } else {
-                    props = props.concat();
+                    props = props.slice();
                 }
             } else {
                 props = [];

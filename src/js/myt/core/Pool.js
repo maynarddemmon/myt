@@ -193,7 +193,7 @@
                         }
                         return retval;
                     }
-                    return actives.concat();
+                    return actives.slice();
                 }
                 return [];
             },

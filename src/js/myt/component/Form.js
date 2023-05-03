@@ -613,7 +613,7 @@
                 @returns array of error messages strings. */
             getAllErrorMessages: function() {
                 const subForms = this.__sf;
-                let msgs = (this.errorMessages || []).concat();
+                let msgs = (this.errorMessages || []).slice();
                 for (const id in subForms) msgs = msgs.concat(subForms[id].getAllErrorMessages());
                 return msgs;
             },

@@ -783,7 +783,7 @@
         /** The options are just the subviews.
             @returns an array of options for this select list. */
         getOptions: function() {
-            return this.getSubviews().concat();
+            return this.getSubviews().slice();
         },
         
         /** @overrides myt.NativeInputWrapper

@@ -33,7 +33,7 @@
                 if (typeof props === 'string') {
                     props = props.split(' ');
                 } else {
-                    props = props.concat();
+                    props = props.slice();
                 }
             } else {
                 props = [];
