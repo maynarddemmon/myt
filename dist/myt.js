@@ -562,6 +562,9 @@ Date.prototype.format = Date.prototype.format || (() => {
             };
         },
         
+        I18N_PLURAL_REGEX = /\{\{plural:\$(.*?)\|(.*?)\|(.*?)\}\}/g,
+        I18N_NUMERIC_ARG_REGEX = /\$(\d+)/g, 
+        
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
             version:20220118.1318,
@@ -1144,26 +1147,21 @@ Date.prototype.format = Date.prototype.format || (() => {
                 addDictionary: (dictionary, locale) => {
                     dictionaries[locale] = Object.assign(dictionaries[locale] || {}, dictionary);
                 },
-                get: function(key) {
-                    const args = arguments,
-                        locale = currentLocale || (currentLocale = (navigator.language || defaultLocale).split('-')[0].toLowerCase());
-                    let value = (dictionaries[locale] || dictionaries[defaultLocale] || {})[key];
+                get: (key, ...args) => {
+                    const locale = currentLocale || (currentLocale = (navigator.language || defaultLocale).split('-')[0].toLowerCase()),
+                        value = (dictionaries[locale] || dictionaries[defaultLocale] || {})[key];
                     if (value != null) {
-                        if (args.length > 1) {
-                            // Process each {{plural:$n|single|multiple}} replacement
-                            for (const m of value.matchAll(/\{\{plural:\$(.*?)\|(.*?)\|(.*?)\}\}/g)) {
-                                // Don't be tempted to do a replace all in the next line. The 
-                                // matchAll handles them. The use of == lets us handle 1 and '1' 
-                                // for single.
-                                value = value.replace(m[0], m[args[parseInt(m[1])] == 1 ? 2 : 3]);
-                            }
-                            
-                            // Process $n replacement for every arg
-                            for (let argNum = 1; argNum < args.length; argNum++) {
-                                value = value.replaceAll('$' + argNum, args[argNum]);
-                            }
+                        if (args.length > 0) {
+                            return value.replaceAll(
+                                // Process each {{plural:$n|single|multiple}} replacement
+                                I18N_PLURAL_REGEX, (m, p1, p2, p3) => (p2 && p3) ? (args[parseInt(p1)] == 1 ? p2 : p3) : ''
+                            ).replaceAll(
+                                // Process $n replacement for every arg
+                                I18N_NUMERIC_ARG_REGEX, (m, idx) => args[idx]
+                            );
+                        } else {
+                            return value;
                         }
-                        return value;
                     }
                     return key;
                 }
