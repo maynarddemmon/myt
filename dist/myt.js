@@ -4692,9 +4692,7 @@ new JS.Singleton('GlobalTouch', {
         
         generateName = (attrName, prefix) => prefix + attrName.charAt(0).toUpperCase() + attrName.slice(1),
         generateSetterName = attrName => SETTER_NAMES.get(attrName) ?? (SETTER_NAMES.set(attrName, generateName(attrName, 'set')), SETTER_NAMES.get(attrName)),
-        generateGetterName = attrName => GETTER_NAMES.get(attrName) ?? (GETTER_NAMES.set(attrName, generateName(attrName, 'get')), GETTER_NAMES.get(attrName)),
-        
-        defAttr = (attrs, attrName, defaultValue) => {attrs[attrName] ??= defaultValue;};
+        generateGetterName = attrName => GETTER_NAMES.get(attrName) ?? (GETTER_NAMES.set(attrName, generateName(attrName, 'get')), GETTER_NAMES.get(attrName));
     
     /** Provides support for getter and setter functions on an object.
         
@@ -4742,9 +4740,7 @@ new JS.Singleton('GlobalTouch', {
                 const getterName = generateGetterName(attrName);
                 if (target[getterName]) console.log('Overwriting getter', getterName);
                 target[getterName] = function() {return this[attrName];};
-            },
-            
-            defAttr: defAttr
+            }
         },
         
         
@@ -4753,8 +4749,6 @@ new JS.Singleton('GlobalTouch', {
         prependToEarlyAttrs: function() {(this.earlyAttrs ??= []).unshift(...arguments);},
         appendToLateAttrs: function() {(this.lateAttrs ??= []).push(...arguments);},
         prependToLateAttrs: function() {(this.lateAttrs ??= []).unshift(...arguments);},
-        
-        defAttr: defAttr,
         
         /** Used to quickly extract and set attributes from the attrs object passed to 
             an initializer.
