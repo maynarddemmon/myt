@@ -40,8 +40,7 @@
                 attrs.percentOfParentWidth = 100;
                 attrs.expansionState = 'collapsed';
                 
-                if (attrs.tabId == null) attrs.tabId = pkg.generateGuid();
-                
+                attrs.tabId ??= pkg.generateGuid();
                 attrs.tabContainer ??= parent;
                 attrs.selected ??= false;
                 attrs.buttonClass ??= pkg.SimpleButton;

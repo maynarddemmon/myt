@@ -148,7 +148,7 @@
             setData: (data, storeId, delay) => {
                 storeId = getStoreId(storeId);
                 
-                if (data == null) data = {};
+                data ??= {};
                 
                 if (typeof data === 'object') {
                     doFunc(() => {LocalStorage.setItem(storeId, JSON.stringify(data));}, delay, storeId);

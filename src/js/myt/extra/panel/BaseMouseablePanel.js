@@ -22,7 +22,7 @@ myt.BaseMouseablePanel = new JS.Module('BaseMouseablePanel', {
         // @overrides behavior from HorizontalThreePanel and VerticalThreePanel
         // mixins which will be used with this mixin in MouseableH3Panel
         // and MouseableV3Panel respectively.
-        if (attrs.repeat == null) attrs.repeat = false;
+        attrs.repeat ??= false;
         
         this.callSuper(parent, attrs);
     },

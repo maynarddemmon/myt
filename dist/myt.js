@@ -1438,7 +1438,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             setData: (data, storeId, delay) => {
                 storeId = getStoreId(storeId);
                 
-                if (data == null) data = {};
+                data ??= {};
                 
                 if (typeof data === 'object') {
                     doFunc(() => {LocalStorage.setItem(storeId, JSON.stringify(data));}, delay, storeId);
@@ -1880,8 +1880,8 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 @returns {!Array} - Where index 0 is the x coordinate and index 
                     1 is the y coordinate. */
             polarToCartesian: (radius, degrees, cx, cy) => {
-                if (cx == null) cx = 0;
-                if (cy == null) cy = 0;
+                cx ??= 0;
+                cy ??= 0;
                 degrees = degrees % 360;
                 
                 let x, 
@@ -1920,8 +1920,8 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     index 1 is angle in degrees (or radians if userRadians 
                     is true). */
             cartesianToPolar: (x, y, cx, cy, useRadians) => {
-                if (cx == null) cx = 0;
-                if (cy == null) cy = 0;
+                cx ??= 0;
+                cy ??= 0;
                 
                 const diffX = x - cx,
                     diffY = y - cy,
@@ -4104,7 +4104,7 @@ new JS.Singleton('GlobalTouch', {
                 this.__IS_FLEXBOX_SUPPORT = true; // Optimize FlexboxChildSupport.isChildOfFlexbox
                 
                 this.rowGap = this.columnGap = 0;
-                if (this.direction == null) this.direction = 'row';
+                this.direction ??= 'row';
                 this.wrap = 'nowrap';
                 this.justifyContent = this.alignContent = 'start';
                 this.alignItems = 'stretch';
@@ -4572,7 +4572,7 @@ new JS.Singleton('GlobalTouch', {
         
         setWidthViaFlex(v, suppressEvent) {
             if (this.width !== v) {
-                if (this.__basisWidth == null) this.__basisWidth = this.width;
+                this.__basisWidth ??= this.width;
                 
                 this.__isFlexUpdate = true;
                 this.setWidth(v, suppressEvent);
@@ -4581,7 +4581,7 @@ new JS.Singleton('GlobalTouch', {
         },
         
         getFlexBasisWidth: function() {
-            return this.__basisWidth == null ? this.width : this.__basisWidth;
+            return this.__basisWidth ?? this.width;
         },
         
         /** @overrides */
@@ -4594,7 +4594,7 @@ new JS.Singleton('GlobalTouch', {
         
         setHeightViaFlex(v, suppressEvent) {
             if (this.height !== v) {
-                if (this.__basisHeight == null) this.__basisHeight = this.height;
+                this.__basisHeight ??= this.height;
                 
                 this.__isFlexUpdate = true;
                 this.setHeight(v, suppressEvent);
@@ -4603,7 +4603,7 @@ new JS.Singleton('GlobalTouch', {
         },
         
         getFlexBasisHeight: function() {
-            return this.__basisHeight == null ? this.height : this.__basisHeight;
+            return this.__basisHeight ?? this.height;
         },
         
         /** Subclasses should override this to provide a more appropriate baseline offset 
@@ -11841,7 +11841,7 @@ new JS.Singleton('GlobalMouse', {
                 if (self.disabled) {
                     // Remember the cursor to change back to, but don't re-remember if we're 
                     // already remembering one.
-                    if (self.__restoreCursor == null) self.__restoreCursor = self.cursor;
+                    self.__restoreCursor ??= self.cursor;
                     self.setCursor('not-allowed');
                     self.drawDisabledState();
                 } else {
@@ -13684,8 +13684,7 @@ new JS.Singleton('GlobalMouse', {
                 attrs.percentOfParentWidth = 100;
                 attrs.expansionState = 'collapsed';
                 
-                if (attrs.tabId == null) attrs.tabId = pkg.generateGuid();
-                
+                attrs.tabId ??= pkg.generateGuid();
                 attrs.tabContainer ??= parent;
                 attrs.selected ??= false;
                 attrs.buttonClass ??= pkg.SimpleButton;
@@ -14156,8 +14155,7 @@ new JS.Singleton('GlobalMouse', {
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                if (attrs.tabId == null) attrs.tabId = pkg.generateGuid();
-                
+                attrs.tabId ??= pkg.generateGuid();
                 attrs.tabContainer ??= parent;
                 
                 // Selection must be done via the select method on the tabContainer
@@ -15382,10 +15380,10 @@ new JS.Singleton('GlobalMouse', {
                     if (v.lower === existingLower && v.upper === existingUpper) return;
                     
                     // Assign upper to lower if no lower was provided.
-                    if (v.lower == null) v.lower = v.upper;
+                    v.lower ??= v.upper;
                     
                     // Assign lower to upper if no upper was provided.
-                    if (v.upper == null) v.upper = v.lower;
+                    v.upper ??= v.lower;
                     
                     // Swap lower and upper if they are in the wrong order
                     if (v.lower !== undefined && v.upper !== undefined && v.lower > v.upper) {
@@ -15437,7 +15435,7 @@ new JS.Singleton('GlobalMouse', {
                 
                 self.appendToEarlyAttrs('snapToInt','minValue','maxValue');
                 
-                if (attrs.snapToInt == null) attrs.snapToInt = true;
+                attrs.snapToInt ??= true;
                 
                 if (!attrs.valueFilter) {
                     attrs.valueFilter = v => {
@@ -16142,7 +16140,7 @@ new JS.Singleton('GlobalMouse', {
                 @returns {undefined} */
             invokeAccelerator: function(id, value) {
                 const accelerator = this.__acc[id];
-                if (accelerator) accelerator.call(this, value == null ? null : value);
+                if (accelerator) accelerator.call(this, value ?? null);
             },
             
             /** Adds a validator to this form.
@@ -16319,9 +16317,9 @@ new JS.Singleton('GlobalMouse', {
                 this.setIsValid(true);
                 this._lockCascade = false;
                 
-                if (defaultValue == null) defaultValue = {};
-                if (rollbackValue == null) rollbackValue = {};
-                if (value == null) value = {};
+                defaultValue ??= {};
+                rollbackValue ??= {};
+                value ??= {};
                 
                 const subForms = this.__sf;
                 for (const id in subForms) subForms[id].setup(defaultValue[id], rollbackValue[id], value[id]);
@@ -17000,7 +16998,7 @@ new JS.Singleton('GlobalMouse', {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides */
         initNode: function(parent, attrs) {
-            if (attrs.groupId == null) attrs.groupId = pkg.generateGuid();
+            attrs.groupId ??= pkg.generateGuid();
             
             this.callSuper(parent, attrs);
             
@@ -21257,7 +21255,7 @@ new JS.Singleton('GlobalMouse', {
                 const self = this,
                     oldMaxValue = self.maxValue ?? 0,
                     gc = self.gridController;
-                if (v == null) v = defaultMaxValue;
+                v ??= defaultMaxValue;
                 self.callSuper(v);
                 if (gc && self.inited && oldMaxValue !== self.maxValue) gc.setMaxWidth(gc.maxWidth + self.maxValue - oldMaxValue);
             },
@@ -22867,7 +22865,7 @@ new JS.Singleton('GlobalMouse', {
         /** @overrides */
         initNode: function(parent, attrs) {
             attrs.distanceBeforeDrag ??= 2;
-            if (attrs.dropParent == null) attrs.dropParent = parent.getRoot();
+            attrs.dropParent ??= parent.getRoot();
             
             this.callSuper(parent, attrs);
         },
@@ -24062,9 +24060,8 @@ myt.Eventable = new JS.Class('Eventable', {
                     break;
                 case 'jpg': case 'JPG': case 'jpeg': case 'JPEG':
                     extension = 'jpeg';
-                    // opt should be a quality number between 0.0 (worst) 
-                    // and 1.0 (best)
-                    if (opt == null) opt = 0.5;
+                    // opt should be a quality number between 0.0 (worst) and 1.0 (best)
+                    opt ??= 0.5;
                     break;
                 default:
                     console.warn('Unexpected image type', imageType);

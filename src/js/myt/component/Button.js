@@ -85,7 +85,7 @@
                 if (self.disabled) {
                     // Remember the cursor to change back to, but don't re-remember if we're 
                     // already remembering one.
-                    if (self.__restoreCursor == null) self.__restoreCursor = self.cursor;
+                    self.__restoreCursor ??= self.cursor;
                     self.setCursor('not-allowed');
                     self.drawDisabledState();
                 } else {

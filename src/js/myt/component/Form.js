@@ -494,7 +494,7 @@
                 @returns {undefined} */
             invokeAccelerator: function(id, value) {
                 const accelerator = this.__acc[id];
-                if (accelerator) accelerator.call(this, value == null ? null : value);
+                if (accelerator) accelerator.call(this, value ?? null);
             },
             
             /** Adds a validator to this form.
@@ -671,9 +671,9 @@
                 this.setIsValid(true);
                 this._lockCascade = false;
                 
-                if (defaultValue == null) defaultValue = {};
-                if (rollbackValue == null) rollbackValue = {};
-                if (value == null) value = {};
+                defaultValue ??= {};
+                rollbackValue ??= {};
+                value ??= {};
                 
                 const subForms = this.__sf;
                 for (const id in subForms) subForms[id].setup(defaultValue[id], rollbackValue[id], value[id]);
@@ -1352,7 +1352,7 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides */
         initNode: function(parent, attrs) {
-            if (attrs.groupId == null) attrs.groupId = pkg.generateGuid();
+            attrs.groupId ??= pkg.generateGuid();
             
             this.callSuper(parent, attrs);
             

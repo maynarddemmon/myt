@@ -111,10 +111,10 @@
                     if (v.lower === existingLower && v.upper === existingUpper) return;
                     
                     // Assign upper to lower if no lower was provided.
-                    if (v.lower == null) v.lower = v.upper;
+                    v.lower ??= v.upper;
                     
                     // Assign lower to upper if no upper was provided.
-                    if (v.upper == null) v.upper = v.lower;
+                    v.upper ??= v.lower;
                     
                     // Swap lower and upper if they are in the wrong order
                     if (v.lower !== undefined && v.upper !== undefined && v.lower > v.upper) {
@@ -166,7 +166,7 @@
                 
                 self.appendToEarlyAttrs('snapToInt','minValue','maxValue');
                 
-                if (attrs.snapToInt == null) attrs.snapToInt = true;
+                attrs.snapToInt ??= true;
                 
                 if (!attrs.valueFilter) {
                     attrs.valueFilter = v => {

@@ -202,8 +202,8 @@
                 @returns {!Array} - Where index 0 is the x coordinate and index 
                     1 is the y coordinate. */
             polarToCartesian: (radius, degrees, cx, cy) => {
-                if (cx == null) cx = 0;
-                if (cy == null) cy = 0;
+                cx ??= 0;
+                cy ??= 0;
                 degrees = degrees % 360;
                 
                 let x, 
@@ -242,8 +242,8 @@
                     index 1 is angle in degrees (or radians if userRadians 
                     is true). */
             cartesianToPolar: (x, y, cx, cy, useRadians) => {
-                if (cx == null) cx = 0;
-                if (cy == null) cy = 0;
+                cx ??= 0;
+                cy ??= 0;
                 
                 const diffX = x - cx,
                     diffY = y - cy,

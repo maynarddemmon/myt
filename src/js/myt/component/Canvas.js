@@ -121,9 +121,8 @@
                     break;
                 case 'jpg': case 'JPG': case 'jpeg': case 'JPEG':
                     extension = 'jpeg';
-                    // opt should be a quality number between 0.0 (worst) 
-                    // and 1.0 (best)
-                    if (opt == null) opt = 0.5;
+                    // opt should be a quality number between 0.0 (worst) and 1.0 (best)
+                    opt ??= 0.5;
                     break;
                 default:
                     console.warn('Unexpected image type', imageType);

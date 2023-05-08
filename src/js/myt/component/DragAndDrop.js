@@ -148,7 +148,7 @@
         /** @overrides */
         initNode: function(parent, attrs) {
             attrs.distanceBeforeDrag ??= 2;
-            if (attrs.dropParent == null) attrs.dropParent = parent.getRoot();
+            attrs.dropParent ??= parent.getRoot();
             
             this.callSuper(parent, attrs);
         },

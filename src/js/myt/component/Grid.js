@@ -725,7 +725,7 @@
                 const self = this,
                     oldMaxValue = self.maxValue ?? 0,
                     gc = self.gridController;
-                if (v == null) v = defaultMaxValue;
+                v ??= defaultMaxValue;
                 self.callSuper(v);
                 if (gc && self.inited && oldMaxValue !== self.maxValue) gc.setMaxWidth(gc.maxWidth + self.maxValue - oldMaxValue);
             },

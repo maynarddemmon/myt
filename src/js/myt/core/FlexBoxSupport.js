@@ -75,7 +75,7 @@
                 this.__IS_FLEXBOX_SUPPORT = true; // Optimize FlexboxChildSupport.isChildOfFlexbox
                 
                 this.rowGap = this.columnGap = 0;
-                if (this.direction == null) this.direction = 'row';
+                this.direction ??= 'row';
                 this.wrap = 'nowrap';
                 this.justifyContent = this.alignContent = 'start';
                 this.alignItems = 'stretch';
@@ -543,7 +543,7 @@
         
         setWidthViaFlex(v, suppressEvent) {
             if (this.width !== v) {
-                if (this.__basisWidth == null) this.__basisWidth = this.width;
+                this.__basisWidth ??= this.width;
                 
                 this.__isFlexUpdate = true;
                 this.setWidth(v, suppressEvent);
@@ -552,7 +552,7 @@
         },
         
         getFlexBasisWidth: function() {
-            return this.__basisWidth == null ? this.width : this.__basisWidth;
+            return this.__basisWidth ?? this.width;
         },
         
         /** @overrides */
@@ -565,7 +565,7 @@
         
         setHeightViaFlex(v, suppressEvent) {
             if (this.height !== v) {
-                if (this.__basisHeight == null) this.__basisHeight = this.height;
+                this.__basisHeight ??= this.height;
                 
                 this.__isFlexUpdate = true;
                 this.setHeight(v, suppressEvent);
@@ -574,7 +574,7 @@
         },
         
         getFlexBasisHeight: function() {
-            return this.__basisHeight == null ? this.height : this.__basisHeight;
+            return this.__basisHeight ?? this.height;
         },
         
         /** Subclasses should override this to provide a more appropriate baseline offset 

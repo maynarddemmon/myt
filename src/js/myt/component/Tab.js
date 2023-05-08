@@ -46,8 +46,7 @@
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                if (attrs.tabId == null) attrs.tabId = pkg.generateGuid();
-                
+                attrs.tabId ??= pkg.generateGuid();
                 attrs.tabContainer ??= parent;
                 
                 // Selection must be done via the select method on the tabContainer
