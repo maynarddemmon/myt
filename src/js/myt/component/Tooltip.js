@@ -11,8 +11,6 @@
         mathMax = math.max,
         mathRound = math.round,
         
-        defAttr = pkg.AccessorSupport.defAttr,
-        
         tooltipDomId = 'tooltipDiv',
         
         /*  Clears the tooltip timer. */
@@ -23,8 +21,8 @@
             }
         },
         
-        /*  Checks if the last mouse position is inside the tip's parent.
-            If not inside the tip will also get hidden.
+        /*  Checks if the last mouse position is inside the tip's parent. If not inside the tip 
+            will also get hidden.
             @returns {boolean} false if the tip got hidden, true otherwise. */
         checkInTooltip = ttView => {
             if (ttView.tooltip) {
@@ -38,17 +36,13 @@
         /** A base class for tooltip classes.
             
             Attributes:
-                tooltip:object The tooltip configuration assigned to this 
-                    tooltip when the mouse has moved over a view with 
-                    TooltipMixin.
-                tipDelay:number The time in millis to wait before showing 
-                    the tooltip.
-                tipHideDelay:number The time in millis to wait before hiding 
-                    the tooltip.
+                tooltip:object The tooltip configuration assigned to this tooltip when the mouse 
+                    has moved over a view with TooltipMixin.
+                tipDelay:number The time in millis to wait before showing the tooltip.
+                tipHideDelay:number The time in millis to wait before hiding the tooltip.
             
             Private Attributes:
-                __checkTID:number The timer ID used internally for 
-                    delaying when the tip gets shown.
+                __checkTID:number The timer ID used internally for delaying when the tip gets shown.
             
             @class */
         BaseTooltip = pkg.BaseTooltip = new JSClass('BaseTooltip', pkg.View, {
@@ -57,12 +51,10 @@
             
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                /** The default length of time in millis before the tip 
-                    is shown. */
+                /** The default length of time in millis before the tip is shown. */
                 TIP_DELAY: 500,
                 
-                /** The default length of time in millis before the tip 
-                    is hidden. */
+                /** The default length of time in millis before the tip is hidden. */
                 TIP_HIDE_DELAY: 100
             },
             
@@ -72,7 +64,7 @@
                 this.tipDelay = this.nextTipDelay = BaseTooltip.TIP_DELAY;
                 this.tipHideDelay = BaseTooltip.TIP_HIDE_DELAY;
                 
-                defAttr(attrs, 'visible', false);
+                attrs.visible ??= false;
                 
                 this.callSuper(parent, attrs);
             },
@@ -111,8 +103,7 @@
                         () => {
                             delete self.__checkTID;
                             
-                            // If the mouse rests in the tooltip's parent, 
-                            // show the tooltip.
+                            // If the mouse rests in the tooltip's parent, show the tooltip.
                             if (checkInTooltip(self)) self.showTip();
                         },
                         self.nextTipDelay
@@ -134,18 +125,17 @@
                 this.nextTipDelay = this.tipDelay;
                 this.setVisible(false);
                 
-                // Don't consume mouse event since we just want to close the 
-                // tip as a side effect of the user action. The typical case 
-                // for this is the user clicking on a button while the tooltip 
-                // for that button is shown.
+                // Don't consume mouse event since we just want to close the tip as a side effect 
+                // of the user action. The typical case for this is the user clicking on a button 
+                // while the tooltip for that button is shown.
                 return true;
             },
             
             /** Called when the tip will be shown.
                 @returns {undefined} */
             showTip: function() {
-                // Don't show tooltips while doing drag and drop since 
-                // tooltips are distracting while this is going on.
+                // Don't show tooltips while doing drag and drop since tooltips are distracting 
+                // while this is going on.
                 if (!G.dragManager.getDragView()) {
                     this.nextTipDelay = this.tipHideDelay;
                     this.bringToFront();
@@ -157,8 +147,7 @@
         /** An implementation of a tooltip.
             
             Attributes:
-                edgeSize:number the thickness of the "edge" of the tip 
-                    background.
+                edgeSize:number the thickness of the "edge" of the tip background.
                 edgeColor:string The color used for the edge.
                 shadowSize:number The thickness of the shadow.
                 shadowColor:string The color of the shadow.
@@ -184,14 +173,14 @@
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                defAttr(attrs, 'edgeSize', Tooltip.EDGE_SIZE);
-                defAttr(attrs, 'edgeColor', Tooltip.EDGE_COLOR);
-                defAttr(attrs, 'shadowSize', Tooltip.SHADOW_SIZE);
-                defAttr(attrs, 'shadowColor', Tooltip.SHADOW_COLOR);
-                defAttr(attrs, 'insetH', Tooltip.HORIZONTAL_INSET);
-                defAttr(attrs, 'insetV', Tooltip.VERTICAL_INSET);
-                defAttr(attrs, 'tipBgColor', Tooltip.TIP_BG_COLOR);
-                defAttr(attrs, 'tipTextColor', Tooltip.TIP_TEXT_COLOR);
+                attrs.edgeSize ??= Tooltip.EDGE_SIZE;
+                attrs.edgeColor ??= Tooltip.EDGE_COLOR;
+                attrs.shadowSize ??= Tooltip.SHADOW_SIZE;
+                attrs.shadowColor ??= Tooltip.SHADOW_COLOR;
+                attrs.insetH ??= Tooltip.HORIZONTAL_INSET;
+                attrs.insetV ??= Tooltip.VERTICAL_INSET;
+                attrs.tipBgColor ??= Tooltip.TIP_BG_COLOR;
+                attrs.tipTextColor ??= Tooltip.TIP_TEXT_COLOR;
                 
                 this.callSuper(parent, attrs);
                 
@@ -226,8 +215,7 @@
                     edgeSize = self.edgeSize,
                     shadowSize = self.shadowSize;
                 
-                // Size tip text and size it to fit within the maximum 
-                // text width.
+                // Size tip text and size it to fit within the maximum text width.
                 if (tipText.text !== txt) tipText.setText(txt);
                 tipText.setWidth('auto');
                 const tipTextWidth = mathMin(tipText.measureNoWrapWidth(), tt.maxTextWidth),
@@ -281,13 +269,12 @@
             
             Attributes:
                 tooltip:string The tip text to display.
-                tipAlign:string The horizontal alignment of the tooltip 
-                    relative to the view the tip is being shown for. Supported 
-                    values are 'left', 'farleft', 'right' and 'farright'. 
-                    Defaults to 'left'.
-                tipValign:string The vertical alignment of the tooltip 
-                    relative to the view the tip is being shown for. Supported 
-                    values are 'above' and 'below'. Defaults to 'above'.
+                tipAlign:string The horizontal alignment of the tooltip relative to the view the 
+                    tip is being shown for. Supported values are 'left', 'farleft', 'right' and 
+                    'farright'. Defaults to 'left'.
+                tipValign:string The vertical alignment of the tooltip relative to the view the 
+                    tip is being shown for. Supported values are 'above' and 'below'. Defaults 
+                    to 'above'.
                 maxTextWidth:number The maximum width of the tooltip text.
                 tipClass:JS.Class The class to use to instantiate the tooltip.
             
@@ -295,9 +282,8 @@
         TooltipMixin = pkg.TooltipMixin = new JS.Module('TooltipMixin', {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                /** The default class to use for tooltip views. If a project 
-                    wants to use a special tip class everywhere it should 
-                    override this. */
+                /** The default class to use for tooltip views. If a project wants to use a special 
+                    tip class everywhere it should override this. */
                 TIP_CLASS: Tooltip,
                 MAX_TEXT_WIDTH: 280
             },
@@ -327,7 +313,7 @@
                 
                 if (isOver && tooltip) {
                     // Use configured class or default if none defined.
-                    const tipClass = self.tipClass || TooltipMixin.TIP_CLASS;
+                    const tipClass = self.tipClass ?? TooltipMixin.TIP_CLASS;
                     
                     // Destroy tip if it's not the correct class.
                     if (tooltipView && !(tooltipView instanceof tipClass)) {
@@ -342,9 +328,8 @@
                         if (!elem) {
                             elem = pkg.DomElementProxy.createElement('div', {position:'absolute'});
                             
-                            // Make the div a child of the body element so it 
-                            // can be in front of pretty much anything in the 
-                            // document.
+                            // Make the div a child of the body element so it can be in front of 
+                            // pretty much anything in the document.
                             pkg.getElement().appendChild(elem);
                         }
                         tooltipView = new tipClass(elem, {domId:tooltipDomId});

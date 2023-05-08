@@ -64,7 +64,7 @@
             [familyName, familyName + ' ' + fontFace.weight].forEach(fontName => {
                 if (!fontLoaded[fontName]) {
                     fontLoaded[fontName] = true;
-                    const targets = fontTargets[fontName] || [];
+                    const targets = fontTargets[fontName] ?? [];
                     while (targets.length) notifyInstanceThatFontLoaded(targets.pop());
                 }
             });
@@ -93,7 +93,7 @@
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
-            version:20220118.1318,
+            version:20230507.1717,
             
             /** Generates a globally unique id, (GUID).
                 @returns {number} */
@@ -143,7 +143,7 @@
             resolveName: (objName, scope) => {
                 if (!objName || objName.length === 0) return undefined;
                 
-                scope = scope || global;
+                scope = scope ?? global;
                 
                 const parts = Array.isArray(objName) ? objName : objName.split('.'), 
                     len = parts.length;
@@ -191,7 +191,7 @@
                     been loaded. */
             loadScript: function(src, callback, noCacheBust) {
                 // Prevent reloading the same script
-                const loadedScripts = this._loadedScripts || (this._loadedScripts = {});
+                const loadedScripts = this._loadedScripts ??= {};
                 if (loadedScripts[src]) {
                     console.warn('script already loaded for src', src);
                     return null;
@@ -220,7 +220,7 @@
                     
                     // Must set src AFTER adding onreadystatechange listener otherwise we’ll miss 
                     // the loaded event for cached scripts
-                    scriptElem.src = src + (noCacheBust ? '' : (src.indexOf('?') >= 0 ? '&' : '?') + 'cacheBust=' + Date.now());
+                    scriptElem.src = src + (noCacheBust ? '' : (src.includes('?') ? '&' : '?') + 'cacheBust=' + Date.now());
                     
                     headElem.appendChild(scriptElem);
                     
@@ -362,7 +362,7 @@
                 if (fontLoaded[fontName]) {
                     notifyInstanceThatFontLoaded(textView);
                 } else {
-                    (fontTargets[fontName] || (fontTargets[fontName] = [])).push(textView);
+                    (fontTargets[fontName] ??= []).push(textView);
                 }
             },
             
@@ -376,7 +376,7 @@
             /** @param {?Array} fontUrls
                 @returns {undefined} */
             loadCSSFonts: fontUrls => {
-                (fontUrls || []).forEach(myt.createStylesheetLink);
+                (fontUrls ?? []).forEach(myt.createStylesheetLink);
             },
             
             // CSS

@@ -6,12 +6,10 @@
         GlobalFocus = G.focus,
         GlobalKeys = G.keys,
         
-        defAttr = pkg.AccessorSupport.defAttr,
-        
         LIST_KEYS = GlobalKeys.LIST_KEYS,
         
         updateItems = listView => {
-            const cfg = listView.itemConfig || [],
+            const cfg = listView.itemConfig ?? [],
                 cfgLen = cfg.length,
                 items = listView.items, 
                 itemsLen = items.length,
@@ -39,8 +37,8 @@
             }
             for (; cfgLen > i; ++i) {
                 const cfgItem = cfg[i],
-                    cfgClass = cfgItem.klass || defaultItemClass,
-                    cfgAttrs = cfgItem.attrs || {};
+                    cfgClass = cfgItem.klass ?? defaultItemClass,
+                    cfgAttrs = cfgItem.attrs ?? {};
                 let item = items[i];
                 
                 // Destroy existing item if it's the wrong class
@@ -56,15 +54,16 @@
                 if (item) {
                     item.callSetters(cfgAttrs);
                     
-                    // Create an item index to sort the layout subviews on. This
-                    // is necessary when the class of list items change so 
-                    // that the newly created items don't end up out of order.
+                    // Create an item index to sort the layout subviews on. This is necessary when 
+                    // the class of list items change so that the newly created items don't end up 
+                    // out of order.
                     item.__LAYOUT_IDX = i;
                 }
             }
             
             // Performance: Put back in dom.
             parentElem.insertBefore(ode, nextDe);
+            
             
             let minWidth;
             if (isFixedWidth) {
@@ -109,15 +108,13 @@
             
             
             // Methods /////////////////////////////////////////////////////////
-            /** Subclasses and/or implementations must implement this method. 
-                Should return the minimum width the list item needs to 
-                display itself.
+            /** Subclasses and/or implementations must implement this method. Should return the 
+                minimum width the list item needs to display itself.
                 @returns number */
             getMinimumWidth: () => 0,
             
-            /** Part of a performance optimization. Called from 
-                updateItems after the items have been inserted into 
-                the dom. Now we can actually measure text width. */
+            /** Part of a performance optimization. Called from updateItems after the items have 
+                been inserted into the dom. Now we can actually measure text width. */
             syncToDom: () => {}
         });
     
@@ -127,15 +124,14 @@
             maxHeight:number
         
         Attributes:
-            minWidth:number The minimum width for the list. The list will size
-                itself to fit the maximum width of the items in the list or 
-                this value whichever is larger. Defaults to 0.
-            maxHeight:number The maximum height of the list view in pixels. 
-                If set to -1 no max height will be used.
-            defaultItemClass:JS.Class The class to use for list items if one 
-                is not provided in the config. Defaults to myt.ListViewItem.
-            itemConfig:array An array of configuration information for 
-                the items in the list.
+            minWidth:number The minimum width for the list. The list will size itself to fit the 
+                maximum width of the items in the list or this value whichever is larger. 
+                Defaults to 0.
+            maxHeight:number The maximum height of the list view in pixels. If set to -1 no max 
+                height will be used.
+            defaultItemClass:JS.Class The class to use for list items if one is not provided in 
+                the config. Defaults to myt.ListViewItem.
+            itemConfig:array An array of configuration information for the items in the list.
             items:array The array of items in the list.
         
         @class */
@@ -146,10 +142,10 @@
             this.maxHeight = -1;
             this.minWidth = 0;
             
-            defAttr(attrs, 'defaultItemClass', pkg.ListViewItem);
-            defAttr(attrs, 'overflow', 'autoy');
-            defAttr(attrs, 'bgColor', '#ccc');
-            defAttr(attrs, 'boxShadow', pkg.Button.FOCUS_SHADOW);
+            attrs.defaultItemClass ??= pkg.ListViewItem;
+            attrs.overflow ??= 'autoy';
+            attrs.bgColor ??= '#ccc';
+            attrs.boxShadow ??= pkg.Button.FOCUS_SHADOW;
             
             this.callSuper(parent, attrs);
             
@@ -157,8 +153,8 @@
             this.buildLayout(this.getContentView());
         },
         
-        /** Allows subclasses to specify their own layout. For example a
-            multi-column layout using a WrappingLayout is possible. */
+        /** Allows subclasses to specify their own layout. For example a multi-column layout using 
+            a WrappingLayout is possible. */
         buildLayout: contentView => {
             new pkg.SpacedLayout(contentView, {
                 axis:'y', spacing:1, collapseParent:true
@@ -198,9 +194,8 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** ListViewItems should call this method when they are activated. 
-            The default implementation invokes doItemActivated on 
-            the ListViewAnchor.
+        /** ListViewItems should call this method when they are activated. The default 
+            implementation invokes doItemActivated on the ListViewAnchor.
             @param {!Object} itemView
             @returns {undefined} */
         doItemActivated: function(itemView) {
@@ -209,7 +204,7 @@
         
         /** @overrides myt.FloatingPanel */
         getFirstFocusableDescendant: function() {
-            return this.getFirstFocusableItem() || this.callSuper();
+            return this.getFirstFocusableItem() ?? this.callSuper();
         },
         
         getFirstFocusableItem: function() {
@@ -252,12 +247,9 @@
     /** The anchor for an myt.ListView.
         
         Attributes:
-            listViewClass:JS.Class The class of list view to create. Defaults
-                to myt.ListView.
-            listViewAttrs:object The initialization attributes for the 
-                listViewClass.
-            itemConfig:array An array of configuration parameters for the items
-                in the list.
+            listViewClass:JS.Class The class of list view to create. Defaults to myt.ListView.
+            listViewAttrs:object The initialization attributes for the listViewClass.
+            itemConfig:array An array of configuration parameters for the items in the list.
         
         @class */
     pkg.ListViewAnchor = new JSModule('ListViewAnchor', {
@@ -266,13 +258,13 @@
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            defAttr(attrs, 'listViewClass', pkg.ListView);
-            defAttr(attrs, 'listViewAttrs', {});
-            defAttr(attrs, 'itemConfig', []);
+            attrs.listViewClass ??= pkg.ListView;
+            attrs.listViewAttrs ??= {};
+            attrs.itemConfig ??= [];
             
-            // Assume this will be mixed onto something that implements 
-            // myt.KeyActivation since it probably will.
-            defAttr(attrs, 'activationKeys', LIST_KEYS);
+            // Assume this will be mixed onto something that implements myt.KeyActivation since 
+            // it probably will.
+            attrs.activationKeys ??= LIST_KEYS;
             
             this.callSuper(parent, attrs);
         },
@@ -285,8 +277,7 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Called by the list view when an item is activated. By default it
-            hides the list view.
+        /** Called by the list view when an item is activated. By default it hides the list view.
             @param {!Object} itemView
             @returns {undefined} */
         doItemActivated: function(itemView) {
@@ -295,7 +286,7 @@
         
         /** @overrides myt.FloatingPanelAnchor */
         getFloatingPanel: function(panelId) {
-            return this.callSuper(panelId) || this.createFloatingPanel(panelId, this.listViewClass, this.listViewAttrs);
+            return this.callSuper(panelId) ?? this.createFloatingPanel(panelId, this.listViewClass, this.listViewAttrs);
         },
         
         /** @overrides myt.FloatingPanelAnchor */
@@ -368,15 +359,15 @@
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            defAttr(attrs, 'activeColor', '#bbb');
-            defAttr(attrs, 'hoverColor', '#fff');
-            defAttr(attrs, 'readyColor', '#eee');
-            defAttr(attrs, 'paddingLeft', 8);
-            defAttr(attrs, 'paddingRight', 8);
-            defAttr(attrs, 'textAlign', 'left');
-            defAttr(attrs, 'roundedCorners', 0);
-            defAttr(attrs, 'activationKeys', LIST_KEYS);
-            defAttr(attrs, 'focusIndicator', true);
+            attrs.activeColor ??= '#bbb';
+            attrs.hoverColor ??= '#fff';
+            attrs.readyColor ??= '#eee';
+            attrs.paddingLeft ??= 8;
+            attrs.paddingRight ??= 8;
+            attrs.textAlign ??= 'left';
+            attrs.roundedCorners ??= 0;
+            attrs.activationKeys ??= LIST_KEYS;
+            attrs.focusIndicator ??= true;
             
             const enableEllipsis = this.__enableEllipsis = attrs.enableEllipsis;
             delete attrs.enableEllipsis;
@@ -440,8 +431,8 @@
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            defAttr(attrs, 'height', 1);
-            defAttr(attrs, 'bgColor', '#666');
+            attrs.height ??= 1;
+            attrs.bgColor ??= '#666';
             
             this.callSuper(parent, attrs);
         }

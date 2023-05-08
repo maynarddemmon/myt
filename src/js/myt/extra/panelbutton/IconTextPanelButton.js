@@ -1,6 +1,4 @@
 (pkg => {
-    const defAttr = pkg.AccessorSupport.defAttr;
-    
     /** A mixin that adds an icon and text to the inside of a button.
         
         Events:
@@ -50,8 +48,8 @@
             self.iconSpacing = 2;
             self.inset = self.outset = 0;
             
-            defAttr(attrs, 'shrinkToFit', false);
-            defAttr(attrs, 'contentAlign', 'center');
+            attrs.shrinkToFit ??= false;
+            attrs.contentAlign ??= 'center';
             
             self.callSuper(parent, attrs);
             

@@ -1,7 +1,7 @@
 (pkg => {
     const
-        /*  A private setter function that provides a common implementation for
-            most of this setters in the TextSupport mixin.
+        /*  A private setter function that provides a common implementation for most of this 
+            setters in the TextSupport mixin.
             @param {string|number} v
             @param {string} attrName
             @param {string|number} defaultValue
@@ -42,47 +42,39 @@
             fontSize:string
         
         Attributes:
-            text:string|event(string) The text to be displayed. The value will 
-                be assigned to the inner html of the div.
-            textOverflow:string How text will be treated when it overflows the
-                bounds. Supported values: 'ellipsis', 'clip', 'inherit'.
-            textAlign:string How text will be aligned within the bounds. 
-                Supported values: 'left', 'right', 'center', 'justify', 
+            text:string|event(string) The text to be displayed. The value will be assigned to the 
+                inner html of the div.
+            textOverflow:string How text will be treated when it overflows the bounds. Supported 
+                values: 'ellipsis', 'clip', 'inherit'.
+            textAlign:string How text will be aligned within the bounds. Supported values: 'left', 
+                'right', 'center', 'justify', 'inherit'.
+            whiteSpace:string How white space is handled. Supported values: 'normal', 'nowrap', 
+                'pre', 'pre-wrap', 'pre-line', 'break-spaces', inherit'.
+            wordWrap:string How line wrapping is done. Supported values: 'anywhere', 'break-word', 
+                'normal'.
+            textIndent:string How text gets indented. Supported values: '20px', '10%', 'inherit'.
+            textTransform:string Transformation performed on the text during display. Supported 
+                values: 'none', 'capitalize', 'uppercase', 'lowercase', 'inherit'.
+            textDecoration:string Visual decoration to the text. Supported values: 'none', 
+                'underline', 'overline', 'line-through', 'blink', 'inherit'.
+            lineHeight:string The height of individual lines of text. Supported values: 'normal', 
+                '1.5', '22px', '150%', 'inherit'.
+            letterSpacing:string Spacing between letters. Supported values: 'normal', '3px', 
                 'inherit'.
-            whiteSpace:string How white space is handled. Supported values: 
-                'normal', 'nowrap', 'pre', 'pre-wrap', 'pre-line', 'break-spaces', inherit'.
-            wordWrap:string How line wrapping is done. Supported 
-                values: 'anywhere', 'break-word', 'normal'.
-            textIndent:string How text gets indented. Supported values: '20px', 
-                '10%', 'inherit'.
-            textTransform:string Transformation performed on the text during
-                display. Supported values: 'none', 'capitalize', 'uppercase', 
-                'lowercase', 'inherit'.
-            textDecoration:string Visual decoration to the text. Supported 
-                values: 'none', 'underline', 'overline', 'line-through', 
-                'blink', 'inherit'.
-            lineHeight:string The height of individual lines of text. Supported 
-                values: 'normal', '1.5', '22px', '150%', 'inherit'.
-            letterSpacing:string Spacing between letters. Supported values: 
-                'normal', '3px', 'inherit'.
-            wordSpacing:string Spacing between words. Supported values: 
-                'normal', '3px', 'inherit'.
-            fontFamily:string The name of a font to use. The value will be 
-                assigned to the font family CSS parameter.
-            fontStyle:string Styling applied to the text. Supported values: 
-                'normal', 'italic', 'oblique', 'inherit'.
-            fontVariant:string The font variant. Supported values: 'normal', 
-                'small-caps', 'inherit'.
-            fontWeight:string The font weight. Supported values: 'normal', 
-                'bold', 'bolder', 'lighter', '100-900', 'inherit'.
-            fontSize:string The size of the font. Supported values: 'normal, 
-                '14px', '14pt', 'xx-small', 'x-small', 'small', 'medium', 
-                'large', 'x-large', 'xx-large', 'smaller', 'larger', '75%', 
-                'inherit'.
-            userUnselectable:boolean If set to true the CSS property user-select 
-                will be set to 'none' thus making text selection not work.
-                Furthermore, the cursor will be set to the default so it no 
-                longer appears as an i-beam.
+            wordSpacing:string Spacing between words. Supported values: 'normal', '3px', 'inherit'.
+            fontFamily:string The name of a font to use. The value will be assigned to the font 
+                family CSS parameter.
+            fontStyle:string Styling applied to the text. Supported values: 'normal', 'italic', 
+                'oblique', 'inherit'.
+            fontVariant:string The font variant. Supported values: 'normal', 'small-caps', 'inherit'.
+            fontWeight:string The font weight. Supported values: 'normal', 'bold', 'bolder', 
+                'lighter', '100-900', 'inherit'.
+            fontSize:string The size of the font. Supported values: 'normal, '14px', '14pt', 
+                'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large', 
+                'smaller', 'larger', '75%', 'inherit'.
+            userUnselectable:boolean If set to true the CSS property user-select will be set to 
+                'none' thus making text selection not work. Furthermore, the cursor will be set to 
+                the default so it no longer appears as an i-beam.
         
         @class */
     pkg.TextSupport = new JS.Module('TextSupport', {
@@ -105,8 +97,8 @@
             v = this.valueFromEvent(v);
             
             if (this.text !== v) {
-                // Use innerHTML rather than textContent since this allows 
-                // us to embed formatting markup.
+                // Use innerHTML rather than textContent since this allows us to embed 
+                // formatting markup.
                 this.getIDE().innerHTML = this.text = v;
                 if (this.inited) {
                     this.fireEvent('text', v);
@@ -159,9 +151,9 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Configures the attributes for this Text so that an ellipsis will be
-            displayed. To actually see an ellipsis, an explicit width should be
-            set on the Text so that overflow will occur.
+        /** Configures the attributes for this Text so that an ellipsis will be displayed. To 
+            actually see an ellipsis, an explicit width should be set on the Text so that overflow 
+            will occur.
             @returns {undefined} */
         enableEllipsis: function() {
             this.setWhiteSpace('nowrap');
@@ -169,23 +161,21 @@
             this.setTextOverflow('ellipsis');
         },
         
-        /** Turns ellipsis off by setting overflow to 'visible'. Other CSS
-            related changes for ellipsis are not undone such as whiteSpace and
-            textOverflow.
+        /** Turns ellipsis off by setting overflow to 'visible'. Other CSS related changes for 
+            ellipsis are not undone such as whiteSpace and textOverflow.
             @returns {undefined} */
         disableEllipsis: function() {
             this.setOverflow('visible');
         },
         
         /** Turns on a text shadow.
-            @param {number} [x] - The x offset in pixels of the shadow.
-                Defaults to 0 if not provided.
-            @param {number} [y] - The y offset in pixels of the shadow.
-                Defaults to 0 if not provided.
-            @param {number} [blur] - The bluriness in pixels of the shadow.
-                Defaults to 2 if not provided.
-            @param {string} [color] - The color of the shadow. Defaults
-                to '#000' if not provided.
+            @param {number} [x] - The x offset in pixels of the shadow. Defaults to 0 if 
+                not provided.
+            @param {number} [y] - The y offset in pixels of the shadow. Defaults to 0 if 
+                not provided.
+            @param {number} [blur] - The bluriness in pixels of the shadow. Defaults to 2 if 
+                not provided.
+            @param {string} [color] - The color of the shadow. Defaults to '#000' if not provided.
             @returns {undefined} */
         showTextShadow: function(x, y, blur, color) {
             this.getIDS().textShadow = 

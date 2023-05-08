@@ -253,15 +253,13 @@
             @param {?Object} v
             @returns {undefined} */
         setDomElement: function(v) {
-            // Support an inner and outer dom element if an array of elements 
-            // is provided.
+            // Support an inner and outer dom element if an array of elements is provided.
             const self = this,
                 isArray = Array.isArray(v),
                 outerElem = self.__oE = isArray ? v[0] : v,
                 innerElem = self.__iE = isArray ? v[1] : v;
             
-            // Store a reference to the dom element style property since it 
-            // is accessed often.
+            // Store a reference to the dom element style property since it is accessed often.
             self.__iS = innerElem.style;
             self.__oS = outerElem.style;
             

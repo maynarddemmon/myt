@@ -3,34 +3,28 @@
         View = pkg.View,
         SizeToParent = pkg.SizeToParent,
         
-        defAttr = pkg.AccessorSupport.defAttr,
-        
         /** A tab slider component.
             
             Events:
-                expansionState:string Fired when the tab slider changes 
-                    expansion state.
+                expansionState:string Fired when the tab slider changes expansion state.
             
             Attributes:
-                tabId:string The unique ID for this tab slider relative to the
-                    tab slider container that manages this tab slider.
-                tabContainer:myt.TabSliderContainer The tab slider container 
-                    that manages this tab.
-                buttonClass:JS.Class The class to use for the button portion 
-                    of the tab slider. Defaults to myt.SimpleButton.
+                tabId:string The unique ID for this tab slider relative to the tab slider container 
+                    that manages this tab slider.
+                tabContainer:myt.TabSliderContainer The tab slider container that manages this tab.
+                buttonClass:JS.Class The class to use for the button portion of the tab slider. 
+                    Defaults to myt.SimpleButton.
                 fillColorSelected:color The color of the button when selected.
                 fillColorHover:color The color of the button when moused over.
                 fillColorActive:color The color of the button while active.
-                fillColorReady:color The color of the button when ready for 
-                    interaction.
-                buttonHeight:number The height of the button portion of the 
-                    tab slider. Defaults to 30.
-                minContainerHeight:number The minimum height of the content 
-                    container inside this tab slider. This is the minimum
-                    height when expanded. Defaults to 100.
-                expansionState:string Indicates the expansion state of the tab 
-                    slider. Supported values are: 'expanded', 'expanding', 
-                    'collapsed' and 'collapsing'. Defaults to 'collapsed'.
+                fillColorReady:color The color of the button when ready for interaction.
+                buttonHeight:number The height of the button portion of the tab slider. Defaults 
+                    to 30.
+                minContainerHeight:number The minimum height of the content container inside this 
+                    tab slider. This is the minimum height when expanded. Defaults to 100.
+                expansionState:string Indicates the expansion state of the tab slider. Supported 
+                    values are: 'expanded', 'expanding', 'collapsed' and 'collapsing'. Defaults 
+                    to 'collapsed'.
             
             @class */
         TabSlider = pkg.TabSlider = new JSClass('TabSlider', View, {
@@ -48,16 +42,16 @@
                 
                 if (attrs.tabId == null) attrs.tabId = pkg.generateGuid();
                 
-                defAttr(attrs, 'tabContainer', parent);
-                defAttr(attrs, 'selected', false);
-                defAttr(attrs, 'buttonClass', pkg.SimpleButton);
-                defAttr(attrs, 'zIndex', 0);
-                defAttr(attrs, 'buttonHeight', 30);
-                defAttr(attrs, 'fillColorSelected', '#666');
-                defAttr(attrs, 'fillColorHover', '#eee');
-                defAttr(attrs, 'fillColorActive', '#ccc');
-                defAttr(attrs, 'fillColorReady', '#fff');
-                defAttr(attrs, 'minContainerHeight', 100);
+                attrs.tabContainer ??= parent;
+                attrs.selected ??= false;
+                attrs.buttonClass ??= pkg.SimpleButton;
+                attrs.zIndex ??= 0;
+                attrs.buttonHeight ??= 30;
+                attrs.fillColorSelected ??= '#666';
+                attrs.fillColorHover ??= '#eee';
+                attrs.fillColorActive ??= '#ccc';
+                attrs.fillColorReady ??= '#fff';
+                attrs.minContainerHeight ??= 100;
                 
                 // Selection must be done via the select method on 
                 // the tabContainer
@@ -179,9 +173,8 @@
                 if (btn) btn.setDisabled(this.disabled);
             },
             
-            /** Called whenever the button is redrawn. Gives 
-                subclasses/instances a chance to do additional things when 
-                the button is redrawn.
+            /** Called whenever the button is redrawn. Gives subclasses/instances a chance to do 
+                additional things when the button is redrawn.
                 @returns {undefined} */
             notifyButtonRedraw: () => {},
             
@@ -243,24 +236,23 @@
                 }
             },
             
-            /** Gets the height of the tab slider when it is collapsed. Will 
-                be the height of the button portion of the tab slider.
+            /** Gets the height of the tab slider when it is collapsed. Will be the height of the 
+                button portion of the tab slider.
                 @returns number */
             getCollapsedHeight: function() {
                 return this.buttonHeight;
             },
             
-            /** Gets the minimum height. Will be the smaller of the preferred 
-                height or the buttonHeight + minContainerHeight. Thus, if the 
-                content is smaller than the minContainerHeight extra space 
-                will not be shown.
+            /** Gets the minimum height. Will be the smaller of the preferred height or the 
+                buttonHeight + minContainerHeight. Thus, if the content is smaller than the 
+                minContainerHeight extra space will not be shown.
                 @returns number */
             getMinimumExpandedHeight: function() {
                 return Math.min(this.getPreferredExpandedHeight(), this.buttonHeight + this.minContainerHeight);
             },
             
-            /** Gets the preferred height that would allow the container to 
-                be shown without vertical scrollbars.
+            /** Gets the preferred height that would allow the container to be shown without 
+                vertical scrollbars.
                 @returns number */
             getPreferredExpandedHeight: function() {
                 return this.buttonHeight + this.wrapper.container.height;
@@ -278,8 +270,8 @@
         TextTabSlider = pkg.TextTabSlider = new JSClass('TextTabSlider', TabSlider, {
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                defAttr(attrs, 'labelTextColorChecked', '#fff');
-                defAttr(attrs, 'labelTextColor', '#333');
+                attrs.labelTextColorChecked ??= '#fff';
+                attrs.labelTextColor ??= '#333';
                 
                 this.callSuper(parent, attrs);
                 
@@ -344,11 +336,11 @@
                 
                 attrs.defaultPlacement = 'container';
                 
-                defAttr(attrs, 'spacing', TabSliderContainer.SPACING);
-                defAttr(attrs, 'overflow', 'autoy');
-                defAttr(attrs, 'itemSelectionId', 'tabId');
-                defAttr(attrs, 'maxSelected', 1);
-                defAttr(attrs, 'duration', 500);
+                attrs.spacing ??= TabSliderContainer.SPACING;
+                attrs.overflow ??= 'autoy';
+                attrs.itemSelectionId ??= 'tabId';
+                attrs.maxSelected ??= 1;
+                attrs.duration ??= 500;
                 
                 self.updateLayout = pkg.debounce(self.updateLayout);
                 

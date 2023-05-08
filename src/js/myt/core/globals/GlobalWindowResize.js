@@ -47,10 +47,10 @@
         // Accessors ///////////////////////////////////////////////////////////
         /** Gets the window.document.body's clientWidth.
             @returns {number} - The current width of the window.document.body. */
-        getWidth: () => clientWidth || (clientWidth = doc.body.clientWidth),
+        getWidth: () => clientWidth ??= doc.body.clientWidth,
         
         /** Gets the window.document.body's clientHeight.
             @returns {number} - The current height of the window.document.body. */
-        getHeight: () => clientHeight || (clientHeight = doc.body.clientHeight)
+        getHeight: () => clientHeight ??= doc.body.clientHeight
     });
 })(myt);

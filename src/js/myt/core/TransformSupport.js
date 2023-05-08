@@ -2,31 +2,28 @@
     const
         updateBounds = view => {view.__updateBounds(view.width, view.height);},
         
-        /*  Sets the 'transformOrigin' style property of the provided
-            style property map.
+        /*  Sets the 'transformOrigin' style property of the provided style property map.
                 param view:View the view to modify.
                 param v:string the transformOrigin to set. */
         setTransformOrigin = (view, v) => {
             view.getODS().transformOrigin = v || '50% 50% 0';
         },
         
-        /*  Adds an entry to the 'transform' style property of the provided
-            style property map.
-                param view:View the view to add the transform to.
-                param type:string the type of transform: 'rotate', 'scaleX', 
-                    'scaleY', 'skewX', 'skewY'.
-                    param v:string the style value to set. */
+        /*  Adds an entry to the 'transform' style property of the provided style property map.
+                param view:View - The view to add the transform to.
+                param type:string - The type of transform: 'rotate', 'scaleX', 'scaleY', 'skewX', 
+                    'skewY'.
+                param v:string the style value to set. */
         addTransform = (view, type, v) => {
             const cur = removeTransform(view, type);
             view.getODS().transform = cur + (cur.length === 0 ? '' : ' ') + type + '(' + v + ')';
         },
         
-        /*  Removes an entry from the 'transform' style property of the 
-            provided style property map. Returns the new transform value 
-            after the removal has been applied.
+        /*  Removes an entry from the 'transform' style property of the provided style property 
+            map. Returns the new transform value after the removal has been applied.
                 param view:View the view ro remove the transform from.
-                param type:string the type of transform: 'rotate', 'scaleX', 
-                    'scaleY', 'skewX', 'skewY'. */
+                param type:string the type of transform: 'rotate', 'scaleX', 'scaleY', 'skewX', 
+                    'skewY'. */
         removeTransform = (view, type) => {
             const ods = view.getODS(),
                 value = ods.transform;
@@ -36,7 +33,7 @@
             const parts = value.split(' ');
             let i = parts.length;
             while (i) {
-                if (parts[--i].indexOf(type) === 0) {
+                if (parts[--i].startsWith(type)) {
                     parts.splice(i, 1);
                     break;
                 }
@@ -66,14 +63,13 @@
         Attributes:
             transformOrigin:string The origin point for transforms.
             rotation:number The rotation in degrees.
-            scale:number (write only) Sets the scale for the view in both the x 
-                and y dimension to the same value. A value of 1 is no scaling, 
-                0.5 is 50%, 2 is 200%, etc. Note: The setters for scaleX and 
-                scaleY are not called.
-            scaleX:number The scale for the view in the x-dimension. A value 
-                of 1 is no scaling, 0.5 is 50%, 2 is 200%, etc.
-            scaleY:number The scale for the view in the y-dimension. A value 
-                of 1 is no scaling, 0.5 is 50%, 2 is 200%, etc.
+            scale:number (write only) Sets the scale for the view in both the x and y dimension to 
+                the same value. A value of 1 is no scaling, 0.5 is 50%, 2 is 200%, etc. Note: The 
+                setters for scaleX and scaleY are not called.
+            scaleX:number The scale for the view in the x-dimension. A value of 1 is no scaling, 
+                0.5 is 50%, 2 is 200%, etc.
+            scaleY:number The scale for the view in the y-dimension. A value of 1 is no scaling, 
+                0.5 is 50%, 2 is 200%, etc.
             skewX:number Sets the horizontal skew in degrees.
             skewY:number Sets the vertical skew in degrees.
         

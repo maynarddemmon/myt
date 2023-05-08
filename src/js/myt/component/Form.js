@@ -7,8 +7,6 @@
         GlobalFocus = G.focus,
         GlobalKeys = G.keys,
         
-        defAttr = pkg.AccessorSupport.defAttr,
-        
         KeyObservable = pkg.KeyObservable,
         
         DEFAULT_ATTR = 'runForDefault',
@@ -51,8 +49,7 @@
         
         getBooleanAttributeGroup = formRadioGroup => pkg.BAG.getGroup('selected', formRadioGroup.groupId),
         
-        /*  Search the radio group for a matching node and make that one the
-            true node.
+        /*  Search the radio group for a matching node and make that one the true node.
             @param {!Object} formRadioGroup
             @returns {undefined} */
         updateRadioGroupValue = formRadioGroup => {
@@ -90,7 +87,7 @@
             @returns boolean true if this form is valid, false otherwise. */
         applyValidation = (form, isValid) => {
             const errorMessages = [];
-            (form.__v || []).forEach(validator => {
+            (form.__v ?? []).forEach(validator => {
                 isValid = validator.isFormValid(form, null, errorMessages) && isValid;
             });
             form.setErrorMessages(errorMessages);
@@ -100,34 +97,32 @@
         
         /*  Runs the provided value through all the ValueProcessors.
             @param value:* The value to process.
-            @param checkAttr:string The name of the attribute on each processor 
-                that is checked to see if that processor should be run or not.
+            @param checkAttr:string The name of the attribute on each processor that is checked to 
+                see if that processor should be run or not.
             @returns * The processed value. */
         processValue = (formElement, value, checkAttr) => {
-            (formElement.__vp || []).forEach(processor => {
+            (formElement.__vp ?? []).forEach(processor => {
                 if (processor[checkAttr]) value = processor.process(value);
             });
             return value;
         },
         
-        /** Modifies a value. Typically used to convert a form element value 
-            to its canonical form.
+        /** Modifies a value. Typically used to convert a form element value to its canonical form.
             
             Attributes:
                 id:string The ideally unique ID for this value processor.
-                runForDefault:boolean Indicates this processor should be run 
-                    for default form values. Defaults to true.
-                runForRollback:boolean Indicates this processor should be run 
-                    for rollback form values. Defaults to true.
-                runForCurrent:boolean Indicates this processor should be run 
-                    for current form values. Defaults to true.
+                runForDefault:boolean Indicates this processor should be run for default form 
+                    values. Defaults to true.
+                runForRollback:boolean Indicates this processor should be run for rollback form 
+                    values. Defaults to true.
+                runForCurrent:boolean Indicates this processor should be run for current form 
+                    values. Defaults to true.
             
             @class */
         ValueProcessor = pkg.ValueProcessor = new JSClass('ValueProcessor', {
             // Constructor /////////////////////////////////////////////////////
             /** Creates a new ValueProcessor
-                @param {string} id - The ideally unique ID for a processor 
-                    instance.
+                @param {string} id - The ideally unique ID for a processor instance.
                 @param {boolean} [runForDefault]
                 @param {boolean} [runForRollback]
                 @param {boolean} [runForCurrent]
@@ -142,24 +137,22 @@
             
             
             // Methods /////////////////////////////////////////////////////////
-            /** Processes the value. The default implementation returns the 
-                value unmodified.
+            /** Processes the value. The default implementation returns the value unmodified.
                 @param {*} value - The value to modify.
                 @returns {*} - The modified value. */
             process: value => value
         }),
         
-        /** Converts values to a Number if possible. If the value becomes NaN
-            the original value is returned.
+        /** Converts values to a Number if possible. If the value becomes NaN the original value 
+            is returned.
             
             @class */
         ToNumberValueProcessor = pkg.ToNumberValueProcessor = new JSClass('ToNumberValueProcessor', ValueProcessor, {
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.ValueProcessor */
             process: value => {
-                // Don't convert "empty" values to a number since they'll 
-                // become zero which is probably incorrect. Also catch 
-                // undefined/null values since they will become NaN.
+                // Don't convert "empty" values to a number since they'll become zero which is 
+                // probably incorrect. Also catch undefined/null values since they will become NaN.
                 if (value == null || value === '' || value === '-') return value;
                 
                 const numericValue = Number(value);
@@ -170,22 +163,19 @@
         /** Trims the whitespace from a value.
             
             Attributes:
-                trim:string Determines what kind of trimming to do. Supported 
-                    values are 'left', 'right' and 'both'. The default value 
-                    is 'both'.
+                trim:string Determines what kind of trimming to do. Supported values are 'left', 
+                    'right' and 'both'. The default value is 'both'.
             
             @class */
         TrimValueProcessor = pkg.TrimValueProcessor = new JSClass('TrimValueProcessor', ValueProcessor, {
             // Constructor /////////////////////////////////////////////////////
             /** @overrides myt.ValueProcessor
-                @param {string} id - The ideally unique ID for a processor 
-                    instance.
+                @param {string} id - The ideally unique ID for a processor instance.
                 @param {boolean} [runForDefault]
                 @param {boolean} [runForRollback]
                 @param {boolean} [runForCurrent]
-                @param trim:string Determines the type of trimming to do. 
-                    Allowed values are 'left', 'right' or 'both'. The default 
-                    value is 'both'.
+                @param trim:string Determines the type of trimming to do. Allowed values are 'left',
+                    'right' or 'both'. The default value is 'both'.
                 @returns {undefined} */
             initialize: function(id, runForDefault, runForRollback, runForCurrent, trim) {
                 this.callSuper(id, runForDefault, runForRollback, runForCurrent);
@@ -214,20 +204,17 @@
         /** Converts undefined values to a default value.
             
             Attributes:
-                defaultValue:* The value to return when the processed value 
-                    is undefined.
+                defaultValue:* The value to return when the processed value is undefined.
             
             @class */
         UndefinedValueProcessor = pkg.UndefinedValueProcessor = new JSClass('UndefinedValueProcessor', ValueProcessor, {
             // Constructor /////////////////////////////////////////////////////
             /** @overrides myt.ValueProcessor
-                @param {string} id - The ideally unique ID for a processor 
-                    instance.
+                @param {string} id - The ideally unique ID for a processor instance.
                 @param {boolean} [runForDefault]
                 @param {boolean} [runForRollback]
                 @param {boolean} [runForCurrent]
-                @param {*} [defaultValue] - The default value to convert 
-                    undefined to.
+                @param {*} [defaultValue] - The default value to convert undefined to.
                 @returns {undefined} */
             initialize: function(id, runForDefault, runForRollback, runForCurrent, defaultValue) {
                 this.callSuper(id, runForDefault, runForRollback, runForCurrent);
@@ -243,33 +230,28 @@
             }
         }),
         
-        /** Provides "form" functionality to a node. Forms can be nested to 
-            build up larger forms from one or more subforms.
+        /** Provides "form" functionality to a node. Forms can be nested to build up larger forms 
+            from one or more subforms.
             
             Events:
                 isValid:boolean Fired when the form changes validity.
-                isChanged:boolean Fired when the form becomes changed
-                    or unchanged.
+                isChanged:boolean Fired when the form becomes changed or unchanged.
             
             Attributes:
-                id:string The unique ID for this form relative to its 
-                    parent form.
+                id:string The unique ID for this form relative to its parent form.
                 form:myt.Form A reference to the parent form if it exists.
-                errorMessages:array A list of error messages that occurred 
-                    during the last execution of doValidation.
-                isValid:boolean Indicates if the data in this form is 
-                    valid or not.
-                isChanged:boolean Indicates if the data in this form is 
-                    different from the rollback value or not.
+                errorMessages:array A list of error messages that occurred during the last 
+                    execution of doValidation.
+                isValid:boolean Indicates if the data in this form is valid or not.
+                isChanged:boolean Indicates if the data in this form is different from the 
+                    rollback value or not.
             
             Private Attributes:
-                _lockCascade:boolean Prevents changes to "isChanged" and 
-                    "isValid" from cascading upwards to the parent form. Used 
-                    during reset and rollback.
+                _lockCascade:boolean Prevents changes to "isChanged" and "isValid" from cascading 
+                    upwards to the parent form. Used during reset and rollback.
                 __sf:object A map of child forms/elements by ID.
-                __acc:object A map of method references by accelerator 
-                    identifier. The values will be function references. An 
-                    intended use of these is to submit or cancel a form 
+                __acc:object A map of method references by accelerator identifier. The values will 
+                    be function references. An intended use of these is to submit or cancel a form 
                     by keystroke.
                 __v:array A list of validators to apply to this form.
             
@@ -337,9 +319,8 @@
             },
             
             setIsValid: function(v) {
-                // Don't abort when value hasn't changed. The reason this form 
-                // is invalid may have changed so we want an event to fire so 
-                // any new error messages can be shown.
+                // Don't abort when value hasn't changed. The reason this form is invalid may have 
+                // changed so we want an event to fire so any new error messages can be shown.
                 this.isValid = v;
                 if (this.inited) this.fireEvent('isValid', v);
                 
@@ -370,8 +351,8 @@
             },
             
             /** Allows bulk setting of validators.
-                @param validators:array An array of myt.Validator instances or
-                    IDs of validators from the myt.global.validators registry.
+                @param validators:array An array of myt.Validator instances or IDs of validators 
+                    from the myt.global.validators registry.
                 @returns {undefined} */
             setValidators: function(validators) {
                 let i = validators.length;
@@ -386,9 +367,9 @@
                 this.__v = validators;
             },
             
-            /** Gets the value of this form. For a form this will be a map of
-                all the subform values by ID. Form elements should override 
-                this to return an element specific value.
+            /** Gets the value of this form. For a form this will be a map of all the subform 
+                values by ID. Form elements should override this to return an element 
+                specific value.
                 @returns object */
             getValue: function() {
                 // Allow for superclass to have custom getValue behavior.
@@ -403,9 +384,9 @@
                 return retval;
             },
             
-            /** Sets the value of this form. For a form the value should be a 
-                map containing values for each of the subform elements. The 
-                entries in the map will be applied to each of the subforms.
+            /** Sets the value of this form. For a form the value should be a map containing values 
+                for each of the subform elements. The entries in the map will be applied to each of 
+                the subforms.
                 @param value:object the value to set.
                 @returns the value that was actually set. */
             setValue: function(value) {
@@ -430,10 +411,9 @@
                 return value;
             },
             
-            /** Gets the default value of this form. For a form this will be 
-                a map of all the subform default values by ID. Form elements 
-                should override this to return an element specific default 
-                value.
+            /** Gets the default value of this form. For a form this will be a map of all the 
+                subform default values by ID. Form elements should override this to return an 
+                element specific default value.
                 @returns object */
             getDefaultValue: function() {
                 const retval = {};
@@ -442,10 +422,9 @@
                 return retval;
             },
             
-            /** Sets the default value of this form. For a form the value 
-                should be a map containing default values for each of the 
-                subform elements. The entries in the map will be applied to 
-                each of the subforms.
+            /** Sets the default value of this form. For a form the value should be a map 
+                containing default values for each of the subform elements. The entries in the map 
+                will be applied to each of the subforms.
                 @param value:object the value to set.
                 @returns the value that was actually set. */
             setDefaultValue: function(value) {
@@ -462,10 +441,9 @@
                 return value;
             },
             
-            /** Gets the rollback value of this form. For a form this will 
-                be a map of all the subform rollback values by ID. Form 
-                elements should override this to return an element specific 
-                rollback value.
+            /** Gets the rollback value of this form. For a form this will be a map of all the 
+                subform rollback values by ID. Form elements should override this to return an 
+                element specific rollback value.
                 @returns object */
             getRollbackValue: function() {
                 const retval = {}, 
@@ -474,10 +452,9 @@
                 return retval;
             },
             
-            /** Sets the rollback value of this form. For a form the value 
-                should be a map containing rollback values for each of the 
-                subform elements. The entries in the map will be applied to 
-                each of the subforms.
+            /** Sets the rollback value of this form. For a form the value should be a map 
+                containing rollback values for each of the subform elements. The entries in the 
+                map will be applied to each of the subforms.
                 @param value:object the value to set.
                 @returns the value that was actually set. */
             setRollbackValue: function(value) {
@@ -498,8 +475,7 @@
             // Methods /////////////////////////////////////////////////////////
             /** Add an accelerator to this form.
                 @param id:string the ID for the accelerator.
-                @param func:function the function to call when the accelerator 
-                    is invoked.
+                @param func:function the function to call when the accelerator is invoked.
                 @returns {undefined} */
             addAccelerator: function(id, func) {
                 this.__acc[id] = func;
@@ -530,8 +506,7 @@
             
             /** Removes a validator from this form.
                 @param id:string The ID of the validator to remove.
-                @returns the removed myt.Validator or undefined 
-                    if not found. */
+                @returns the removed myt.Validator or undefined if not found. */
             removeValidator: function(id) {
                 if (id) {
                     const validators = this.__v;
@@ -613,7 +588,7 @@
                 @returns array of error messages strings. */
             getAllErrorMessages: function() {
                 const subForms = this.__sf;
-                let msgs = (this.errorMessages || []).slice();
+                let msgs = (this.errorMessages ?? []).slice();
                 for (const id in subForms) msgs = msgs.concat(subForms[id].getAllErrorMessages());
                 return msgs;
             },
@@ -624,13 +599,11 @@
                 this.setIsValid(false);
             },
             
-            /** Tests if this form is valid or not and updates the isValid 
-                attribute if necessary. Allows upwards cascade of validity.
-                @param subformToIgnore:myt.Form (optional) A subform that will 
-                    not be checked for validity. This is typically the subform 
-                    that is invoking this method.
-                @returns boolean true if this form is valid, 
-                    false otherwise. */
+            /** Tests if this form is valid or not and updates the isValid attribute if necessary. 
+                Allows upwards cascade of validity.
+                @param subformToIgnore:myt.Form (optional) A subform that will not be checked for 
+                    validity. This is typically the subform that is invoking this method.
+                @returns boolean true if this form is valid, false otherwise. */
             verifyValidState: function(subformToIgnore) {
                 const subForms = this.__sf;
                 let isValid = true;
@@ -641,12 +614,10 @@
                 return applyValidation(this, isValid);
             },
             
-            /** Tests if this form is valid or not. Performs a top down 
-                validation check across the entire form tree. Does not allow 
-                upwards cascade of validity check since this is intended to be 
-                a top down check.
-                @returns boolean true if this form is valid, 
-                    false otherwise. */
+            /** Tests if this form is valid or not. Performs a top down validation check across 
+                the entire form tree. Does not allow upwards cascade of validity check since this 
+                is intended to be a top down check.
+                @returns boolean true if this form is valid, false otherwise. */
             doValidation: function() {
                 const subForms = this.__sf;
                 let isValid = true;
@@ -659,8 +630,7 @@
                 return isValid;
             },
             
-            /** Called whenever a value changes for the form or any subform 
-                therein.
+            /** Called whenever a value changes for the form or any subform therein.
                 @param sourceForm:myt.Form the form that had a value change.
                 @returns {undefined} */
             notifyValueChanged: function(sourceForm) {
@@ -673,13 +643,11 @@
                 this.setIsChanged(true);
             },
             
-            /** Tests if this form is changed or not and updates the isChanged 
-                attribute if necessary. Allows upwards cascade of changed state.
-                @param subformToIgnore:myt.Form (optional) A subform that will 
-                    not be checked for changed state. This is typically the 
-                    subform that is invoking this method.
-                @returns boolean true if this form is changed, 
-                    false otherwise. */
+            /** Tests if this form is changed or not and updates the isChanged attribute if 
+                necessary. Allows upwards cascade of changed state.
+                @param subformToIgnore:myt.Form (optional) A subform that will not be checked for 
+                    changed state. This is typically the subform that is invoking this method.
+                @returns boolean true if this form is changed, false otherwise. */
             verifyChangedState: function(subformToIgnore) {
                 const subForms = this.__sf;
                 let isChanged = false;
@@ -741,10 +709,9 @@
                 this._lockCascade = false;
             },
             
-            /** Gets the changed values of this form. For a form this will be 
-                a map of all the subform values by ID that are in the "changed" 
-                state. Form elements should override this to return an element 
-                specific value.
+            /** Gets the changed values of this form. For a form this will be a map of all the 
+                subform values by ID that are in the "changed" state. Form elements should override 
+                this to return an element specific value.
                 @returns object */
             getChangedValue: function() {
                 const retval = {}, 
@@ -770,9 +737,8 @@
                 defaultValue:* The default value of the form element.
             
             Private Attributes:
-                __vp:array A list of myt.ValueProcessors that get applied 
-                    to a value whenever it is retrieved via the methods: 
-                    getValue, getRollbackValue or getDefaultValue.
+                __vp:array A list of myt.ValueProcessors that get applied to a value whenever it is 
+                    retrieved via the methods: getValue, getRollbackValue or getDefaultValue.
             
             @class */
         FormElement = pkg.FormElement = new JSModule('FormElement', {
@@ -835,9 +801,8 @@
             },
             
             /** Allows bulk setting of ValueProcessors.
-                @param processors:array An array of myt.ValueProcessor 
-                    instances or IDs of value processors from the 
-                    myt.global.valueProcessors registry.
+                @param processors:array An array of myt.ValueProcessor instances or IDs of value 
+                    processors from the myt.global.valueProcessors registry.
                 @returns {undefined} */
             setValueProcessors: function(processors) {
                 let i = processors.length;
@@ -863,8 +828,7 @@
             
             /** Removes a ValueProcessor from this form element.
                 @param id:string the ID of the processor to remove.
-                @returns the removed myt.ValueProcessor or undefined 
-                    if not found. */
+                @returns the removed myt.ValueProcessor or undefined if not found. */
             removeValueProcessor: function(id) {
                 if (id) {
                     const processors = this.__vp;
@@ -905,9 +869,8 @@
             setup: function(defaultValue, rollbackValue, value) {
                 this._lockCascade = true;
                 
-                // Reset values to uninitialized state to make repeated calls 
-                // to setup behave identically. Otherwise values could 
-                // bleed through.
+                // Reset values to uninitialized state to make repeated calls to setup behave 
+                // identically. Otherwise values could bleed through.
                 this.defaultValue = undefined;
                 this.rollbackValue = undefined;
                 this.value = undefined;
@@ -963,30 +926,25 @@
         /** Provides common functionality for text related form elements.
             
             Accelerators:
-                accept: Invokes the doAccept function. Activated upon key down 
-                    of the ENTER key.
-                reject: Invokes the doReject function. Activated upon key up 
-                    of the ESC key.
+                accept: Invokes the doAccept function. Activated upon key down of the ENTER key.
+                reject: Invokes the doReject function. Activated upon key up of the ESC key.
             
             Attributes:
-                errorColor:color_string The color to use when a validation 
-                    error exists. Defaults to '#f99'.
-                actionRequiredColor:color_string The color to use when a 
-                    validation error exists but the user has not modified the 
-                    value. Defaults to '#966'.
-                normalColor:color_string The color to use when no validation 
-                    error exists. Defaults to '#999'.
+                errorColor:color_string The color to use when a validation error exists. Defaults 
+                    to '#f99'.
+                actionRequiredColor:color_string The color to use when a validation error exists 
+                    but the user has not modified the value. Defaults to '#966'.
+                normalColor:color_string The color to use when no validation error exists. 
+                    Defaults to '#999'.
                 validateWhen:string Indicates when to run validation.
                     Supported values are:
                         key: Validate as the user types.
                         blur: Validate when blurring out of the UI control
-                        blurWithKeyFix: The same as blur except we also 
-                            validate as the user types if currently invalid.
-                        none: Don't do any validation when interacting with 
-                            the field.
+                        blurWithKeyFix: The same as blur except we also validate as the user types 
+                            if currently invalid.
+                        none: Don't do any validation when interacting with the field.
                     The default value is 'key'.
-                acceleratorScope:string The scope the accelerators will be 
-                    applied to.
+                acceleratorScope:string The scope the accelerators will be applied to.
                     Supported values are:
                         element: Take action on this element only
                         root: Take action on the root form.
@@ -1009,10 +967,9 @@
                 self.actionRequiredColor = '#966';
                 self.normalColor = '#999';
                 
-                defAttr(attrs, 'bgColor', '#fff');
-                defAttr(attrs, 'borderWidth', 1);
-                defAttr(attrs, 'borderStyle', 'solid');
-                defAttr(attrs, 'borderStyle', true);
+                attrs.bgColor ??= '#fff';
+                attrs.borderWidth ??= 1;
+                attrs.borderStyle ??= 'solid';
                 
                 self.callSuper(parent, attrs);
                 
@@ -1123,8 +1080,8 @@
     /** Provides additional common functionality for a root level form.
         
         Accelerators:
-            submit: Invokes the doSubmit function which in turn may invoke the
-                doValidSubmit or doInvalidSubmit function.
+            submit: Invokes the doSubmit function which in turn may invoke the doValidSubmit or 
+                doInvalidSubmit function.
             cancel: Invokes the doCancel function.
         
         @class */
@@ -1355,8 +1312,8 @@
     /** An myt.InputSelect that is also a FormElement.
         
         Private Attributes:
-            __abortSetValue:boolean Prevents setValue from being called again
-                when performing operations from within setValue.
+            __abortSetValue:boolean Prevents setValue from being called again when performing 
+                operations from within setValue.
         
         @class */
     pkg.FormInputSelect = new JSClass('FormInputSelect', pkg.InputSelect, {
@@ -1431,12 +1388,11 @@
         }
     });
     
-    /** Pulls the current value from another form field if the provided value
-        is undefined, null or empty string.
+    /** Pulls the current value from another form field if the provided value is undefined, null 
+        or empty string.
         
         Attributes:
-            otherField:myt.FormElement The form element to pull the current 
-                value from.
+            otherField:myt.FormElement The form element to pull the current value from.
         
         @class */
     pkg.UseOtherFieldIfEmptyValueProcessor = new JSClass('UseOtherFieldIfEmptyValueProcessor', ValueProcessor, {
@@ -1446,8 +1402,7 @@
             @param {boolean} [runForDefault]
             @param {boolean} [runForRollback]
             @param {boolean} [runForCurrent]
-            @param {!Object} [otherField] - The myt.FormElement to pull the 
-                value from.
+            @param {!Object} [otherField] - The myt.FormElement to pull the value from.
             @returns {undefined} */
         initialize: function(id, runForDefault, runForRollback, runForCurrent, otherField) {
             this.callSuper(id, runForDefault, runForRollback, runForCurrent);
@@ -1463,8 +1418,7 @@
         }
     });
     
-    /** Stores myt.ValueProcessors by ID so they can be used in multiple
-        places easily. */
+    /** Stores myt.ValueProcessors by ID so they can be used in multiple places easily. */
     new JS.Singleton('GlobalValueProcessorRegistry', {
         // Life Cycle //////////////////////////////////////////////////////////
         initialize: function() {

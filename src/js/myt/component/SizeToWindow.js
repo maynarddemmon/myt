@@ -2,8 +2,6 @@
     const JSModule = JS.Module,
         GlobalWindowResize = pkg.global.windowResize,
         
-        defAttr = pkg.AccessorSupport.defAttr,
-        
         handleResize = sizeToWindow => {
             const dim = sizeToWindow.resizeDimension;
             if (dim === 'both' || dim === 'width') sizeToWindow.setWidth(Math.max(sizeToWindow.minWidth, GlobalWindowResize.getWidth()));
@@ -13,13 +11,12 @@
         /** A mixin that sizes a RootView to the window width, height or both.
             
             Attributes:
-                resizeDimension:string The dimension to resize in. 
-                    Supported values are 'width', 'height' and 'both'. 
-                    Defaults to 'both'.
-                minWidth:number the minimum width below which this view 
-                    will not resize its width. Defaults to 0.
-                minWidth:number the minimum height below which this view 
-                    will not resize its height. Defaults to 0.
+                resizeDimension:string The dimension to resize in. Supported values are 'width', 
+                    'height' and 'both'. Defaults to 'both'.
+                minWidth:number the minimum width below which this view will not resize its width. 
+                    Defaults to 0.
+                minWidth:number the minimum height below which this view will not resize its 
+                    height. Defaults to 0.
             
             @class */
         SizeToWindow = pkg.SizeToWindow = new JSModule('SizeToWindow', {
@@ -30,7 +27,7 @@
             /** @overrides */
             initNode: function(parent, attrs) {
                 this.minWidth = this.minHeight = 0;
-                defAttr(attrs, 'resizeDimension', 'both');
+                attrs.resizeDimension ??= 'both';
                 
                 this.attachTo(GlobalWindowResize, '__hndlResize', 'resize');
                 this.callSuper(parent, attrs);
@@ -79,7 +76,7 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.SizeToWindow */
         initNode: function(parent, attrs) {
-            defAttr(attrs, 'resizeDimension', 'width');
+            attrs.resizeDimension ??= 'width';
             this.callSuper(parent, attrs);
         }
     });
@@ -94,7 +91,7 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.SizeToWindow */
         initNode: function(parent, attrs) {
-            defAttr(attrs, 'resizeDimension', 'height');
+            attrs.resizeDimension ??= 'height';
             this.callSuper(parent, attrs);
         }
     });

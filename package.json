@@ -5,7 +5,7 @@
     "description": "The myt UI framework.",
     "license": "MIT",
     "dependencies": {
-        "google-closure-compiler": "^20220405.0.0"
+        "google-closure-compiler": "^20230502.0.0"
     },
     "scripts": {
         "build-loader": "./bin/build bin/loader-browser-manifest.js dist/loader-browser.js ./src true true JS && rm ./dist/loader-browser.js && stat -f%z ./dist/loader-browser.min.js",

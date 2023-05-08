@@ -9,8 +9,6 @@
         
         View = pkg.View,
         
-        defAttr = pkg.AccessorSupport.defAttr,
-        
         SliderThumb = new JSClass('SliderThumb', pkg.SimpleButton, {
             include: [pkg.Draggable],
             
@@ -117,20 +115,18 @@
         /** A base class for slider components.
             
             Attributes:
-                axis:string Indicates the direction the slider moves in. 
-                    Allowed values are 'x' and 'y'. Defaults to 'x'.
-                trackInset:number the number of pixels to inset the start of 
-                    the track from the top/left edge of the component. 
-                    Defaults to 0.
-                trackOutset:number the number of pixels to inset the end of 
-                    the track from the bottom/right edge of the component. 
-                    Default to 0.
+                axis:string Indicates the direction the slider moves in. Allowed values are 'x' 
+                    and 'y'. Defaults to 'x'.
+                trackInset:number the number of pixels to inset the start of the track from the 
+                    top/left edge of the component. Defaults to 0.
+                trackOutset:number the number of pixels to inset the end of the track from the 
+                    bottom/right edge of the component. Default to 0.
                 thumbWidth:number The width of the thumb.
                 thumbHeight:number The height of the thumb.
-                thumbOffset:number The x/y offset of the thumb. Will applied to 
-                    the opposite dimension to the axis.
-                nudgeAmount:number the amount to nudge the value when the 
-                    arrows keys are invoked. Defaults to 1.
+                thumbOffset:number The x/y offset of the thumb. Will applied to the opposite 
+                    dimension to the axis.
+                nudgeAmount:number the amount to nudge the value when the arrows keys are invoked. 
+                    Defaults to 1.
             
             Private Attributes:
                 __lockSync:boolean Used internally to prevent infinite loops.
@@ -143,22 +139,22 @@
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides myt.View */
             initNode: function(parent, attrs) {
-                defAttr(attrs, 'axis', 'x');
+                attrs.axis ??= 'x';
                 if (attrs.axis === 'x') {
-                    defAttr(attrs, 'width', 100);
-                    defAttr(attrs, 'height', 18);
+                    attrs.width ??= 100;
+                    attrs.height ??= 18;
                 } else {
-                    defAttr(attrs, 'width', 18);
-                    defAttr(attrs, 'height', 100);
+                    attrs.width ??= 18;
+                    attrs.height ??= 100;
                 }
-                defAttr(attrs, 'bgColor', '#999');
-                defAttr(attrs, 'roundedCorners', 9);
-                defAttr(attrs, 'trackInset', 9);
-                defAttr(attrs, 'trackOutset', 9);
-                defAttr(attrs, 'thumbWidth', 16);
-                defAttr(attrs, 'thumbHeight', 16);
-                defAttr(attrs, 'thumbOffset', 1);
-                defAttr(attrs, 'nudgeAmount', 1);
+                attrs.bgColor ??= '#999';
+                attrs.roundedCorners ??= 9;
+                attrs.trackInset ??= 9;
+                attrs.trackOutset ??= 9;
+                attrs.thumbWidth ??= 16;
+                attrs.thumbHeight ??= 16;
+                attrs.thumbOffset ??= 1;
+                attrs.nudgeAmount ??= 1;
                 
                 this.callSuper(parent, attrs);
             },
@@ -253,8 +249,7 @@
             }
         });
     
-    /** A slider component that supports two thumbs, a lower one and an
-        upper one.
+    /** A slider component that supports two thumbs, a lower one and an upper one.
         
         @class */
     pkg.RangeSlider = new JSClass('RangeSlider', BaseSlider, {
@@ -451,11 +446,11 @@
         initNode: function(parent, attrs) {
             const self = this;
             
-            defAttr(attrs, 'labelX', 8);
-            defAttr(attrs, 'labelY', 2);
-            defAttr(attrs, 'labelFontSize', '12px');
-            defAttr(attrs, 'labelColor', '#000');
-            defAttr(attrs, 'flipThreshold', math.round((attrs.maxValue - attrs.minValue) / 2) || 0);
+            attrs.labelX ??= 8;
+            attrs.labelY ??= 2;
+            attrs.labelFontSize ??= '12px';
+            attrs.labelColor ??= '#000';
+            attrs.flipThreshold ??= math.round((attrs.maxValue - attrs.minValue) / 2) || 0;
             
             self.quickSet(['labelX','labelY','labelFontSize','labelColor','flipThreshold'], attrs);
             

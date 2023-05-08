@@ -21,7 +21,7 @@
   * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   * THE SOFTWARE
   */
-Date.prototype.format = Date.prototype.format || (() => {
+Date.prototype.format = Date.prototype.format ?? (() => {
     const math = Math,
         mathAbs = math.abs,
         mathFloor = math.floor,

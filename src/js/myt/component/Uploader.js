@@ -99,12 +99,11 @@
                 }
             },
             
-            /** Provides an opportunity to prevent a file from being handled. 
-                The default implementation returns the provided file argument.
+            /** Provides an opportunity to prevent a file from being handled. The default 
+                implementation returns the provided file argument.
                 @param file:File the file to be checked for handleability.
-                @returns file:File the file to be handled (possibly modified 
-                    by this function) or something falsy if the file should 
-                    not be handled. */
+                @returns file:File the file to be handled (possibly modified by this function) or 
+                    something falsy if the file should not be handled. */
             filterFiles: file => file,
             
             /** @param {!Object} file
@@ -122,8 +121,8 @@
             
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                /** The attribute key used in a file to store the path for 
-                    the file on the server. */
+                /** The attribute key used in a file to store the path for the file on 
+                    the server. */
                 FILE_ATTR_SERVER_PATH: 'serverPath',
                 
                 readFile: (file, handlerFunc) => {
@@ -156,8 +155,8 @@
                 self.files = [];
                 
                 // Modify attrs so setter gets called.
-                self.defAttr(attrs, 'requestFileParam', 'file');
-                self.defAttr(attrs, 'maxFiles', -1);
+                attrs.requestFileParam ??= 'file';
+                attrs.maxFiles ??= -1;
                 
                 self.callSuper(parent, attrs);
                 
@@ -249,7 +248,7 @@
             },
             
             uploadFiles: function(url, fileParam) {
-                url = url || this.uploadUrl;
+                url ??= this.uploadUrl;
                 
                 const files = this.files;
                 let i = files.length;
@@ -261,9 +260,9 @@
             uploadFile: function(file, url, fileParam) {
                 const self = this,
                     formData = new FormData();
-                formData.append(fileParam || self.requestFileParam, file, file.name);
+                formData.append(fileParam ?? self.requestFileParam, file, file.name);
                 pkg.doFetch(
-                    url || self.uploadUrl,
+                    url ?? self.uploadUrl,
                     self.makeFetchOptionsForUpload(formData),
                     false,
                     data => {
@@ -284,8 +283,8 @@
                 pkg.dumpStack('Upload failure:' + error.status + ':' + error.message);
             },
             
-            /** Subclasses must implement this to extract the uploaded file path from
-                the response. By default this return null.
+            /** Subclasses must implement this to extract the uploaded file path from the response. 
+                By default this returns null.
                 @param {!Object} file
                 @param {!Object} data
                 @returns {undefined} */

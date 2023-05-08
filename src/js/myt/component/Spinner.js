@@ -4,8 +4,8 @@
             spinner[spinner.visible ? 'addDomClass' : 'removeDomClass']('mytCenterSpin');
         },
         
-        /*  Remove the border from the dom element width and height so that 
-            the spinner doesn't take up more space that the size. */
+        /*  Remove the border from the dom element width and height so that the spinner doesn't 
+            take up more space that the size. */
         updateSize = spinner => {
             const size = spinner.size,
                 ids = spinner.getIDS();
@@ -14,8 +14,8 @@
             ids.width = ids.height = (size - 2*spinner.borderWidth) + 'px';
         };
     
-    /** A spinner that uses the CSS border property and a CSS rotation 
-        animation to create the appearance of a spinner.
+    /** A spinner that uses the CSS border property and a CSS rotation animation to create the 
+        appearance of a spinner.
         
         Events:
             spinColor
@@ -33,12 +33,11 @@
             
             self.lateAttrs = ['spinColor'];
             
-            const defAttr = self.defAttr;
-            defAttr(attrs, 'visible', false);
-            defAttr(attrs, 'borderWidth', 5);
-            defAttr(attrs, 'borderColor', '#fff');
-            defAttr(attrs, 'borderStyle', 'solid');
-            defAttr(attrs, 'spinColor', '#000');
+            attrs.visible ??= false;
+            attrs.borderWidth ??= 5;
+            attrs.borderColor ??= '#fff';
+            attrs.borderStyle ??= 'solid';
+            attrs.spinColor ??= '#000';
             
             self.callSuper(parent, attrs);
             

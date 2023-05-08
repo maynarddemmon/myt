@@ -48,9 +48,8 @@
             
             // Methods /////////////////////////////////////////////////////////
             /** Connects the WebSocket to the currently configured URL.
-                @param {?Function} [afterOpenCallback] - This callback will be
-                    executed once after the connection is established and the 
-                    onOpen method has been called.
+                @param {?Function} [afterOpenCallback] - This callback will be executed once after 
+                    the connection is established and the onOpen method has been called.
                 @returns {undefined} */
             connect: function(afterOpenCallback) {
                 if (!this._ws && this.url) {
@@ -82,12 +81,10 @@
             
             /** Sends a message over the WebSocket.
                 @param {*} msg - The message to send.
-                @param {boolean} [doNotTryToConnect] - If falsy an attempt will
-                    be made to connect if the WebSocket is not currently 
-                    connected before sending the message.
-                @returns {boolean|undefined} Indicating if the message was sent
-                    or not. Undefined is returned when the connection has to 
-                    be opened before sending. */
+                @param {boolean} [doNotTryToConnect] - If falsy an attempt will be made to connect 
+                    if the WebSocket is not currently connected before sending the message.
+                @returns {boolean|undefined} Indicating if the message was sent or not. Undefined 
+                    is returned when the connection has to be opened before sending. */
             send: function(msg, doNotTryToConnect) {
                 const self = this,
                     ws = self._ws;
@@ -110,13 +107,13 @@
             },
             
             /** Attempts to close the connection.
-                @param code:number (optional) Should be a WebSocket 
-                    CloseEvent.code value. Defaults to 1000 CLOSE_NORMAL.
-                @param reason:string (optional) An explanation of why the 
-                    close is occurring. Defaults to "close".
+                @param code:number (optional) Should be a WebSocket CloseEvent.code value. Defaults 
+                    to 1000 CLOSE_NORMAL.
+                @param reason:string (optional) An explanation of why the close is occurring. 
+                    Defaults to "close".
                 @returns {undefined} */
             close: function(code, reason) {
-                if (this._ws) this._ws.close(code || CLOSE_NORMAL, reason || 'close');
+                if (this._ws) this._ws.close(code ?? CLOSE_NORMAL, reason ?? 'close');
             },
             
             /** Invoked when after the WebSocket is opened.
@@ -127,8 +124,7 @@
             },
             
             /** Invoked when an error occurs in the WebSocket.
-                @param {!Object} event -  The error event fired by the 
-                    WebSocket.
+                @param {!Object} event - The error event fired by the WebSocket.
                 @returns {undefined} */
             onError: function(event) {
                 console.error(event);
@@ -137,8 +133,7 @@
             },
             
             /** Invoked when a message is received over the WebSocket.
-                @param {!Object} event -  The message event fired by the 
-                    WebSocket.
+                @param {!Object} event - The message event fired by the WebSocket.
                 @returns msg:* The message received. */
             onMessage: function(event) {
                 let msg = event.data;
@@ -170,11 +165,10 @@
         makeMatcherFunction = matcher => {
             let matcherFunc;
             if (typeof matcher === 'string') {
-                // Use the provided string as an exact match function. We must
-                // generate a unique function for each string key (and reuse it)
-                // so that the === tests will work in the registerListener and
-                // unregisterListener functions.
-                matcherFunc = matcherFunctionsByKey[matcher] || (matcherFunctionsByKey[matcher] = type => type === matcher);
+                // Use the provided string as an exact match function. We must generate a unique 
+                // function for each string key (and reuse it) so that the === tests will work in 
+                // the registerListener and unregisterListener functions.
+                matcherFunc = matcherFunctionsByKey[matcher] ??= type => type === matcher;
             } else if (typeof matcher === 'function') {
                 matcherFunc = matcher;
             } else if (matcher == null) {
@@ -186,11 +180,9 @@
             return matcherFunc;
         };
     
-    /** A WebSocket where messages are JSON objects with the following
-        structure:
-            type:string The type of the message. This will allow registered 
-                listeners to be notified when a message they are interested 
-                in arrives.
+    /** A WebSocket where messages are JSON objects with the following structure:
+            type:string The type of the message. This will allow registered listeners to be 
+                notified when a message they are interested in arrives.
             msg:json The message payload.
             date:number The time in milliseconds when the message was sent.
         
@@ -200,22 +192,21 @@
         /** @overrides */
         initNode: function(parent, attrs) {
             this._listeners = [];
-            this.defAttr(attrs, 'protocols', 'typedMessage');
+            attrs.protocols ??= 'typedMessage';
             this.callSuper();
         },
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Registers a listener function that will get called for messages 
-            with a type that is matched by the provided matcher.
-            @param {?Function} listenerFunc The function that will get invoked. 
-                The message is provided as the sole argument to the function.
-            @param {string|?Function} matcher (optional) A matcher function 
-                that takes the type as the sole argument and must return true 
-                or false indicating if the type is matched or not. If a string 
-                is provided it will be converted into an exact match function. 
-                If not provided (or something falsy) is provided a promiscuous 
-                matcher function will be used.
+        /** Registers a listener function that will get called for messages with a type that is 
+            matched by the provided matcher.
+            @param {?Function} listenerFunc The function that will get invoked. The message is 
+                provided as the sole argument to the function.
+            @param {string|?Function} matcher (optional) A matcher function that takes the type as 
+                the sole argument and must return true or false indicating if the type is matched 
+                or not. If a string is provided it will be converted into an exact match function. 
+                If not provided (or something falsy) is provided a promiscuous matcher function 
+                will be used.
             @returns {undefined} */
         registerListener: function(listenerFunc, matcher) {
             if (listenerFunc) {
@@ -236,8 +227,7 @@
                             }
                             patternMatchers.push(matcherFunc);
                             
-                            // Prevent fall through to "add" below since we 
-                            // found a listener.
+                            // Prevent fall through to "add" below since we found a listener.
                             return;
                         }
                     }
@@ -293,12 +283,12 @@
             if (msg) return this.send(msg, doNotTryToConnect);
         },
         
-        /** Creates a new message to be sent. May be overridden by subclasses, 
-            but should not be used externally.
+        /** Creates a new message to be sent. May be overridden by subclasses, but should not be 
+            used externally.
             @param type:string The type of the message to send.
             @param msg:* The message value. Must be convertible to JSON.
-            @returns string The message to be sent or undefined if an
-                exception occurs during JSON.stringify. */
+            @returns string The message to be sent or undefined if an exception occurs during 
+                JSON.stringify. */
         createMessage: (type, msg) => {
             let jsonMsg;
             try {
@@ -309,7 +299,7 @@
             }
             
             return {
-                type:type || '',
+                type:type ?? '',
                 msg:jsonMsg,
                 date:Date.now()
             };

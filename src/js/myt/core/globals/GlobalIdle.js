@@ -37,7 +37,7 @@
             for (let i = 0; i < vendors.length && !win.requestAnimationFrame;) {
                 const vendor = vendors[i++];
                 win.requestAnimationFrame = win[vendor + 'RequestAnimationFrame'];
-                win.cancelAnimationFrame = win[vendor + 'CancelAnimationFrame'] || win[vendor + 'CancelRequestAnimationFrame'];
+                win.cancelAnimationFrame = win[vendor + 'CancelAnimationFrame'] ?? win[vendor + 'CancelRequestAnimationFrame'];
             }
             
             // Setup callback function

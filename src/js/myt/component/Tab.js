@@ -1,6 +1,5 @@
 (pkg => {
-    const defAttr = pkg.AccessorSupport.defAttr,
-        
+    const 
         updateTextColor = tab => {
             tab.textView.setTextColor(tab.selected ? tab.labelTextSelectedColor : tab.labelTextColor);
         },
@@ -22,18 +21,16 @@
                 myt.Activateable
             
             Attributes:
-                tabId:string The unique ID of this tab relative to its tab 
-                    container.
-                tabContainer:myt.TabContainer The tab container that manages 
-                    this tab.
+                tabId:string The unique ID of this tab relative to its tab container.
+                tabContainer:myt.TabContainer The tab container that manages this tab.
                 edgeColor:color
                 edgeSize:number
                 selectedColor:color
                 
-                labelTextColorSelected:color The color to use for the label 
-                    text when this tab is selected.
-                cornerRadius:number Passed into the drawing config to determine
-                    if a rounded corner is drawn or not. Defaults to 6.
+                labelTextColorSelected:color The color to use for the label text when this tab 
+                    is selected.
+                cornerRadius:number Passed into the drawing config to determine if a rounded corner 
+                    is drawn or not. Defaults to 6.
             
             @class */
         Tab = pkg.Tab = new JS.Class('Tab', pkg.SimpleTextButton, {
@@ -50,10 +47,10 @@
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
                 if (attrs.tabId == null) attrs.tabId = pkg.generateGuid();
-                defAttr(attrs, 'tabContainer', parent);
                 
-                // Selection must be done via the select method on 
-                // the tabContainer
+                attrs.tabContainer ??= parent;
+                
+                // Selection must be done via the select method on the tabContainer
                 let initiallySelected;
                 if (attrs.selected) {
                     initiallySelected = true;
@@ -61,20 +58,20 @@
                 }
                 
                 // myt.SimpleTextButton
-                defAttr(attrs, 'inset', Tab.INSET);
-                defAttr(attrs, 'outset', Tab.OUTSET);
+                attrs.inset ??= Tab.INSET;
+                attrs.outset ??= Tab.OUTSET;
                 
                 // myt.Tab
-                defAttr(attrs, 'selectedColor', '#fff');
-                defAttr(attrs, 'hoverColor', '#eee');
-                defAttr(attrs, 'activeColor', '#aaa');
-                defAttr(attrs, 'readyColor', '#ccc');
-                defAttr(attrs, 'labelTextSelectedColor', '#333');
+                attrs.selectedColor ??= '#fff';
+                attrs.hoverColor ??= '#eee';
+                attrs.activeColor ??= '#aaa';
+                attrs.readyColor ??= '#ccc';
+                attrs.labelTextSelectedColor ??= '#333';
                 
                 // Other
-                defAttr(attrs, 'height', 24);
-                defAttr(attrs, 'focusIndicator', false);
-                defAttr(attrs, 'cornerRadius', 6);
+                attrs.height ??= 24;
+                attrs.focusIndicator ??= false;
+                attrs.cornerRadius ??= 6;
                 
                 this.callSuper(parent, attrs);
                 
@@ -127,9 +124,8 @@
             
             Attributes:
                 layout:myt.SpacedLayout The layout for the tabs.
-                location:string The location of the tabs relative to the 
-                    container. Supported values are: 'top', 'bottom', 'left' 
-                    and 'right'. Defaults to 'top'.
+                location:string The location of the tabs relative to the container. Supported 
+                    values are: 'top', 'bottom', 'left' and 'right'. Defaults to 'top'.
                 spacing:number The spacing between tabs. Defaults to 1.
                 inset:number The inset for the layout. Defaults to 0.
             
@@ -149,11 +145,11 @@
             initNode: function(parent, attrs) {
                 this.__tabs = [];
                 
-                defAttr(attrs, 'spacing', TabContainer.SPACING);
-                defAttr(attrs, 'inset', TabContainer.INSET);
-                defAttr(attrs, 'location', 'top');
-                defAttr(attrs, 'itemSelectionId', 'tabId');
-                defAttr(attrs, 'maxSelected', 1);
+                attrs.spacing ??= TabContainer.SPACING;
+                attrs.inset ??= TabContainer.INSET;
+                attrs.location ??= 'top';
+                attrs.itemSelectionId ??= 'tabId';
+                attrs.maxSelected ??= 1;
                 
                 this.callSuper(parent, attrs);
                 

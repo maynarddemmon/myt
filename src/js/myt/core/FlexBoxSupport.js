@@ -52,19 +52,20 @@
                 wrap:string
                     Supported values: "nowrap", "wrap", "wrapReverse".
                 justifyContent:string
-                    Supported values: "start", "end", "center", "spaceBetween", "spaceAround", "spaceEvenly".
+                    Supported values: "start", "end", "center", "spaceBetween", "spaceAround", 
+                    "spaceEvenly".
                 alignItems:string
                     Supported values: "start", "end", "center", "stretch".
                 alignContent:string
-                    Supported values: "start", "end", "center", "spaceBetween", "spaceAround", "spaceEvenly", "stretch"
+                    Supported values: "start", "end", "center", "spaceBetween", "spaceAround", 
+                    "spaceEvenly", "stretch"
                 rowGap:number
                 columnGap:number
                 
             Private Attributes:
                 __flexboxPaused:boolean - Used to prevent flexbox layout updates
                     from occuring.
-                __isUpdatingFlexboxLayout:boolean - Prevents infinite loops in
-                    the layout function.
+                __isUpdatingFlexboxLayout:boolean - Prevents infinite loops in the layout function.
             
             @class */
         FlexboxSupport = pkg.FlexboxSupport = new JSModule('FlexboxSupport', {
@@ -205,7 +206,8 @@
                         
                         if (direction.endsWith('Reverse')) children.reverse();
                         
-                        // Basic Flow: break up the basic flow into an array of items that fit within the mainFlexboxSize.
+                        // Basic Flow: break up the basic flow into an array of items that fit 
+                        // within the mainFlexboxSize.
                         let pos = 0,
                             maxPos = 0,
                             crossPos = 0,
@@ -223,7 +225,8 @@
                                 // We can only make new flows if we're wrapping
                                 !noWrap && 
                                 
-                                // The current flow must have at least 1 item before we will make a new flow.
+                                // The current flow must have at least 1 item before we will make 
+                                // a new flow.
                                 currentFlow.items.length > 0 &&
                                 
                                 // If the next child would overflow then make a new flow
@@ -353,7 +356,8 @@
                                     const amountPerGrow = extraSize / flow.growCount;
                                     let growAmountTotal = 0;
                                     items.forEach(item => {
-                                        // Shift items as we go so we don't have to loop over the items again.
+                                        // Shift items as we go so we don't have to loop over the 
+                                        // items again.
                                         if (growAmountTotal > 0) adjustPositionAttrOnChild(item, isRowDirection, growAmountTotal);
                                         
                                         const growAmount = item.getGrow() * amountPerGrow;
@@ -379,12 +383,13 @@
                                             adjustListOfViews(items, isRowDirection, extraSize / 2, false);
                                             break;
                                         case 'spaceBetween':
-                                            // Equal space between each item and flush to the edges. No need
-                                            // to adjust if there is only 1 item.
+                                            // Equal space between each item and flush to the edges. 
+                                            // No need to adjust if there is only 1 item.
                                             if (itemLen > 1) adjustListOfViews(items, isRowDirection, extraSize / (itemLen - 1), true, 1);
                                             break;
                                         case 'spaceAround':
-                                            // Equal Space between each item and half space at the edges.
+                                            // Equal Space between each item and half space at 
+                                            // the edges.
                                             if (extraSize <= mainGap) {
                                                 // Effectively just center it.
                                                 adjustListOfViews(items, isRowDirection, extraSize / 2, false);
@@ -414,7 +419,8 @@
                                 let shrinkAmountTotal = 0;
                                 // See: https://www.madebymike.com.au/writing/understanding-flexbox/ for math
                                 items.forEach(item => {
-                                    // Shift items as we go so we don't have to loop over the items again.
+                                    // Shift items as we go so we don't have to loop over the 
+                                    // items again.
                                     if (shrinkAmountTotal < 0) adjustPositionAttrOnChild(item, isRowDirection, shrinkAmountTotal);
                                     
                                     const shrinkAmount = (item.getShrink() * getChildBasisSize(item, isRowDirection) / shrinkBasis) * mathMax(extraSize, -shrinkBasis);
@@ -480,25 +486,19 @@
     /** Adds support for flex box child behavior to a myt.View.
         
         Attributes:
-            grow:number
-                Supported values: Non-negative numbers.
-            alignSelf:string
-                Supported values: "auto", start", "end", "center", "stretch".
-                The value "auto" can be used to unset this attr.
+            grow:number - Supported values: Non-negative numbers.
+            alignSelf:string - Supported values: "auto", start", "end", "center", "stretch". The 
+                value "auto" can be used to unset this attr.
         
         Private Attributes:
-            __ignoreFlex:boolean - When true, this View is ignored by the
-                flexbox parent.
-            __basisWidth:number - The preferred width of this View for
-                calculating the size of this View in a flexbox. This value
-                gets set whenever the flexbox layout changes the width of this
-                view so it can be referenced in future layout updates.
-            __basisHeight:number - The preferred height of this View for
-                calculating the size of this View in a flexbox. This value
-                gets set whenever the flexbox layout changes the height of this
-                view so it can be referenced in future layout updates.
-            __isFlexUpdate:boolean - Prevents clearing of basis size during
-                a flexbox layout update.
+            __ignoreFlex:boolean - When true, this View is ignored by the flexbox parent.
+            __basisWidth:number - The preferred width of this View for calculating the size of this 
+                View in a flexbox. This value gets set whenever the flexbox layout changes the 
+                width of this view so it can be referenced in future layout updates.
+            __basisHeight:number - The preferred height of this View for calculating the size of 
+                this View in a flexbox. This value gets set whenever the flexbox layout changes the 
+                height of this view so it can be referenced in future layout updates.
+            __isFlexUpdate:boolean - Prevents clearing of basis size during a flexbox layout update.
         
         @class */
     pkg.FlexboxChildSupport = new JSModule('FlexboxChildSupport', {
@@ -511,8 +511,8 @@
             }
         },
         
-        /** Provides a hook for subclasses to intervene when the x position is
-            being updated by the flex layout. */
+        /** Provides a hook for subclasses to intervene when the x position is being updated by the 
+            flex layout. */
         setXViaFlex(v, isAdj) {
             if (isAdj) v += this.x;
             if (this.x !== v) {
@@ -522,8 +522,8 @@
             }
         },
         
-        /** Provides a hook for subclasses to intervene when the y position is
-            being updated by the flex layout. */
+        /** Provides a hook for subclasses to intervene when the y position is being updated by the 
+            flex layout. */
         setYViaFlex(v, isAdj) {
             if (isAdj) v += this.y;
             if (this.y !== v) {
@@ -577,8 +577,8 @@
             return this.__basisHeight == null ? this.height : this.__basisHeight;
         },
         
-        /** Subclasses should override this to provide a more appropriate
-            baseline offset as needed. */
+        /** Subclasses should override this to provide a more appropriate baseline offset 
+            as needed. */
         getFlexBaselineOffset: isRowDirection => 0,
         
         setIgnoreFlex: function(v) {

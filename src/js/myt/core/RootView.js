@@ -1,23 +1,21 @@
 (pkg => {
     const roots = pkg.global.roots,
         
-        /** Allows a view to act as a "root" for a view hierarchy. A "root" 
-            view is backed by a dom element from the page rather than a dom 
-            element created by the view.
+        /** Allows a view to act as a "root" for a view hierarchy. A "root" view is backed by a 
+            dom element from the page rather than a dom element created by the view.
             
             Attributes:
-                keepDomElementWhenDestroyed:boolean Indicates the dom element 
-                    backing this view must not be destroyed when this view is 
-                    destroyed. Defaults to undefined which is equivalent 
-                    to false.
+                keepDomElementWhenDestroyed:boolean Indicates the dom element backing this view 
+                    must not be destroyed when this view is destroyed. Defaults to undefined which 
+                    is equivalent to false.
             
             @class */
         RootView = pkg.RootView = new JS.Module('RootView', {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
                 /** Prevents default drag/drop behavior.
-                    @param {!Obect} view - The myt.View the view to suppress 
-                        default dragover and drop on.
+                    @param {!Obect} view - The myt.View the view to suppress default dragover and 
+                        drop on.
                     @returns {undefined} */
                 setupCaptureDrop: view => {
                     const cdf = view.__captureDrop = event => {event.preventDefault();},
@@ -27,8 +25,8 @@
                 },
                 
                 /** Cleanup dom listeners for drag/drop.
-                    @param {!Obect} view - The myt.View the view that had 
-                        suppressed default dragover  and drop on.
+                    @param {!Obect} view - The myt.View the view that had suppressed default 
+                        dragover and drop on.
                     @returns {undefined} */
                 teardownCaptureDrop: view => {
                     const ide = view.getIDE(), 
@@ -62,8 +60,8 @@
                     pkg.getElement().appendChild(parent);
                 }
                 
-                // A root view has a dom element provided as the parent. 
-                // We use that as our dom element.
+                // A root view has a dom element provided as the parent. We use that as 
+                // our dom element.
                 return parent;
             },
             

@@ -9,8 +9,6 @@
         View = pkg.View,
         Disableable = pkg.Disableable,
         
-        defAttr = pkg.AccessorSupport.defAttr,
-        
         FOCUS_SHADOW = pkg.Button.FOCUS_SHADOW,
         
         setEditableTextAttr = (editableText, v, propName) => {
@@ -38,10 +36,10 @@
             
             Attributes:
                 value:* the current value of the input element.
-                inputType:string (read only) the type of the input element to 
-                    create. Changing this value after initialization will modify
-                    the type of the underlying dom element and is not generally 
-                    supported. See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#attr-type
+                inputType:string (read only) the type of the input element to create. Changing this 
+                    value after initialization will modify the type of the underlying dom element 
+                    and is not generally supported. 
+                    See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#attr-type
                     for more info and a list of allowed values.
             
             @class */
@@ -52,8 +50,8 @@
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides myt.View */
             initNode: function(parent, attrs) {
-                defAttr(attrs, 'tagName', 'input');
-                defAttr(attrs, 'focusable', true);
+                attrs.tagName ??= 'input';
+                attrs.focusable ??= true;
                 
                 this.callSuper(parent, attrs);
                 
@@ -174,16 +172,13 @@
                 placeholder:string
             
             Attributes:
-                spellcheck:boolean Turns browser spellchecking on and off. 
-                    Defaults to false.
-                maxLength:int Sets a maximum number of input characters. Set to
-                    a negative number to turn off max length. Defaults to 
-                    undefined which is equivalent to a negative number.
-                allowedChars:string Each character in the string is an allowed
-                    input character. If not set or empty all characters are 
-                    allowed. Defaults to undefined.
-                placeholder:string Text that will be shown if the value 
-                    is empty.
+                spellcheck:boolean Turns browser spellchecking on and off. Defaults to false.
+                maxLength:int Sets a maximum number of input characters. Set to a negative number 
+                    to turn off max length. Defaults to undefined which is equivalent to a 
+                    negative number.
+                allowedChars:string Each character in the string is an allowed input character. If 
+                    not set or empty all characters are allowed. Defaults to undefined.
+                placeholder:string Text that will be shown if the value is empty.
             
             Private Attributes:
                 _selRange:object Stores the start and end of the selection.
@@ -198,8 +193,8 @@
             initNode: function(parent, attrs) {
                 const self = this;
                 
-                defAttr(attrs, 'bgColor', 'transparent');
-                defAttr(attrs, 'spellcheck', false);
+                attrs.bgColor ??= 'transparent';
+                attrs.spellcheck ??= false;
                 
                 self.callSuper(parent, attrs);
                 
@@ -252,19 +247,19 @@
                 // Filter for allowed characters
                 const domEvent = event.value,
                     allowedChars = this.allowedChars;
-                if (allowedChars && allowedChars.indexOf(pkg.KeyObservable.getKeyFromEvent(event)) === -1) domEvent.preventDefault();
+                if (allowedChars && !allowedChars.includes(pkg.KeyObservable.getKeyFromEvent(event))) domEvent.preventDefault();
                 
                 this.filterInputPress(domEvent);
             },
             
-            /** A hook for subclasses/instances to do input filtering. The 
-                default implementation returns the value unchanged.
+            /** A hook for subclasses/instances to do input filtering. The default implementation 
+                returns the value unchanged.
                 @param {string} v - the current value of the form element.
                 @returns {string} The new value of the form element. */
             filterInput: v => v,
             
-            /** A hook for subclasses/instances to do input filtering during 
-                key press. The default implementation does nothing.
+            /** A hook for subclasses/instances to do input filtering during key press. The default 
+                implementation does nothing.
                 @param {!Object} domEvent - The dom key press event.
                 @returns {undefined} */
             filterInputPress: domEvent => {/* Subclasses to implement as needed. */},
@@ -290,8 +285,8 @@
             },
             
             /** Sets the caret and selection.
-                @param start:int the start of the selection or location of 
-                    the caret if no end is provided.
+                @param start:int the start of the selection or location of the caret if no end 
+                    is provided.
                 @param end:int (optional) the end of the selection.
                 @returns {undefined} */
             setCaretPosition: function(start, end) {
@@ -388,10 +383,10 @@
         
         Attributes:
             contentEditble:boolean Makes the text editable or not.
-            minWidth:number The minimum width for the component. Defaults to 
-                undefined which is effectively 0.
-            minHeight:number The minimum height for the component. Defaults to 
-                undefined which is effectively 0.
+            minWidth:number The minimum width for the component. Defaults to undefined which is 
+                effectively 0.
+            minHeight:number The minimum height for the component. Defaults to undefined which is 
+                effectively 0.
         
         @class */
     pkg.EditableText = new JSClass('EditableText', BaseInputText, {
@@ -403,11 +398,11 @@
         initNode: function(parent, attrs) {
             const self = this;
             
-            defAttr(attrs, 'tagName', 'div');
+            attrs.tagName ??= 'div';
             attrs.inputType = null;
             
-            defAttr(attrs, 'whiteSpace', 'pre');
-            defAttr(attrs, 'contentEditable', true);
+            attrs.whiteSpace ??= 'pre';
+            attrs.contentEditable ??= true;
             
             self.callSuper(parent, attrs);
             
@@ -583,21 +578,20 @@
             wrap:string
         
         Attributes:
-            resize:string Sets how the textarea can be resized. Defaults to 
-                'none'. Allowed values: 'none', 'both', 'horizontal', 
-                'vertical'.
-            wrap:string Sets how text will wrap. Defaults to 'soft'.
-                Allowed values: 'off', 'hard', 'soft'.
+            resize:string Sets how the textarea can be resized. Defaults to 'none'. Allowed 
+                values: 'none', 'both', 'horizontal', 'vertical'.
+            wrap:string Sets how text will wrap. Defaults to 'soft'. Allowed values: 'off', 
+                'hard', 'soft'.
         
         @class */
     pkg.InputTextArea = new JSClass('InputTextArea', BaseInputText, {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.BaseInputText */
         initNode: function(parent, attrs) {
-            defAttr(attrs, 'tagName', 'textarea');
+            attrs.tagName ??= 'textarea';
             attrs.inputType = null;
-            defAttr(attrs, 'resize', 'none');
-            defAttr(attrs, 'wrap', 'soft');
+            attrs.resize ??= 'none';
+            attrs.wrap ??= 'soft';
             
             this.callSuper(parent, attrs);
         },
@@ -617,7 +611,7 @@
                 if (self.inited) self.fireEvent('resize', v);
                 
                 if (v !== 'none') {
-                    (self.__resizeObserver || (self.__resizeObserver = new ResizeObserver(() => {self.doResize();}))).observe(self.getIDE());
+                    (self.__resizeObserver ??= new ResizeObserver(() => {self.doResize();})).observe(self.getIDE());
                 }
             }
         },
@@ -636,11 +630,10 @@
     /** A text input with select list.
         
         Attributes:
-            filterItems:boolean Indicates if the list items should be filtered
-                down based on the current value. Defaults to true.
-            fullItemConfig:array The full list of items that can be shown in the
-                list. The actual itemConfig used will be filtered based on the
-                current value of the input text.
+            filterItems:boolean Indicates if the list items should be filtered down based on the 
+                current value. Defaults to true.
+            fullItemConfig:array The full list of items that can be shown in the list. The actual 
+                itemConfig used will be filtered based on the current value of the input text.
         
         @class */
     pkg.ComboBox = new JSClass('ComboBox', InputText, {
@@ -656,13 +649,13 @@
         initNode: function(parent, attrs) {
             this.filterItems = true;
             
-            defAttr(attrs, 'activationKeys', [GlobalKeys.CODE_ENTER, GlobalKeys.CODE_ESC, GlobalKeys.CODE_ARROW_UP, GlobalKeys.CODE_ARROW_DOWN]);
-            defAttr(attrs, 'bgColor', '#fff');
-            defAttr(attrs, 'borderWidth', 1);
-            defAttr(attrs, 'borderStyle', 'solid');
-            defAttr(attrs, 'floatingAlignOffset', attrs.borderWidth);
-            defAttr(attrs, 'listViewAttrs', {maxHeight:99});
-            defAttr(attrs, 'fullItemConfig', []);
+            attrs.activationKeys ??= [GlobalKeys.CODE_ENTER, GlobalKeys.CODE_ESC, GlobalKeys.CODE_ARROW_UP, GlobalKeys.CODE_ARROW_DOWN];
+            attrs.bgColor ??= '#fff';
+            attrs.borderWidth ??= 1;
+            attrs.borderStyle ??= 'solid';
+            attrs.floatingAlignOffset ??= attrs.borderWidth;
+            attrs.fullItemConfig ??= [];
+            attrs.listViewAttrs = {...attrs.listViewAttrs, maxHeight:attrs.listViewAttrs?.maxHeight ?? 99};
             
             this.callSuper(parent, attrs);
         },
@@ -675,8 +668,7 @@
         
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides
-            Show floating panel if the value has changed during during
-            user interaction. */
+            Show floating panel if the value has changed during during user interaction. */
         __syncToDom: function(event) {
             const existing = this.value;
             this.callSuper(event);
@@ -740,15 +732,14 @@
             value:string
         
         Attributes:
-            multiple:boolean Indicates if multiple options can be selected 
-                or not. Defaults to false.
-            size:int The number of options to show. The default value is 4 for
-                multiple == true and 1 for multiple == false. It is recommended
-                that a size of at least 4 be used when multiple is 2.
-            options:array (write only) Adds a list of options to this select 
-                list. The value should be an array of myt.InputSelectOptions 
-                attrs that will be used to instantiate new myt.InputSelectOption
-                instances on this select list.
+            multiple:boolean Indicates if multiple options can be selected or not. Defaults 
+                to false.
+            size:int The number of options to show. The default value is 4 for multiple == true 
+                and 1 for multiple == false. It is recommended that a size of at least 4 be used 
+                when multiple is 2.
+            options:array (write only) Adds a list of options to this select list. The value should 
+                be an array of myt.InputSelectOptions attrs that will be used to instantiate 
+                new myt.InputSelectOption instances on this select list.
         
         @class */
     pkg.InputSelect = new JSClass('InputSelect', NativeInputWrapper, {
@@ -758,10 +749,10 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.NativeInputWrapper */
         initNode: function(parent, attrs) {
-            defAttr(attrs, 'tagName', 'select');
+            attrs.tagName ??= 'select';
             attrs.inputType = null;
-            defAttr(attrs, 'multiple', false);
-            defAttr(attrs, 'size', attrs.multiple ? 4 : 1);
+            attrs.multiple ??= false;
+            attrs.size ??= attrs.multiple ? 4 : 1;
             this.callSuper(parent, attrs);
             
             this.attachToDom(this, '__syncToDom', 'change');
@@ -787,8 +778,8 @@
         },
         
         /** @overrides myt.NativeInputWrapper
-            Does not update the dom since the dom element's 'value' attribute
-            doesn't support lists. */
+            Does not update the dom since the dom element's 'value' attribute doesn't 
+            support lists. */
         setValue: function(v) {
             if (isArray(v) && pkg.areArraysEqual(v, this.value)) return;
             
@@ -836,8 +827,8 @@
         
         /** Gets the myt.InputSelectOption with the provided value.
             @param {*} value - The value of the option to get.
-            @returns {?Object} - The matching myt.InputSelectOption option 
-                or undefined if not found. */
+            @returns {?Object} - The matching myt.InputSelectOption option or undefined if 
+                not found. */
         getOptionForValue: function(value) {
             return this.getOptions().find(option => option.value === value);
         },
@@ -855,8 +846,7 @@
         
         /** Destroys an option that has the provided value.
             @param value:* The value of the option to remove.
-            @returns boolean: true if the option is destroyed, 
-                false otherwise. */
+            @returns boolean: true if the option is destroyed, false otherwise. */
         destroyOptionWithValue: function(value) {
             const option = this.getOptionForValue(value);
             if (option) {

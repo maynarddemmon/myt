@@ -5,15 +5,13 @@
         GlobalKeys = G.keys,
         GlobalIdle = G.idle,
         
-        defAttr = pkg.AccessorSupport.defAttr,
-        
         NO_KEY_DOWN = '',
         
         getCodeFromEvent = event => pkg.KeyObservable.getCodeFromEvent(event),
         getMouseFromEvent = event => pkg.MouseObservable.getMouseFromEvent(event);
     
-    /** Adds the capability for an myt.View to be "activated". A doActivated 
-        method is added that gets called when the view is "activated".
+    /** Adds the capability for an myt.View to be "activated". A doActivated method is added that 
+        gets called when the view is "activated".
         
         @class */
     pkg.Activateable = new JSModule('Activateable', {
@@ -23,9 +21,8 @@
         doActivated: () => {/* Subclasses to implement as needed. */}
     });
     
-    /** Adds an udpateUI method that should be called to update the UI. 
-        Various mixins will rely on the updateUI method to trigger 
-        visual updates.
+    /** Adds an udpateUI method that should be called to update the UI. Various mixins will rely on 
+        the updateUI method to trigger visual updates.
         
         @class */
     pkg.UpdateableUI = new JSModule('UpdateableUI', {
@@ -34,28 +31,27 @@
         initNode: function(parent, attrs) {
             this.callSuper(parent, attrs);
             
-            // Call updateUI one time after initialization is complete to give
-            // this View a chance to update itself.
+            // Call updateUI one time after initialization is complete to give this View a chance 
+            // to update itself.
             this.updateUI();
         },
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Updates the UI whenever a change occurs that requires a visual 
-            update. Subclasses should implement this as needed.
+        /** Updates the UI whenever a change occurs that requires a visual update. Subclasses 
+            should implement this as needed.
             @returns {undefined} */
         updateUI: () => {/* Subclasses to implement as needed. */}
     });
     
-    /** Adds the capability to be "disabled" to an myt.Node. When an myt.Node 
-        is disabled the user should typically not be able to interact with it.
+    /** Adds the capability to be "disabled" to an myt.Node. When an myt.Node is disabled the user 
+        should typically not be able to interact with it.
         
-        When disabled becomes true an attempt will be made to give away the 
-        focus using myt.FocusObservable's giveAwayFocus method.
+        When disabled becomes true an attempt will be made to give away the focus using 
+        myt.FocusObservable's giveAwayFocus method.
         
         Events:
-            disabled:boolean Fired when the disabled attribute is modified
-                via setDisabled.
+            disabled:boolean Fired when the disabled attribute is modified via setDisabled.
         
         Attributes:
             disabled:boolean Indicates that this component is disabled.
@@ -65,7 +61,7 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides */
         initNode: function(parent, attrs) {
-            defAttr(attrs, 'disabled', false);
+            attrs.disabled ??= false;
             
             this.callSuper(parent, attrs);
         },
@@ -84,9 +80,8 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Called after the disabled attribute is set. Default behavior 
-            attempts to give away focus and calls the updateUI method of 
-            myt.UpdateableUI if it is defined.
+        /** Called after the disabled attribute is set. Default behavior attempts to give away 
+            focus and calls the updateUI method of myt.UpdateableUI if it is defined.
             @returns {undefined} */
         doDisabled: function() {
             if (this.inited) {
@@ -98,23 +93,21 @@
         }
     });
     
-    /** Provides keyboard handling to "activate" the component when a key 
-        is pressed down or released up. By default, when a keyup event 
-        occurs for an activation key and this view is not disabled, the 
-        'doActivated' method will get called.
+    /** Provides keyboard handling to "activate" the component when a key is pressed down or 
+        released up. By default, when a keyup event occurs for an activation key and this view is 
+        not disabled, the "doActivated" method will get called.
         
-        Requires: myt.Activateable, myt.Disableable, myt.KeyObservable and 
-            myt.FocusObservable super mixins.
+        Requires: myt.Activateable, myt.Disableable, myt.KeyObservable and myt.FocusObservable 
+            super mixins.
         
         Attributes:
-            activationKeys:array of chars The keys that when keyed down will
-                activate this component. Note: The value is not copied so
-                modification of the array outside the scope of this object 
-                will effect behavior.
-            activateKeyDown:string the key code of the activation key that is 
-                currently down. This will be empty string when no key is down.
-            repeatKeyDown:boolean Indicates if doActivationKeyDown will be 
-                called for repeated keydown events or not. Defaults to false.
+            activationKeys:array of chars The keys that when keyed down will activate this 
+                component. Note: The value is not copied so modification of the array outside the 
+                scope of this object will effect behavior.
+            activateKeyDown:string the key code of the activation key that is currently down. This 
+                will be empty string when no key is down.
+            repeatKeyDown:boolean Indicates if doActivationKeyDown will be called for repeated 
+                keydown events or not. Defaults to false.
         
         @class */
     pkg.KeyActivation = new JSModule('KeyActivation', {
@@ -133,7 +126,7 @@
             
             self.activateKeyDown = NO_KEY_DOWN;
             
-            defAttr(attrs, 'activationKeys', pkg.KeyActivation.ACTIVATION_KEYS);
+            attrs.activationKeys ??= pkg.KeyActivation.ACTIVATION_KEYS;
             
             self.callSuper(parent, attrs);
             
@@ -228,32 +221,30 @@
             }
         },
         
-        /** Called when an activation key is pressed down. Default 
-            implementation does nothing.
+        /** Called when an activation key is pressed down. Default implementation does nothing.
             @param code:string the key code that is down.
-            @param isRepeat:boolean Indicates if this is a key repeat event 
-                or not.
+            @param isRepeat:boolean Indicates if this is a key repeat event or not.
             @returns {undefined} */
         doActivationKeyDown: (code, isRepeat) => {/* Subclasses to implement as needed. */},
         
-        /** Called when an activation key is release up. This executes the
-            'doActivated' method by default. 
+        /** Called when an activation key is release up. This executes the "doActivated" method 
+            by default. 
             @param code:string the keycode that is up.
             @returns {undefined} */
         doActivationKeyUp: function(code) {
             this.doActivated();
         },
         
-        /** Called when focus is lost while an activation key is down. Default 
-            implementation does nothing.
+        /** Called when focus is lost while an activation key is down. Default implementation 
+            does nothing.
             @param code:string the keycode that is down.
             @returns {undefined} */
         doActivationKeyAborted: code => {/* Subclasses to implement as needed. */}
     });
     
-    /** Provides a 'mouseOver' attribute that tracks mouse over/out state. 
-        Also provides a mechanism to smoothe over/out events so only one 
-        call to 'doSmoothMouseOver' occurs per idle event.
+    /** Provides a 'mouseOver' attribute that tracks mouse over/out state. Also provides a 
+        mechanism to smoothe over/out events so only one call to 'doSmoothMouseOver' occurs per 
+        idle event.
         
         Requires myt.Disableable and myt.MouseObservable super mixins.
         
@@ -261,22 +252,20 @@
             mouseOver:boolean Indicates if the mouse is over this view or not.
         
         Private Attributes:
-            __attachedToOverIdle:boolean Used by the code that smoothes out
-                mouseover events. Indicates that we are registered with the
-                idle event.
-            __lastOverIdleValue:boolean Used by the code that smoothes out
-                mouseover events. Stores the last mouseOver value.
-            __disabledOver:boolean Tracks mouse over/out state while a view 
-                is disabled. This allows correct restoration of mouseOver 
-                state if a view becomes enabled while the mouse is already 
-                over it.
+            __attachedToOverIdle:boolean Used by the code that smoothes out mouseover events. 
+                Indicates that we are registered with the idle event.
+            __lastOverIdleValue:boolean Used by the code that smoothes out mouseover events. 
+                Stores the last mouseOver value.
+            __disabledOver:boolean Tracks mouse over/out state while a view is disabled. This 
+                allows correct restoration of mouseOver state if a view becomes enabled while the 
+                mouse is already over it.
         
         @class */
     pkg.MouseOver = new JSModule('MouseOver', {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides */
         initNode: function(parent, attrs) {
-            defAttr(attrs, 'mouseOver', false);
+            attrs.mouseOver ??= false;
             
             this.callSuper(parent, attrs);
             
@@ -291,8 +280,7 @@
                 this.mouseOver = v;
                 // No event needed
                 
-                // Smooth out over/out events by delaying until the next 
-                // idle event.
+                // Smooth out over/out events by delaying until the next idle event.
                 if (this.inited && !this.__attachedToOverIdle) {
                     this.__attachedToOverIdle = true;
                     this.attachTo(GlobalIdle, '__doMouseOverOnIdle', 'idle');
@@ -305,9 +293,9 @@
             this.callSuper(v);
             
             if (this.disabled) {
-                // When disabling make sure exposed mouseOver is not true. This 
-                // helps prevent unwanted behavior of a disabled view such as a
-                // disabled button looking like it is moused over.
+                // When disabling make sure exposed mouseOver is not true. This helps prevent 
+                // unwanted behavior of a disabled view such as a disabled button looking like it 
+                // is moused over.
                 if (this.mouseOver) {
                     this.__disabledOver = true;
                     this.setMouseOver(false);
@@ -326,8 +314,8 @@
             this.detachFrom(GlobalIdle, '__doMouseOverOnIdle', 'idle');
             this.__attachedToOverIdle = false;
             
-            // Only call doSmoothOver if the over/out state has changed since 
-            // the last time it was called.
+            // Only call doSmoothOver if the over/out state has changed since the last time it 
+            // was called.
             const isOver = this.mouseOver;
             if (this.__lastOverIdleValue !== isOver) {
                 this.__lastOverIdleValue = isOver;
@@ -335,9 +323,8 @@
             }
         },
         
-        /** Called when mouseOver state changes. This method is called after
-            an event filtering process has reduced frequent over/out events
-            originating from the dom.
+        /** Called when mouseOver state changes. This method is called after an event filtering 
+            process has reduced frequent over/out events originating from the dom.
             @param {boolean} isOver
             @returns {undefined} */
         doSmoothMouseOver: function(isOver) {
@@ -365,8 +352,7 @@
     
     /** Provides a 'mouseDown' attribute that tracks mouse up/down state.
         
-        Requires: myt.MouseOver, myt.Disableable, myt.MouseObservable super 
-            mixins.
+        Requires: myt.MouseOver, myt.Disableable, myt.MouseObservable super mixins.
         
         Suggested: myt.UpdateableUI and myt.Activateable super mixins.
         
@@ -378,7 +364,7 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides */
         initNode: function(parent, attrs) {
-            defAttr(attrs, 'mouseDown', false);
+            attrs.mouseDown ??= false;
             
             this.callSuper(parent, attrs);
             
@@ -401,8 +387,8 @@
         
         /** @overrides myt.Disableable */
         setDisabled: function(v) {
-            // When about to disable the view make sure mouseDown is not true. 
-            // This helps prevent unwanted activation of a disabled view.
+            // When about to disable the view make sure mouseDown is not true. This helps prevent 
+            // unwanted activation of a disabled view.
             if (v && this.mouseDown) this.setMouseDown(false);
             
             this.callSuper(v);
@@ -420,23 +406,20 @@
         doMouseOut: function(event) {
             this.callSuper(event);
             
-            // Wait for a mouse up anywhere if the user moves the mouse out of 
-            // the view while the mouse is still down. This allows the user to 
-            // move the mouse in and out of the view with the view still 
-            // behaving as moused down.
+            // Wait for a mouse up anywhere if the user moves the mouse out of the view while the 
+            // mouse is still down. This allows the user to move the mouse in and out of the view 
+            // with the view still behaving as moused down.
             if (!this.disabled && this.mouseDown) this.attachToDom(GlobalMouse, 'doMouseUp', 'mouseup', true);
         },
         
-        /** Called when the mouse is down on this view.
-            Subclasses must call super.
+        /** Called when the mouse is down on this view. Subclasses must call super.
             @param {!Object} event
             @returns {undefined} */
         doMouseDown: function(event) {
             if (!this.disabled) this.setMouseDown(true);
         },
         
-        /** Called when the mouse is up on this view.
-            Subclasses must call super.
+        /** Called when the mouse is up on this view. Subclasses must call super.
             @param {!Object} event
             @returns {undefined} */
         doMouseUp: function(event) {
@@ -447,16 +430,15 @@
             if (!this.disabled && this.mouseDown) {
                 this.setMouseDown(false);
                 
-                // Only do mouseUpInside if the mouse is actually over 
-                // the view. This means the user can mouse down on a view, 
-                // move the mouse out and then mouse up and not "activate" 
-                // the view.
+                // Only do mouseUpInside if the mouse is actually over the view. This means the 
+                // user can mouse down on a view, move the mouse out and then mouse up and not 
+                // "activate" the view.
                 if (this.mouseOver) this.doMouseUpInside(event);
             }
         },
         
-        /** Called when the mouse is up and we are still over the view. Executes
-            the 'doActivated' method by default.
+        /** Called when the mouse is up and we are still over the view. Executes the "doActivated" 
+            method by default.
             @param {!Object} event
             @returns {undefined} */
         doMouseUpInside: function(event) {
@@ -473,39 +455,32 @@
     
     /** Makes an myt.View draggable via the mouse.
         
-        Also suppresses context menus since the mouse down to open it causes 
-        bad behavior since a mouseup event is not always fired.
+        Also suppresses context menus since the mouse down to open it causes bad behavior since a 
+        mouseup event is not always fired.
         
         Events:
-            isDragging:boolean Fired when the isDragging attribute is 
-                modified via setIsDragging.
+            isDragging:boolean Fired when the isDragging attribute is modified via setIsDragging.
         
         Attributes:
-            allowAbort:boolean Allows a drag to be aborted by the user by
-                pressing the 'esc' key. Defaults to undefined which is 
-                equivalent to false.
-            isDraggable:boolean Configures the view to be draggable or not. 
-                The default value is true.
-            distanceBeforeDrag:number The distance, in pixels, before a mouse 
-                down and drag is considered a drag action. Defaults to 0.
-            isDragging:boolean Indicates that this view is currently 
-                being dragged.
-            draggableAllowBubble:boolean Determines if mousedown and mouseup
-                dom events handled by this component will bubble or not. 
-                Defaults to true.
-            dragOffsetX:number The x amount to offset the position during 
-                dragging. Defaults to 0.
-            dragOffsetY:number The y amount to offset the position during 
-                dragging. Defaults to 0.
+            allowAbort:boolean Allows a drag to be aborted by the user by pressing the "esc" key. 
+                Defaults to undefined which is equivalent to false.
+            isDraggable:boolean Configures the view to be draggable or not. The default value 
+                is true.
+            distanceBeforeDrag:number The distance, in pixels, before a mouse down and drag is 
+                considered a drag action. Defaults to 0.
+            isDragging:boolean Indicates that this view is currently being dragged.
+            draggableAllowBubble:boolean Determines if mousedown and mouseup dom events handled by 
+                this component will bubble or not. Defaults to true.
+            dragOffsetX:number The x amount to offset the position during dragging. Defaults to 0.
+            dragOffsetY:number The y amount to offset the position during dragging. Defaults to 0.
             dragInitX:number Stores initial mouse x position during dragging.
             dragInitY:number Stores initial mouse y position during dragging.
-            centerOnMouse:boolean If true this draggable will update the 
-                dragInitX and dragInitY to keep the view centered on the 
-                mouse. Defaults to undefined which is equivalent to false.
+            centerOnMouse:boolean If true this draggable will update the dragInitX and dragInitY to 
+                keep the view centered on the mouse. Defaults to undefined which is equivalent 
+                to false.
         
         Private Attributes:
-            __lastMousePosition:object The last position of the mouse 
-                during dragging.
+            __lastMousePosition:object The last position of the mouse during dragging.
         
         @class */
     pkg.Draggable = new JSModule('Draggable', {
@@ -519,8 +494,7 @@
             self.draggableAllowBubble = true;
             self.distanceBeforeDrag = self.dragOffsetX = self.dragOffsetY = 0;
             
-            // Will be set after init since the draggable subview probably
-            // doesn't exist yet.
+            // Will be set after init since the draggable subview probably doesn't exist yet.
             if (attrs.isDraggable != null) {
                 isDraggable = attrs.isDraggable;
                 delete attrs.isDraggable;
@@ -583,10 +557,9 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** @returns {!Array} - An array of views that can be moused down on 
-            to start the drag. Subclasses should override this to return an 
-            appropriate list of views. By default this view is returned thus 
-            making the entire view capable of starting a drag. */
+        /** @returns {!Array} - An array of views that can be moused down on to start the drag. 
+            Subclasses should override this to return an appropriate list of views. By default this 
+            view is returned thus making the entire view capable of starting a drag. */
         getDragViews: function() {
             return [this];
         },
@@ -650,11 +623,9 @@
             }
         },
         
-        /** Active until stopDrag is called. The view position will be bound
-            to the mouse position. Subclasses typically call this onmousedown 
-            for subviews that allow dragging the view.
-            @param {!Object} event - The event the mouse event when the 
-                drag started.
+        /** Active until stopDrag is called. The view position will be bound to the mouse position. 
+            Subclasses typically call this onmousedown for subviews that allow dragging the view.
+            @param {!Object} event - The event the mouse event when the drag started.
             @returns {undefined} */
         startDrag: function(event) {
             const self = this;
@@ -695,8 +666,7 @@
         
         /** Stop the drag. (see startDrag for more details)
             @param {!Object} event - The event that ended the drag.
-            @param {boolean} isAbort - Indicates if the drag ended normally 
-                or was aborted.
+            @param {boolean} isAbort - Indicates if the drag ended normally or was aborted.
             @returns {undefined} */
         stopDrag: function(event, isAbort) {
             const self = this;
@@ -710,9 +680,9 @@
             self.setIsDragging(false);
         },
         
-        /** Repositions the view to the provided values. The default 
-            implementation is to directly set x and y. Subclasses should 
-            override this method when it is necessary to constrain the position.
+        /** Repositions the view to the provided values. The default implementation is to directly 
+            set x and y. Subclasses should override this method when it is necessary to constrain 
+            the position.
             @param {number} x - the new x position.
             @param {number} y - the new y position.
             @returns {undefined} */

@@ -50,16 +50,14 @@
             }
         };
     
-    /** Objects that can be replicated should include this mixin and 
-        implemment the replicate method. The myt.Reusable mixin is 
-        also included and the clean method should also be implemented. 
-        The methods replicate and clean should perform setup and teardown 
-        of the object respectively.
+    /** Objects that can be replicated should include this mixin and implemment the replicate 
+        method. The myt.Reusable mixin is also included and the clean method should also be 
+        implemented. The methods replicate and clean should perform setup and teardown of the 
+        object respectively.
         
         Attributes:
             replicationData:* The data provided during replication.
-            replicationIndex:number The replication index provided 
-                during replication.
+            replicationIndex:number The replication index provided during replication.
         
         @class */
     pkg.Replicable = new JS.Module('Replicable', {
@@ -67,12 +65,9 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Called to configure the replicable object with data. 
-            Subclasses should call super.
-            @param {?Object} data - The data being replicated for 
-                this instance.
-            @param {number} idx - The index of the data in the 
-                replicated list.
+        /** Called to configure the replicable object with data. Subclasses should call super.
+            @param {?Object} data - The data being replicated for this instance.
+            @param {number} idx - The index of the data in the replicated list.
             @returns {undefined} */
         replicate: function(data, idx) {
             this.replicationData = data;
@@ -93,14 +88,11 @@
             this.replicationIndex = -1;
         },
         
-        /** Called by an myt.Replicator to check if this replicable 
-            needs to be updated or not.
-            @param {!Object} data - The data being replicated for 
-                this instance.
-            @param {number} idx - The index of the data in the 
-                replicated list.
-            @returns {boolean} - True if the provided data is already 
-                set on this replicable, false otherwise. */
+        /** Called by an myt.Replicator to check if this replicable needs to be updated or not.
+            @param {!Object} data - The data being replicated for this instance.
+            @param {number} idx - The index of the data in the replicated list.
+            @returns {boolean} - True if the provided data is already set on this replicable, 
+                false otherwise. */
         alreadyHasReplicationData: function(data, idx) {
             // FIXME: Use deepEquals on replicationData?
             return idx === this.replicationIndex && data === this.replicationData;
@@ -110,13 +102,11 @@
     /** Creates instances using a template class and an array of data items.
         
         Attributes:
-            template:JS.Class The template to replicate for each entry 
-                in the data set.
+            template:JS.Class The template to replicate for each entry in the data set.
             data:array The data to replicate the template for.
         
         Private Attributes:
-            __pool:myt.TrackActivesPool The pool that holds the 
-                myt.Replicable instances.
+            __pool:myt.TrackActivesPool The pool that holds the myt.Replicable instances.
         
         @class */
     pkg.Replicator = new JS.Class('Replicator', pkg.Node, {
@@ -198,14 +188,12 @@
                     if (active) pool.putInstance(active);
                 }
                 
-                // Replicate on unused data and data that was beyond the length
-                // of the actives list
+                // Replicate on unused data and data that was beyond the length of the actives list
                 for (i = 0; dataLen > i; ++i) {
                     if (i >= activesLen || unused[i] != null) pool.getInstance().replicate(data[i], i);
                 }
                 
-                // Sort layout subviews so the layout reflects the 
-                // data list order.
+                // Sort layout subviews so the layout reflects the data list order.
                 i = layouts.length;
                 while (i) layouts[--i].sortSubviews(sortFunction);
                 

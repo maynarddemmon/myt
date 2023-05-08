@@ -7,17 +7,13 @@
         View = pkg.View,
         RootView = pkg.RootView,
         
-        defAttr = pkg.AccessorSupport.defAttr,
-        
-        /** A dimmer that can be placed on another myt.View to obscure the 
-            subviews of that view.
+        /** A dimmer that can be placed on another myt.View to obscure the subviews of that view.
             
             Attributes:
-                restoreFocus:boolean when true focus will be sent back to the 
-                    view that had focus before the dimmer was shown when the 
-                    dimmer is hidden. Defaults to true.
-                prevFocus:myt.View or dom element. The thing to set focus on 
-                    when the dimmer is hidden if restoreFocus is true.
+                restoreFocus:boolean when true focus will be sent back to the view that had focus 
+                    before the dimmer was shown when the dimmer is hidden. Defaults to true.
+                prevFocus:myt.View or dom element. The thing to set focus on when the dimmer is 
+                    hidden if restoreFocus is true.
             
             @class */
         Dimmer = pkg.Dimmer = new JSClass('Dimmer', View, {
@@ -40,10 +36,10 @@
                 
                 attrs.focusable = attrs.focusCage = true;
                 
-                defAttr(attrs, 'percentOfParentWidth', 100);
-                defAttr(attrs, 'percentOfParentHeight', 100);
-                defAttr(attrs, 'visible', false);
-                defAttr(attrs, 'ignoreLayout', true);
+                attrs.percentOfParentWidth ??= 100;
+                attrs.percentOfParentHeight ??= 100;
+                attrs.visible ??= false;
+                attrs.ignoreLayout ??= true;
                 
                 self.callSuper(parent, attrs);
                 
@@ -76,8 +72,7 @@
             
             
             // Methods /////////////////////////////////////////////////////////
-            /** A handler for mouse events that does nothing and prevents 
-                propogation.
+            /** A handler for mouse events that does nothing and prevents propogation.
                 @param {!Object} event
                 @return boolean True so that the dom event gets eaten. */
             eatMouseEvent: event => true,
@@ -87,7 +82,7 @@
             show: function() {
                 const self = this,
                     globalFocus = pkg.global.focus;
-                self.prevFocus = globalFocus.focusedView || globalFocus.focusedDom;
+                self.prevFocus = globalFocus.focusedView ?? globalFocus.focusedDom;
                 
                 self.makeHighestZIndex();
                 
@@ -98,8 +93,7 @@
             },
             
             /** Hides the dimmer and restores focus if necessary.
-                @param {boolean} [ignoreRestoreFocus] - When true focus will not 
-                    be restored.
+                @param {boolean} [ignoreRestoreFocus] - When true focus will not be restored.
                 @returns {undefined} */
             hide: function(ignoreRestoreFocus) {
                 const self = this;
@@ -115,36 +109,27 @@
             
             Attributes:
                 content:myt.View The content view placed inside the dimmer.
-                sizingStrategy:string Determines how the content view is 
-                    positioned relative to the bounds of the dimmer. Supported 
-                    values are:
-                        children: The content will be sized to fit the children 
-                            it contains. The content will be positioned in the 
-                            center and middle of the dimmer. This is the 
-                            default sizingStrategy
-                        parent: The content will be sized to the bounds of 
-                            the dimmer.
-                        basic: The content will not be sized in any way. It 
-                            will be positioned in the center and middle of 
-                            the dimmer.
-                        none: The content will not be sized or positioned in 
-                            any way.
-                marginTop:number The margin above the content when the 
+                sizingStrategy:string Determines how the content view is positioned relative to the 
+                    bounds of the dimmer. Supported values are:
+                        children: The content will be sized to fit the children it contains. The 
+                            content will be positioned in the center and middle of the dimmer. This 
+                            is the default sizingStrategy
+                        parent: The content will be sized to the bounds of the dimmer.
+                        basic: The content will not be sized in any way. It will be positioned in 
+                            the center and middle of the dimmer.
+                        none: The content will not be sized or positioned in any way.
+                marginTop:number The margin above the content when the sizingStrategy is "parent". 
+                    Defaults to 40 if not provided.
+                marginLeft:number The margin on the left side of the content when the 
                     sizingStrategy is "parent". Defaults to 40 if not provided.
-                marginLeft:number The margin on the left side of the content 
-                    when the sizingStrategy is "parent". Defaults to 40 if 
-                    not provided.
-                marginBottom:number The margin below the content when the 
+                marginBottom:number The margin below the content when the sizingStrategy is 
+                    "parent". Defaults to 40 if not provided.
+                marginRight:number The margin on the right side of the content when the 
                     sizingStrategy is "parent". Defaults to 40 if not provided.
-                marginRight:number The margin on the right side of the content 
-                    when the sizingStrategy is "parent". Defaults to 40 if 
-                    not provided.
-                paddingX:number The internal horizontal padding when the 
-                    sizingStrategy is "children". Defaults to 20 if 
-                    not provided.
-                paddingY:number The internal vertical padding when the 
-                    sizingStrategy is "children". Defaults to 15 if 
-                    not provided.
+                paddingX:number The internal horizontal padding when the sizingStrategy is 
+                    "children". Defaults to 20 if not provided.
+                paddingY:number The internal vertical padding when the sizingStrategy is 
+                    "children". Defaults to 15 if not provided.
                 
             @class */
         ModalPanel = pkg.ModalPanel = new JSClass('ModalPanel', Dimmer, {
@@ -182,17 +167,17 @@
                 
                 self.defaultPlacement = 'content';
                 
-                defAttr(attrs, 'sizingStrategy', 'children');
+                attrs.sizingStrategy ??= 'children';
                 
                 // Used for parent sizing strategy
-                defAttr(attrs, 'marginTop', ModalPanel.MARGIN_TOP);
-                defAttr(attrs, 'marginLeft', ModalPanel.MARGIN_LEFT);
-                defAttr(attrs, 'marginBottom', ModalPanel.MARGIN_BOTTOM);
-                defAttr(attrs, 'marginRight', ModalPanel.MARGIN_RIGHT);
+                attrs.marginTop ??= ModalPanel.MARGIN_TOP;
+                attrs.marginLeft ??= ModalPanel.MARGIN_LEFT;
+                attrs.marginBottom ??= ModalPanel.MARGIN_BOTTOM;
+                attrs.marginRight ??= ModalPanel.MARGIN_RIGHT;
                 
                 // Used for "children" sizing strategy
-                defAttr(attrs, 'paddingX', ModalPanel.PADDING_X);
-                defAttr(attrs, 'paddingY', ModalPanel.PADDING_Y);
+                attrs.paddingX ??= ModalPanel.PADDING_X;
+                attrs.paddingY ??= ModalPanel.PADDING_Y;
                 
                 self.callSuper(parent, attrs);
                 

@@ -39,8 +39,7 @@
         };
     });
     
-    /** A view for programatic drawing. This view is backed by an html 
-        canvas element.
+    /** A view for programatic drawing. This view is backed by an html canvas element.
         
         Attributes:
             Same as HTML canvas element.
@@ -91,11 +90,10 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Clears the drawing context. Anything currently drawn will 
-            be erased. */
+        /** Clears the drawing context. Anything currently drawn will be erased. */
         clear: function() {
-            // Store the current transform matrix, then apply the identity 
-            // matrix to make clearing simpler then restore the transform.
+            // Store the current transform matrix, then apply the identity matrix to make clearing 
+            // simpler then restore the transform.
             const ctx = this.__ctx;
             ctx.save();
             ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -148,8 +146,8 @@
         
         /** Draws a rounded rect into the provided drawview.
             @param {number} r - The radius of the corners.
-            @param {number} thickness - The thickness of the line. If thickness 
-                is zero or less a fill will be done rather than an outline.
+            @param {number} thickness - The thickness of the line. If thickness is zero or less a 
+                fill will be done rather than an outline.
             @param {number} left
             @param {number} top
             @param {number} w
@@ -163,9 +161,8 @@
             let bottom = top + h,
                 right = left + w;
             
-            // We create a single path for both an outer and inner rounded 
-            // rect. The reason for this is that filling looks much better 
-            // than stroking.
+            // We create a single path for both an outer and inner rounded rect. The reason for 
+            // this is that filling looks much better than stroking.
             self.beginPath();
             
             self.moveTo(left, top + r);
@@ -283,20 +280,17 @@
         },
         
         /** Draws an annulus filled with a gradient.
-            @param {number} centerX - The x location of the origin of 
-                the annulus.
-            @param {number} centerY - The y location of the origin of 
-                the annulus.
+            @param {number} centerX - The x location of the origin of the annulus.
+            @param {number} centerY - The y location of the origin of the annulus.
             @param {number} r - The outer radius of the annulus in pixels.
             @param {number} ir - The inner radius of the annulus in pixels.
             @param {number} startAngle - The start of the annulus in radians.
             @param {number} endAngle - The end of the annulus in radians.
-            @param {!Array} colors - An array of objects that contains the
-                colors to blend between and the angle they occur at. The object
-                has two properties, "angle" (in radians) and "color". The
-                "color" may be either a hex color string or a myt.Color object.
-            @param {number} [segments] - The number of segments to draw for
-                half a circle. Defaults to 60.
+            @param {!Array} colors - An array of objects that contains the colors to blend between 
+                and the angle they occur at. The object has two properties, "angle" (in radians) 
+                and "color". The "color" may be either a hex color string or a myt.Color object.
+            @param {number} [segments] - The number of segments to draw for half a circle. 
+                Defaults to 60.
             @returns {!Object} The canvas for function chaining. */
         drawAnnulus: function(centerX, centerY, r, ir, startAngle, endAngle, colors, segments=60) {
             const self = this,
@@ -311,7 +305,7 @@
             let angleDelta = PI / segments,
                 i = 0;
             
-            for (; colors.length - 1 > i;) {
+            for (const limit = colors.length - 1; i < limit;) {
                 const config = colors[i++],
                     nextConfig = colors[i],
                     angleDiff = nextConfig.angle - config.angle,
@@ -328,14 +322,11 @@
                 iy1,
                 x1,
                 y1,
-                x2 = vectors[0],
-                y2 = vectors[1],
-                ix2 = vectors[2],
-                iy2 = vectors[3],
+                [x2, y2, ix2, iy2] = vectors,
                 diffCount = 0,
                 
-                // Antialiasing issues means we need to draw each polygon with 
-                // a small overlap to fill the gap.
+                // Antialiasing issues means we need to draw each polygon with a small overlap to 
+                // fill the gap.
                 angleOverlap =  PI / 360;
             
             i = 0;
@@ -355,10 +346,7 @@
                     angle = endAngle;
                 }
                 path.rotateAroundOrigin(angleDelta + angleOverlap, centerX, centerY);
-                x2 = vectors[0];
-                y2 = vectors[1];
-                ix2 = vectors[2];
-                iy2 = vectors[3];
+                [x2, y2, ix2, iy2] = vectors;
                 
                 // Draw part
                 self.beginPath();
@@ -380,10 +368,7 @@
                 
                 if (angleOverlap > 0) {
                     path.rotateAroundOrigin(-angleOverlap, centerX, centerY);
-                    x2 = vectors[0];
-                    y2 = vectors[1];
-                    ix2 = vectors[2];
-                    iy2 = vectors[3];
+                    [x2, y2, ix2, iy2] = vectors;
                 }
                 
                 // Increment color

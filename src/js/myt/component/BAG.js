@@ -1,13 +1,12 @@
 (pkg => {
     const AccessorSupport = pkg.AccessorSupport,
         
-        /*  A data structure of groups stored as a map of maps. First 
-            level is attribute name second level is group ID. */
+        /*  A data structure of groups stored as a map of maps. First level is attribute name 
+            second level is group ID. */
         BAGsByAttrName = {},
         
-        /** Manages a boolean attribute on a collection of Nodes. Ensures 
-            that no more than one of the Nodes has the attribute set to 
-            true at one time.
+        /** Manages a boolean attribute on a collection of Nodes. Ensures that no more than one of 
+            the Nodes has the attribute set to true at one time.
             
             Events:
                 attrName:string
@@ -15,11 +14,9 @@
                 trueNode:myt.Node
             
             Attributes:
-                attrName:string The name of the boolean attribute to 
-                    monitor and update.
+                attrName:string The name of the boolean attribute to monitor and update.
                 groupId:string The unqiue ID of the group.
-                trueNode:myt.Node The node that is currently true. Will 
-                    be null if no node is true.
+                trueNode:myt.Node The node that is currently true. Will be null if no node is true.
             
             Private Attributes:
                 __nodes:array A list of the currently registered nodes.
@@ -32,23 +29,20 @@
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
                 /** Gets a BAG for the attribute name and group ID.
-                    @param attrName:string the name of the attribute 
-                        to monitor.
+                    @param attrName:string the name of the attribute to monitor.
                     @param groupId:string the unique ID of the group.
                     @returns the BAG or undefined if not found */
                 getGroup: (attrName, groupId) => {
                     if (attrName && groupId) {
-                        const groupIdMap = BAGsByAttrName[attrName] || (BAGsByAttrName[attrName] = {});
-                        return groupIdMap[groupId] || (groupIdMap[groupId] = new BAG(attrName, groupId));
+                        const groupIdMap = BAGsByAttrName[attrName] ??= {};
+                        return groupIdMap[groupId] ??= new BAG(attrName, groupId);
                     }
                 },
                 
                 /** Removes a BAG for the attribute name and group id.
-                    @param attrName:string the name of the attribute 
-                        to monitor.
+                    @param attrName:string the name of the attribute to monitor.
                     @param groupId:string the unique ID of the group.
-                    @returns the removed BAG or undefined if no
-                        BAG was removed. */
+                    @returns the removed BAG or undefined if no BAG was removed. */
                 removeGroup: (attrName, groupId) => {
                     if (attrName && groupId) {
                         const groupIdMap = BAGsByAttrName[attrName];
@@ -120,8 +114,8 @@
                 }
             },
             
-            /** Sets the attribute to true on the provided registered node 
-                and sets it to false on all other registered nodes.
+            /** Sets the attribute to true on the provided registered node and sets it to false on 
+                all other registered nodes.
                 @param node:myt.Node the node to set the attribute to true on.
                 @returns {undefined} */
             setTrue: function(node) {
@@ -159,12 +153,7 @@
                 @param node:myt.Node the node to test.
                 @returns {undefined} */
             isRegistered: function(node) {
-                const nodes = this.__nodes;
-                let i = nodes.length;
-                while (i) {
-                    if (node === nodes[--i]) return true;
-                }
-                return false;
+                return this.__nodes.includes(node);
             }
         });
     
@@ -198,18 +187,12 @@
         
         // Methods /////////////////////////////////////////////////////////////
         isRegisteredWithBAG: function(group) {
-            const groups = this.__bags;
-            let i = groups.length;
-            while (i) {
-                if (groups[--i] === group) return true;
-            }
-            return false;
+            return this.__bags.includes(group);
         },
         
         getBAG: (attrName, groupId) => BAG.getGroup(attrName, groupId),
         
-        /** Adds this node to the BAG for the groupId and
-            attribute name.
+        /** Adds this node to the BAG for the groupId and attribute name.
             @param attrName:string
             @param groupId:string
             @returns {undefined} */
@@ -226,8 +209,7 @@
             }
         },
         
-        /** Removes this node from the BAG for the groupId and
-            attribute name.
+        /** Removes this node from the BAG for the groupId and attribute name.
             @param attrName:string
             @param groupId:string
             @returns {undefined} */
@@ -243,8 +225,7 @@
                         groups.splice(i, 1);
                         group.unregister(this);
                     } else if (g.attrName === attrName) {
-                        // Don't detach if another group is listening to 
-                        // the same attr.
+                        // Don't detach if another group is listening to the same attr.
                         detach = false;
                     }
                 }

@@ -16,27 +16,22 @@
                 floatingValignOffset:number
             
             Attributes:
-                floatingPanelId:string If defined this is the panel ID that 
-                    will be used by default in the various methods that 
-                    require a panel ID.
-                floatingAlign:string:number The horizontal alignment for panels 
-                    shown by this anchor. If the value is a string it is an 
-                    alignment identifier relative to this anchor. If the value 
-                    is a number it is an absolute position in pixels. Allowed 
-                    values: 'outsideLeft', 'insideLeft', 'insideRight', 
-                    'outsideRight' or a number.
-                floatingValign:string:number The vertical alignment for panels 
-                    shown by this anchor. If the value is a string it is an 
-                    alignment identifier relative to this anchor. If the value 
-                    is a number it is an absolute position in pixels. Allowed 
-                    values: 'outsideTop', 'insideTop', 'insideBottom', 
-                    'outsideBottom' or a number.
-                floatingAlignOffset:number The number of pixels to offset 
-                    the panel position by horizontally.
-                floatingValignOffset:number The number of pixels to offset 
-                    the panel position by vertically.
-                lastFloatingPanelShown:myt.FloatingPanel A reference to the 
-                    last floating panel shown by this anchor.
+                floatingPanelId:string If defined this is the panel ID that will be used by default 
+                    in the various methods that require a panel ID.
+                floatingAlign:string:number The horizontal alignment for panels shown by this 
+                    anchor. If the value is a string it is an alignment identifier relative to this 
+                    anchor. If the value is a number it is an absolute position in pixels. Allowed 
+                    values: 'outsideLeft', 'insideLeft', 'insideRight', 'outsideRight' or a number.
+                floatingValign:string:number The vertical alignment for panels shown by this anchor.
+                    If the value is a string it is an alignment identifier relative to this anchor.
+                    If the value is a number it is an absolute position in pixels. Allowed values: 
+                    'outsideTop', 'insideTop', 'insideBottom', 'outsideBottom' or a number.
+                floatingAlignOffset:number The number of pixels to offset the panel position 
+                    by horizontally.
+                floatingValignOffset:number The number of pixels to offset the panel position 
+                    by vertically.
+                lastFloatingPanelShown:myt.FloatingPanel A reference to the last floating panel 
+                    shown by this anchor.
             
             @class */
         FloatingPanelAnchor = pkg.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
@@ -68,18 +63,18 @@
             
             // Methods /////////////////////////////////////////////////////////
             createFloatingPanel: function(panelId, panelClass, panelInitAttrs) {
-                panelId = panelId || this.floatingPanelId;
-                panelInitAttrs = panelInitAttrs || {};
+                panelId = panelId ?? this.floatingPanelId;
+                panelInitAttrs = panelInitAttrs ?? {};
                 panelInitAttrs.panelId = panelId;
                 return panelsByPanelId[panelId] = new panelClass(null, panelInitAttrs);
             },
             
             getFloatingPanel: function(panelId) {
-                return getFloatingPanel(panelId || this.floatingPanelId);
+                return getFloatingPanel(panelId ?? this.floatingPanelId);
             },
             
             toggleFloatingPanel: function(panelId) {
-                const fp = this.getFloatingPanel(panelId = panelId || this.floatingPanelId);
+                const fp = this.getFloatingPanel(panelId ??= this.floatingPanelId);
                 if (fp && fp.isShown()) {
                     this.hideFloatingPanel(panelId);
                 } else {
@@ -88,7 +83,7 @@
             },
             
             showFloatingPanel: function(panelId) {
-                const fp = this.getFloatingPanel(panelId || this.floatingPanelId);
+                const fp = this.getFloatingPanel(panelId ?? this.floatingPanelId);
                 if (fp) {
                     fp.show(this);
                     this.setLastFloatingPanelShown(fp);
@@ -96,7 +91,7 @@
             },
             
             hideFloatingPanel: function(panelId) {
-                const fp = this.getFloatingPanel(panelId || this.floatingPanelId);
+                const fp = this.getFloatingPanel(panelId ?? this.floatingPanelId);
                 if (fp) {
                     fp.hide();
                     this.setLastFloatingPanelShown();
@@ -104,8 +99,7 @@
             },
             
             /** Called when a floating panel has been shown for this anchor.
-                @param {!Object} panel - The myt.FloatingPanel that is 
-                    now shown.
+                @param {!Object} panel - The myt.FloatingPanel that is now shown.
                 @returns {undefined} */
             notifyPanelShown: function(panel) {
                 // Subclasses to implement as needed.
@@ -113,29 +107,25 @@
             },
             
             /** Called when a floating panel has been hidden for this anchor.
-                @param {!Object} panel - The myt.FloatingPanel that is 
-                    now hidden.
+                @param {!Object} panel - The myt.FloatingPanel that is now hidden.
                 @returns {undefined} */
             notifyPanelHidden: function(panel) {
                 // Subclasses to implement as needed.
                 if (this.callSuper) this.callSuper();
             },
             
-            /** Called by the FloatingPanel to determine where to position 
-                itself horizontally. By default this returns the floatingAlign 
-                attribute. Subclasses and instances should override this if 
-                panel specific behavior is needed.
+            /** Called by the FloatingPanel to determine where to position itself horizontally. By 
+                default this returns the floatingAlign attribute. Subclasses and instances should 
+                override this if panel specific behavior is needed.
                 @param {string} panelId - The ID of the panel being positioned.
-                @returns {string|number} - An alignment identifer or 
-                    absolute position. */
+                @returns {string|number} - An alignment identifer or absolute position. */
             getFloatingAlignForPanelId: function(panelId) {
                 return this.floatingAlign;
             },
             
-            /** Called by the FloatingPanel to determine where to position 
-                itself vertically. By default this returns the floatingAlign 
-                attribute. Subclasses and instances should override this if 
-                panel specific behavior is needed.
+            /** Called by the FloatingPanel to determine where to position itself vertically. By 
+                default this returns the floatingAlign attribute. Subclasses and instances should 
+                override this if panel specific behavior is needed.
                 @param {string} panelId - The ID of the panel being positioned.
                 @returns {string|number} - An alignment identifer or absolute 
                     position. */
@@ -143,20 +133,18 @@
                 return this.floatingValign;
             },
             
-            /** Called by the FloatingPanel to determine where to position 
-                itself horizontally. By default this returns the 
-                floatingAlignOffset attribute. Subclasses and instances should 
-                override this if panel specific behavior is needed.
+            /** Called by the FloatingPanel to determine where to position itself horizontally. By 
+                default this returns the floatingAlignOffset attribute. Subclasses and instances 
+                should override this if panel specific behavior is needed.
                 @param {string} panelId - The ID of the panel being positioned.
                 @returns {number} the offset to use. */
             getFloatingAlignOffsetForPanelId: function(panelId) {
                 return this.floatingAlignOffset;
             },
             
-            /** Called by the FloatingPanel to determine where to position 
-                itself vertically. By default this returns the 
-                floatingValignOffset attribute. Subclasses and instances should 
-                override this if panel specific behavior is needed.
+            /** Called by the FloatingPanel to determine where to position itself vertically. By 
+                default this returns the floatingValignOffset attribute. Subclasses and instances 
+                should override this if panel specific behavior is needed.
                 @param {string} panelId - The ID of the panel being positioned.
                 @returns {number} the offset to use. */
             getFloatingValignOffsetForPanelId: function(panelId) {
@@ -164,26 +152,24 @@
             },
             
             /** @overrides myt.FocusObservable
-                @returns {!Object} The last floating panel shown if it exists 
-                    and can be shown. Otherwise it returns the default. */
+                @returns {!Object} The last floating panel shown if it exists and can be shown. 
+                    Otherwise it returns the default. */
             getNextFocus: function() {
                 const last = this.lastFloatingPanelShown;
                 if (last && last.isShown()) return last;
                 if (this.callSuper) return this.callSuper();
             },
             
-            /** Called by the floating panel owned by this anchor to determine 
-                where to go to next after leaving the panel in the forward 
-                direction.
+            /** Called by the floating panel owned by this anchor to determine where to go to next 
+                after leaving the panel in the forward direction.
                 @param {string} panelId
                 @returns {!Object} */
             getNextFocusAfterPanel: function(panelId) {
                 return this;
             },
             
-            /** Called by the floating panel owned by this anchor to determine 
-                where to go to next after leaving the panel in the backward 
-                direction.
+            /** Called by the floating panel owned by this anchor to determine where to go to next 
+                after leaving the panel in the backward direction.
                 @param {string} panelId
                 @returns {!Object} */
             getPrevFocusAfterPanel: function(panelId) {
@@ -194,18 +180,16 @@
     /** A panel that floats above everything else.
         
         Attributes:
-            owner:myt.FloatingPanelAnchor The anchor that currently "owns" 
-                this panel.
+            owner:myt.FloatingPanelAnchor The anchor that currently "owns" this panel.
             panelId:string The unique ID for this panel instance.
-            hideOnMouseDown:boolean If true this panel will be hidden when a
-                mousedown occurs outside the panel. True by default.
-            ignoreOwnerForHideOnMouseDown:boolean If true the owner view for 
-                this panel will also be ignored for mousedown events. True by 
-                default.
-            ignoreOwnerForHideOnBlur:boolean If true the owner view for this
-                panel will also be ignored for blur events. True by default.
-            hideOnBlur:boolean If true this panel will be hidden when a
-                focus traverses outside the panel. True by default.
+            hideOnMouseDown:boolean If true this panel will be hidden when a mousedown occurs 
+                outside the panel. True by default.
+            ignoreOwnerForHideOnMouseDown:boolean If true the owner view for this panel will also 
+                be ignored for mousedown events. True by default.
+            ignoreOwnerForHideOnBlur:boolean If true the owner view for this panel will also be 
+                ignored for blur events. True by default.
+            hideOnBlur:boolean If true this panel will be hidden when a focus traverses outside 
+                the panel. True by default.
         
         @class */
     pkg.FloatingPanel = new JS.Class('FloatingPanel', pkg.View, {
@@ -214,8 +198,7 @@
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            // Create a dom element for the panel and insert it at the end of
-            // the body.
+            // Create a dom element for the panel and insert it at the end of the body.
             const elem = document.createElement('div');
             elem.style.position = 'absolute';
             pkg.getElement().appendChild(elem);
@@ -255,27 +238,24 @@
             return true;
         },
         
-        /** Called when a mousedown occurs outside the floating panel. The 
-            default behavior is to hide the panel. This gives subclasses a 
-            chance to provide different behavior.
+        /** Called when a mousedown occurs outside the floating panel. The default behavior is to 
+            hide the panel. This gives subclasses a chance to provide different behavior.
             @returns {undefined} */
         doMouseDownOutside: function() {
             if (this.hideOnMouseDown) this.hide();
         },
         
         /** @overrides myt.FocusObservable
-            Intercepts focus on this panel and refocuses to the "best" view.
-            When focus enters the panel we give focus to the first focusable
-            descendant of the panel. When leaving we ask the panel anchor
-            where to give focus. */
+            Intercepts focus on this panel and refocuses to the "best" view. When focus enters the 
+            panel we give focus to the first focusable descendant of the panel. When leaving we ask 
+            the panel anchor where to give focus. */
         focus: function(noScroll) {
             if (this.owner && this.isAncestorOf(GlobalFocus.focusedView)) {
                 this.owner[(GlobalFocus.lastTraversalWasForward ? 'getNext' : 'getPrev') + 'FocusAfterPanel'](this.panelId).focus(noScroll);
             } else {
                 const ffv = this.getFirstFocusableDescendant();
                 if (ffv === this) {
-                    // Process normally since focus is actually being set
-                    // on the panel.
+                    // Process normally since focus is actually being set on the panel.
                     this.callSuper(noScroll);
                 } else {
                     ffv.focus(noScroll);
@@ -283,9 +263,8 @@
             }
         },
         
-        /** Gets the view to give focus to when this panel gets focus. Should 
-            be a descendant of the floating panel or the panel itself. Returns 
-            this floating panel by default.
+        /** Gets the view to give focus to when this panel gets focus. Should be a descendant of 
+            the floating panel or the panel itself. Returns this floating panel by default.
             @returns myt.View: The view to give focus to. */
         getFirstFocusableDescendant: function() {
             return this;
@@ -299,8 +278,7 @@
             if (v && !this.isAncestorOf(v)) this.doLostFocus();
         },
         
-        /** Called when focus moves out of the floating panel. Hides the
-            floating panel by default.
+        /** Called when focus moves out of the floating panel. Hides the floating panel by default.
             @returns {undefined} */
         doLostFocus: function() {
             if (this.hideOnBlur) {
@@ -310,16 +288,16 @@
             }
         },
         
-        /** Determines if this floating panel is being "shown" or not. Typically
-            this means the floating panel is visible.
+        /** Determines if this floating panel is being "shown" or not. Typically this means the 
+            floating panel is visible.
             @returns {boolean} True if this panel is shown, otherwise false. */
         isShown: function() {
             return this.visible;
         },
         
         /** Shows the floating panel for the provided myt.FloatingPanelAnchor.
-            @param panelAnchor:myt.FloatingPanelAnchor The floating panel 
-                anchor to show the panel for.
+            @param panelAnchor:myt.FloatingPanelAnchor The floating panel anchor to show the 
+                panel for.
             @returns {undefined} */
         show: function(panelAnchor) {
             if (!this.isShown()) {
@@ -335,9 +313,8 @@
         },
         
         /** Hides the floating panel for the provided myt.FloatingPanelAnchor.
-            @param ignoreRestoreFocus:boolean (Optional) If true the 
-                restoreFocus method will not be called. Defaults to undefined 
-                which is equivalent to false.
+            @param ignoreRestoreFocus:boolean (Optional) If true the restoreFocus method will not 
+                be called. Defaults to undefined which is equivalent to false.
             @returns {undefined} */
         hide: function(ignoreRestoreFocus) {
             if (this.isShown()) {
@@ -351,17 +328,15 @@
             }
         },
         
-        /** Sends the focus back to the owner. Can be overridden to
-            send the focus elsewhere.
+        /** Sends the focus back to the owner. Can be overridden to send the focus elsewhere.
             @returns {undefined} */
         restoreFocus: function() {
             if (this.owner) this.owner.focus();
         },
         
-        /** Updates the x and y position of the floating panel for the provided 
-            floating panel anchor.
-            @param panelAnchor:myt.FloatingPanelAnchor The anchor to update 
-                the location for.
+        /** Updates the x and y position of the floating panel for the provided floating 
+            panel anchor.
+            @param panelAnchor:myt.FloatingPanelAnchor The anchor to update the location for.
             @returns {undefined} */
         updateLocation: function(panelAnchor) {
             this.setOwner(panelAnchor);

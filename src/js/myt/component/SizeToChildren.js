@@ -13,8 +13,8 @@
             func(sv, 'update', 'visible');
         };
     
-    /** A special "layout" that resizes the parent to fit the children rather 
-        than laying out the children.
+    /** A special "layout" that resizes the parent to fit the children rather than laying out 
+        the children.
         
         Events:
             axis:string
@@ -22,13 +22,12 @@
             paddingY:number
         
         Attributes:
-            axis:string The axis along which to resize this view to fit its
-                children. Supported values are 'x', 'y' and 'both'. Defaults 
-                to 'x'.
-            paddingX:number Additional space added on the child extent along 
-                the x-axis. Defaults to 0.
-            paddingY:number Additional space added on the child extent along 
-                the y-axis. Defaults to 0.
+            axis:string The axis along which to resize this view to fit its children. Supported 
+                values are 'x', 'y' and 'both'. Defaults to 'x'.
+            paddingX:number Additional space added on the child extent along the x-axis. 
+                Defaults to 0.
+            paddingY:number Additional space added on the child extent along the y-axis. 
+                Defaults to 0.
         
         @class */
     pkg.SizeToChildren = new JS.Class('SizeToChildren', pkg.Layout, {
@@ -120,15 +119,15 @@
         },
         
         /** @overrides myt.Layout
-            Provides a default implementation that calls update when the
-            visibility of a subview changes. */
+            Provides a default implementation that calls update when the visibility of a 
+            subview changes. */
         startMonitoringSubview: function(sv) {
             updateMonitoringSubview(this, sv, this.attachTo);
         },
         
         /** @overrides myt.Layout
-            Provides a default implementation that calls update when the
-            visibility of a subview changes. */
+            Provides a default implementation that calls update when the visibility of a 
+            subview changes. */
         stopMonitoringSubview: function(sv) {
             updateMonitoringSubview(this, sv, this.detachFrom);
         }

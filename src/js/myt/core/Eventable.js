@@ -1,10 +1,8 @@
-/** An object that provides accessors, events and simple lifecycle management.
-    Useful as a light weight alternative to myt.Node when parent child
-    relationships are not needed.
+/** An object that provides accessors, events and simple lifecycle management. Useful as a light 
+    weight alternative to myt.Node when parent child relationships are not needed.
     
     Attributes:
-        inited:boolean Set to true after this Eventable has completed 
-            initialization.
+        inited:boolean Set to true after this Eventable has completed initialization.
     
     @class */
 myt.Eventable = new JS.Class('Eventable', {
@@ -19,8 +17,7 @@ myt.Eventable = new JS.Class('Eventable', {
     // Constructor /////////////////////////////////////////////////////////////
     /** The standard JSClass initializer function.
         @param {?Object} [attrs] - A map of attribute names and values.
-        @param {?Array} [mixins] - A list of mixins to be added onto
-            the new instance.
+        @param {?Array} [mixins] - A list of mixins to be added onto the new instance.
         @returns {undefined} */
     initialize: function(attrs, mixins) {
         const self = this;
@@ -36,13 +33,13 @@ myt.Eventable = new JS.Class('Eventable', {
         }
         
         self.inited = false;
-        self.init(attrs || {});
+        self.init(attrs ?? {});
     },
     
     
     // Life Cycle //////////////////////////////////////////////////////////////
-    /** Called during initialization. Calls setter methods and lastly, sets 
-        inited to true. Subclasses must callSuper.
+    /** Called during initialization. Calls setter methods and lastly, sets inited to true. 
+        Subclasses must callSuper.
         @param {?Object} attrs - A map of attribute names and values.
         @returns {undefined} */
     init: function(attrs) {

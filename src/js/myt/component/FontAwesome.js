@@ -10,7 +10,7 @@
                     
                     if (!props[1].startsWith('fa-')) props[1] = 'fa-' + props[1];
                     
-                    if (len >= 3) props[2] = sizeClasses[props[2]] || '';
+                    if (len >= 3) props[2] = sizeClasses[props[2]] ?? '';
                     
                     if (len > 3) {
                         for (let i = 3; len > i; i++) {
@@ -52,11 +52,9 @@
     /** An adapter for FontAwesome.
         
         Attributes:
-            icon:string The name of the FA icon to set.
-            size:number A number from 0 to 5 with 0 being normal size 
-                and 5 being the largest size.
-            propeties:string || array A space separated string or list 
-                of FA CSS classes to set.
+            icon:string - The name of the FA icon to set.
+            size:number - A number from 0 to 5 with 0 being normal size and 5 being the largest size.
+            propeties:string || array - A space separated string or list of FA CSS classes to set.
         
         @class */
     pkg.FontAwesome = new JS.Class('FontAwesome', pkg.Markup, {

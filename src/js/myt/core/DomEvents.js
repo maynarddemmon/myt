@@ -10,8 +10,8 @@
         
         getCodeFromEvent = event => event.value.code,
         
-        /** Generates Key Events and passes them on to one or more event 
-            observers. Requires myt.DomObservable as a super mixin.
+        /** Generates Key Events and passes them on to one or more event observers. Requires 
+            myt.DomObservable as a super mixin.
             
             @class */
         KeyObservable = pkg.KeyObservable = new JSModule('KeyObservable', {
@@ -48,9 +48,8 @@
             }
         }),
         
-        /** Generates Mouse Events and passes them on to one or more event 
-            observers. Also provides the capability to capture contextmenu 
-            events and mouse wheel events.
+        /** Generates Mouse Events and passes them on to one or more event observers. Also provides 
+            the capability to capture contextmenu events and mouse wheel events.
             
             Requires: myt.DomObservable super mixin.
             
@@ -76,8 +75,8 @@
                 
                 /** Gets the mouse coordinates from the provided event.
                     @param {!Object} event Event value is a dom event.
-                    @returns {!Object} An object with 'x' and 'y' keys 
-                        containing the x and y mouse position. */
+                    @returns {!Object} An object with 'x' and 'y' keys containing the x and y 
+                        mouse position. */
                 getMouseFromEvent: event => {
                     return {x:event.value.pageX, y:event.value.pageY};
                 },
@@ -100,8 +99,7 @@
             }
         }),
         
-        /** Generates Scroll Events and passes them on to one or more 
-            event observers.
+        /** Generates Scroll Events and passes them on to one or more event observers.
             
             Requires myt.DomObservable as a super mixin.
             
@@ -119,11 +117,10 @@
                 
                 /** Gets the scrollLeft and scrollTop from the event.
                     @param {!Object} event Event value is a dom event.
-                    @returns object with an x and y key each containing 
-                        a number. */
+                    @returns object with an x and y key each containing a number. */
                 getScrollFromEvent: event => {
                     const value = event.value,
-                        target = value.target || value.srcElement;
+                        target = value.target ?? value.srcElement;
                     return {x:target.scrollLeft, y:target.scrollTop};
                 }
             },
@@ -137,8 +134,7 @@
             }
         }),
         
-        /** Generates Touch Events and passes them on to one or more 
-            event observers.
+        /** Generates Touch Events and passes them on to one or more event observers.
             
             Requires: myt.DomObservable super mixin.
             
@@ -167,34 +163,30 @@
             }
         }),
         
-        /** Generates focus and blur events and passes them on to one or more 
-            event observers. Also provides focus related events to a view. 
-            When a view is focused or blurred, myt.global.focus will be 
-            notified via the 'notifyFocus' and 'notifyBlur' methods.
+        /** Generates focus and blur events and passes them on to one or more event observers. 
+            Also provides focus related events to a view. When a view is focused or blurred, 
+            myt.global.focus will be notified via the 'notifyFocus' and 'notifyBlur' methods.
             
             Requires myt.DomObservable as a super mixin.
             
             Events:
-                focused:object Fired when this view gets focus. The value is 
-                    this view.
-                focus:object Fired when this view gets focus. The value is 
-                    a dom focus event.
-                blur:object Fired when this view loses focus. The value is 
-                    a dom focus event.
+                focused:object Fired when this view gets focus. The value is this view.
+                focus:object Fired when this view gets focus. The value is a dom focus event.
+                blur:object Fired when this view loses focus. The value is a dom focus event.
             
             Attributes:
                 focused:boolean Indicates if this view has focus or not.
                 focusable:boolean Indicates if this view can have focus or not.
-                focusIndicator:boolean Indicates if the focus indicator should
-                    be shown for this view or not when it has focus.
+                focusIndicator:boolean Indicates if the focus indicator should be shown for this 
+                    view or not when it has focus.
             
             Virtual Methods:
-                getNextFocus() Implement this method to return the next view 
-                    that should have focus. If null is returned or the method 
-                    is not implemented, normal dom traversal will occur.
-                getPrevFocus() Implement this method to return the prev view 
-                    that should have focus. If null is returned or the method 
-                    is not implemented, normal dom traversal will occur.
+                getNextFocus() Implement this method to return the next view that should have 
+                    focus. If null is returned or the method is not implemented, normal dom 
+                    traversal will occur.
+                getPrevFocus() Implement this method to return the prev view that should have 
+                    focus. If null is returned or the method is not implemented, normal dom 
+                    traversal will occur.
             
             @class */
         // TODO: fire focus and blur events rather than a focused event?
@@ -279,39 +271,36 @@
             
             
             // Methods /////////////////////////////////////////////////////////
-            /** Gives the focus to the next focusable element or, if nothing 
-                else is focusable, blurs away from this element.
+            /** Gives the focus to the next focusable element or, if nothing else is focusable, 
+                blurs away from this element.
                 @returns {undefined} */
             giveAwayFocus: function() {
                 if (this.focused) {
                     // Try to go to next focusable element.
                     GlobalFocus.next();
                     
-                    // If focus loops around to ourself make sure we 
-                    // do not keep it.
+                    // If focus loops around to ourself make sure we do not keep it.
                     if (this.focused) this.blur();
                 }
             },
             
             /** Tests if this view is in a state where it can receive focus.
-                @returns boolean True if this view is visible, enabled, 
-                    focusable and not focus masked, false otherwise. */
+                @returns boolean True if this view is visible, enabled, focusable and not focus 
+                    masked, false otherwise. */
             isFocusable: function() {
                 return this.focusable && !this.disabled && this.isVisible() && 
                     this.searchAncestorsOrSelf(node => node.maskFocus === true) == null;
             },
             
-            /** Calling this method will set focus onto this view if it 
-                is focusable.
-                @param noScroll:boolean (optional) if true is provided no 
-                    auto-scrolling will occur when focus is set.
+            /** Calling this method will set focus onto this view if it is focusable.
+                @param noScroll:boolean (optional) if true is provided no auto-scrolling will 
+                    occur when focus is set.
                 @returns {undefined} */
             focus: function(noScroll) {
                 if (this.isFocusable()) this.getIDE().focus({preventScroll:noScroll});
             },
             
-            /** Removes the focus from this view. Do not call this 
-                method directly.
+            /** Removes the focus from this view. Do not call this method directly.
                 @private
                 @returns {undefined} */
             blur: function() {
@@ -383,9 +372,8 @@
                     return domEvent => {
                         if (!domEvent) domEvent = window.event;
                         
-                        // OPTIMIZATION: prevent extra focus events under 
-                        // special circumstances. See myt.VariableLayout 
-                        // for more detail.
+                        // OPTIMIZATION: prevent extra focus events under special circumstances. 
+                        // See myt.VariableLayout for more detail.
                         if (self._ignoreFocus) {
                             domEvent.cancelBubble = true;
                             if (domEvent.stopPropagation) domEvent.stopPropagation();
@@ -413,8 +401,7 @@
             }
         }),
         
-        /** Generates input events and passes them on to one or more 
-            event observers.
+        /** Generates input events and passes them on to one or more event observers.
             
             Requires myt.DomObservable as a super mixin.
             
@@ -443,8 +430,7 @@
             }
         }),
         
-        /** Generates drag and drop events and passes them on to one or more 
-            event observers.
+        /** Generates drag and drop events and passes them on to one or more event observers.
             
             Requires myt.DomObservable as a super mixin.
             
@@ -477,35 +463,30 @@
         Requires myt.DomElementProxy be included when this mixin is included.
         
         Private Attributes:
-            __dobsbt:object Stores arrays of myt.DomObservers and method 
-                names by event type.
+            __dobsbt:object Stores arrays of myt.DomObservers and method names by event type.
         
         @class */
     pkg.DomObservable = new JSModule('DomObservable', {
         // Methods /////////////////////////////////////////////////////////////
-        /** Adds the observer to the list of event recipients for the 
-            event type.
-            @param {!Object} domObserver - The myt.DomObserver that will be 
-                notified when a dom event occurs.
-            @param {string} methodName - The method name to call on the 
-                dom observer.
+        /** Adds the observer to the list of event recipients for the event type.
+            @param {!Object} domObserver - The myt.DomObserver that will be notified when a dom 
+                event occurs.
+            @param {string} methodName - The method name to call on the dom observer.
             @param {string} type - The type of dom event to register for.
-            @param {boolean} [capture] - Indicates if the event registration 
-                is during capture or bubble phase. Defaults to false, 
-                bubble phase.
+            @param {boolean} [capture] - Indicates if the event registration is during capture or 
+                bubble phase. Defaults to false, bubble phase.
             @param {boolean} [passive]
-            @returns {boolean} - True if the observer was successfully 
-                registered, false otherwise. */
+            @returns {boolean} - True if the observer was successfully registered, 
+                false otherwise. */
         attachDomObserver: function(domObserver, methodName, type, capture, passive) {
             if (domObserver && methodName && type) {
                 capture = !!capture;
                 
                 const methodRef = this.createDomHandler(domObserver, methodName, type);
                 if (methodRef) {
-                    const domObserversByType = this.__dobsbt || (this.__dobsbt = {});
+                    const domObserversByType = this.__dobsbt ??= {};
                     
-                    // Lazy instantiate dom observers array for type and 
-                    // insert observer.
+                    // Lazy instantiate dom observers array for type and insert observer.
                     const domObservers = domObserversByType[type];
                     if (!domObservers) {
                         // Create list with observer
@@ -527,44 +508,40 @@
             return this.getIDE();
         },
         
-        /** Creates a function that will handle the dom event when it is fired
-            by the browser. Must be implemented by the object this mixin is 
-            applied to.
-            @param {!Object} domObserver - The myt.DomObserver that must be 
-                notified when the dom event fires.
-            @param {string} methodName - the name of the function to pass the 
-                event to.
+        /** Creates a function that will handle the dom event when it is fired by the browser. 
+            Must be implemented by the object this mixin is applied to.
+            @param {!Object} domObserver - The myt.DomObserver that must be notified when the dom 
+                event fires.
+            @param {string} methodName - the name of the function to pass the event to.
             @param {string} type - the type of the event to fire.
-            @returns {?Function} - A function to handle the dom event or null 
-                if the event is not supported. */
+            @returns {?Function} - A function to handle the dom event or null if the event is 
+                not supported. */
         createDomHandler: (domObserver, methodName, type) => null,
         
-        /** Used by the createDomHandler implementations of submixins of 
-            myt.DomObservable to implement the standard methodRef.
-            @param {!Object} domObserver - The myt.DomObserver that must be 
-                notified when the dom event fires.
-            @param {string} methodName - The name of the function to pass the 
-                event to.
+        /** Used by the createDomHandler implementations of submixins of myt.DomObservable to 
+            implement the standard methodRef.
+            @param {!Object} domObserver - The myt.DomObserver that must be notified when the dom 
+                event fires.
+            @param {string} methodName - The name of the function to pass the event to.
             @param {string} type - The type of the event to fire.
-            @param {!Function} observableClass - The JS.Class that has the 
-                common event.
-            @param {boolean} [preventDefault] - If true the default behavior
-                of the domEvent will be prevented.
-            @returns {?Function} - A function to handle the dom event or 
-                undefined if the event will not be handled. */
+            @param {!Function} observableClass - The JS.Class that has the common event.
+            @param {boolean} [preventDefault] - If true the default behavior of the domEvent will 
+                be prevented.
+            @returns {?Function} - A function to handle the dom event or undefined if the event 
+                will not be handled. */
         createStandardDomHandler: function(domObserver, methodName, type, observableClass, preventDefault) {
             if (observableClass.EVENT_TYPES[type]) {
                 const self = this, 
                     event = observableClass.EVENT;
                 return domEvent => {
-                    if (!domEvent) domEvent = window.event;
+                    domEvent ??= window.event;
                     
                     event.source = self;
                     event.type = domEvent.type;
                     event.value = domEvent;
                     
-                    // Execute handler function and prevent event bubbling if
-                    // the handler returned false.
+                    // Execute handler function and prevent event bubbling if the handler 
+                    // returned false.
                     if (!domObserver[methodName](event)) {
                         domEvent.cancelBubble = true;
                         if (domEvent.stopPropagation) domEvent.stopPropagation();
@@ -576,15 +553,14 @@
             }
         },
         
-        /** Removes the observer from the list of dom observers for the 
-            event type.
+        /** Removes the observer from the list of dom observers for the event type.
             @param {!Object} domObserver - The myt.DomObserver to unregister.
             @param {string} methodName - The method name to unregister for.
             @param {string} type - The dom event type to unregister for.
-            @param {boolean} [capture] - The event phase to unregister for.
-                Defaults to false if not provided.
-            @returns {boolean} - True if the observer was successfully 
-                unregistered, false otherwise.*/
+            @param {boolean} [capture] - The event phase to unregister for. Defaults to false if 
+                not provided.
+            @returns {boolean} - True if the observer was successfully unregistered, f
+                alse otherwise. */
         detachDomObserver: function(domObserver, methodName, type, capture) {
             if (domObserver && methodName && type) {
                 capture = !!capture;
@@ -595,15 +571,11 @@
                     if (domObservers) {
                         // Remove dom observer
                         const de = this.getDomElementForDomObservable(type);
-                        let retval = false,  
-                            i = domObservers.length;
-                        while (i) {
-                            i -= 4;
-                            if (domObserver === domObservers[i] && 
-                                methodName === domObservers[i + 1] && 
-                                capture === domObservers[i + 3]
-                            ) {
-                                if (de) pkg.removeEventListener(de, type, domObservers[i + 2], capture);
+                        let retval = false;
+                        for (let i = domObservers.length - 4; i >= 0; i -= 4) {
+                            const [obs, method, handler, cap] = domObservers.slice(i, i + 4);
+                            if (domObserver === obs && methodName === method && capture === cap) {
+                                if (de) pkg.removeEventListener(de, type, handler, capture);
                                 domObservers.splice(i, 4);
                                 retval = true;
                             }
@@ -620,13 +592,9 @@
         detachAllDomObservers: function() {
             const domObserversByType = this.__dobsbt;
             if (domObserversByType) {
-                for (const type in domObserversByType) {
-                    const domObservers = domObserversByType[type];
-                    let i = domObservers.length;
-                    while (i) {
-                        const capture = domObservers[--i],
-                            methodRef = domObservers[--i];
-                        i -= 2; // methodName and domObserver
+                for (const [type, domObservers] of Object.entries(domObserversByType)) {
+                    for (let i = domObservers.length - 2; i >= 0; i -= 4) { // Offset by 2 so we can easily slice methodRef and capture.
+                        const [methodRef, capture] = domObservers.slice(i);
                         pkg.removeEventListener(this.getDomElementForDomObservable(type), type, methodRef, capture);
                     }
                     domObservers.length = 0;
@@ -635,15 +603,13 @@
         }
     });
     
-    /** Provides a mechanism to remember which DomObservables this 
-        DomObserver has attached itself to. This is useful when the 
-        instance is being destroyed to automatically cleanup the 
+    /** Provides a mechanism to remember which DomObservables this DomObserver has attached itself 
+        to. This is useful when the instance is being destroyed to automatically cleanup the 
         observer/observable relationships.
         
-        When this mixin is used attachment and detachment should be done 
-        using the 'attachToDom' and 'detachFromDom' methods of this mixin. 
-        If this is not done, it is possible for the relationship between 
-        observer and observable to become broken.
+        When this mixin is used attachment and detachment should be done using the 'attachToDom' 
+        and 'detachFromDom' methods of this mixin. If this is not done, it is possible for the 
+        relationship between observer and observable to become broken.
         
         Private Attributes:
             __dobt: (Object) Holds arrays of DomObservables by event type.
@@ -651,8 +617,7 @@
         @class */
     pkg.DomObserver = new JSModule('DomObserver', {
         // Methods /////////////////////////////////////////////////////////////
-        /** Attaches this DomObserver to the provided DomObservable for the 
-            provided type.
+        /** Attaches this DomObserver to the provided DomObservable for the provided type.
             @param {!Object} observable
             @param {string} methodName
             @param {string} type
@@ -664,8 +629,8 @@
                 capture = !!capture;
                 
                 // Lazy instantiate __dobt map.
-                const observablesByType = this.__dobt || (this.__dobt = {}),
-                    observables = observablesByType[type] || (observablesByType[type] = []);
+                const observablesByType = this.__dobt ??= {},
+                    observables = observablesByType[type] ??= [];
                 
                 // Attach this DomObserver to the DomObservable
                 if (observable.attachDomObserver(this, methodName, type, capture, passive)) {
@@ -674,14 +639,12 @@
             }
         },
         
-        /** Detaches this DomObserver from the DomObservable for the 
-            event type.
+        /** Detaches this DomObserver from the DomObservable for the event type.
             @param {!Object} observable
             @param {string} methodName
             @param {string} type
             @param {boolean} [capture]
-            @returns {boolean} - True if detachment succeeded, 
-                false otherwise. */
+            @returns {boolean} - True if detachment succeeded, false otherwise. */
         detachFromDom: function(observable, methodName, type, capture) {
             if (observable && methodName && type) {
                 capture = !!capture;
@@ -693,14 +656,10 @@
                     if (observables) {
                         // Remove all instances of this observer/methodName/type/capture 
                         // from the observable
-                        let retval = false, 
-                            i = observables.length;
-                        while (i) {
-                            i -= 3;
-                            if (observable === observables[i + 2] && 
-                                methodName === observables[i + 1] && 
-                                capture === observables[i]
-                            ) {
+                        let retval = false;
+                        for (let i = observables.length - 3; i >= 0; i -= 3) {
+                            const [obsCapture, obsMethodName, obsObservable] = observables.slice(i);
+                            if (observable === obsObservable && methodName === obsMethodName && capture === obsCapture) {
                                 if (observable.detachDomObserver(this, methodName, type, capture)) {
                                     observables.splice(i, 3);
                                     retval = true;
@@ -721,10 +680,11 @@
         detachFromAllDomSources: function() {
             const observablesByType = this.__dobt;
             if (observablesByType) {
-                for (const type in observablesByType) {
-                    const observables = observablesByType[type];
-                    let i = observables.length;
-                    while (i) observables[--i].detachDomObserver(this, observables[--i], type, observables[--i]);
+                for (const [type, observables] of Object.entries(observablesByType)) {
+                    for (let i = observables.length - 3; i >= 0; i -= 3) {
+                        const [capture, methodName, observable] = observables.slice(i);
+                        observable.detachDomObserver(this, methodName, type, capture);
+                    }
                     observables.length = 0;
                 }
             }

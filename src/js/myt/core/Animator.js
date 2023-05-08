@@ -81,7 +81,7 @@
         
         globalIdle = pkg.global.idle,
         
-        getTarget = animator => animator.target || animator.parent,
+        getTarget = animator => animator.target ?? animator.parent,
         
         isColorAttr = animator => {
             const target = getTarget(animator);

@@ -1,7 +1,6 @@
 (pkg => {
-    /** Use a shared idx so we can better distibute extra space during
-        small but frequent resizings such as what occurs when slowly
-        resizing a grid. */
+    /** Use a shared idx so we can better distibute extra space during small but frequent resizings 
+        such as what occurs when slowly resizing a grid. */
     let resizeIdx = 0;
     
     const JSClass = JS.Class,
@@ -12,10 +11,10 @@
         
         View = pkg.View,
         
-        defAttr = pkg.AccessorSupport.defAttr,
+        DEFAULT_PLACEMENT = pkg.Node.DEFAULT_PLACEMENT,
         
         // GridController
-        findLastColumn = controller => {
+        findLastVisibleColumn = controller => {
             const hdrs = controller.columnHeaders;
             let i = hdrs.length;
             while (i) {
@@ -47,10 +46,9 @@
                 // Get resizable column info
                 const isGrow = extra > 0,
                     resizeInfo = [];
-                let i = hdrs.length,
-                    hdr;
+                let i = hdrs.length;
                 while (i) {
-                    hdr = hdrs[--i];
+                    const hdr = hdrs[--i];
                     if (hdr.resizable && (isFlex ? (hdr.flex > 0) : (hdr.flex === 0))) {
                         resizeInfo.push({
                             hdr:hdr,
@@ -71,8 +69,8 @@
                             fullCount = 0;
                         }
                         
-                        const info = resizeInfo[resizeIdx];
-                        hdr = info.hdr;
+                        const info = resizeInfo[resizeIdx],
+                            hdr = info.hdr;
                         
                         if (info.full) {
                             ++fullCount;
@@ -143,8 +141,7 @@
         
         /*  Steals width from previous column headers.
             @param {!Object} gridHeader
-            @param {number} diff - The amount to steal. Will be a 
-                negative number.
+            @param {number} diff - The amount to steal. Will be a negative number.
             @returns {number} - The amount of width actually stolen. */
         stealPrevWidth = (gridHeader, diff) => {
             const hdr = getPrevHdr(gridHeader);
@@ -161,8 +158,7 @@
         
         /*  Gives width to previous column headers.
             @param {!Object} gridHeader
-            @param {number} diff - The amount to give. Will be a 
-                positive number.
+            @param {number} diff - The amount to give. Will be a positive number.
             @returns {number} - The amount of width actually given. */
         givePrevWidth = (gridHeader, diff) => {
             const hdr = getPrevHdr(gridHeader);
@@ -179,8 +175,7 @@
         
         /*  Steals width from next column headers.
             @param {!Object} gridHeader
-            @param {number} diff - The amount to steal. Will be a 
-                negative number.
+            @param {number} diff - The amount to steal. Will be a negative number.
             @returns {number} - The amount of width actually stolen. */
         stealNextWidth = (gridHeader, diff) => {
             const hdr = getNextHdr(gridHeader);
@@ -194,8 +189,7 @@
         
         /*  Gives width to next column headers.
             @param {!Object} gridHeader
-            @param {number} diff - The amount to give. Will be a 
-                positive number.
+            @param {number} diff - The amount to give. Will be a positive number.
             @returns {number} - The amount of width actually given. */
         giveNextWidth = (gridHeader, diff) => {
             const hdr = getNextHdr(gridHeader);
@@ -238,21 +232,18 @@
                 maxWidth:number the sum of the maximum widths of the columns.
                 minWidth:number the sum of the minimum widths of the columns.
                 gridWidth:number the width of the grid component.
-                fitToWidth:boolean determines if the columns will always fill 
-                    up the width of the grid or not. Defaults to true.
-                lastColumn:myt.GridColHdr Holds a reference to the last
-                    column header.
-                sort:array An array containing the id of the column to sort by 
-                    and the order to sort by.
-                locked:boolean Prevents the grid from updating the UI. Defaults 
-                    to true. After a grid has been setup a call should be made 
-                    to setLocked(false)
+                fitToWidth:boolean determines if the columns will always fill up the width of the 
+                    grid or not. Defaults to true.
+                lastColumn:myt.GridColHdr Holds a reference to the last column header.
+                sort:array An array containing the id of the column to sort by and the order to 
+                    sort by.
+                locked:boolean Prevents the grid from updating the UI. Defaults to true. After a 
+                    grid has been setup a call should be made to setLocked(false)
             
             Private Attributes:
                 columnHeaders:array An array of column headers in this grid.
                 rows:array An array of rows in this grid.
-                __tempLock:boolean Prevents "change" notifications from 
-                    being processed.
+                __tempLock:boolean Prevents "change" notifications from being processed.
             
             @class */
         GridController = pkg.GridController = new JSModule('GridController', {
@@ -306,8 +297,7 @@
                     this.fitHeadersToWidth();
                     this.__tempLock = false;
                     
-                    // Reset min/max since notifyHdrVisibilityChange 
-                    // will update these values
+                    // Reset min/max since notifyHdrVisibilityChange will update these values
                     this.setMaxWidth(0);
                     this.setMinWidth(0);
                     this.__skipInvisibleHeaders = true;
@@ -336,16 +326,15 @@
             
             
             // Methods /////////////////////////////////////////////////////////
-            /** Sorts the rows according to the current sort criteria. 
-                Subclasses and instances should implement this as needed.
+            /** Sorts the rows according to the current sort criteria. Subclasses and instances 
+                should implement this as needed.
                 @returns {undefined} */
             doSort: () => {},
             
             // Column Headers
             /** Gets the column header before the provided one.
                 @param {!Object} columnHeader
-                @returns {?Object} The myt.GridColHdr or undefined if 
-                    none exists. */
+                @returns {?Object} The myt.GridColHdr or undefined if none exists. */
             getPrevHdr: function(columnHeader) {
                 const hdrs = this.columnHeaders;
                 let idx = this.getHdrIndex(columnHeader);
@@ -359,8 +348,7 @@
             
             /** Gets the column header after the provided one.
                 @param {!Object} columnHeader
-                @returns {?Object} The myt.GridColHdr or undefined if 
-                    none exists. */
+                @returns {?Object} The myt.GridColHdr or undefined if none exists. */
             getNextHdr: function(columnHeader) {
                 const hdrs = this.columnHeaders,
                     len = hdrs.length;
@@ -374,7 +362,7 @@
             },
             
             hasHdr: function(columnHeader) {
-                return this.getHdrIndex(columnHeader) >= 0;
+                return this.columnHeaders.includes(columnHeader);
             },
             
             getHdrIndex: function(columnHeader) {
@@ -425,7 +413,7 @@
                 if (!skip && !this.isLocked()) {
                     this.updateRowsForVisibilityChange(columnHeader);
                     
-                    this.setLastColumn(findLastColumn(this));
+                    this.setLastColumn(findLastVisibleColumn(this));
                     
                     const adjMultiplier = columnHeader.visible ? 1 : -1;
                     this.setMaxWidth(this.maxWidth + columnHeader.maxValue * adjMultiplier);
@@ -442,16 +430,16 @@
             
             // Rows
             hasRow: function(row) {
-                return this.getRowIndex(row) >= 0;
+                return this.rows.includes(row);
             },
             
             getRowIndex: function(row) {
                 return this.rows.indexOf(row);
             },
             
-            /** Gets a row for the provided id and matcher function. If no 
-                matcher function is provided a default function will be used 
-                that assumes each row has a model property and that model 
+            /** Gets a row for the provided id and matcher function. If no matcher function is 
+                provided a default function will be used that assumes each row has a model property 
+                and that model 
                 property has an id property.
                 @param {string} id
                 @param {?Function} [matcherFunc]
@@ -501,8 +489,8 @@
                     let maxExtent = 0;
                     hdrs.forEach(hdr => {maxExtent = mathMax(maxExtent, hdr.x + hdr.width);});
                     
-                    // Distribute extra width to resizable flex columns and 
-                    // then to non-flex columns.
+                    // Distribute extra width to resizable flex columns and then to 
+                    // non-flex columns.
                     calculateAndDistribute(hdrs, this.gridWidth - maxExtent, true, extra => {
                         calculateAndDistribute(hdrs, extra, false, null);
                     });
@@ -512,8 +500,8 @@
             fixupResizerCursors: function() {
                 const hdrs = this.getVisibleHdrs();
                 
-                // Search forward hiding the cursor for each fixed column
-                // until a non-fixed column is encountered
+                // Search forward hiding the cursor for each fixed column until a non-fixed column 
+                // is encountered
                 let allPrevAreFixed = true,
                     firstNonFixedIdx = 0;
                 hdrs.forEach((hdr, idx) => {
@@ -526,8 +514,8 @@
                     }
                 });
                 
-                // Search backward hiding the cursor for each fixed column
-                // until a non-fixed column is encountered
+                // Search backward hiding the cursor for each fixed column until a non-fixed 
+                // column is encountered
                 let allAfterAreFixed = true,
                     i = hdrs.length,
                     lastNonFixedIndex = i - 1;
@@ -544,8 +532,8 @@
                     }
                 }
                 
-                // Handle the case where there is only one resizable column.
-                // When there's only one there is not point in resizing it.
+                // Handle the case where there is only one resizable column. When there's only one 
+                // there is not point in resizing it.
                 if (firstNonFixedIdx === lastNonFixedIndex) hdrs[firstNonFixedIdx].setResizerCursor('', true);
             }
         }),
@@ -558,27 +546,22 @@
                 resizable:boolean
             
             Attributes:
-                columnId:string The unique ID for this column relative 
-                    to the grid it is part of.
-                gridController:myt.GridController the controller for the 
-                    grid this component is part of.
-                flex:number If 1 or more the column will get extra space 
-                    if any exists.
-                resizable:boolean Indicates if this column can be resized 
-                    or not. Defaults to true.
-                last:boolean Indicates if this is the last column header 
-                    or not.
-                sortable:boolean Indicates if this column can be sorted 
-                    or not. Defaults to true.
+                columnId:string The unique ID for this column relative to the grid it is part of.
+                gridController:myt.GridController the controller for the grid this component is 
+                    part of.
+                flex:number If 1 or more the column will get extra space if any exists.
+                resizable:boolean Indicates if this column can be resized or not. Defaults to true.
+                last:boolean Indicates if this is the last column header or not.
+                sortable:boolean Indicates if this column can be sorted or not. Defaults to true.
                 sortState:string The sort state of this column. Allowed 
                     values are:
                         'ascending': Sorted in ascending order.
                         'descending': Sorted in descending order.
                         'none': Not currently an active sort column.
-                cellXAdj:number The amount to shift the x values of cells 
-                    updated by this column. Defaults to 0.
-                cellWidthAdj:number The amount to grow/shrink the width 
-                    of cells updated by this column. Defaults to 0.
+                cellXAdj:number The amount to shift the x values of cells updated by this column. 
+                    Defaults to 0.
+                cellWidthAdj:number The amount to grow/shrink the width of cells updated by this 
+                    column. Defaults to 0.
             
             @class */
         GridColHdr = pkg.GridColHdr = new JSModule('GridColHdr', {
@@ -589,23 +572,23 @@
             initNode: function(parent, attrs) {
                 const self = this;
                 
-                defAttr(attrs, 'resizerCursor', 'col-resize');
+                attrs.resizerCursor ??= 'col-resize';
                 let resizerCursor = attrs.resizerCursor;
                 delete attrs.resizerCursor;
                 
-                defAttr(attrs, 'minValue', 16);
-                defAttr(attrs, 'maxValue', defaultMaxValue);
-                defAttr(attrs, 'value', attrs.minValue);
+                attrs.minValue ??= 16;
+                attrs.maxValue ??= defaultMaxValue;
+                attrs.value ??= attrs.minValue;
                 
-                defAttr(attrs, 'resizable', true);
-                defAttr(attrs, 'flex', 0);
-                defAttr(attrs, 'cellXAdj', 0);
-                defAttr(attrs, 'cellWidthAdj', 0);
-                defAttr(attrs, 'sortable', true);
-                defAttr(attrs, 'sortState', 'none');
+                attrs.resizable ??= true;
+                attrs.flex ??= 0;
+                attrs.cellXAdj ??= 0;
+                attrs.cellWidthAdj ??= 0;
+                attrs.sortable ??= true;
+                attrs.sortState ??= 'none';
                 
                 // Ensure participation in determinePlacement method of myt.Grid
-                defAttr(attrs, 'placement', '*');
+                attrs.placement ??= DEFAULT_PLACEMENT;
                 
                 self.callSuper(parent, attrs);
                 
@@ -731,7 +714,7 @@
             /** @overrides myt.BoundedValueComponent */
             setMinValue: function(v) {
                 const self = this,
-                    oldMinValue = self.minValue || 0, 
+                    oldMinValue = self.minValue ?? 0, 
                     gc = self.gridController;
                 self.callSuper(v);
                 if (gc && self.inited && oldMinValue !== self.minValue) gc.setMinWidth(gc.minWidth + self.minValue - oldMinValue);
@@ -740,7 +723,7 @@
             /** @overrides myt.BoundedValueComponent */
             setMaxValue: function(v) {
                 const self = this,
-                    oldMaxValue = self.maxValue || 0,
+                    oldMaxValue = self.maxValue ?? 0,
                     gc = self.gridController;
                 if (v == null) v = defaultMaxValue;
                 self.callSuper(v);
@@ -778,15 +761,15 @@
         /** Makes a view behave as a row in a grid.
             
             Attributes:
-                gridController:myt.GridConstroller A reference to the grid 
-                    controller that is managing this row.
+                gridController:myt.GridConstroller A reference to the grid controller that is 
+                    managing this row.
             
             @class */
         GridRow = pkg.GridRow = new JSModule('GridRow', {
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
                 // Ensure participation in determinePlacement method of myt.Grid
-                defAttr(attrs, 'placement', '*');
+                attrs.placement ??= DEFAULT_PLACEMENT;
                 
                 this.callSuper(parent, attrs);
                 
@@ -833,9 +816,8 @@
         Attributes:
             rowSpacing:number The spacing between rows. Defaults to 1.
             columnSpacing:number the spacing between columns. Defaults to 1.
-            sizeHeightToRows:boolean If true, this component will be sized to 
-                fit all the rows without showing scrollbars. Defaults to 
-                undefined which is equivalent to false.
+            sizeHeightToRows:boolean If true, this component will be sized to fit all the rows 
+                without showing scrollbars. Defaults to undefined which is equivalent to false.
         
         @class */
     pkg.Grid = new JSClass('Grid', View, {
@@ -849,11 +831,11 @@
                 SpacedLayout = pkg.SpacedLayout;
             
             // Allows horizontal scrolling if the grid columns are too wide.
-            defAttr(attrs, 'overflow', 'autox');
+            attrs.overflow ??= 'autox';
             
-            defAttr(attrs, 'bgColor', '#ccc');
-            defAttr(attrs, 'rowSpacing', 1);
-            defAttr(attrs, 'columnSpacing', 1);
+            attrs.bgColor ??= '#ccc';
+            attrs.rowSpacing ??= 1;
+            attrs.columnSpacing ??= 1;
             
             const isAutoScrolling = attrs.isAutoScrolling;
             delete attrs.isAutoScrolling;
@@ -940,9 +922,9 @@
         
         /** @overrides myt.Node */
         determinePlacement: function(placement, subnode) {
-            // Automatically place column headers and rows in the header and
-            // content views respectively.
-            if (placement === '*') {
+            // Automatically place column headers and rows in the header and content 
+            // views respectively.
+            if (placement === DEFAULT_PLACEMENT) {
                 let target;
                 if (subnode.isA(GridRow)) {
                     target = this.content;
@@ -961,8 +943,8 @@
         
         /** @overrides myt.GridController */
         doSort: function() {
-            const sort = this.sort || ['',''],
-                sortFunc = this.getSortFunction(sort[0], sort[1]);
+            const [sortField, sortOrder] = this.sort ?? ['', ''],
+                sortFunc = this.getSortFunction(sortField, sortOrder);
             if (sortFunc) {
                 const content = this.content, 
                     yLayout = content.yLayout;
@@ -973,8 +955,8 @@
             }
         },
         
-        /** Gets the sort function used to sort the rows. Subclasses and 
-            instances should implement this as needed.
+        /** Gets the sort function used to sort the rows. Subclasses and instances should 
+            implement this as needed.
             @param {string} sortColumnId,
             @param {string} sortOrder
             @returns {!Function}  a comparator function used for sorting. */
@@ -1001,8 +983,7 @@
     /** A simple implementation of a grid column header.
         
         Attributes:
-            sortIconColor:color the color to fill the sort icon with if shown.
-                Defaults to '#666'.
+            sortIconColor:color the color to fill the sort icon with if shown. Defaults to '#666'.
         
         @class */
     pkg.SimpleGridColHdr = new JSClass('SimpleGridColHdr', pkg.SimpleTextButton, {
@@ -1014,14 +995,13 @@
         initNode: function(parent, attrs) {
             const self = this;
             
-            defAttr(attrs, 'activeColor', '#999');
-            defAttr(attrs, 'hoverColor', '#bbb');
-            defAttr(attrs, 'readyColor', '#aaa');
-            defAttr(attrs, 'inset', 2);
-            defAttr(attrs, 'sortIconColor', '#666');
+            attrs.activeColor ??= '#999';
+            attrs.hoverColor ??= '#bbb';
+            attrs.readyColor ??= '#aaa';
+            attrs.inset ??= 2;
+            attrs.sortIconColor ??= '#666';
             
-            defAttr(attrs, 'outset', 2);
-            const outset = attrs.outset;
+            const outset = attrs.outset ?? 2;
             delete attrs.outset;
             
             self.callSuper(parent, attrs);

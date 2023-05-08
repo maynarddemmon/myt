@@ -97,7 +97,7 @@ myt.DrawButton = new JS.Class('DrawButton', myt.Canvas, {
         if (state == null) state = this.__lastState;
         this.__lastState = state;
         
-        (this.drawingMethod || this).draw(this, this.getDrawConfig(state));
+        (this.drawingMethod ?? this).draw(this, this.getDrawConfig(state));
     },
     
     /** Used if no drawing method is found.

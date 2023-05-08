@@ -58,8 +58,6 @@
         
         makeTag = pkg.FontAwesome.makeTag,
         
-        defAttr = pkg.AccessorSupport.defAttr,
-        
         objectAssign = Object.assign,
         
         mathMin = Math.min,
@@ -81,13 +79,13 @@
         DialogButton = new JSClass('DialogButton', TextButton, {
             /** @overrides */
             initNode: function(parent, attrs) {
-                defAttr(attrs, 'height', 17);
-                defAttr(attrs, 'paddingTop', 3);
-                defAttr(attrs, 'paddingLeft', 10);
-                defAttr(attrs, 'paddingRight', 10);
-                defAttr(attrs, 'activeColor', '#bbb');
-                defAttr(attrs, 'hoverColor', '#ddd');
-                defAttr(attrs, 'readyColor', '#ccc');
+                attrs.height ??= 17;
+                attrs.paddingTop ??= 3;
+                attrs.paddingLeft ??= 10;
+                attrs.paddingRight ??= 10;
+                attrs.activeColor ??= '#bbb';
+                attrs.hoverColor ??= '#ddd';
+                attrs.readyColor ??= '#ccc';
                 
                 attrs.domClass = 'mytButtonText';
                 
@@ -151,13 +149,13 @@
                 colorPicker = this;
                 colorPicker._isReady = false;
                 
-                let initialColorHex = attrs.color || TRANSPARENT;
+                let initialColorHex = attrs.color ?? TRANSPARENT;
                 delete attrs.color;
                 
-                supportsAlphaChannel = attrs.alphaChannel || false;
+                supportsAlphaChannel = attrs.alphaChannel ?? false;
                 delete attrs.alphaChannel;
                 
-                defaultPalette = attrs.palette || [];
+                defaultPalette = attrs.palette ?? [];
                 initializePaletteLookup(defaultPalette);
                 delete attrs.palette;
                 
@@ -284,13 +282,13 @@
                 if (supportsAlphaChannel) {
                     let alpha = 'ff';
                     if (colorIsNotTransparent && color.length > 7) {
-                        alpha = color.substring(7,9);
-                        color = color.substring(0,7);
+                        alpha = color.slice(7,9);
+                        color = color.slice(0,7);
                     }
                     alphaChannelSlider.setValue(parseInt(alpha, 16));
                 } else {
                     if (colorIsNotTransparent && color.length > 7) {
-                        color = color.substring(0,7);
+                        color = color.slice(0,7);
                     }
                 }
                 
@@ -646,7 +644,7 @@
                 
                 this.callSuper(parent, attrs);
                 
-                localeData = opt.locales[opt.locale || 'en'];
+                localeData = opt.locales[opt.locale ?? 'en'];
                 dateOnly = opt.dateOnly;
                 timeOnly = opt.timeOnly;
                 firstDayOfWeek = opt.firstDayOfWeek;
@@ -720,7 +718,7 @@
                 
                 this.setWidth(timeListView.visible ? timeListView.x + timeListView.width : calendarView.width);
                 
-                drawForDate(opt.current || new Date());
+                drawForDate(opt.current ?? new Date());
             },
             
             
@@ -731,12 +729,11 @@
         /** A modal panel that contains a Dialog.
             
             Attributes:
-                callbackFunction:function (read only) A function that gets 
-                    called when the dialog is about to be closed. A single 
-                    argument is passed in that indicates the UI element 
-                    interacted with that should close the dialog. Supported 
-                    values are: 'closeBtn', 'cancelBtn' and 'confirmBtn'. The 
-                    function should return true if the close should be aborted.
+                callbackFunction:function (read only) A function that gets called when the dialog 
+                    is about to be closed. A single argument is passed in that indicates the UI 
+                    element interacted with that should close the dialog. Supported values are: 
+                    'closeBtn', 'cancelBtn' and 'confirmBtn'. The function should return true if 
+                    the close should be aborted.
             
             @class */
         Dialog = pkg.Dialog = new JSClass('Dialog', ModalPanel, {
@@ -757,8 +754,7 @@
                 /** The default background color. */
                 BGCOLOR: '#fff',
                 
-                /** Makes the text wrap at 200px and the dialog will be at
-                    least 200px wide. */
+                /** Makes the text wrap at 200px and the dialog will be at least 200px wide. */
                 WRAP_TEXT_DEFAULTS: {
                     width:200,
                     fontWeight:'bold',
@@ -766,8 +762,7 @@
                     wordWrap:'break-word'
                 },
                 
-                /** Makes the text stay on a single line and the dialog sizes 
-                    to fit. */
+                /** Makes the text stay on a single line and the dialog sizes to fit. */
                 NO_WRAP_TEXT_DEFAULTS: {
                     width:'auto',
                     fontWeight:'bold',
@@ -817,7 +812,7 @@
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides */
             initNode: function(parent, attrs) {
-                defAttr(attrs, 'buttonClass', Dialog.BUTTON_CLASS);
+                attrs.buttonClass ??= Dialog.BUTTON_CLASS;
                 
                 this.callSuper(parent, attrs);
                 
@@ -839,8 +834,7 @@
             
             // Methods /////////////////////////////////////////////////////////
             /** Make a standard button for a Dialog.
-                @param {!Object} btnContainer - The myt.View to create the 
-                    button on.
+                @param {!Object} btnContainer - The myt.View to create the button on.
                 @param {!Object} attrs - The attributes for the new button.
                 @returns {!Object} - The created button.*/
             makeButton: function(btnContainer, attrs) {
@@ -851,8 +845,7 @@
             },
             
             /** Creates a close button on the provided targetView.
-                @param {!Object} targetView - The myt.View to create the 
-                    button on.
+                @param {!Object} targetView - The myt.View to create the button on.
                 @returns {!Object} - The created myt.Button. */
             makeCloseButton: function(targetView) {
                 return this.makeButton(targetView, {
@@ -882,8 +875,8 @@
                 this.callSuper(ignoreRestoreFocus);
             },
             
-            /** Called before a dialog is shown to reset state and cleanup 
-                UI elements from the previous display of the Dialog.
+            /** Called before a dialog is shown to reset state and cleanup UI elements from the 
+                previous display of the Dialog.
                 @returns {undefined} */
             destroyContent: function() {
                 hideSpinner(this);
@@ -892,8 +885,7 @@
                     stc = content.sizeToChildren,
                     svs = content.getSubviews();
                 
-                // Destroy all children except the close button since 
-                // that gets reused.
+                // Destroy all children except the close button since that gets reused.
                 let i = svs.length;
                 while (i) {
                     const sv = svs[--i];
@@ -920,10 +912,8 @@
                 content.setBorder(Dialog.BORDER);
             },
             
-            /** Called by each of the buttons that can trigger the dialog to 
-                be hidden.
-                @param {!Object} sourceView - The myt.View that triggered 
-                    the hiding of the dialog.
+            /** Called by each of the buttons that can trigger the dialog to be hidden.
+                @param {!Object} sourceView - The myt.View that triggered the hiding of the dialog.
                 @returns {undefined} */
             doCallback: function(sourceView) {
                 const cbf = this.callbackFunction;
@@ -931,8 +921,8 @@
             },
             
             /** Shows this dialog as a regular dimmer.
-                @param {?Object} opts - If opts.bgColor is provided it will 
-                    be used for the bgColor of the overlay.
+                @param {?Object} opts - If opts.bgColor is provided it will be used for the bgColor 
+                    of the overlay.
                 @returns {undefined} */
             showBlank: function(opts) {
                 this.destroyContent();
@@ -945,15 +935,13 @@
             
             /** Shows a dialog with a message and the standard cancel button.
                 @param {string} msg - The message to show.
-                @param {?Function} [callbackFunction] - A function that gets 
-                    called when the close button is activated. A single 
-                    argument is passed in that indicates the UI element 
-                    interacted with that should close the dialog. Supported 
-                    values are: 'closeBtn', 'cancelBtn' and 'confirmBtn'. The 
-                    function should return true if the close should be aborted.
-                @param {?Object} [opts] - Options that modify how the message 
-                    is displayed. Supports: fontWeight, whiteSpace, wordWrap 
-                    and width.
+                @param {?Function} [callbackFunction] - A function that gets called when the close 
+                    button is activated. A single argument is passed in that indicates the UI 
+                    element interacted with that should close the dialog. Supported values are: 
+                    'closeBtn', 'cancelBtn' and 'confirmBtn'. The function should return true if 
+                    the close should be aborted.
+                @param {?Object} [opts] - Options that modify how the message is displayed. 
+                    Supports: fontWeight, whiteSpace, wordWrap and width.
                 @returns {undefined} */
             showMessage: function(msg, callbackFunction, opts) {
                 const self = this,
@@ -993,7 +981,7 @@
             },
             
             showSimple: function(contentBuilderFunc, callbackFunction, opts, afterSetupFunc) {
-                opts = opts || {};
+                opts = opts ?? {};
                 
                 const self = this,
                     content = self.content,
@@ -1089,12 +1077,10 @@
                 if (afterSetupFunc) afterSetupFunc(self);
             },
             
-            /** Shows a dialog with a spinner and a message and no standard 
-                cancel button.
+            /** Shows a dialog with a spinner and a message and no standard cancel button.
                 @param {string} msg - the message to show.
-                @param {?Objecft} opts - Options that modify how the message 
-                    is displayed. Supports: fontWeight, whiteSpace, wordWrap 
-                    and width.
+                @param {?Objecft} opts - Options that modify how the message is displayed. 
+                    Supports: fontWeight, whiteSpace, wordWrap and width.
                 @returns {undefined} */
             showSpinner: function(msg, opts) {
                 const self = this,
@@ -1136,8 +1122,7 @@
                 opts = objectAssign({}, Dialog.COLOR_PICKER_DEFAULTS, opts);
                 self.destroyContent();
                 
-                // Set the callback function to one wrapped to handle each 
-                // button type.
+                // Set the callback function to one wrapped to handle each button type.
                 self.setCallbackFunction(action => {
                     switch (action) {
                         case 'closeBtn':
@@ -1177,8 +1162,7 @@
                 opts = objectAssign({}, Dialog.DATE_PICKER_DEFAULTS, opts);
                 self.destroyContent();
                 
-                // Set the callback function to one wrapped to handle each 
-                // button type.
+                // Set the callback function to one wrapped to handle each button type.
                 self.setCallbackFunction(action => {
                     switch (action) {
                         case 'closeBtn':
@@ -1198,7 +1182,7 @@
                     y:ModalPanel.PADDING_Y + 24,
                     height:195,
                     opt: {
-                        current:new Date(opts.initialDate || Date.now()),
+                        current:new Date(opts.initialDate ?? Date.now()),
                         dateOnly:opts.dateOnly || false,
                         timeOnly:opts.timeOnly || false,
                         locales:opts.locales,
@@ -1238,9 +1222,9 @@
                     btnConfigKeys = ['active','hover','ready','text'];
                 
                 // Cancel Button
-                let attrs = opts.cancelAttrs || {};
-                defAttr(attrs, 'name', 'cancelBtn');
-                defAttr(attrs, 'text', opts.cancelTxt);
+                let attrs = opts.cancelAttrs ?? {};
+                attrs.name ??= 'cancelBtn';
+                attrs.text ??= opts.cancelTxt;
                 btnConfigKeys.forEach(key => {
                     key += 'Color';
                     if (opts[key] != null) attrs[key] = opts[key];
@@ -1248,9 +1232,9 @@
                 const cancelBtn = self.makeButton(btnContainer, attrs);
                 
                 // Confirm Button
-                attrs = opts.confirmAttrs || {};
-                defAttr(attrs, 'name', 'confirmBtn');
-                defAttr(attrs, 'text', opts.confirmTxt);
+                attrs = opts.confirmAttrs ?? {};
+                attrs.name ??= 'confirmBtn';
+                attrs.text ??= opts.confirmTxt;
                 btnConfigKeys.forEach(key => {
                     key += 'Color';
                     const optsKey = key + 'Confirm';
@@ -1259,7 +1243,7 @@
                 self.makeButton(btnContainer, attrs);
                 
                 // Additional Buttons
-                (opts.buttons || []).forEach(buttonAttrs => {self.makeButton(btnContainer, buttonAttrs);});
+                (opts.buttons ?? []).forEach(buttonAttrs => {self.makeButton(btnContainer, buttonAttrs);});
                 
                 new SizeToChildren(btnContainer, {axis:'y'});
                 new SpacedLayout(btnContainer, {spacing:4, collapseParent:true});

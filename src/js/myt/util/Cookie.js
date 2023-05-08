@@ -1,11 +1,10 @@
 (pkg => {
     const objectAssign = Object.assign,
         
-        /*  Function to convert a stored cookie value into a value that can
-            be returned. */
+        /*  Function to convert a stored cookie value into a value that can be returned. */
         converted = (s, useJson) => {
             // This is a quoted cookie as according to RFC2068, unescape
-            if (s.indexOf('"') === 0) s = s.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+            if (s.charAt(0) === '"') s = s.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
             
             try {return useJson ? JSON.parse(s) : s;} catch(ex) {}
         },
@@ -31,15 +30,13 @@
             // Methods /////////////////////////////////////////////////////////
             /** Reads a cookie.
                 @param {string} key - The name of the cookie to read.
-                @param {?Object} options - Options that determine how the 
-                    cookie is read and/or parsed. Supported options are:
-                        raw:boolean If true the cookie key and value will be 
-                            used as is. Otherwise decodeURIComponent will 
-                            be used.
-                        json:boolean If true JSON.parse will be used to 
-                            parse the cookie value before it is returned.
-                @returns {*} - The cookie value string or a parsed 
-                    cookie value. */
+                @param {?Object} options - Options that determine how the cookie is read and/or 
+                    parsed. Supported options are:
+                        raw:boolean If true the cookie key and value will be used as is. Otherwise 
+                            decodeURIComponent will be used.
+                        json:boolean If true JSON.parse will be used to parse the cookie value 
+                            before it is returned.
+                @returns {*} - The cookie value string or a parsed cookie value. */
             read: (key, options) => {
                 options = objectAssign({}, Cookie.defaults, options);
                 
@@ -64,19 +61,16 @@
             /** Stores a cookie.
                 @param {string} key - the name of the cookie to store.
                 @param {*} value - The value to store.
-                @param {?Object} options - The options that determine how the 
-                    cookie is written and stored. Supported options are:
-                        expires:number the number of days until the 
-                            cookie expires.
+                @param {?Object} options - The options that determine how the cookie is written and 
+                    stored. Supported options are: 
+                        expires:number the number of days until the cookie expires.
                         path:string the path scope for the cookie.
                         domain:string the domain scope for the cookie.
                         secure:boolean the cookie must be secure.
                         samesite:string the samesite property of the cookie.
-                        raw:boolean If true the cookie key and value will be 
-                            used as is. Otherwise encodeURIComponent will 
-                            be used.
-                        json:boolean If true JSON.stringify will be used to 
-                            encode the cookie value.
+                        raw:boolean If true the cookie key and value will be used as is. Otherwise 
+                            encodeURIComponent will be used.
+                        json:boolean If true JSON.stringify will be used to encode the cookie value.
                 @returns {undefined} */
             write: (key, value, options) => {
                 options = objectAssign({}, Cookie.defaults, options);
@@ -101,11 +95,9 @@
                 ].join(''));
             },
             
-            /** Removes a stored cookie by setting its expires option 
-                to -1 days.
+            /** Removes a stored cookie by setting its expires option to -1 days.
                 @param {string} key - the name of the cookie to remove.
-                @param {?Object} options - Options used to read/write the 
-                    cookie.
+                @param {?Object} options - Options used to read/write the cookie.
                 @returns {boolean} - true if a cookie was removed, 
                     false otherwise. */
             remove: (key, options) => {

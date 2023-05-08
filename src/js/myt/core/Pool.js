@@ -6,13 +6,13 @@
             @private
             @param {boolean} lazy - If true a pool will be lazily instantiated.
             @returns {!Object} */
-        getObjPool = (abstractPool, lazy) => lazy ? abstractPool.__op || (abstractPool.__op = []) : abstractPool.__op,
+        getObjPool = (abstractPool, lazy) => lazy ? abstractPool.__op ??= [] : abstractPool.__op,
         
         /*  Get the active objects array.
             @private
             @param {boolean} lazy - If true a list will be lazily instantiated.
             @returns {!Array} */
-        getActiveObjArray = (trackActivesPool, lazy) => lazy ? trackActivesPool.__actives || (trackActivesPool.__actives = []) : trackActivesPool.__actives,
+        getActiveObjArray = (trackActivesPool, lazy) => lazy ? trackActivesPool.__actives ??= [] : trackActivesPool.__actives,
         
         makeInstance = (parent, instanceClass, attrs) => parent ? new instanceClass(parent, attrs) : new instanceClass(),
         
@@ -116,7 +116,7 @@
             initialize: function(instanceClass, instanceParent) {
                 this.callSuper();
                 
-                this.instanceClass = instanceClass || Object;
+                this.instanceClass = instanceClass ?? Object;
                 this.instanceParent = instanceParent;
             },
             

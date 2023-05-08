@@ -25,8 +25,7 @@
         
         sizeWidth = view => {
             if (!view.__hasSetWidth) {
-                // Bounding rect doesn't factor in scaling so we need to 
-                // calculate this ourselves.
+                // Bounding rect doesn't factor in scaling so we need to calculate this ourselves.
                 const w = view.getODE().offsetWidth / view.getEffectiveScaleX();
                 
                 // Circumvent setter
@@ -40,8 +39,7 @@
         
         sizeHeight = view => {
             if (!view.__hasSetHeight) {
-                // Bounding rect doesn't factor in scaling so we need to 
-                // calculate this ourselves.
+                // Bounding rect doesn't factor in scaling so we need to calculate this ourselves.
                 const h = view.getODE().offsetHeight / view.getEffectiveScaleY();
                 
                 // Circumvent setter
@@ -56,22 +54,18 @@
     /** A mixin that sizes the view to the width and height of the dom element.
         
         Attributes:
-            width:number:string If a number the behavior is defined by the
-                superclass. If a string value of 'auto' is provided sizing to
-                the dom will occur. Using 'auto' allows the original SizeToDom
-                behavior to be restored after an explicit width has been set.
-            height:number:string If a number the behavior is defined by the
-                superclass. If a string value of 'auto' is provided sizing to
-                the dom will occur. Using 'auto' allows the original SizeToDom
-                behavior to be restored after an explicit height has been set.
+            width:number:string If a number the behavior is defined by the superclass. If a string 
+                value of 'auto' is provided sizing to the dom will occur. Using 'auto' allows the 
+                original SizeToDom behavior to be restored after an explicit width has been set.
+            height:number:string If a number the behavior is defined by the superclass. If a string 
+                value of 'auto' is provided sizing to the dom will occur. Using 'auto' allows the 
+                original SizeToDom behavior to be restored after an explicit height has been set.
         
         Private Attributes:
-            __hasSetWidth:boolean Indicates the an explicit width has been 
-                set so that width should be used rather than sizing to the 
-                dom element.
-            __hasSetHeight:boolean Indicates the an explicit height has been 
-                set so that height should be used rather than sizing to the 
-                dom element.
+            __hasSetWidth:boolean Indicates the an explicit width has been set so that width should 
+                be used rather than sizing to the dom element.
+            __hasSetHeight:boolean Indicates the an explicit height has been set so that height 
+                should be used rather than sizing to the dom element.
         
         @class */
     pkg.SizeToDom = new JSModule('SizeToDom', {
@@ -103,8 +97,8 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Call this method after any change to the width or height of the dom
-            element would have occurred.
+        /** Call this method after any change to the width or height of the dom element would 
+            have occurred.
             @returns {undefined} */
         sizeViewToDom: function() {
             sizeWidth(this);
@@ -112,19 +106,16 @@
         }
     });
     
-    /** A variation of myt.SizeToDom that sizes the view to the width of the 
-        dom element only.
+    /** A variation of myt.SizeToDom that sizes the view to the width of the dom element only.
         
         Attributes:
-            width:number:string If a number the behavior is defined by the
-                superclass. If a string value of 'auto' is provided sizing to
-                the dom will occur. Using 'auto' allows the original SizeToDom
-                behavior to be restored after an explicit width has been set.
+            width:number:string If a number the behavior is defined by the superclass. If a string 
+                value of 'auto' is provided sizing to the dom will occur. Using 'auto' allows the 
+                original SizeToDom behavior to be restored after an explicit width has been set.
         
         Private Attributes:
-            __hasSetWidth:boolean Indicates the an explicit width has been 
-                set so that width should be used rather than sizing to the 
-                dom element.
+            __hasSetWidth:boolean Indicates the an explicit width has been set so that width should 
+                be used rather than sizing to the dom element.
         
         @class */
     pkg.SizeWidthToDom = new JSModule('SizeWidthToDom', {
@@ -144,27 +135,23 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Call this method after any change to the width of the dom
-            element would have occurred.
+        /** Call this method after any change to the width of the dom element would have occurred.
             @returns {undefined} */
         sizeViewToDom: function() {
             sizeWidth(this);
         }
     });
     
-    /** A variation of myt.SizeToDom that sizes the view to the height of the 
-        dom element only.
+    /** A variation of myt.SizeToDom that sizes the view to the height of the dom element only.
         
         Attributes:
-            height:number:string If a number the behavior is defined by the
-                superclass. If a string value of 'auto' is provided sizing to
-                the dom will occur. Using 'auto' allows the original SizeToDom
-                behavior to be restored after an explicit height has been set.
+            height:number:string If a number the behavior is defined by the superclass. If a string 
+                value of 'auto' is provided sizing to the dom will occur. Using 'auto' allows the 
+                original SizeToDom behavior to be restored after an explicit height has been set.
         
         Private Attributes:
-            __hasSetHeight:boolean Indicates the an explicit height has been 
-                set so that height should be used rather than sizing to the 
-                dom element.
+            __hasSetHeight:boolean Indicates the an explicit height has been set so that height 
+                should be used rather than sizing to the dom element.
         
         @class */
     pkg.SizeHeightToDom = new JSModule('SizeHeightToDom', {
@@ -184,8 +171,7 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Call this method after any change to the height of the dom
-            element would have occurred.
+        /** Call this method after any change to the height of the dom element would have occurred.
             @returns {undefined} */
         sizeViewToDom: function() {
             sizeHeight(this);

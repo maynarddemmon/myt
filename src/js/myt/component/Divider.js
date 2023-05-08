@@ -8,8 +8,6 @@
         STATE_RESTORED_JUST_EXPANDED = 2,
         STATE_EXPANDED = 3,
         
-        defAttr = pkg.AccessorSupport.defAttr,
-        
         /*  Setup the limitToParent constraint.
             @param {!BaseDivider} divider
             @returns {undefined} */
@@ -18,27 +16,26 @@
             divider.constrain('__limitToParent', [divider, 'limitToParent', divider, dim, divider.parent, dim]);
         },
         
-        /** A divider is a UI control that allows the user to resize two area 
-            by dragging the divider left/right or up/down.
+        /** A divider is a UI control that allows the user to resize two area by dragging the 
+            divider left/right or up/down.
             
             Events:
                 limitToParent:number
             
             Attributes:
-                @property {string} axis - Indicates if the divider should be 
-                    constrained horizontally or vertically. Allowed values: 'x' 
-                    or 'y'. This value can only be set during instantiation.
-                @property {number} limitToParent - If set, this will constrain 
-                    the maxValue to the appropriate parent view dimension less 
-                    the limitToParent amount.
-                @property {number} expansionState - Used by the "primary" 
-                    action to update the divider position. Allowed values are:
+                @property {string} axis - Indicates if the divider should be constrained 
+                    horizontally or vertically. Allowed values: 'x' or 'y'. This value can only be 
+                    set during instantiation.
+                @property {number} limitToParent - If set, this will constrain the maxValue to the 
+                    appropriate parent view dimension less the limitToParent amount.
+                @property {number} expansionState - Used by the "primary" action to update the 
+                    divider position. Allowed values are:
                         collapsed:0
                         restored just collapsed:1
                         restored just expanded:2
                         expanded:3
-                @property {number} restoreValue - The value used to restore 
-                    the position in the "primary" action.
+                @property {number} restoreValue - The value used to restore the position in the 
+                    "primary" action.
             
             Private Attributes:
                 __nudgeAcc:number The multiplier in px per nudge.
@@ -52,23 +49,23 @@
             initNode: function(parent, attrs) {
                 const self = this;
                 
-                defAttr(attrs, 'activeColor', '#bbb');
-                defAttr(attrs, 'hoverColor', '#ddd');
-                defAttr(attrs, 'readyColor', '#ccc');
-                defAttr(attrs, 'axis', 'x');
-                defAttr(attrs, 'minValue', 0);
-                defAttr(attrs, 'value', attrs.minValue);
-                defAttr(attrs, 'expansionState', STATE_RESTORED_JUST_EXPANDED);
-                defAttr(attrs, 'focusIndicator', false);
-                defAttr(attrs, 'repeatKeyDown', true);
-                defAttr(attrs, 'activationKeys', [GlobalKeys.CODE_ARROW_LEFT, GlobalKeys.CODE_ARROW_UP, GlobalKeys.CODE_ARROW_RIGHT, GlobalKeys.CODE_ARROW_DOWN, GlobalKeys.CODE_ENTER, GlobalKeys.CODE_SPACE]);
+                attrs.activeColor ??= '#bbb';
+                attrs.hoverColor ??= '#ddd';
+                attrs.readyColor ??= '#ccc';
+                attrs.axis ??= 'x';
+                attrs.minValue ??= 0;
+                attrs.value ??= attrs.minValue;
+                attrs.expansionState ??= STATE_RESTORED_JUST_EXPANDED;
+                attrs.focusIndicator ??= false;
+                attrs.repeatKeyDown ??= true;
+                attrs.activationKeys ??= [GlobalKeys.CODE_ARROW_LEFT, GlobalKeys.CODE_ARROW_UP, GlobalKeys.CODE_ARROW_RIGHT, GlobalKeys.CODE_ARROW_DOWN, GlobalKeys.CODE_ENTER, GlobalKeys.CODE_SPACE];
                 
                 if (attrs.axis === 'y') {
-                    defAttr(attrs, 'height', 6);
-                    defAttr(attrs, 'cursor', 'row-resize');
+                    attrs.height ??= 6;
+                    attrs.cursor ??= 'row-resize';
                 } else {
-                    defAttr(attrs, 'width', 6);
-                    defAttr(attrs, 'cursor', 'col-resize');
+                    attrs.width ??= 6;
+                    attrs.cursor ??= 'col-resize';
                 }
                 self.quickSet(['axis'], attrs);
                 
@@ -77,8 +74,8 @@
                 
                 self.callSuper(parent, attrs);
                 
-                // Do afterwards since value might have been constrained from 
-                // the value provided in attrs.
+                // Do afterwards since the value might have been constrained from the value provided 
+                // in the attrs.
                 if (attrs.restoreValue == null) self.setRestoreValue(self.value);
                 
                 if (self.limitToParent != null) updateLimitToParentConstraint(self);
@@ -119,8 +116,8 @@
             /** Update the x or y position of the divider as the value changes.
                 @overrides myt.ValueComponent
                 @param {number} v - The x or y position to set.
-                @param {boolean} [restoreValueAlso] - If true, the restoreValue
-                    will also be updated.
+                @param {boolean} [restoreValueAlso] - If true, the restoreValue will also 
+                    be updated.
                 @returns {undefined} */
             setValue: function(v, restoreValueAlso) {
                 this.callSuper(v);
@@ -147,8 +144,8 @@
                 self.setMaxValue(self.parent[dim] - self.limitToParent - self[dim]);
             },
             
-            /** Nudge the divider when the arrow keys are used. Nudging 
-                accelerates up to a limit if the key is held down.
+            /** Nudge the divider when the arrow keys are used. Nudging accelerates up to a limit 
+                if the key is held down.
                 @overrides myt.Button. */
             doActivationKeyDown: function(key, isRepeat) {
                 const self = this;
@@ -191,8 +188,7 @@
                         if (rv != null) {
                             self.setExpansionState(STATE_RESTORED_JUST_COLLAPSED);
                             if (rv === minV) {
-                                // Prevent infinite loop if there's nowhere 
-                                // to animate to.
+                                // Prevent infinite loop if there's nowhere to animate to.
                                 if (rv !== maxV) self.doPrimaryAction();
                             } else {
                                 toValue = rv;

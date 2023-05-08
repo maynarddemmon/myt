@@ -127,20 +127,17 @@
             }
         });
     
-    /** Makes an myt.View support being a source for myt.Dropable instances. 
-        Makes use of myt.Draggable for handling drag initiation but this view 
-        is not actually draggable.
+    /** Makes an myt.View support being a source for myt.Dropable instances. Makes use of 
+        myt.Draggable for handling drag initiation but this view is not actually draggable.
         
         Attributes:
-            dropParent:myt.View The view to make the myt.Dropable instances in.
-                Defaults to the myt.RootView that contains this drop source.
-            dropClass:JS.Class The myt.Dropable class that gets created in the
-                default implementation of makeDropable.
-            dropClassAttrs:object The attrs to use when making the dropClass 
-                instance.
-            dropable:mytDropable (read only) The dropable that was most 
-                recently created. Once the dropable has been dropped this will
-                be set to null.
+            dropParent:myt.View The view to make the myt.Dropable instances in. Defaults to the 
+                myt.RootView that contains this drop source.
+            dropClass:JS.Class The myt.Dropable class that gets created in the default 
+                implementation of makeDropable.
+            dropClassAttrs:object The attrs to use when making the dropClass instance.
+            dropable:mytDropable (read only) The dropable that was most recently created. Once the 
+                dropable has been dropped this will be set to null.
         
         @class */
     pkg.DropSource = new JSModule('DropSource', {
@@ -150,7 +147,7 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides */
         initNode: function(parent, attrs) {
-            this.defAttr(attrs, 'distanceBeforeDrag', 2);
+            attrs.distanceBeforeDrag ??= 2;
             if (attrs.dropParent == null) attrs.dropParent = parent.getRoot();
             
             this.callSuper(parent, attrs);
@@ -170,8 +167,7 @@
             
             // Emulate mouse down on the dropable
             if (dropable) {
-                // Remember distance and set to zero so a drag will begin 
-                // for sure.
+                // Remember distance and set to zero so a drag will begin for sure.
                 const origDistance = dropable.distanceBeforeDrag;
                 dropable.distanceBeforeDrag = 0;
                 
@@ -203,7 +199,7 @@
                 dropParent = this.dropParent;
             if (dropClass && dropParent) {
                 const pos = pkg.DomElementProxy.getRelativePosition(this.getIDE(), dropParent.getIDE());
-                return new dropClass(dropParent, Object.assign({}, this.dropClassAttrs, {x:pos.x || 0, y:pos.y || 0}));
+                return new dropClass(dropParent, Object.assign({}, this.dropClassAttrs, {x:pos.x ?? 0, y:pos.y ?? 0}));
             }
         }
     });
@@ -232,48 +228,43 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Called by myt.GlobalDragManager when a dropable is dragged over 
-            this target. Gives this drop target a chance to reject a drop 
-            regardless of drag group. The default implementation returns true 
-            if the view is not disabled.
+        /** Called by myt.GlobalDragManager when a dropable is dragged over this target. Gives this 
+            drop target a chance to reject a drop regardless of drag group. The default 
+            implementation returns true if the view is not disabled.
             @param dropable:myt.Dropable The dropable being dragged.
-            @returns boolean: True if the drop will be allowed, false 
-                otherwise. */
+            @returns boolean: True if the drop will be allowed, false otherwise. */
         willAcceptDrop: function(dropable) {
             // Components must be visible and not disabled to accept a drop.
             return !this.disabled && this.isVisible();
         },
         
-        /** Called by myt.GlobalDragManager when a dropable starts being 
-            dragged that has a matching drag group.
+        /** Called by myt.GlobalDragManager when a dropable starts being dragged that has a 
+            matching drag group.
             @param dropable:myt.Dropable The dropable being dragged.
             @returns {undefined} */
         notifyDragStart: dropable => {},
         
-        /** Called by myt.GlobalDragManager when a dropable stops being 
-            dragged that has a matching drag group.
+        /** Called by myt.GlobalDragManager when a dropable stops being dragged that has a 
+            matching drag group.
             @param dropable:myt.Dropable The dropable no longer being dragged.
             @returns {undefined} */
         notifyDragStop: dropable => {},
         
-        /** Called by myt.GlobalDragManager when a dropable is dragged over 
-            this view and has a matching drag group.
-            @param dropable:myt.Dropable The dropable being dragged over 
-                this view.
+        /** Called by myt.GlobalDragManager when a dropable is dragged over this view and has a 
+            matching drag group.
+            @param dropable:myt.Dropable The dropable being dragged over this view.
             @returns {undefined} */
         notifyDragEnter: dropable => {},
         
-        /** Called by myt.GlobalDragManager when a dropable is dragged out of 
-            this view and has a matching drag group.
-            @param dropable:myt.Dropable The dropable being dragged out of 
-                this view.
+        /** Called by myt.GlobalDragManager when a dropable is dragged out of this view and has a 
+            matching drag group.
+            @param dropable:myt.Dropable The dropable being dragged out of this view.
             @returns {undefined} */
         notifyDragLeave: dropable => {},
         
-        /** Called by myt.GlobalDragManager when a dropable is dropped 
-            onto this view and has a matching drag group.
-            @param dropable:myt.Dropable The dropable being dropped onto 
-                this view.
+        /** Called by myt.GlobalDragManager when a dropable is dropped onto this view and has a 
+            matching drag group.
+            @param dropable:myt.Dropable The dropable being dropped onto this view.
             @returns {undefined} */
         notifyDrop: dropable => {}
     });
@@ -282,10 +273,8 @@
         
         Attributes:
             dropped:boolean Indicates this dropable was just dropped.
-            dropFailed:boolean Indicates this dropable was just dropped 
-                outside of a drop target.
-            dropTarget:myt.DropTarget The drop target this dropable is 
-                currently over.
+            dropFailed:boolean Indicates this dropable was just dropped outside of a drop target.
+            dropTarget:myt.DropTarget The drop target this dropable is currently over.
         
         @class */
     pkg.Dropable = new JSModule('Dropable', {
@@ -299,12 +288,11 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Called by myt.GlobalDragManager when a dropable is dragged over a
-            target. Gives this dropable a chance to reject a drop regardless
-            of drag group. The default implementation returns true.
+        /** Called by myt.GlobalDragManager when a dropable is dragged over a target. Gives this 
+            dropable a chance to reject a drop regardless of drag group. The default implementation 
+            returns true.
             @param dropTarget:myt.DropTarget The drop target dragged over.
-            @returns boolean: True if the drop will be allowed, false 
-                otherwise. */
+            @returns boolean: True if the drop will be allowed, false otherwise. */
         willPermitDrop: dropTarget => true,
         
         /** @overrides myt.Draggable */
@@ -334,16 +322,14 @@
             }
         },
         
-        /** Called by myt.GlobalDragManager when this view is dragged over 
-            a drop target.
+        /** Called by myt.GlobalDragManager when this view is dragged over a drop target.
             @param dropTarget:myt.DropTarget The target that was dragged over.
             @returns {undefined} */
         notifyDragEntering: function(dropTarget) {
             this.setDropTarget(dropTarget);
         },
         
-        /** Called by myt.GlobalDragManager when this view is dragged out of 
-            a drop target.
+        /** Called by myt.GlobalDragManager when this view is dragged out of a drop target.
             @param dropTarget:myt.DropTarget The target that was dragged out of.
             @returns {undefined} */
         notifyDragLeaving: function(dropTarget) {
@@ -351,11 +337,10 @@
         },
         
         /** Called by myt.GlobalDragManager when this view is dropped.
-            @param dropTarget:myt.DropTarget The target that was dropped on. 
-                Will be undefined if this dropable was dropped on no 
-                drop target.
-            @param isAbort:boolean Indicates if the drop was the result of 
-                an abort or a normal drop.
+            @param dropTarget:myt.DropTarget The target that was dropped on. Will be undefined if 
+                this dropable was dropped on no drop target.
+            @param isAbort:boolean Indicates if the drop was the result of an abort or a 
+                normal drop.
             @returns {undefined} */
         notifyDropped: function(dropTarget, isAbort) {
             this.setDropped(true);
@@ -363,13 +348,13 @@
             if (!this.dropTarget) this.setDropFailed(true);
         },
         
-        /** Called after dragging stops and the drop failed. The default
-            implementation does nothing.
+        /** Called after dragging stops and the drop failed. The default implementation 
+            does nothing.
             @returns {undefined} */
         notifyDropFailed: () => {},
         
-        /** Called after dragging stops and the drop was aborted. The default
-            implementation does nothing.
+        /** Called after dragging stops and the drop was aborted. The default implementation 
+            does nothing.
             @returns {undefined} */
         notifyDropAborted: () => {}
     });
@@ -377,15 +362,12 @@
     /** Makes an myt.View auto scroll during drag and drop.
         
         Attributes:
-            scrollBorder:number The thickness of the auto scroll border. 
-                Defaults to 40 pixels.
-            scrollFrequency:number The time between autoscroll adjustments.
-                Defaults to 50 millis.
-            scrollAmount:number The number of pixels to adjust by each time.
-                Defaults to 2 pixels.
-            scrollAcceleration:number The amount to increase scrolling by as 
-                the mouse gets closer to the edge of the view. Setting this 
-                to 0 will result in no acceleration. Defaults to 7.
+            scrollBorder:number The thickness of the auto scroll border. Defaults to 40 pixels.
+            scrollFrequency:number The time between autoscroll adjustments. Defaults to 50 millis.
+            scrollAmount:number The number of pixels to adjust by each time. Defaults to 2 pixels.
+            scrollAcceleration:number The amount to increase scrolling by as the mouse gets closer 
+                to the edge of the view. Setting this to 0 will result in no acceleration. 
+                Defaults to 7.
         
         Private Attributes:
             __amtUp:number
@@ -414,7 +396,7 @@
             this.scrollAmount = 2;
             this.scrollAcceleration = 7;
             
-            this.defAttr(attrs, 'overflow', 'auto');
+            attrs.overflow ??= 'auto';
             
             this.callSuper(parent, attrs);
             
@@ -437,8 +419,8 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Called by myt.GlobalDragManager when a dropable starts 
-            being dragged that has a matching drag group.
+        /** Called by myt.GlobalDragManager when a dropable starts being dragged that has a 
+            matching drag group.
             @param {!Object} dropable - The myt.Dropable being dragged.
             @returns {undefined} */
         notifyAutoScrollerDragStart: function(dropable) {
@@ -448,10 +430,9 @@
             }
         },
         
-        /** Called by myt.GlobalDragManager when a dropable stops being 
-            dragged that has a matching drag group.
-            @param {!Object} dropable - The myt.Dropable no longer 
-                being dragged.
+        /** Called by myt.GlobalDragManager when a dropable stops being dragged that has a 
+            matching drag group.
+            @param {!Object} dropable - The myt.Dropable no longer being dragged.
             @returns {undefined} */
         notifyAutoScrollerDragStop: function(dropable) {
             this.detachFromDom(globalMouse, '__hndlMove', 'mousemove', true);

@@ -184,10 +184,7 @@
             
             const map = this.map;
             let i = from.length;
-            while (i) {
-                const mapEntry = map[from[--i]] || (map[from[i]] = {});
-                mapEntry[transitionName] = to;
-            }
+            while (i) (map[from[--i]] ??= {})[transitionName] = to;
         },
         
         doTransition: function(...args) {
@@ -263,7 +260,7 @@
         
         is: function(stateName) {
             if (isArray(stateName)) {
-                return stateName.indexOf(this.current) >= 0;
+                return stateName.includes(this.current);
             } else {
                 return this.current === stateName;
             }

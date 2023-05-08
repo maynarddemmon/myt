@@ -2,7 +2,7 @@ JS.Packages(function() {
     const file = this.file;
     
     // Package:myt
-    const MYT_ROOT = (global.ROOT || '../src/js/') + 'myt/';
+    const MYT_ROOT = (global.ROOT ?? '../src/js/') + 'myt/';
     
     // JS.Class
     file(MYT_ROOT+'../jsclass/core.js').provides('JS.Class','JS.Module','JS.Singleton');

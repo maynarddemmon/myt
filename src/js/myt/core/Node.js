@@ -1,11 +1,13 @@
 (pkg => {
-    const
+    const 
+        /*  The value that indicates default placement should be used. */
+        DEFAULT_PLACEMENT = '*',
+        
         /*  Get the closest ancestor of the provided Node or the Node itself 
             for which the matcher function returns true. Returns a Node or 
             undefined if no match is found.
                 param node:myt.Node the Node to start searching from.
-                param matcher:function the function to test for matching 
-                    Nodes with. */
+                param matcher:function the function to test for matching Nodes with. */
         getMatchingAncestorOrSelf = (node, matcherFunc) => {
             if (matcherFunc) {
                 while (node) {
@@ -16,18 +18,15 @@
         },
         
         /*  Get the youngest ancestor of the provided Node for which the 
-            matcher function returns true. Returns a Node or undefined if no 
-            match is found.
+            matcher function returns true. Returns a Node or undefined if no match is found.
                 param node:myt.Node the Node to start searching from. This 
                     Node is not tested, but its parent is.
-                param matcher:function the function to test for matching 
-                    Nodes with. */
+                param matcher:function the function to test for matching Nodes with. */
         getMatchingAncestor = (node, matcherFunc) => getMatchingAncestorOrSelf(node ? node.parent : null, matcherFunc),
         
         /*  Adds a named reference to a subnode.
                 param node:Node the node to add the name reference to.
-                param nodeToAdd:Node the node to add the name 
-                    reference for. */
+                param nodeToAdd:Node the node to add the name reference for. */
         addNameRef = (node, nodeToAdd) => {
             const name = nodeToAdd.name;
             if (node[name] === undefined) {
@@ -39,8 +38,7 @@
         
         /*  Removes a named reference to a subnode.
                 param node:Node the node to remove the name reference from.
-                param nodeToRemove:Node the node to remove the name 
-                    reference for. */
+                param nodeToRemove:Node the node to remove the name reference for. */
         removeNameRef = (node, nodeToRemove) => {
             const name = nodeToRemove.name;
             if (node[name] === nodeToRemove) {
@@ -52,7 +50,7 @@
         
         /*  Gets the animation pool if it exists, or lazy instantiates it 
             first if necessary. Returns a myt.TrackActivesPool */
-        getAnimPool = node => node.__animPool || (node.__animPool = new pkg.TrackActivesPool(pkg.Animator, node));
+        getAnimPool = node => node.__animPool ??= new pkg.TrackActivesPool(pkg.Animator, node);
         
     /** A single node within a tree data structure. A node has zero or 
         one parent node and zero or more child nodes. If a node has no 
@@ -68,8 +66,7 @@
             parent:myt.Node Fired when the parent is set.
         
         Attributes:
-            inited:boolean Set to true after this Node has completed 
-                initializing.
+            inited:boolean Set to true after this Node has completed initializing.
             parent:myt.Node The parent of this Node.
             name:string The name of this node. Used to reference this Node 
                 from its parent Node.
@@ -80,8 +77,7 @@
                 to when setParent is called on the subnode. Placement can be 
                 nested using '.' For example 'foo.bar'. The special value of 
                 '*' means use the default placement. For example 'foo.*' means 
-                place in the foo subnode and then in the default placement 
-                for foo.
+                place in the foo subnode and then in the default placement for foo.
             defaultPlacement:string The name of the subnode to add nodes to 
                 when no placement is specified. Defaults to undefined which 
                 means add subnodes directly to this node.
@@ -89,8 +85,7 @@
                 processed for this Node when it is added to a parent Node.
         
         Private Attributes:
-            __animPool:array An myt.TrackActivesPool used by the 'animate' 
-                method.
+            __animPool:array An myt.TrackActivesPool used by the 'animate' method.
             subnodes:array The array of child nodes for this node. Should be
                 accessed through the getSubnodes method.
         
@@ -107,7 +102,8 @@
         // Class Methods and Attributes ////////////////////////////////////////
         extend: {
             getMatchingAncestorOrSelf: getMatchingAncestorOrSelf,
-            getMatchingAncestor: getMatchingAncestor
+            getMatchingAncestor: getMatchingAncestor,
+            DEFAULT_PLACEMENT: DEFAULT_PLACEMENT
         },
         
         
@@ -117,8 +113,7 @@
             @param {?Object} [parent] - The myt.Node (or dom element for 
                 RootViews) that will be set as the parent of this myt.Node.
             @param {?Object} [attrs] - A map of attribute names and values.
-            @param {?Array} [mixins] - A list of mixins to be added onto
-                the new instance.
+            @param {?Array} [mixins] - A list of mixins to be added onto the new instance.
             @returns {undefined} */
         initialize: function(parent, attrs, mixins) {
             const self = this;
@@ -134,7 +129,7 @@
             }
             
             self.inited = false;
-            self.initNode(parent, attrs || {});
+            self.initNode(parent, attrs ?? {});
         },
         
         
@@ -162,8 +157,7 @@
             
             // Destroy subnodes depth first
             if (subs) {
-                let i = subs.length;
-                while (i) subs[--i].destroy();
+                for (let i = subs.length; i > 0;) subs[--i].destroy();
             }
             
             if (self.__animPool) {
@@ -204,7 +198,7 @@
             
             // Use placement if indicated
             if (newParent && !self.ignorePlacement) {
-                let placement = self.placement || newParent.defaultPlacement;
+                let placement = self.placement ?? newParent.defaultPlacement;
                 if (placement) newParent = newParent.determinePlacement(placement, self);
             }
             
@@ -215,7 +209,7 @@
                 // Remove ourselves from our existing parent if we have one.
                 let curParent = self.parent;
                 if (curParent) {
-                    let idx = curParent.getSubnodeIndex(self);
+                    const idx = curParent.getSubnodes().indexOf(self);
                     if (idx > -1) {
                         if (self.name) removeNameRef(curParent, self);
                         curParent.subnodes.splice(idx, 1);
@@ -260,7 +254,7 @@
             the subnodes array if no child Nodes exist.
             @returns {!Array} - An array of subnodes. */
         getSubnodes: function() {
-            return this.subnodes || (this.subnodes = []);
+            return this.subnodes ??= [];
         },
         
         
@@ -276,27 +270,26 @@
             let idx = placement.indexOf('.'),
                 remainder;
             if (idx >= 0) {
-                remainder = placement.substring(idx + 1);
-                placement = placement.substring(0, idx);
+                remainder = placement.slice(idx + 1);
+                placement = placement.slice(0, idx);
             }
             
             // Evaluate placement of '*' as defaultPlacement.
-            if (placement === '*') {
+            if (placement === DEFAULT_PLACEMENT) {
                 placement = this.defaultPlacement;
                 
                 // Default placement may be compound and thus require splitting
                 if (placement) {
                     idx = placement.indexOf('.');
                     if (idx >= 0) {
-                        remainder = placement.substring(idx + 1) + (remainder ? '.' + remainder : '');
-                        placement = placement.substring(0, idx);
+                        remainder = placement.slice(idx + 1) + (remainder ? '.' + remainder : '');
+                        placement = placement.slice(0, idx);
                     }
                 }
                 
                 // It's possible that a placement of '*' comes out here if a
                 // Node has its defaultPlacement set to '*'. This should result
-                // in a null loc when the code below runs which will end up
-                // returning 'this'.
+                // in a null loc when the code below runs which will end up returning 'this'.
             }
             
             const loc = this[placement];
@@ -317,8 +310,7 @@
             return this.parent == null;
         },
         
-        /** Tests if this Node is a descendant of the provided Node or is 
-            the node itself.
+        /** Tests if this Node is a descendant of the provided Node or is the node itself.
             @param {!Object} node - The myt.Node to check for descent from.
             @returns {boolean} */
         isDescendantOf: function(node) {
@@ -335,20 +327,16 @@
             return false;
         },
         
-        /** Tests if this Node is an ancestor of the provided Node or is 
-            the node itself.
+        /** Tests if this Node is an ancestor of the provided Node or is the node itself.
             @param {!Object} node - The myt.Node to check for.
             @returns {boolean} */
         isAncestorOf: function(node) {
             return node ? node.isDescendantOf(this) : false;
         },
         
-        /** Gets the youngest common ancestor of this node and the 
-            provided node.
-            @param {!Object} node - The myt.Node to look for a common 
-                ancestor with.
-            @returns {?Object} The youngest common Node or undefined if 
-                none exists. */
+        /** Gets the youngest common ancestor of this node and the provided node.
+            @param {!Object} node - The myt.Node to look for a common ancestor with.
+            @returns {?Object} The youngest common Node or undefined if none exists. */
         getLeastCommonAncestor: function(node) {
             while (node) {
                 if (this.isDescendantOf(node)) return node;
@@ -375,10 +363,8 @@
         /** Get the youngest ancestor of this Node for which the matcher 
             function returns true. This is a simple wrapper around 
             myt.Node.getMatchingAncestor(this, matcherFunc).
-            @param {!Function} matcherFunc - The function to test for matching 
-                Nodes with.
-            @returns {?Object} - The myt.Node or undefined if no match 
-                is found. */
+            @param {!Function} matcherFunc - The function to test for matching Nodes with.
+            @returns {?Object} - The myt.Node or undefined if no match is found. */
         searchAncestors: function(matcherFunc) {
             return getMatchingAncestor(this, matcherFunc);
         },
@@ -386,10 +372,8 @@
         /** Get the youngest ancestor of this Node or the Node itself for which 
             the matcher function returns true. This is a simple wrapper around 
             myt.Node.getMatchingAncestorOrSelf(this, matcherFunc).
-            @param {!Function} matcherFunc - The function to test for matching 
-                Nodes with.
-            @returns {?Object} - The myt.Node or undefined if no match 
-                is found. */
+            @param {!Function} matcherFunc - The function to test for matching Nodes with.
+            @returns {?Object} - The myt.Node or undefined if no match is found. */
         searchAncestorsOrSelf: function(matcherFunc) {
             return getMatchingAncestorOrSelf(this, matcherFunc);
         },
@@ -412,25 +396,25 @@
         /** Checks if this Node has the provided Node in the subnodes array.
             @param {!Object} node - The sub myt.Node to check for.
             @returns {boolean} true if the subnode is found, false otherwise. */
-        hasSubnode: function(node) {
-            return this.getSubnodeIndex(node) >= 0;
-        },
+        /*hasSubnode: function(node) {
+            return this.getSubnodes().includes(node);
+        },*/
         
         /** Gets the index of the provided Node in the subnodes array.
             @param {!Object} node - The sub myt.Node to get the index for.
             @returns {number} - The index of the subnode or -1 if not found. */
-        getSubnodeIndex: function(node) {
+        /*getSubnodeIndex: function(node) {
             return this.getSubnodes().indexOf(node);
-        },
+        },*/
         
         /** A convienence method to make a Node a child of this Node. The
             standard way to do this is to call the setParent method on the
             prospective child Node.
             @param {!Object} node - The sub myt.Node to add.
             @returns {undefined} */
-        addSubnode: function(node) {
+        /*addSubnode: function(node) {
             node.setParent(this);
-        },
+        },*/
         
         /** A convienence method to make a Node no longer a child of this Node. 
             The standard way to do this is to call the setParent method with 
@@ -438,12 +422,12 @@
             @param {!Object} node - The sub myt.Node to remove.
             @returns {?Object} - The removed myt.Node or undefined if 
                 removal failed. */
-        removeSubnode: function(node) {
+        /*removeSubnode: function(node) {
             if (node.parent === this) {
                 node.setParent();
                 return node;
             }
-        },
+        },*/
         
         /** Called when a subnode is added to this node. Provides a hook for
             subclasses. No need for subclasses to call super. Do not call this

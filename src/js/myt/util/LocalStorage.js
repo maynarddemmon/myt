@@ -1,7 +1,7 @@
 (pkg => {
     const localStorage = global.localStorage,
         
-        getStoreId = storeId => storeId = storeId || 'myt',
+        getStoreId = storeId => storeId = storeId ?? 'myt',
         
         doFunc = (func, delay, timerKey) => {
             if (delay > 0) {

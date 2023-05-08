@@ -205,11 +205,9 @@
             visible:boolean
             cursor:string
             subviewAdded:myt.View Fired when a subview is added to this view.
-            subviewRemoved:myt.View Fired when a subview is removed from 
-                this view.
+            subviewRemoved:myt.View Fired when a subview is removed from this view.
             layoutAdded:myt.Layout Fired when a layout is added to this view.
-            layoutRemoved:myt.Layout Fired when a layout is removed from 
-                this view.
+            layoutRemoved:myt.Layout Fired when a layout is removed from this view.
         
         Attributes:
             tagName:string Determines the name of the DOM element to create for
@@ -228,8 +226,7 @@
                 or any of its subviews. The default is undefined which is 
                 equivalent to false.
             ignoreLayout:boolean Determines if this view should be included 
-                in layouts or not. Default is undefined which is equivalent 
-                to false.
+                in layouts or not. Default is undefined which is equivalent to false.
             layoutHint:* A value that indicates this view is treated as 
                 "special" by the layout. The interpretation of this value 
                 is up to the layout managing the view.
@@ -265,8 +262,7 @@
                 'autoy', 'autox' and 'inherit'. Defaults to undefined which 
                 is equivalent to 'visible'.
             visible:boolean Makes this view visible or not. The default 
-                value is true which means visbility is inherited from the 
-                parent view.
+                value is true which means visbility is inherited from the parent view.
             cursor:string Determines what cursor to show when moused over the 
                 view. Allowed values: 'auto', 'move', 'no-drop', 'col-resize', 
                 'all-scroll', 'pointer', 'not-allowed', 'row-resize', 
@@ -338,8 +334,7 @@
             
             // Necessary since x and y of 0 won't update the dom element 
             // style so this gets things initialized correctly. Without 
-            // this RootViews will have an incorrect initial position 
-            // for x or y of 0.
+            // this RootViews will have an incorrect initial position for x or y of 0.
             const ods = self.getODS();
             ods.left = ods.top = '0px';
             
@@ -363,12 +358,12 @@
                 of the newly created dom element.
             @returns {!Object} a dom element */
         createOurDomElement: function(parent) {
-            const elem = document.createElement(this.tagName || 'div');
+            const elem = document.createElement(this.tagName ?? 'div');
             elem.style.position = 'absolute';
             
             // Make dom elements easier to location via selectors
             const klass = this.klass;
-            elem.className = klass.__cssClassName || (klass.__cssClassName = 'myt-' + klass.__displayName.split('.').join('-'));
+            elem.className = klass.__cssClassName ??= 'myt-' + klass.__displayName.split('.').join('-');
             
             return elem;
         },
@@ -401,7 +396,7 @@
         /** Does lazy instantiation of the subviews array.
             @returns {!Array} */
         getSubviews: function() {
-            return this.subviews || (this.subviews = []);
+            return this.subviews ??= [];
         },
         
         /** Get an array of the subviews in the lexical order of the dom.
@@ -442,7 +437,7 @@
         /** Does lazy instantiation of the layouts array.
             @returns {!Array} */
         getLayouts: function() {
-            return this.layouts || (this.layouts = []);
+            return this.layouts ??= [];
         },
         
         setIgnoreLayout: function(v) {
@@ -988,7 +983,7 @@
             @param {!Object} sv - The myt.View to look for.
             @returns {boolean} true if the subview is found, false otherwise. */
         hasSubview: function(sv) {
-            return this.getSubviewIndex(sv) >= 0;
+            return this.getSubviews().includes(sv);
         },
         
         /** Gets the index of the provided View in the subviews array.
@@ -1035,7 +1030,7 @@
             @param {!Object} layout - The myt.Layout to look for.
             @returns {boolean} true if the layout is found, false otherwise. */
         hasLayout: function(layout) {
-            return this.getLayoutIndex(layout) >= 0;
+            return this.getLayouts().includes(layout);
         },
         
         /** Gets the index of the provided Layout in the layouts array.

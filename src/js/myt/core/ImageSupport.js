@@ -1,11 +1,11 @@
 (pkg => {
     const 
-        /*  Stores widths and heights of images by URL so we don't have to
-            reload them to get sizes. */
+        /*  Stores widths and heights of images by URL so we don't have to reload them to 
+            get sizes. */
         sizeCache = {},
         
-        /*  Tracks requests to get the width and height of an image. Used to 
-            prevent multiple requests being made for the same image URL. */
+        /*  Tracks requests to get the width and height of an image. Used to prevent multiple 
+            requests being made for the same image URL. */
         openQueryCache = {},
         
         getSizeFromCache = imgUrl => sizeCache[imgUrl],
@@ -29,9 +29,8 @@
                         // Start a size query
                         const img = new Image();
                         img.onerror = err => {
-                            // Notify all ImageSupport instances that are 
-                            // waiting for a natural size that an error 
-                            // has occurred.
+                            // Notify all ImageSupport instances that are waiting for a natural 
+                            // size that an error has occurred.
                             const openQueries = openQueryCache[imgUrl];
                             if (openQueries) {
                                 let i = openQueries.length;
@@ -43,8 +42,8 @@
                             }
                         };
                         img.onload = () => {
-                            // Notify all ImageSupport instances that are 
-                            // waiting for a natural size.
+                            // Notify all ImageSupport instances that are waiting for a 
+                            // natural size.
                             const w = img.width,
                                 h = img.height,
                                 openQueries = openQueryCache[imgUrl];
@@ -90,29 +89,23 @@
         
         Attributes:
             imageUrl:string The URL to load the image data from.
-            imageSize:string Determines the size of the image. Allowed values
-                are: 'auto', 'cover', 'contain', absolute ('20px 10px') and 
-                percentage ('100% 50%').
-            imageRepeat:string Determines if an image is repeated or not.
-                Allowed values: 'repeat', 'repeat-x', 'repeat-y', 'no-repeat', 
-                'inherit'. Defaults to 'no-repeat'.
+            imageSize:string Determines the size of the image. Allowed values are: 'auto', 'cover', 
+                'contain', absolute ('20px 10px') and percentage ('100% 50%').
+            imageRepeat:string Determines if an image is repeated or not. Allowed values: 'repeat', 
+                'repeat-x', 'repeat-y', 'no-repeat', 'inherit'. Defaults to 'no-repeat'.
             imagePosition:string Determines where an image is positioned.
-            imageAttachment:string Determines how an image is attached to the 
-                view. Allowed values are: 'scroll', 'fixed', 'inherit'. 
-                The default value is 'scroll'.
-            calculateNaturalSize:boolean Determines if the natural size should 
-                be automatically calculated or not. Defaults to undefined which 
-                is equivalent to false.
-            naturalWidth:number The natural width of the image. Only set if
-                calculateNaturalWidth is true.
-            naturalHeight:number The natural height of the image. Only set if
-                calculateNaturalWidth is true.
-            useNaturalSize:boolean If true this image view will be sized to the
-                naturalWidth and naturalHeight and calculateNaturalSize will be
-                set to true.
-            imageLoadingError:boolean Gets set to true when an error occurs
-                loading the image. The image will be loaded whenever the
-                calculateNaturalSize attribute is set to true.
+            imageAttachment:string Determines how an image is attached to the view. Allowed values 
+                are: 'scroll', 'fixed', 'inherit'. The default value is 'scroll'.
+            calculateNaturalSize:boolean Determines if the natural size should be automatically 
+                calculated or not. Defaults to undefined which is equivalent to false.
+            naturalWidth:number The natural width of the image. Only set if calculateNaturalWidth 
+                is true.
+            naturalHeight:number The natural height of the image. Only set if calculateNaturalWidth 
+                is true.
+            useNaturalSize:boolean If true this image view will be sized to the naturalWidth and 
+                naturalHeight and calculateNaturalSize will be set to true.
+            imageLoadingError:boolean Gets set to true when an error occurs loading the image. The 
+                image will be loaded whenever the calculateNaturalSize attribute is set to true.
         
         @class */
     pkg.ImageSupport = new JS.Module('ImageSupport', {
@@ -125,8 +118,8 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.Node */
         initNode: function(parent, attrs) {
-            this.defAttr(attrs, 'imageRepeat', 'no-repeat');
-            this.defAttr(attrs, 'imageAttachment', 'scroll');
+            attrs.imageRepeat ??= 'no-repeat';
+            attrs.imageAttachment ??= 'scroll';
             
             this.callSuper(parent, attrs);
         },
@@ -218,8 +211,7 @@
                     if (this.naturalHeight) this.setHeight(this.naturalHeight);
                 }
                 
-                // Turn on calculation of natural size if we're going to use
-                // natural size.
+                // Turn on calculation of natural size if we're going to use natural size.
                 if (v && !this.calculateNaturalSize) this.setCalculateNaturalSize(true);
             }
         }

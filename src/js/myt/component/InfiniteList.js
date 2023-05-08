@@ -11,8 +11,6 @@
         GlobalFocus = G.focus,
         GlobalKeys = G.keys,
         
-        defAttr = pkg.AccessorSupport.defAttr,
-        
         DEFAULT_CLASS_KEY = 'default',
         
         /*  Clears the selectedRow while leaving the selectedRowModel. */
@@ -109,16 +107,16 @@
                     rowClasses = defaultClassObj;
                 }
                 
-                defAttr(attrs, 'modelIDName', 'id');
-                defAttr(attrs, 'numericSort', true);
-                defAttr(attrs, 'ascendingSort', true);
-                defAttr(attrs, 'overflow', 'autoy');
-                defAttr(attrs, 'bgColor', '#ccc');
-                defAttr(attrs, 'rowSpacing', 1);
-                defAttr(attrs, 'rowInset', 0);
-                defAttr(attrs, 'rowOutset', 0);
-                defAttr(attrs, 'rowHeight', 30);
-                defAttr(attrs, 'overscrollBehavior', 'auto contain');
+                attrs.modelIDName ??= 'id';
+                attrs.numericSort ??= true;
+                attrs.ascendingSort ??= true;
+                attrs.overflow ??= 'autoy';
+                attrs.bgColor ??= '#ccc';
+                attrs.rowSpacing ??= 1;
+                attrs.rowInset ??= 0;
+                attrs.rowOutset ??= 0;
+                attrs.rowHeight ??= 30;
+                attrs.overscrollBehavior ??= 'auto contain';
                 
                 self._rowExtent = self.rowSpacing = self.rowHeight = 0;
                 self._startIdx = self._endIdx = -1;
@@ -170,7 +168,7 @@
             },
             
             getVisibleRows: function() {
-                return Object.values(this._visibleRowsByIdx || {});
+                return Object.values(this._visibleRowsByIdx ?? {});
             },
             
             getVisibleRowForModel: function(model) {
@@ -355,7 +353,7 @@
                     rowInset = self.rowInset,
                     forceFullReset = self.forceFullResetOnNextRefresh,
                     scrollY = getDomScrollTop(self),
-                    data = self.getListData() || [],
+                    data = self.getListData() ?? [],
                     startIdx = mathMax(0, math.floor((scrollY - rowInset) / rowExtent)),
                     endIdx = math.min(data.length, math.ceil((scrollY - rowInset + self.height) / rowExtent));
                 
@@ -436,12 +434,12 @@
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                defAttr(attrs, 'selectedColor', '#ccf');
-                defAttr(attrs, 'activeColor', '#f8f8f8');
-                defAttr(attrs, 'hoverColor', '#eee');
-                defAttr(attrs, 'readyColor', '#fff');
-                defAttr(attrs, 'focusIndicator', false);
-                defAttr(attrs, 'activationKeys', GlobalKeys.LIST_KEYS);
+                attrs.selectedColor ??= '#ccf';
+                attrs.activeColor ??= '#f8f8f8';
+                attrs.hoverColor ??= '#eee';
+                attrs.readyColor ??= '#fff';
+                attrs.focusIndicator ??= false;
+                attrs.activationKeys ??= GlobalKeys.LIST_KEYS;
                 
                 this.callSuper(parent, attrs);
             },
@@ -638,9 +636,7 @@
             
             /** @overrides myt.InfiniteList */
             getSortFunction: function() {
-                const sort = this.gridHeader.sort || ['',''],
-                    sortColumnId  = sort[0],
-                    sortOrder = sort[1];
+                const [sortColumnId, sortOrder] = this.gridHeader.sort ?? ['',''];
                 return sortColumnId ? pkg.getAlphaObjSortFunc(sortColumnId, sortOrder === 'ascending', false) : this.callSuper();
             },
             
@@ -701,7 +697,7 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides */
         initNode: function(parent, attrs) {
-            defAttr(attrs, 'columnSpacing', 1);
+            attrs.columnSpacing ??= 1;
             
             attrs.overflow = 'hidden';
             

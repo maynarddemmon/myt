@@ -1,7 +1,6 @@
 (pkg => {
     let 
-        /*  The global lock counter. Any value greater than zero sets the 
-            global lock. */
+        /*  The global lock counter. Any value greater than zero sets the global lock. */
         globalLockCount = 0,
         
         /*  The global layout locked status. */
@@ -9,12 +8,10 @@
     
     const JSClass = JS.Class,
         
-        /*  A list of layouts to be updated once the global lock 
-            is released. */
+        /*  A list of layouts to be updated once the global lock is released. */
         deferredLayouts = [],
         
-        /*  Called to set/unset the global lock. Updates all the currently 
-            deferred layouts. */
+        /*  Called to set/unset the global lock. Updates all the currently deferred layouts. */
         setGlobalLock = v => {
             if (globalLock !== v) {
                 globalLock = v;
@@ -31,8 +28,8 @@
             }
         },
         
-        /*  Adds a Layout to the list of layouts that will get updated when 
-            the global lock is released.
+        /*  Adds a Layout to the list of layouts that will get updated when the global lock 
+            is released.
                 param layout:myt.Layout the layout to defer an update for. */
         deferLayoutUpdate = layout => {
             // Don't add a layout that is already deferred.
@@ -84,23 +81,20 @@
             
             Private Attributes:
                 subviews:array An array of Views managed by this layout.
-                __deferredLayout:boolean Marks a layout as deferred if the 
-                    global layout lock is true during a call to 'canUpdate' 
-                    on the layout.
+                __deferredLayout:boolean Marks a layout as deferred if the global layout lock is 
+                    true during a call to 'canUpdate' on the layout.
             
             @class */
         Layout = pkg.Layout = new JSClass('Layout', pkg.Node, {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                /** Increments the global lock that prevents all layouts 
-                    from updating.
+                /** Increments the global lock that prevents all layouts from updating.
                     @returns {undefined} */
                 incrementGlobalLock: () => {
                     if (++globalLockCount === 1) setGlobalLock(true);
                 },
                 
-                /** Decrements the global lock that prevents all layouts 
-                    from updating.
+                /** Decrements the global lock that prevents all layouts from updating.
                     @returns {undefined} */
                 decrementGlobalLock: () => {
                     if (globalLockCount > 0 && --globalLockCount === 0) setGlobalLock(false);
@@ -141,8 +135,8 @@
             setParent: function(parent) {
                 const curParent = this.parent;
                 if (curParent !== parent) {
-                    // Lock during parent change so that old parent is not 
-                    // updated by the calls to removeSubview and addSubview.
+                    // Lock during parent change so that old parent is not updated by the calls to 
+                    // removeSubview and addSubview.
                     const wasNotLocked = !this.locked;
                     if (wasNotLocked) this.locked = true;
                     
@@ -171,8 +165,7 @@
                         this.attachTo(parent, '__hndlPSR', 'subviewRemoved');
                     }
                     
-                    // Clear temporary lock and update if this happened 
-                    // after initialization.
+                    // Clear temporary lock and update if this happened after initialization.
                     if (wasNotLocked) {
                         this.locked = false;
                         if (this.inited && parent) this.update();
@@ -182,12 +175,10 @@
             
             
             // Methods /////////////////////////////////////////////////////////
-            /** Checks if the layout is locked or not. Should be called by the
-                "update" method of each layout to check if it is OK to do the 
-                update. If myt.Layout.locked is true (the global layout lock) 
-                then a deferred layout update will be setup for this Layout. 
-                Once the global lock is unlocked this Layout's 'update' method 
-                will be invoked.
+            /** Checks if the layout is locked or not. Should be called by the "update" method of 
+                each layout to check if it is OK to do the update. If myt.Layout.locked is true (the
+                global layout lock) then a deferred layout update will be setup for this Layout. 
+                Once the global lock is unlocked this Layout's 'update' method will be invoked.
                 @returns {boolean} true if not locked, false otherwise. */
             canUpdate: function() {
                 if (globalLock) {
@@ -197,24 +188,22 @@
                 return !this.locked;
             },
             
-            /** Updates the layout. Subclasses should call canUpdate to check 
-                lock state before trying to do anything.
+            /** Updates the layout. Subclasses should call canUpdate to check lock state before 
+                trying to do anything.
                 @returns {undefined} */
             update: () => {},
             
             // Subview Methods //
-            /** Checks if this Layout has the provided View in the subviews 
-                array.
+            /** Checks if this Layout has the provided View in the subviews array.
                 @param {?Object} sv - The myt.View to check for.
                 @returns true if the subview is found, false otherwise. */
             hasSubview: function(sv) {
-                return this.getSubviewIndex(sv) >= 0;
+                return this.subviews.includes(sv);
             },
             
             /** Gets the index of the provided View in the subviews array.
                 @param {?Object} sv - The myt.View to check for.
-                @returns {number} - The index of the subview or -1 
-                    if not found. */
+                @returns {number} - The index of the subview or -1 if not found. */
             getSubviewIndex: function(sv) {
                 return this.subviews.indexOf(sv);
             },
@@ -230,15 +219,14 @@
                 }
             },
             
-            /** Subclasses should implement this method to start listening to
-                events from the subview that should trigger the update method.
-                @param {?Object} sv - The myt.View to start monitoring for 
-                    changes.
+            /** Subclasses should implement this method to start listening to events from the 
+                subview that should trigger the update method.
+                @param {?Object} sv - The myt.View to start monitoring for changes.
                 @returns {undefined} */
             startMonitoringSubview: sv => {},
             
-            /** Calls startMonitoringSubview for all views. Used by Layout 
-                implementations when a change occurs to the layout that 
+            /** Calls startMonitoringSubview for all views. Used by Layout implementations when a 
+                change occurs to the layout that 
                 requires refreshing all the subview monitoring.
                 @returns {undefined} */
             startMonitoringAllSubviews: function() {
@@ -247,11 +235,9 @@
                 while (i) this.startMonitoringSubview(svs[--i]);
             },
             
-            /** Removes the provided View from the subviews array of this 
-                Layout.
+            /** Removes the provided View from the subviews array of this Layout.
                 @param {?Object} sv - The myt.View to remove from this layout.
-                @returns the index of the removed subview or -1 if 
-                    not removed. */
+                @returns the index of the removed subview or -1 if not removed. */
             removeSubview: function(sv) {
                 if (this.ignore(sv)) return -1;
                 
@@ -264,18 +250,15 @@
                 return idx;
             },
             
-            /** Subclasses should implement this method to stop listening to
-                events from the subview that would trigger the update method. 
-                This should remove all listeners that were setup in 
-                startMonitoringSubview.
-                @param {?Object} sv - The myt.View to stop monitoring 
-                    for changes.
+            /** Subclasses should implement this method to stop listening to events from the 
+                subview that would trigger the update method. This should remove all listeners that 
+                were setup in startMonitoringSubview.
+                @param {?Object} sv - The myt.View to stop monitoring for changes.
                 @returns {undefined} */
             stopMonitoringSubview: sv => {},
             
-            /** Calls stopMonitoringSubview for all views. Used by Layout 
-                implementations when a change occurs to the layout that 
-                requires refreshing all the subview monitoring.
+            /** Calls stopMonitoringSubview for all views. Used by Layout implementations when a 
+                change occurs to the layout that requires refreshing all the subview monitoring.
                 @returns {undefined} */
             stopMonitoringAllSubviews: function() {
                 const svs = this.subviews;
@@ -283,12 +266,10 @@
                 while (i) this.stopMonitoringSubview(svs[--i]);
             },
             
-            /** Checks if a subview can be added to this Layout or not. The 
-                default implementation returns the 'ignoreLayout' attributes 
-                of the subview.
+            /** Checks if a subview can be added to this Layout or not. The default implementation 
+                returns the 'ignoreLayout' attributes of the subview.
                 @param {?Object} sv - The myt.View to check.
-                @returns {boolean} true means the subview will be skipped, 
-                    false otherwise. */
+                @returns {boolean} true means the subview will be skipped, false otherwise. */
             ignore: sv => sv.ignoreLayout,
             
             /** If our parent adds a new subview we should add it.
@@ -310,19 +291,16 @@
             },
             
             // Subview ordering //
-            /** Sorts the subviews array according to the provided 
-                sort function.
-                @param {?Function} sortFunc - The sort function to sort 
-                    the subviews with.
+            /** Sorts the subviews array according to the provided sort function.
+                @param {?Function} sortFunc - The sort function to sort the subviews with.
                 @returns {undefined} */
             sortSubviews: function(sortFunc) {
                 this.subviews.sort(sortFunc);
             },
             
-            /** Moves the subview before the target subview in the order the 
-                subviews are layed out. If no target subview is provided, or 
-                it isn't in the layout the subview will be moved to the front 
-                of the list.
+            /** Moves the subview before the target subview in the order the subviews are layed 
+                out. If no target subview is provided, or it isn't in the layout the subview will 
+                be moved to the front of the list.
                 @param {?Object} sv
                 @param {?Object} target
                 @returns {undefined} */
@@ -330,10 +308,9 @@
                 moveSubview(this, sv, target, false);
             },
             
-            /** Moves the subview after the target subview in the order the 
-                subviews are layed out. If no target subview is provided, or 
-                it isn't in the layout the subview will be moved to the back 
-                of the list.
+            /** Moves the subview after the target subview in the order the subviews are layed out. 
+                If no target subview is provided, or it isn't in the layout the subview will be 
+                moved to the back of the list.
                 @param {?Object} sv
                 @param {?Object} target
                 @returns {undefined} */
@@ -342,20 +319,17 @@
             }
         }),
         
-        /** A layout that sets the target attribute name to the target value 
-            for each subview.
+        /** A layout that sets the target attribute name to the target value for each subview.
             
             Events:
                 targetAttrName:string
                 targetValue:*
             
             Attributes:
-                targetAttrName:string the name of the attribute to set on 
-                    each subview.
+                targetAttrName:string the name of the attribute to set on each subview.
                 targetValue:* the value to set the attribute to.
-                setterName:string the name of the setter method to call on 
-                    the subview for the targetAttrName. This value is updated 
-                    when setTargetAttrName is called.
+                setterName:string the name of the setter method to call on the subview for the 
+                    targetAttrName. This value is updated when setTargetAttrName is called.
             
             @class */
         ConstantLayout = pkg.ConstantLayout = new JSClass('ConstantLayout', Layout, {
@@ -381,22 +355,20 @@
             }
         }),
         
-        /** An extension of ConstantLayout that allows for variation based on 
-            the index and subview. An updateSubview method is provided that 
-            can be overriden to provide variable behavior.
+        /** An extension of ConstantLayout that allows for variation based on the index and 
+            subview. An updateSubview method is provided that can be overriden to provide 
+            variable behavior.
             
             Events:
                 collapseParent:boolean
                 reverse:boolean
             
             Attributes:
-                collapseParent:boolean If true the updateParent method will be 
-                    called. The updateParent method will typically resize the 
-                    parent to fit the newly layed out child views. Defaults 
-                    to false.
-                reverse:boolean If true the layout will position the items in 
-                    the opposite order. For example, right to left instead of 
-                    left to right. Defaults to false.
+                collapseParent:boolean If true the updateParent method will be called. The 
+                    updateParent method will typically resize the parent to fit the newly layed 
+                    out child views. Defaults to false.
+                reverse:boolean If true the layout will position the items in the opposite order. 
+                    For example, right to left instead of left to right. Defaults to false.
             
             @class */
         VariableLayout = pkg.VariableLayout = new JSClass('VariableLayout', ConstantLayout, {
@@ -456,19 +428,19 @@
                 }
             },
             
-            /** Called by update before any processing is done. Gives subviews 
-                a chance to do any special setup before update is processed.
+            /** Called by update before any processing is done. Gives subviews a chance to do any 
+                special setup before update is processed.
                 @returns {undefined} */
             doBeforeUpdate: () => {/* Subclasses to implement as needed. */},
             
-            /** Called by update after any processing is done but before the 
-                optional collapsing of parent is done. Gives subviews a chance 
-                to do any special teardown after update is processed.
+            /** Called by update after any processing is done but before the optional collapsing of 
+                parent is done. Gives subviews a chance to do any special teardown after update 
+                is processed.
                 @returns {undefined} */
             doAfterUpdate: () => {/* Subclasses to implement as needed. */},
             
-            /** Provides a default implementation that calls update when the
-                visibility of a subview changes.
+            /** Provides a default implementation that calls update when the visibility of a 
+                subview changes.
                 @overrides myt.Layout
                 @param {?Object} sv
                 @returns {undefined} */
@@ -476,8 +448,8 @@
                 this.attachTo(sv, 'update', 'visible');
             },
             
-            /** Provides a default implementation that calls update when the
-                visibility of a subview changes.
+            /** Provides a default implementation that calls update when the visibility of a 
+                subview changes.
                 @overrides myt.Layout
                 @param {?Object} sv
                 @returns {undefined} */
@@ -486,12 +458,10 @@
             },
             
             /** Called for each subview in the layout.
-                @param {number} count - The number of subviews that have been 
-                    layed out including the current one. i.e. count will be 1 
-                    for the first subview layed out.
+                @param {number} count - The number of subviews that have been layed out including 
+                    the current one. i.e. count will be 1 for the first subview layed out.
                 @param {!Object} sv - The sub myt.View being layed out.
-                @param {string} setterName - The name of the setter method 
-                    to call.
+                @param {string} setterName - The name of the setter method to call.
                 @param {*} value - The layout value.
                 @returns {*} - The value to use for the next subview. */
             updateSubview: (count, sv, setterName, value) => {
@@ -499,42 +469,37 @@
                 return value;
             },
             
-            /** Called for each subview in the layout to determine if the view 
-                should be positioned or not. The default implementation returns 
-                true if the subview is not visible.
+            /** Called for each subview in the layout to determine if the view should be positioned 
+                or not. The default implementation returns true if the subview is not visible.
                 @param {?Object} sv - The sub myt.View to test.
-                @returns {boolean} true if the subview should be skipped during 
-                    layout updates. */
+                @returns {boolean} true if the subview should be skipped during layout updates. */
             skipSubview: sv => !sv.visible,
             
-            /** Called if the collapseParent attribute is true. Subclasses 
-                should implement this if they want to modify the parent view.
-                @param {string} setterName - The name of the setter method to 
-                    call on the parent.
+            /** Called if the collapseParent attribute is true. Subclasses should implement this if 
+                they want to modify the parent view.
+                @param {string} setterName - The name of the setter method to call on the parent.
                 @param {*} value - The value to set on the parent.
                 @returns {undefined} */
             updateParent: (setterName, value) => {/* Subclasses to implement as needed. */}
         }),
         
-        /** An extension of VariableLayout that positions views along an axis 
-            using an inset, outset and spacing value.
+        /** An extension of VariableLayout that positions views along an axis using an inset, 
+            outset and spacing value.
             
             Events:
                 spacing:number
                 outset:number
             
             Attributes:
-                axis:string The orientation of the layout. An alias 
-                    for setTargetAttrName.
-                inset:number Padding before the first subview that gets 
-                    positioned. An alias for setTargetValue.
+                axis:string The orientation of the layout. An alias for setTargetAttrName.
+                inset:number Padding before the first subview that gets positioned. An alias for 
+                    setTargetValue.
                 spacing:number Spacing between each subview.
-                outset:number Padding at the end of the layout. Only gets 
-                    used if collapseParent is true.
-                noAddSubviewOptimization:boolean Turns the optimization to 
-                    suppress layout updates when a subview is added off/on. 
-                    Defaults to undefined which is equivalent to false and 
-                    thus leaves the optimization on.
+                outset:number Padding at the end of the layout. Only gets used if collapseParent 
+                    is true.
+                noAddSubviewOptimization:boolean Turns the optimization to suppress layout updates 
+                    when a subview is added off/on. Defaults to undefined which is equivalent to 
+                    false and thus leaves the optimization on.
             
             @class */
         SpacedLayout = pkg.SpacedLayout = new JSClass('SpacedLayout', VariableLayout, {
@@ -580,10 +545,9 @@
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.Layout */
             addSubview: function(sv) {
-                // OPTIMIZATION: Skip the update call that happens during 
-                // subview add. The boundsWidth/boundsHeight events will be 
-                // fired immediately after and are a more appropriate time to 
-                // do the update.
+                // OPTIMIZATION: Skip the update call that happens during subview add. The 
+                // boundsWidth/boundsHeight events will be fired immediately after and are a more 
+                // appropriate time to do the update.
                 const isLocked = this.locked; // Remember original locked state.
                 if (!this.noAddSubviewOptimization) this.locked = true; // Lock the layout so no updates occur.
                 this.callSuper(sv);
@@ -615,10 +579,9 @@
             }
         });
     
-    /** An extension of SpacedLayout that resizes one or more views to fill 
-        in any remaining space. The resizable subviews should not have a 
-        transform applied to it. The non-resized views may have transforms 
-        applied to them.
+    /** An extension of SpacedLayout that resizes one or more views to fill in any remaining space. 
+        The resizable subviews should not have a transform applied to it. The non-resized views may 
+        have transforms applied to them.
         
         @class */
     pkg.ResizeLayout = new JSClass('ResizeLayout', SpacedLayout, {
@@ -654,16 +617,14 @@
         
         // Methods /////////////////////////////////////////////////////////////
         /** Called when monitoring of width/height should start on our parent.
-            @param {string} attrName - The name of the attribute to 
-                start monitoring.
+            @param {string} attrName - The name of the attribute to start monitoring.
             @returns {undefined} */
         startMonitoringParent: function(attrName) {
             this.attachTo(this.parent, 'update', attrName);
         },
         
         /** Called when monitoring of width/height should stop on our parent.
-            @param {string} attrName - The name of the attribute to 
-                stop monitoring.
+            @param {string} attrName - The name of the attribute to stop monitoring.
             @returns {undefined} */
         stopMonitoringParent: function(attrName) {
             this.detachFrom(this.parent, 'update', attrName);
@@ -722,16 +683,14 @@
         
         /** @overrides myt.SpacedLayout */
         startMonitoringSubview: function(sv) {
-            // Don't monitor width/height of the "stretchy" subviews since this
-            // layout changes them.
+            // Don't monitor width/height of the "stretchy" subviews since this layout changes them.
             if (!(sv.layoutHint > 0)) this.attachTo(sv, 'update', this.measureAttrName);
             this.attachTo(sv, 'update', 'visible');
         },
         
         /** @overrides myt.SpacedLayout */
         stopMonitoringSubview: function(sv) {
-            // Don't monitor width/height of the "stretchy" subviews since this
-            // layout changes them.
+            // Don't monitor width/height of the "stretchy" subviews since this layout changes them.
             if (!(sv.layoutHint > 0)) this.detachFrom(sv, 'update', this.measureAttrName);
             this.detachFrom(sv, 'update', 'visible');
         },
@@ -739,17 +698,15 @@
         /** @overrides myt.SpacedLayout */
         updateParent: (setterName, value) => {/* No resizing of parent since this view expands to fill the parent. */}
     });
-
-    /** An extension of VariableLayout that also aligns each view vertically
-        or horizontally.
+    
+    /** An extension of VariableLayout that also aligns each view vertically or horizontally.
         
         Events:
             align:string
         
         Attributes:
-            align:string Determines which way the views are aligned. Allowed
-                values are 'left', 'center', 'right' and 'top', 'middle', 
-                'bottom'. Defaults to 'middle'.
+            align:string Determines which way the views are aligned. Allowed values are 'left', 
+                'center', 'right' and 'top', 'middle', 'bottom'. Defaults to 'middle'.
         
         @class */
     pkg.AlignedLayout = new JSClass('AlignedLayout', VariableLayout, {
@@ -789,8 +746,8 @@
             if (this.align !== v) {
                 this.align = v;
                 
-                // Update orientation but don't trigger an update since we
-                // already call update at the end of this setter.
+                // Update orientation but don't trigger an update since we already call update at 
+                // the end of this setter.
                 const isLocked = this.locked;
                 this.locked = true;
                 this.setTargetAttrName((v === 'middle' || v === 'bottom' || v === 'top') ? 'y' : 'x');
@@ -855,9 +812,8 @@
         }
     });
     
-    /** An extension of VariableLayout that positions views along an axis 
-        using an inset, outset and spacing value. Views will be wrapped 
-        when they overflow the available space.
+    /** An extension of VariableLayout that positions views along an axis using an inset, outset 
+        and spacing value. Views will be wrapped when they overflow the available space.
         
         Supported Layout Hints:
             break:string Will force the subview to start a new line/column.
@@ -930,16 +886,14 @@
         
         // Methods /////////////////////////////////////////////////////////////
         /** Called when monitoring of width/height should start on our parent.
-            @param {string} measureAttrName - The name of the attribute to 
-                start monitoring.
+            @param {string} measureAttrName - The name of the attribute to start monitoring.
             @returns {undefined} */
         startMonitoringParent: function(measureAttrName) {
             this.attachTo(this.parent, 'update', measureAttrName);
         },
         
         /** Called when monitoring of width/height should stop on our parent.
-            @param {string} measureAttrName - The name of the attribute to 
-                stop monitoring.
+            @param {string} measureAttrName - The name of the attribute to stop monitoring.
             @returns {undefined} */
         stopMonitoringParent: function(measureAttrName) {
             this.detachFrom(this.parent, 'update', measureAttrName);
@@ -968,16 +922,15 @@
             // The maximum size achieved by any line.
             this.maxSize = 0;
             
-            // Track the maximum size of a line. Used to determine how much to
-            // update linePos by when wrapping occurs.
+            // Track the maximum size of a line. Used to determine how much to update linePos by 
+            // when wrapping occurs.
             this.lineSize = 0;
             
-            // The position for each subview in a line. Gets updated for each 
-            // new line of subviews.
+            // The position for each subview in a line. Gets updated for each new line of subviews.
             this.linePos = this.lineInset;
             
-            // The size of the parent view. Needed to determine when to wrap. 
-            // The outset is already subtracted as a performance optimization.
+            // The size of the parent view. Needed to determine when to wrap. The outset is already 
+            // subtracted as a performance optimization.
             this.parentSizeLessOutset = this.parent[this.measureAttrName] - this.outset;
         },
         

@@ -10,10 +10,9 @@
             
             Attributes:
                 value:* The stored value.
-                valueFilter:function If it exists, values will be run through 
-                    this filter function before being set on the component. By 
-                    default no valueFilter exists. A value filter function must 
-                    take a single value as an argument and return a value.
+                valueFilter:function If it exists, values will be run through this filter function 
+                    before being set on the component. By default no valueFilter exists. A value 
+                    filter function must take a single value as an argument and return a value.
             
             @class */
         ValueComponent = pkg.ValueComponent = new JSModule('ValueComponent', {
@@ -48,9 +47,8 @@
             // Methods /////////////////////////////////////////////////////////
             /** Combines a value filter with any existing value filter.
                 @param filter:function the value filter to add.
-                @param where:string (optional) Determines where to add the 
-                    filter. Supported values are 'first' and 'last'. Defaults 
-                    to 'first'.
+                @param where:string (optional) Determines where to add the filter. Supported values 
+                    are 'first' and 'last'. Defaults to 'first'.
                 @returns {undefined} */
             chainValueFilter: function(filter, where) {
                 const existingFilter = this.valueFilter;
@@ -69,10 +67,9 @@
             }
         }),
         
-        /** A value that consists of an upper and lower value. The lower value 
-            must be less than or equal to the upper value. The value object 
-            that must be passed into setValue and returned from getValue is 
-            an object of the form: {lower:number, upper:number}.
+        /** A value that consists of an upper and lower value. The lower value must be less than or 
+            equal to the upper value. The value object that must be passed into setValue and 
+            returned from getValue is an object of the form: {lower:number, upper:number}.
             
             @class */
         RangeComponent = pkg.RangeComponent = new JSModule('RangeComponent', {
@@ -145,8 +142,7 @@
             }
         }),
         
-        /** A numeric value component that stays within a minimum and 
-            maximum value.
+        /** A numeric value component that stays within a minimum and maximum value.
             
             Events:
                 minValue:number
@@ -154,12 +150,11 @@
                 snapToInt:boolean
             
             Attributes:
-                minValue:number the largest value allowed. If undefined or 
-                    null no min value is enforced.
-                maxValue:number the lowest value allowed. If undefined or 
-                    null no max value is enforced.
-                snapToInt:boolean If true values can only be integers. 
-                    Defaults to true.
+                minValue:number the largest value allowed. If undefined or null no min value 
+                    is enforced.
+                maxValue:number the lowest value allowed. If undefined or null no max value 
+                    is enforced.
+                snapToInt:boolean If true values can only be integers. Defaults to true.
             
             @class */
         BoundedValueComponent = pkg.BoundedValueComponent = new JSModule('BoundedValueComponent', {
@@ -196,8 +191,7 @@
                     if (this.inited) {
                         this.fireEvent('snapToInt', v);
                         
-                        // Update min, max and value since snap has been 
-                        // turned on
+                        // Update min, max and value since snap has been turned on
                         if (v) {
                             this.setMinValue(this.minValue);
                             this.setMaxValue(this.maxValue);
@@ -251,8 +245,8 @@
             }
         });
     
-    /** A numeric value component that stays within an upper and lower value 
-        and where the value is a range.
+    /** A numeric value component that stays within an upper and lower value and where the value 
+        is a range.
         
         @class */
     pkg.BoundedRangeComponent = new JSModule('BoundedRangeComponent', {

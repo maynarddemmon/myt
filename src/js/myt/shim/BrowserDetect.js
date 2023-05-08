@@ -18,14 +18,14 @@
                 i = data.length;
             while (i) {
                 dataItem = data[--i];
-                versionSearchString = dataItem.ver || dataItem.id;
-                if ((dataItem.str && dataItem.str.indexOf(dataItem.sub) >= 0) || dataItem.prop) return dataItem.id;
+                versionSearchString = dataItem.ver ?? dataItem.id;
+                if ((dataItem.str && dataItem.str.includes(dataItem.sub)) || dataItem.prop) return dataItem.id;
             }
         },
         
         searchVersion = dataString => {
             const index = dataString.indexOf(versionSearchString);
-            if (index >= 0) return parseFloat(dataString.substring(index + versionSearchString.length + 1));
+            if (index >= 0) return parseFloat(dataString.slice(index + versionSearchString.length + 1));
         },
         
         userAgent = navigator.userAgent, 
@@ -39,7 +39,7 @@
                 {str:userAgent,        sub:'Firefox', id:'Firefox'},
                 {str:userAgent,        sub:'Chrome',  id:'Chrome'},
                 {str:userAgent,        sub:'MSIE',    id:'Explorer', ver:'MSIE'}
-            ]) || unknown,
+            ]) ?? unknown,
             
             version:searchVersion(userAgent) || searchVersion(navigator.appVersion) || unknown,
             
@@ -48,7 +48,7 @@
                 {str:platform,  sub:'Linux',  id:'Linux'},
                 {str:platform,  sub:'Mac',    id:'Mac'},
                 {str:platform,  sub:'Win',    id:'Windows'}
-            ]) || unknown
+            ]) ?? unknown
         };
     
     switch (BrowserDetect.browser) {

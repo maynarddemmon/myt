@@ -5,21 +5,18 @@
         View = pkg.View,
         KeyActivation = pkg.KeyActivation,
         
-        defAttr = pkg.AccessorSupport.defAttr,
-        
         defaultDisabledOpacity = 0.5,
         defaultFocusShadowPropertyValue = [0, 0, 7, '#666'],
         
-        /** Provides button functionality to an myt.View. Most of the 
-            functionality comes from the mixins included by this mixin. 
-            This mixin resolves issues that arise when the various mixins 
-            are used together.
+        /** Provides button functionality to an myt.View. Most of the functionality comes from the 
+            mixins included by this mixin. This mixin resolves issues that arise when the various 
+            mixins are used together.
             
             By default myt.Button instances are focusable.
             
             Private Attributes:
-                __restoreCursor:string The cursor to restore to when the 
-                    button is no longer disabled.
+                __restoreCursor:string The cursor to restore to when the button is no 
+                    longer disabled.
             
             @class */
         Button = pkg.Button = new JSModule('Button', {
@@ -45,8 +42,8 @@
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides */
             initNode: function(parent, attrs) {
-                defAttr(attrs, 'focusable', true);
-                defAttr(attrs, 'cursor', 'pointer');
+                attrs.focusable ??= true;
+                attrs.cursor ??= 'pointer';
                 
                 this.callSuper(parent, attrs);
             },
@@ -86,8 +83,8 @@
                 const self = this;
                 
                 if (self.disabled) {
-                    // Remember the cursor to change back to, but don't 
-                    // re-remember if we're already remembering one.
+                    // Remember the cursor to change back to, but don't re-remember if we're 
+                    // already remembering one.
                     if (self.__restoreCursor == null) self.__restoreCursor = self.cursor;
                     self.setCursor('not-allowed');
                     self.drawDisabledState();
@@ -110,27 +107,26 @@
                 }
             },
             
-            /** Draw the UI when the component has focus. The default 
-                implementation calls drawHoverState.
+            /** Draw the UI when the component has focus. The default implementation 
+                calls drawHoverState.
                 @returns {undefined} */
             drawFocusedState: function() {
                 this.drawHoverState();
             },
             
-            /** Draw the UI when the component is on the verge of being 
-                interacted with. For mouse interactions this corresponds to 
-                the over state.
+            /** Draw the UI when the component is on the verge of being interacted with. For mouse 
+                interactions this corresponds to the over state.
                 @returns {undefined} */
             drawHoverState: () => {/* Subclasses to implement as needed. */},
             
-            /** Draw the UI when the component has a pending activation. For 
-                mouse interactions this corresponds to the down state.
+            /** Draw the UI when the component has a pending activation. For mouse interactions 
+                this corresponds to the down state.
                 @returns {undefined} */
             drawActiveState: () => {/* Subclasses to implement as needed. */},
             
-            /** Draw the UI when the component is ready to be interacted with. 
-                For mouse interactions this corresponds to the enabled state 
-                when the mouse is not over the component.
+            /** Draw the UI when the component is ready to be interacted with. For mouse 
+                interactions this corresponds to the enabled state when the mouse is not over 
+                the component.
                 @returns {undefined} */
             drawReadyState: () => {/* Subclasses to implement as needed. */},
             
@@ -149,17 +145,16 @@
             }
         }),
         
-        /** A mixin that provides activeColor, hoverColor and readyColor
-            attributes to fill the view.
+        /** A mixin that provides activeColor, hoverColor and readyColor attributes to fill 
+            the view.
             
             Attributes:
-                activeColor:string A color string such as '#ff0000' or 
-                    'transparent'. Used when the button is in the active state.
-                hoverColor:string A color string such as '#ff0000' or 
-                    'transparent'. Used when the button is in the hover state.
-                readyColor:string A color string such as '#ff0000' or 
-                    'transparent'. Used when the button is in the ready or 
-                    disabled state.
+                activeColor:string A color string such as '#ff0000' or 'transparent'. Used when the 
+                    button is in the active state.
+                hoverColor:string A color string such as '#ff0000' or 'transparent'. Used when the 
+                    button is in the hover state.
+                readyColor:string A color string such as '#ff0000' or 'transparent'. Used when the 
+                    button is in the ready or disabled state.
             
             @class */
         SimpleButtonStyle = pkg.SimpleButtonStyle = new JSModule('SimpleButtonStyle', {
@@ -219,8 +214,8 @@
             }
         }),
         
-        /** An myt.Button that makes use of activeColor, hoverColor and 
-            readyColor attributes to fill the button.
+        /** An myt.Button that makes use of activeColor, hoverColor and readyColor attributes to 
+            fill the button.
             
             @class */
         SimpleButton = pkg.SimpleButton = new JSClass('SimpleButton', View, {
@@ -234,8 +229,8 @@
             }
         });
     
-    /** A simple button with support for text and a tooltip. Adds a text 
-        element to the inside of the button.
+    /** A simple button with support for text and a tooltip. Adds a text element to the inside of 
+        the button.
         
         Events:
             inset:number
@@ -248,11 +243,11 @@
             inset:number The left padding before the text. Defaults to 0.
             outset:number The right padding after the text. Defaults to 0.
             text:string The text to display on the button.
-            shrinkToFit:boolean When true the button will be as narrow as 
-                possible to fit the text, inset and outset. When false the 
-                button will be as wide as the set width. Defaults to false.
-            textY:number|string The y offset for the text. If a string it 
-                must be a valign value: 'top', 'middle' or 'bottom'.
+            shrinkToFit:boolean When true the button will be as narrow as possible to fit the text, 
+                inset and outset. When false the button will be as wide as the set width. Defaults 
+                to false.
+            textY:number|string The y offset for the text. If a string it must be a valign 
+                value: 'top', 'middle' or 'bottom'.
             textView:myt.Text A reference to the child text view.
         
         Private Attributes:
@@ -267,9 +262,9 @@
             
             self.inset = self.outset = 0;
             
-            defAttr(attrs, 'shrinkToFit', false);
-            defAttr(attrs, 'height', 24);
-            defAttr(attrs, 'textY', 'middle');
+            attrs.shrinkToFit ??= false;
+            attrs.height ??= 24;
+            attrs.textY ??= 'middle';
             
             self.callSuper(parent, attrs);
             
@@ -288,8 +283,8 @@
             }
             const textView = new pkg.Text(self, textAttrs);
             
-            // Setup the constraint after adoption since the textView 
-            // won't have been sized to the dom until it's added in.
+            // Setup the constraint after adoption since the textView won't have been sized to the 
+            // dom until it's added in.
             self.constrain('__updateContent', [
                 self, 'inset', self, 'outset',
                 self, 'width', self, 'shrinkToFit',
@@ -376,14 +371,14 @@
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            defAttr(attrs, 'focusIndicator', false);
-            defAttr(attrs, 'roundedCorners', 3);
-            defAttr(attrs, 'textAlign', 'center');
-            defAttr(attrs, 'paddingTop', 1);
-            defAttr(attrs, 'height', 23 - (attrs.paddingTop || 0));
-            defAttr(attrs, 'activeColor', '#ddd');
-            defAttr(attrs, 'hoverColor', '#eee');
-            defAttr(attrs, 'readyColor', '#fff');
+            attrs.focusIndicator ??= false;
+            attrs.roundedCorners ??= 3;
+            attrs.textAlign ??= 'center';
+            attrs.paddingTop ??= 1;
+            attrs.height ??= 23 - (attrs.paddingTop ?? 0);
+            attrs.activeColor ??= '#ddd';
+            attrs.hoverColor ??= '#eee';
+            attrs.readyColor ??= '#fff';
             
             this.callSuper(parent, attrs);
         }

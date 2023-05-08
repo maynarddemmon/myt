@@ -1,13 +1,10 @@
 (pkg => {
     const STYLE_SOLID = 'solid',
         STYLE_OUTLINE = 'outline',
-        DEFAULT_STYLE = STYLE_OUTLINE,
-        
-        defAttr = pkg.AccessorSupport.defAttr,
         
         updateUI = checkbox => {
-            const label = checkbox.label || '',
-                checkboxStyle = checkbox.checkboxStyle || DEFAULT_STYLE;
+            const label = checkbox.label ?? '',
+                checkboxStyle = checkbox.checkboxStyle ?? STYLE_OUTLINE;
             checkbox.setText(
                 '<i class="' + 
                 (checkboxStyle === STYLE_SOLID ? 'fas' : 'far') + 
@@ -20,8 +17,8 @@
         
         Attributes:
             label:string
-            checkboxStyle:string Determines what style of checkbox to display.
-                Supported values are "solid" and "outline".
+            checkboxStyle:string Determines what style of checkbox to display. Supported values 
+                are "solid" and "outline".
         
         @class */
     pkg.Checkbox = new JS.Class('Checkbox', pkg.Text, {
@@ -30,16 +27,15 @@
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            // Ensures the "pointer" cursor shows up rather than the
-            // "default" cursor.
+            // Ensures the "pointer" cursor shows up rather than the "default" cursor.
             this.appendToEarlyAttrs('userUnselectable');
             
-            defAttr(attrs, 'value', false);
-            defAttr(attrs, 'focusIndicator', false);
-            defAttr(attrs, 'checkboxStyle', DEFAULT_STYLE);
-            defAttr(attrs, 'activeColor', 'inherit');
-            defAttr(attrs, 'hoverColor', 'inherit');
-            defAttr(attrs, 'readyColor', 'inherit');
+            attrs.value ??= false;
+            attrs.focusIndicator ??= false;
+            attrs.checkboxStyle ??= STYLE_OUTLINE;
+            attrs.activeColor ??= 'inherit';
+            attrs.hoverColor ??= 'inherit';
+            attrs.readyColor ??= 'inherit';
             
             this.callSuper(parent, attrs);
             

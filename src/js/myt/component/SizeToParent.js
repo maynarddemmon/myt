@@ -21,9 +21,8 @@
     
     /** A mixin that sizes a view to a percentage of its parent view.
         
-        This is the inverse of a layout since the child is responsible for 
-        sizing itself to the parent rather than in a layout where the layout 
-        positions and sizes the children.
+        This is the inverse of a layout since the child is responsible for sizing itself to the 
+        parent rather than in a layout where the layout positions and sizes the children.
         
         Events:
             percentOfParentWidthOffset:number
@@ -32,20 +31,16 @@
             percentOfParentHeight:number
             
         Attributes:
-            percentOfParentWidthOffset:number An additional offset used to 
-                adjust the width of the parent. Defaults to undefined which is
-                equivalent to 0.
-            percentOfParentHeightOffset:number An additional offset used to 
-                adjust the height of the parent. Defaults to undefined which is
-                equivalent to 0.
-            percentOfParentWidth:number The percent of the parent views width
-                to size this views width to. Should be a number between 0 and 
-                100 or a negative value which means don't do resizing. Defaults 
-                to undefined which is equivalent to a negative value.
-            percentOfParentHeight:number The percent of the parent views height
-                to size this views height to. Should be a number between 0 and 
-                100 or a negative value which means don't do resizing. Defaults 
-                to undefined which is equivalent to a negative value.
+            percentOfParentWidthOffset:number An additional offset used to adjust the width of the 
+                parent. Defaults to undefined which is equivalent to 0.
+            percentOfParentHeightOffset:number An additional offset used to adjust the height of 
+                the parent. Defaults to undefined which is equivalent to 0.
+            percentOfParentWidth:number The percent of the parent views width to size this views 
+                width to. Should be a number between 0 and 100 or a negative value which means 
+                don't do resizing. Defaults to undefined which is equivalent to a negative value.
+            percentOfParentHeight:number The percent of the parent views height to size this views 
+                height to. Should be a number between 0 and 100 or a negative value which means 
+                don't do resizing. Defaults to undefined which is equivalent to a negative value.
         
         @class */
     pkg.SizeToParent = new JS.Module('SizeToParent', {
@@ -108,8 +103,7 @@
             @returns {undefined} */
         __doPOPW: function(event) {
             this.setWidth((this.percentOfParentWidthOffset || 0) + mathRound(this.parent.width * (this.percentOfParentWidth / 100)));
-            // Force width event if not inited yet so that align constraint
-            // in myt.View will work.
+            // Force width event if not inited yet so that align constraint in myt.View will work.
             if (!this.inited) this.fireEvent('width', this.width);
         },
         
@@ -118,8 +112,7 @@
             @returns {undefined} */
         __doPOPH: function(event) {
             this.setHeight((this.percentOfParentHeightOffset || 0) + mathRound(this.parent.height * (this.percentOfParentHeight / 100)));
-            // Force height event if not inited yet so that valign constraint
-            // in myt.View will work.
+            // Force height event if not inited yet so that valign constraint in myt.View will work.
             if (!this.inited) this.fireEvent('height', this.height);
         }
     });
