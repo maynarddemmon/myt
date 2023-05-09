@@ -303,23 +303,19 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             }
         },
         
-        eigenFunc = target => target.__meta__ ? target.__meta__ : (target.__meta__ = new Module('', null, {_target:target})).include(target.klass, {_rslv:false}),
+        eigenFunc = target => target.__meta__ ?? (target.__meta__ = new Module('', null, {_target:target})).include(target.klass, {_rslv:false}),
         ignore = value => typeof value !== 'function' || (value.__fns__ && value.__inc__),
         
         makeClass = parent => {
-            const constructor = function() {
-                    return this.initialize ? this.initialize.apply(this, arguments) ?? this : this;
-                },
-                bridge = function() {};
-            bridge.prototype = (parent ?? Object).prototype;
-            constructor.prototype = new bridge();
+            const constructor = function(...args) {return this.initialize(...args) ?? this;};
+            constructor.prototype = Object.create(parent.prototype);
             return constructor;
         },
         
         createMethod = (module, name, callable) => (callable && callable.__inc__ && callable.__fns__) || typeof callable !== 'function' ? callable : new Method(module, name, callable),
         
-        Method = makeClass(),
-        Module = exports.Module = makeClass();
+        Method = makeClass(Object),
+        Module = exports.Module = makeClass(Object);
     
     Method.prototype.initialize = function(module, name, callable) {
         this.module = module;
@@ -339,7 +335,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         //this.__anc__ = null;
         this.__mct__ = {};
         
-        this.__displayName = name;
+        if (name) this.__displayName = name;
         
         this.include(methods, {_rslv:false});
     };
@@ -353,7 +349,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 this.__inc__.push(module);
                 module.__dep__.push(this);
             } else {
-                const extend  = module.extend,
+                const extend = module.extend,
                     include = module.include;
                 if (extend && ignore(extend)) this.extend(extend);
                 if (include && ignore(include)) {
@@ -397,9 +393,8 @@ Date.prototype.format = Date.prototype.format ?? (() => {
     };
     
     const Kernel = new Module('Kernel', {
-        extend: function(module, options) {
-            if (module) eigenFunc(this).include(module, {_rslv:(options ?? {})._rslv});
-            return this;
+        extend: function(module) {
+            eigenFunc(this).include(module);
         },
         
         /** Checks if this object includes, extends or is the provided module.
@@ -412,18 +407,15 @@ Date.prototype.format = Date.prototype.format ?? (() => {
     
     const Class = exports.Class = makeClass(Module),
         classProto = Class.prototype;
-    classProto.initialize = function(name, parent, methods, options) {
+    classProto.initialize = function(name, parent, methods) {
         if (typeof parent !== 'function') {
-            options = methods;
             methods = parent;
             parent  = Object;
         }
         
         Module.prototype.initialize.call(this, name);
         
-        const resolve = (options ?? {})._rslv,
-            resolveFalse = {_rslv:false},
-            klass = makeClass(parent);
+        const klass = makeClass(parent);
         
         // The klass extends from this.
         for (const field in this) {
@@ -431,13 +423,14 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         }
         
         klass.prototype.constructor = klass.prototype.klass = klass;
-        eigenFunc(klass).include(parent.__meta__, {_rslv:resolve});
+        eigenFunc(klass).include(parent.__meta__);
         klass.__tgt__ = klass.prototype;
         
-        const parentModule = parent === Object ? {} : (parent.__fns__ ? parent : new Module(parent.prototype, resolveFalse));
+        const resolveFalse = {_rslv:false},
+            parentModule = parent === Object ? {} : (parent.__fns__ ? parent : new Module(parent.prototype, resolveFalse));
         klass.include(Kernel, resolveFalse).include(parentModule, resolveFalse).include(methods, resolveFalse);
         
-        if (resolve !== false) resolveModule(klass);
+        resolveModule(klass);
         
         return klass;
     };
@@ -2370,6 +2363,10 @@ Date.prototype.format = Date.prototype.format ?? (() => {
     @class */
 myt.global = new JS.Singleton('Global', {
     include: [myt.Observable],
+    
+    
+    // Constructor /////////////////////////////////////////////////////////////
+    initialize: () => {},
     
     
     // Methods /////////////////////////////////////////////////////////////////

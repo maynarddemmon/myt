@@ -10,6 +10,10 @@ myt.global = new JS.Singleton('Global', {
     include: [myt.Observable],
     
     
+    // Constructor /////////////////////////////////////////////////////////////
+    initialize: () => {},
+    
+    
     // Methods /////////////////////////////////////////////////////////////////
     /** Registers the provided global under the key. Fires a register<key>
         event. If a global is already registered under the key the existing
