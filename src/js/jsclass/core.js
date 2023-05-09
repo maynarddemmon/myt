@@ -36,42 +36,43 @@
         
         compile = (method, environment) => {
             const callable = method.callable;
-            return method.__hs ? function() {
-                const existing = this.callSuper,
-                    prevOwn = this.hasOwnProperty('callSuper'),
-                    methods = lookup(environment, method.name);
-                let stackIndex = methods.length - 1;
-                if (stackIndex === 0) {
-                    delete this.callSuper;
-                } else {
-                    const params = Array.from(arguments),
-                        _super = this.callSuper = (...theArgs) => {
-                            let i = theArgs.length;
-                            while (i) params[--i] = theArgs[i];
-                            
-                            if (--stackIndex === 0) delete this.callSuper;
-                            const returnValue = methods[stackIndex].callable.apply(this, params);
-                            this.callSuper = _super;
-                            stackIndex++;
-                            
-                            return returnValue;
-                        };
-                }
-                
-                const returnValue = callable.apply(this, arguments);
-                
-                if (prevOwn) {
-                    this.callSuper = existing;
-                } else {
-                    delete this.callSuper;
-                }
-                
-                return returnValue;
-            } : callable;
+            return method.__hs ? 
+                function() {
+                    const existing = this.callSuper,
+                        prevOwn = this.hasOwnProperty('callSuper'),
+                        methods = lookup(environment, method.name);
+                    let stackIndex = methods.length - 1;
+                    if (stackIndex === 0) {
+                        delete this.callSuper;
+                    } else {
+                        const params = Array.from(arguments),
+                            _super = this.callSuper = (...theArgs) => {
+                                let i = theArgs.length;
+                                while (i) params[--i] = theArgs[i];
+                                
+                                if (--stackIndex === 0) delete this.callSuper;
+                                const returnValue = methods[stackIndex].callable.apply(this, params);
+                                this.callSuper = _super;
+                                stackIndex++;
+                                
+                                return returnValue;
+                            };
+                    }
+                    
+                    const returnValue = callable.apply(this, arguments);
+                    
+                    if (prevOwn) {
+                        this.callSuper = existing;
+                    } else {
+                        delete this.callSuper;
+                    }
+                    
+                    return returnValue;
+                } : callable;
         },
         
         resolveModule = (module, host) => {
-            host = host || module;
+            host = host ?? module;
             
             if (host === module) {
                 module.__anc__ = null;
@@ -102,10 +103,10 @@
         
         makeClass = parent => {
             const constructor = function() {
-                    return this.initialize ? this.initialize.apply(this, arguments) || this : this;
+                    return this.initialize ? this.initialize.apply(this, arguments) ?? this : this;
                 },
                 bridge = function() {};
-            bridge.prototype = (parent || Object).prototype;
+            bridge.prototype = (parent ?? Object).prototype;
             constructor.prototype = new bridge();
             return constructor;
         },
@@ -121,7 +122,7 @@
         this.callable = callable;
         
         // Indicates if this Method has a super call or not.
-        this.__hs = callable.toString().indexOf('callSuper') !== -1;
+        this.__hs = callable.toString().includes('callSuper');
     };
     
     const moduleProto = Module.prototype;
@@ -129,7 +130,7 @@
         this.__inc__ = [];
         this.__dep__ = [];
         this.__fns__ = {};
-        this.__tgt__ = (options || {})._target;
+        this.__tgt__ = (options ?? {})._target;
         //this.__anc__ = null;
         this.__mct__ = {};
         
@@ -166,7 +167,7 @@
                 }
             }
             
-            if ((options || {})._rslv !== false) resolveModule(this);
+            if ((options ?? {})._rslv !== false) resolveModule(this);
         }
         return this;
     };
@@ -192,7 +193,7 @@
     
     const Kernel = new Module('Kernel', {
         extend: function(module, options) {
-            if (module) eigenFunc(this).include(module, {_rslv:(options || {})._rslv});
+            if (module) eigenFunc(this).include(module, {_rslv:(options ?? {})._rslv});
             return this;
         },
         
@@ -215,7 +216,7 @@
         
         Module.prototype.initialize.call(this, name);
         
-        const resolve = (options || {})._rslv,
+        const resolve = (options ?? {})._rslv,
             resolveFalse = {_rslv:false},
             klass = makeClass(parent);
         
