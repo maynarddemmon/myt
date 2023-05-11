@@ -1119,11 +1119,14 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 },
                 getLocale: () => currentLocale,
                 addDictionary: (dictionary, locale) => {
-                    dictionaries[locale] = Object.assign(dictionaries[locale] || {}, dictionary);
+                    dictionaries[locale] = Object.assign(dictionaries[locale] ?? {}, dictionary);
+                },
+                setDictionary: (dictionary, locale) => {
+                    dictionaries[locale] = dictionary ?? {};
                 },
                 get: (key, ...args) => {
-                    const locale = currentLocale || (currentLocale = (navigator.language || defaultLocale).split('-')[0].toLowerCase()),
-                        value = (dictionaries[locale] || dictionaries[defaultLocale] || {})[key];
+                    const locale = currentLocale ?? (currentLocale = (navigator.language ?? defaultLocale).split('-')[0].toLowerCase()),
+                        value = (dictionaries[locale] ?? dictionaries[defaultLocale] ?? {})[key];
                     if (value != null) {
                         if (args.length > 0) {
                             return value.replaceAll(
