@@ -1,8 +1,8 @@
 (pkg => {
     let globalKeys,
         
-        /*  A map of codes of the keys currently pressed down. */
-        keysDown = {};
+        /*  A set of codes of the keys currently pressed down. */
+        keysDown = new Set();
     
     const G = pkg.global,
         globalFocus = G.focus,
@@ -26,10 +26,10 @@
         isControlCode = code => code === CODE_CONTROL_LEFT || code === CODE_CONTROL_RIGHT,
         isAltCode = code => code === CODE_ALT_LEFT || code === CODE_ALT_RIGHT,
         
-        /*  Tests if a key is currently pressed down or not. Returns true if 
-            the key is down, false otherwise.
+        /*  Tests if a key is currently pressed down or not. Returns true if the key is down, 
+            false otherwise.
                 param code:string the key code to test. */
-        isKeyDown = code => !!keysDown[code],
+        isKeyDown = code => keysDown.has(code),
         
         /*  Tests if the 'shift' key is down. */
         isShiftKeyDown = () => isKeyDown(CODE_SHIFT_LEFT) || isKeyDown(CODE_SHIFT_RIGHT),
@@ -48,8 +48,8 @@
         shouldPreventDefault = (code, targetElem) => {
             switch (code) {
                 case CODE_BACKSPACE: // Backspace
-                    // Catch backspace since it navigates the history. Allow 
-                    // it to go through for text input elements though.
+                    // Catch backspace since it navigates the history. Allow it to go through for 
+                    // text input elements though.
                     const nodeName = targetElem.nodeName;
                     return !(
                         nodeName === 'TEXTAREA' || 
@@ -73,16 +73,15 @@
     
     /** Provides global keyboard events. Registered with myt.global as 'keys'.
         
-        Also works with GlobalFocus to navigate the focus hierarchy when the 
-        focus traversal keys are used.
+        Also works with GlobalFocus to navigate the focus hierarchy when the focus traversal keys 
+        are used.
         
         Events:
-            keydown:string fired when a key is pressed down. The value is the
-                code of the key pressed down.
-            keypress:string fired when a key is pressed. The value is the
-                code of the key pressed.
-            keyup:string fired when a key is released up. The value is the
-                code of the key released up.
+            keydown:string fired when a key is pressed down. The value is the code of the key 
+                pressed down.
+            keypress:string fired when a key is pressed. The value is the code of the key pressed.
+            keyup:string fired when a key is released up. The value is the code of the key 
+                released up.
         
         @class */
     new JS.Singleton('GlobalKeys', {
@@ -118,18 +117,17 @@
             });
             
             globalKeys.ARROW_KEYS = [globalKeys.CODE_ARROW_LEFT, globalKeys.CODE_ARROW_UP, globalKeys.CODE_ARROW_RIGHT, globalKeys.CODE_ARROW_DOWN];
-            globalKeys.LIST_KEYS = [globalKeys.CODE_ENTER, globalKeys.CODE_SPACE, globalKeys.CODE_ESC].concat(globalKeys.ARROW_KEYS);
+            (globalKeys.LIST_KEYS = [globalKeys.CODE_ENTER, globalKeys.CODE_SPACE, globalKeys.CODE_ESC]).push(...globalKeys.ARROW_KEYS);
             
             
             globalKeys.setDomElement(document);
             globalKeys.attachTo(globalFocus, '__hndl_focused', 'focused');
             attach(globalKeys);
             
-            // Clear keys down when the window loses focus. This is necessary 
-            // when using keyboard shortcusts to switch apps since that will 
-            // leave a key in the down state even though it may no longer be 
-            // when the focus is returned to the page.
-            global.onblur = () => {keysDown = {};};
+            // Clear keys down when the window loses focus. This is necessary when using keyboard 
+            // shortcusts to switch apps since that will leave a key in the down state even though 
+            // it may no longer be when the focus is returned to the page.
+            global.onblur = () => {keysDown.clear();};
         },
         
         
@@ -148,8 +146,8 @@
         
         ignoreFocusTrap: ignoreFocusTrap,
         
-        /** Switch what is being listened to as focus changes. By default the
-            document is listened to for key events.
+        /** Switch what is being listened to as focus changes. By default the document is listened 
+            to for key events.
             @private
             @param {!Object} event
             @returns {undefined} */
@@ -179,7 +177,7 @@
                 globalKeys.fireEvent('keydown', code);
                 globalKeys.fireEvent('keyup', code);
             } else {
-                keysDown[code] = true;
+                keysDown.add(code);
                 
                 // Check for 'tab' key and do focus traversal.
                 if (code === CODE_TAB) {
@@ -209,7 +207,7 @@
             const code = getCodeFromEvent(event),
                 domEvent = event.value;
             if (shouldPreventDefault(code, domEvent.target)) domEvent.preventDefault();
-            keysDown[code] = false;
+            keysDown.delete(code);
             globalKeys.fireEvent('keyup', code);
         }
     });

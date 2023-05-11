@@ -216,7 +216,6 @@
             include: [TrackActives]
         });
     
-
     /** A pool that tracks which objects are "active" and stores objects of
         different classes in different internal TrackActivesPools.
         
@@ -277,7 +276,7 @@
         getActives: function(filterFunc) {
             let actives = [];
             const poolsByKey = this.__pbk;
-            for (const key in poolsByKey) actives = actives.concat(poolsByKey[key].getActives(filterFunc));
+            for (const key in poolsByKey) actives.push(...poolsByKey[key].getActives(filterFunc));
             return actives;
         },
         

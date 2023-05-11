@@ -589,7 +589,7 @@
             getAllErrorMessages: function() {
                 const subForms = this.__sf;
                 let msgs = (this.errorMessages ?? []).slice();
-                for (const id in subForms) msgs = msgs.concat(subForms[id].getAllErrorMessages());
+                for (const id in subForms) msgs.push(...subForms[id].getAllErrorMessages());
                 return msgs;
             },
             

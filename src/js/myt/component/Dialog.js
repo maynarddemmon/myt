@@ -342,13 +342,14 @@
                 const subs = paletteContainer.getSubviews();
                 let i = subs.length;
                 while (i) subs[--i].destroy();
-                const alreadyAdded = {};
-                (defaultPalette.concat(selectionPalette)).forEach(color => {
+                const alreadyAdded = new Set();
+                defaultPalette.push(...selectionPalette);
+                defaultPalette.forEach(color => {
                     if (supportsAlphaChannel || color.length === 7) {
                         if (color.length === 7) color += 'ff';
-                        if (!alreadyAdded[color]) {
+                        if (!alreadyAdded.has(color)) {
                             new Swatch(paletteContainer, {bgColor:color});
-                            alreadyAdded[color] = true;
+                            alreadyAdded.add(color);
                         }
                     }
                 });

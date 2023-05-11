@@ -107,7 +107,7 @@
         },
         
         // GridColHdr
-        defaultMaxValue = 9999,
+        defaultMaxValue = 1000,
         
         getPrevHdr = gridHeader => gridHeader.gridController ? gridHeader.gridController.getPrevHdr(gridHeader) : null,
         

@@ -209,102 +209,88 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             @param {string} name - The name of the method to lookup.
             @returns {!Array} An array of JS.Methods from the ancestors chain. */
         lookup = (module, name) => {
-            const cached = module.__mct__[name];
+            const cached = module.__mct__.get(name);
             if (cached) return cached.slice();
             
             // Get the ancestor classes array
-            let ancestors;
-            const cachedAncestors = module.__anc__;
+            const methods = [],
+                cachedAncestors = module.__anc__;
             if (cachedAncestors) {
-                ancestors = cachedAncestors.slice();
+                const len = cachedAncestors.length;
+                for (let i = 0; i < len; i++) {
+                    const fns = cachedAncestors[i].__fns__;
+                    if (fns.has(name)) methods.push(fns.get(name));
+                }
             } else {
-                ancestors = [];
-                const walk = theModule => {
-                    const includes = theModule.__inc__,
-                        len = includes.length;
-                    for (let i = 0; i < len;) walk(includes[i++]);
-                    if (!ancestors.includes(theModule)) ancestors.push(theModule);
-                };
+                const ancestors = module.__anc__ = [],
+                    walk = theModule => {
+                        const includes = theModule.__inc__,
+                            len = includes.length;
+                        for (let i = 0; i < len; i++) walk(includes[i]);
+                        if (!ancestors.includes(theModule)) {
+                            ancestors.push(theModule);
+                            const fns = theModule.__fns__;
+                            if (fns.has(name)) methods.push(fns.get(name));
+                        }
+                    };
                 walk(module);
-                module.__anc__ = ancestors.slice();
             }
-            
-            const len = ancestors.length,
-                methods = [];
-            for (let i = 0; i < len;) {
-                const fns = ancestors[i++].__fns__;
-                if (fns.hasOwnProperty(name)) methods.push(fns[name]);
-            }
-            module.__mct__[name] = methods.slice();
+            module.__mct__.set(name, methods.slice());
             return methods;
         },
         
-        compile = (method, environment) => {
+        compile = (method, hostModule) => {
             const callable = method.callable;
-            return method.__hs ? 
-                function() {
-                    const existing = this.callSuper,
-                        prevOwn = this.hasOwnProperty('callSuper'),
-                        methods = lookup(environment, method.name);
-                    let stackIndex = methods.length - 1;
-                    if (stackIndex === 0) {
-                        delete this.callSuper;
-                    } else {
-                        const params = Array.from(arguments),
-                            _super = this.callSuper = (...theArgs) => {
-                                let i = theArgs.length;
-                                while (i) params[--i] = theArgs[i];
-                                
-                                if (--stackIndex === 0) delete this.callSuper;
-                                const returnValue = methods[stackIndex].callable.apply(this, params);
-                                this.callSuper = _super;
-                                stackIndex++;
-                                
-                                return returnValue;
-                            };
-                    }
-                    
-                    const returnValue = callable.apply(this, arguments);
-                    
-                    if (prevOwn) {
-                        this.callSuper = existing;
-                    } else {
-                        delete this.callSuper;
-                    }
-                    
-                    return returnValue;
-                } : callable;
-        },
-        
-        resolveModule = (module, host) => {
-            host = host ?? module;
-            
-            if (host === module) {
-                module.__anc__ = null;
-                module.__mct__ = {};
-                let i = module.__dep__.length;
-                while (i) resolveModule(module.__dep__[--i]);
-            }
-            
-            const target = host.__tgt__;
-            if (target) {
-                const inc = module.__inc__,
-                    fns = module.__fns__,
-                    len = inc.length;
-                for (let i = 0; i < len;) resolveModule(inc[i++], host);
-                
-                for (const key in fns) {
-                    // Compile method
-                    const method = fns[key],
-                        compiled = method instanceof Method ? compile(method, host) : method;
-                    
-                    if (target[key] !== compiled) target[key] = compiled;
+            return method.__hs ? function(...args) {
+                const existing = this.callSuper,
+                    methods = lookup(hostModule, method.name);
+                let stackIndex = methods.length - 1;
+                if (stackIndex === 0) {
+                    if (existing) delete this.callSuper;
+                } else {
+                    const argsLen = args.length,
+                        _super = this.callSuper = (...superArgs) => {
+                            for (let i = superArgs.length; i < argsLen; i++) superArgs[i] = args[i];
+                            if (--stackIndex === 0) delete this.callSuper;
+                            const returnValue = methods[stackIndex].callable.call(this, ...superArgs);
+                            this.callSuper = _super;
+                            stackIndex++;
+                            return returnValue;
+                        };
                 }
+                const returnValue = callable.call(this, ...args);
+                if (existing) {
+                    this.callSuper = existing;
+                } else {
+                    delete this.callSuper;
+                }
+                return returnValue;
+            } : callable;
+        },
+        
+        resolveModule = (module, hostModule) => {
+            hostModule = hostModule ?? module;
+            
+            if (hostModule === module) {
+                module.__anc__ = null;
+                module.__mct__ = new Map();
+                const dep = module.__dep__;
+                let i = dep.length;
+                while (i--) resolveModule(dep[i]);
+            }
+            
+            const target = hostModule.__tgt__,
+                inc = module.__inc__,
+                len = inc.length;
+            for (let i = 0; i < len; i++) resolveModule(inc[i], hostModule);
+            
+            for (const [key, method] of module.__fns__) {
+                const compiled = method instanceof Method ? compile(method, hostModule) : method;
+                if (target[key] !== compiled) target[key] = compiled;
             }
         },
         
-        eigenFunc = target => target.__meta__ ?? (target.__meta__ = new Module('', null, {_target:target})).include(target.klass, {_rslv:false}),
-        ignore = value => typeof value !== 'function' || (value.__fns__ && value.__inc__),
+        eigenFunc = target => target.__meta__ ?? (target.__meta__ = new Module(null, null, target)).include(target.klass, true),
         
         makeClass = parent => {
             const constructor = function(...args) {return this.initialize(...args) ?? this;};
@@ -312,7 +298,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             return constructor;
         },
         
-        createMethod = (module, name, callable) => (callable && callable.__inc__ && callable.__fns__) || typeof callable !== 'function' ? callable : new Method(module, name, callable),
+        createMethod = (module, name, callable) => (callable && callable.__fns__) || typeof callable !== 'function' ? callable : new Method(module, name, callable),
         
         Method = makeClass(Object),
         Module = exports.Module = makeClass(Object);
@@ -327,65 +313,61 @@ Date.prototype.format = Date.prototype.format ?? (() => {
     };
     
     const moduleProto = Module.prototype;
-    moduleProto.initialize = function(name, methods, options) {
+    moduleProto.initialize = function(name, methods, target) {
         this.__inc__ = [];
         this.__dep__ = [];
-        this.__fns__ = {};
-        this.__tgt__ = (options ?? {})._target;
-        //this.__anc__ = null;
-        this.__mct__ = {};
+        this.__fns__ = new Map();
+        this.__mct__ = new Map();
+        this.__tgt__ = target;
         
         if (name) this.__displayName = name;
         
-        this.include(methods, {_rslv:false});
+        this.include(methods, true);
     };
     /*  Mixes a module into this module.
         @param {!Function} module - The JS.Module to mix in.
-        @param {?Object} [options]
+        @param {boolean} [noResolve]
         @returns {!Function) this JS.Module. */
-    moduleProto.include = function(module, options) {
+    moduleProto.include = function(module, noResolve) {
         if (module) {
-            if (module.__fns__ && module.__inc__) {
+            if (module.__fns__) {
                 this.__inc__.push(module);
                 module.__dep__.push(this);
             } else {
                 const extend = module.extend,
                     include = module.include;
-                if (extend && ignore(extend)) this.extend(extend);
-                if (include && ignore(include)) {
-                    const len = include.length,
-                        resolveFalse = {_rslv:false};
-                    for (let i = 0; i < len;) this.include(include[i++], resolveFalse);
+                if (extend && (extend.__fns__ || typeof extend !== 'function')) this.extend(extend);
+                if (include &&  (include.__fns__ || typeof include !== 'function')) {
+                    const len = include.length;
+                    for (let i = 0; i < len; i++) this.include(include[i], true);
                 }
                 for (const field of Object.keys(module)) {
                     const value = module[field];
-                    if ((field === 'extend' || field === 'include') && ignore(value)) continue;
-                    
-                    // Adds a single named method to a JS.Class/JS.Module. If you’re 
-                    // modifying a class, the method instantly becomes available in 
-                    // instances of the class, and in its subclasses.
-                    this.__fns__[field] = createMethod(this, field, value);
+                    if ((field !== 'extend' && field !== 'include') || (!value.__fns__ && typeof value === 'function')) {
+                        // Adds a single named method to a JS.Class/JS.Module. If you’re modifying a 
+                        // class, the method instantly becomes available in instances of the class, 
+                        // and in its subclasses.
+                        this.__fns__.set(field, createMethod(this, field, value));
+                    }
                 }
             }
-            
-            if ((options ?? {})._rslv !== false) resolveModule(this);
+            if (noResolve !== true) resolveModule(this);
         }
         return this;
     };
-    /*  Checks if this module includes the provided module.
+    /*  Checks if this module includes the provided Module.
         @param {!Function} module - The module to check for.
         @returns {boolean} True if the module is included, otherwise false. */
     moduleProto.includes = function(module) {
         if (module === this) return true;
-        
         const inc = this.__inc__, 
             len = inc.length;
-        for (let i = 0; i < len;) {
-            if (inc[i++].includes(module)) return true;
+        for (let i = 0; i < len; i++) {
+            if (inc[i].includes(module)) return true;
         }
         return false;
     };
-    /*  Extracts a single named method from a module.
+    /*  Extracts a single named method from a Module.
         @param {string} name - The name of the method to extract.
         @return {!Function) The extracted JS.Method. */
     moduleProto.instanceMethod = function(name) {
@@ -396,8 +378,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         extend: function(module) {
             eigenFunc(this).include(module);
         },
-        
-        /** Checks if this object includes, extends or is the provided module.
+        /** Checks if this object includes, extends or is the provided Module.
             @param {!Function} module - The JS.Module module to check for.
             @returns {boolean} */
         isA: function(module) {
@@ -426,9 +407,8 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         eigenFunc(klass).include(parent.__meta__);
         klass.__tgt__ = klass.prototype;
         
-        const resolveFalse = {_rslv:false},
-            parentModule = parent === Object ? {} : (parent.__fns__ ? parent : new Module(parent.prototype, resolveFalse));
-        klass.include(Kernel, resolveFalse).include(parentModule, resolveFalse).include(methods, resolveFalse);
+        const parentModule = parent === Object ? {} : (parent.__fns__ ? parent : new Module(parent.prototype, true));
+        klass.include(Kernel, true).include(parentModule, true).include(methods, true);
         
         resolveModule(klass);
         
@@ -439,9 +419,9 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         klass.__inc__ = [];
         klass.__dep__ = [];
         const proto = klass.__tgt__ = klass.prototype,
-            methods = klass.__fns__ = {};
-            
-        for (const field of Object.keys(proto)) methods[field] = createMethod(klass, field, proto[field]);
+            methods = klass.__fns__ = new Map();
+        
+        for (const field of Object.keys(proto)) methods.set(field, createMethod(klass, field, proto[field]));
         proto.constructor = proto.klass = klass;
         
         // The klass extends from Class.prototype.
@@ -3793,8 +3773,8 @@ new JS.Singleton('GlobalError', {
 (pkg => {
     let globalKeys,
         
-        /*  A map of codes of the keys currently pressed down. */
-        keysDown = {};
+        /*  A set of codes of the keys currently pressed down. */
+        keysDown = new Set();
     
     const G = pkg.global,
         globalFocus = G.focus,
@@ -3818,10 +3798,10 @@ new JS.Singleton('GlobalError', {
         isControlCode = code => code === CODE_CONTROL_LEFT || code === CODE_CONTROL_RIGHT,
         isAltCode = code => code === CODE_ALT_LEFT || code === CODE_ALT_RIGHT,
         
-        /*  Tests if a key is currently pressed down or not. Returns true if 
-            the key is down, false otherwise.
+        /*  Tests if a key is currently pressed down or not. Returns true if the key is down, 
+            false otherwise.
                 param code:string the key code to test. */
-        isKeyDown = code => !!keysDown[code],
+        isKeyDown = code => keysDown.has(code),
         
         /*  Tests if the 'shift' key is down. */
         isShiftKeyDown = () => isKeyDown(CODE_SHIFT_LEFT) || isKeyDown(CODE_SHIFT_RIGHT),
@@ -3840,8 +3820,8 @@ new JS.Singleton('GlobalError', {
         shouldPreventDefault = (code, targetElem) => {
             switch (code) {
                 case CODE_BACKSPACE: // Backspace
-                    // Catch backspace since it navigates the history. Allow 
-                    // it to go through for text input elements though.
+                    // Catch backspace since it navigates the history. Allow it to go through for 
+                    // text input elements though.
                     const nodeName = targetElem.nodeName;
                     return !(
                         nodeName === 'TEXTAREA' || 
@@ -3865,16 +3845,15 @@ new JS.Singleton('GlobalError', {
     
     /** Provides global keyboard events. Registered with myt.global as 'keys'.
         
-        Also works with GlobalFocus to navigate the focus hierarchy when the 
-        focus traversal keys are used.
+        Also works with GlobalFocus to navigate the focus hierarchy when the focus traversal keys 
+        are used.
         
         Events:
-            keydown:string fired when a key is pressed down. The value is the
-                code of the key pressed down.
-            keypress:string fired when a key is pressed. The value is the
-                code of the key pressed.
-            keyup:string fired when a key is released up. The value is the
-                code of the key released up.
+            keydown:string fired when a key is pressed down. The value is the code of the key 
+                pressed down.
+            keypress:string fired when a key is pressed. The value is the code of the key pressed.
+            keyup:string fired when a key is released up. The value is the code of the key 
+                released up.
         
         @class */
     new JS.Singleton('GlobalKeys', {
@@ -3910,18 +3889,17 @@ new JS.Singleton('GlobalError', {
             });
             
             globalKeys.ARROW_KEYS = [globalKeys.CODE_ARROW_LEFT, globalKeys.CODE_ARROW_UP, globalKeys.CODE_ARROW_RIGHT, globalKeys.CODE_ARROW_DOWN];
-            globalKeys.LIST_KEYS = [globalKeys.CODE_ENTER, globalKeys.CODE_SPACE, globalKeys.CODE_ESC].concat(globalKeys.ARROW_KEYS);
+            (globalKeys.LIST_KEYS = [globalKeys.CODE_ENTER, globalKeys.CODE_SPACE, globalKeys.CODE_ESC]).push(...globalKeys.ARROW_KEYS);
             
             
             globalKeys.setDomElement(document);
             globalKeys.attachTo(globalFocus, '__hndl_focused', 'focused');
             attach(globalKeys);
             
-            // Clear keys down when the window loses focus. This is necessary 
-            // when using keyboard shortcusts to switch apps since that will 
-            // leave a key in the down state even though it may no longer be 
-            // when the focus is returned to the page.
-            global.onblur = () => {keysDown = {};};
+            // Clear keys down when the window loses focus. This is necessary when using keyboard 
+            // shortcusts to switch apps since that will leave a key in the down state even though 
+            // it may no longer be when the focus is returned to the page.
+            global.onblur = () => {keysDown.clear();};
         },
         
         
@@ -3940,8 +3918,8 @@ new JS.Singleton('GlobalError', {
         
         ignoreFocusTrap: ignoreFocusTrap,
         
-        /** Switch what is being listened to as focus changes. By default the
-            document is listened to for key events.
+        /** Switch what is being listened to as focus changes. By default the document is listened 
+            to for key events.
             @private
             @param {!Object} event
             @returns {undefined} */
@@ -3971,7 +3949,7 @@ new JS.Singleton('GlobalError', {
                 globalKeys.fireEvent('keydown', code);
                 globalKeys.fireEvent('keyup', code);
             } else {
-                keysDown[code] = true;
+                keysDown.add(code);
                 
                 // Check for 'tab' key and do focus traversal.
                 if (code === CODE_TAB) {
@@ -4001,7 +3979,7 @@ new JS.Singleton('GlobalError', {
             const code = getCodeFromEvent(event),
                 domEvent = event.value;
             if (shouldPreventDefault(code, domEvent.target)) domEvent.preventDefault();
-            keysDown[code] = false;
+            keysDown.delete(code);
             globalKeys.fireEvent('keyup', code);
         }
     });
@@ -5098,7 +5076,6 @@ myt.Destructible = new JS.Module('Destructible', {
             include: [TrackActives]
         });
     
-
     /** A pool that tracks which objects are "active" and stores objects of
         different classes in different internal TrackActivesPools.
         
@@ -5159,7 +5136,7 @@ myt.Destructible = new JS.Module('Destructible', {
         getActives: function(filterFunc) {
             let actives = [];
             const poolsByKey = this.__pbk;
-            for (const key in poolsByKey) actives = actives.concat(poolsByKey[key].getActives(filterFunc));
+            for (const key in poolsByKey) actives.push(...poolsByKey[key].getActives(filterFunc));
             return actives;
         },
         
@@ -16233,7 +16210,7 @@ new JS.Singleton('GlobalMouse', {
             getAllErrorMessages: function() {
                 const subForms = this.__sf;
                 let msgs = (this.errorMessages ?? []).slice();
-                for (const id in subForms) msgs = msgs.concat(subForms[id].getAllErrorMessages());
+                for (const id in subForms) msgs.push(...subForms[id].getAllErrorMessages());
                 return msgs;
             },
             
@@ -18486,13 +18463,14 @@ new JS.Singleton('GlobalMouse', {
                 const subs = paletteContainer.getSubviews();
                 let i = subs.length;
                 while (i) subs[--i].destroy();
-                const alreadyAdded = {};
-                (defaultPalette.concat(selectionPalette)).forEach(color => {
+                const alreadyAdded = new Set();
+                defaultPalette.push(...selectionPalette);
+                defaultPalette.forEach(color => {
                     if (supportsAlphaChannel || color.length === 7) {
                         if (color.length === 7) color += 'ff';
-                        if (!alreadyAdded[color]) {
+                        if (!alreadyAdded.has(color)) {
                             new Swatch(paletteContainer, {bgColor:color});
-                            alreadyAdded[color] = true;
+                            alreadyAdded.add(color);
                         }
                     }
                 });
@@ -20635,7 +20613,7 @@ new JS.Singleton('GlobalMouse', {
         },
         
         // GridColHdr
-        defaultMaxValue = 9999,
+        defaultMaxValue = 1000,
         
         getPrevHdr = gridHeader => gridHeader.gridController ? gridHeader.gridController.getPrevHdr(gridHeader) : null,
         
