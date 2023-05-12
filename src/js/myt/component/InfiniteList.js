@@ -180,6 +180,8 @@
                 }
             },
             
+            getListViewHeight: function() {return this._listView.height;},
+            
             
             // Methods /////////////////////////////////////////////////////////
             /** @returns {undefined} */

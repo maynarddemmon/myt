@@ -21762,6 +21762,8 @@ new JS.Singleton('GlobalMouse', {
                 }
             },
             
+            getListViewHeight: function() {return this._listView.height;},
+            
             
             // Methods /////////////////////////////////////////////////////////
             /** @returns {undefined} */
