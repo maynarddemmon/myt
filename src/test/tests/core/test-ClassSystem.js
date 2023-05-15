@@ -1,8 +1,8 @@
 module('Class System');
 
 test("Create a class, subclass and verify instanceof works.", function() {
-    var classA = new JS.Class('ClassA');
-    var classB = new JS.Class('ClassB', Object);
+    var classA = new JS.Class('ClassA', Object, {initialize:function() {}});
+    var classB = new JS.Class('ClassB', Object, {initialize:() => {}});
     var classC = new JS.Class('ClassC', classB);
     
     var instA = new classA();

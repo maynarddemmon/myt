@@ -2851,20 +2851,19 @@ new JS.Singleton('GlobalError', {
     let globalFocus;
     
     const
-        /*  Gets the deepest dom element that is a descendant of the provided
-            dom element or the element itself. */
+        /*  Gets the deepest dom element that is a descendant of the provided dom element or the 
+            element itself. */
         getDeepestDescendant = elem => {
             while (elem.lastChild) elem = elem.lastChild;
             return elem;
         },
         
-        /*  Traverse forward or backward from the currently focused view. 
-            Returns the new view to give focus to, or undefined if there is 
-            no view to focus on or an unmanaged dom element will receive focus.
-                param: isForward:boolean indicates forward or backward dom 
-                    traversal.
-                param: ignoreFocusTrap:boolean indicates if focus traps should 
-                    be skipped over or not. */
+        /*  Traverse forward or backward from the currently focused view. Returns the new view to 
+            give focus to, or undefined if there is no view to focus on or an unmanaged dom element 
+            will receive focus.
+                param: isForward:boolean indicates forward or backward dom traversal.
+                param: ignoreFocusTrap:boolean indicates if focus traps should be skipped over 
+                    or not. */
         traverse = (isForward, ignoreFocusTrap) => {
             globalFocus.lastTraversalWasForward = isForward;
             
@@ -2903,8 +2902,7 @@ new JS.Singleton('GlobalError', {
                     } else if (elem.nextSibling) {
                         elem = elem.nextSibling;
                     } else {
-                        // Jump up and maybe over since we're at a local
-                        // deepest last child.
+                        // Jump up and maybe over since we're at a local deepest last child.
                         while (elem) {
                             elem = elem.parentNode;
                             
@@ -2944,8 +2942,7 @@ new JS.Singleton('GlobalError', {
                             if (!elem.disabled && !isNaN(elem.tabIndex) && 
                                 pkg.DomElementProxy.isDomElementVisible(elem)
                             ) {
-                                // Make sure the dom element isn't inside 
-                                // a maskFocus
+                                // Make sure the dom element isn't inside a maskFocus
                                 model = globalFocus.findModelForDomElement(elem);
                                 if (model && model.searchAncestorsOrSelf(n => n.maskFocus === true)) {
                                     // Is a masked dom element so ignore.
@@ -2961,22 +2958,20 @@ new JS.Singleton('GlobalError', {
             }
         };
     
-    /** Tracks focus and provides global focus events. Registered with 
-        myt.global  as 'focus'.
+    /** Tracks focus and provides global focus events. Registered with myt.global  as 'focus'.
         
         Events:
-            focused:View Fired when the focused view changes. The event value 
-                is the newly focused view.
+            focused:View Fired when the focused view changes. The event value is the newly 
+                focused view.
         
         Attributes:
-            lastTraversalWasForward:boolean indicates if the last traversal 
-                was in the forward direction or not. If false this implies 
-                the last traversal was in the backward direction. This value 
-                is initalized to true.
+            lastTraversalWasForward:boolean indicates if the last traversal was in the forward 
+                direction or not. If false this implies the last traversal was in the backward 
+                direction. This value is initalized to true.
             focusedView:View the view that currently has focus.
             prevFocusedView:View the view that previously had focus.
-            focusedDom:DomElement holds the dom element that has focus when the
-                focus has traversed into a non myt managed area of the dom.
+            focusedDom:DomElement holds the dom element that has focus when the focus has traversed 
+                into a non myt managed area of the dom.
         
         @class */
     /* Dom element types reference:
@@ -3020,8 +3015,7 @@ new JS.Singleton('GlobalError', {
         
         // Methods /////////////////////////////////////////////////////////////
         /** Called by a FocusObservable when it has received focus.
-            @param {!Object} focusable - The FocusObservable that 
-                received focus.
+            @param {!Object} focusable - The FocusObservable that received focus.
             @returns {undefined}. */
         notifyFocus: focusable => {
             if (globalFocus.focusedView !== focusable) globalFocus.setFocusedView(focusable);
@@ -3047,8 +3041,7 @@ new JS.Singleton('GlobalError', {
         
         // Focus Traversal //
         /** Move focus to the next focusable element.
-            @param {boolean} ignoreFocusTrap - If true focus traps will be 
-                skipped over.
+            @param {boolean} ignoreFocusTrap - If true focus traps will be skipped over.
             @returns {undefined} */
         next: ignoreFocusTrap => {
             const next = traverse(true, ignoreFocusTrap);
@@ -3056,8 +3049,7 @@ new JS.Singleton('GlobalError', {
         },
         
         /** Move focus to the previous focusable element.
-            @param {boolean} ignoreFocusTrap - If true focus traps will be 
-                skipped over.
+            @param {boolean} ignoreFocusTrap - If true focus traps will be skipped over.
             @returns {undefined} */
         prev: ignoreFocusTrap => {
             const prev = traverse(false, ignoreFocusTrap);
@@ -5168,9 +5160,8 @@ myt.Destructible = new JS.Module('Destructible', {
         /*  The value that indicates default placement should be used. */
         DEFAULT_PLACEMENT = '*',
         
-        /*  Get the closest ancestor of the provided Node or the Node itself 
-            for which the matcher function returns true. Returns a Node or 
-            undefined if no match is found.
+        /*  Get the closest ancestor of the provided Node or the Node itself for which the matcher 
+            function returns true. Returns a Node or undefined if no match is found.
                 param node:myt.Node the Node to start searching from.
                 param matcher:function the function to test for matching Nodes with. */
         getMatchingAncestorOrSelf = (node, matcherFunc) => {
@@ -5182,10 +5173,10 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         },
         
-        /*  Get the youngest ancestor of the provided Node for which the 
-            matcher function returns true. Returns a Node or undefined if no match is found.
-                param node:myt.Node the Node to start searching from. This 
-                    Node is not tested, but its parent is.
+        /*  Get the youngest ancestor of the provided Node for which the matcher function returns 
+            true. Returns a Node or undefined if no match is found.
+                param node:myt.Node the Node to start searching from. This Node is not tested, but 
+                    its parent is.
                 param matcher:function the function to test for matching Nodes with. */
         getMatchingAncestor = (node, matcherFunc) => getMatchingAncestorOrSelf(node ? node.parent : null, matcherFunc),
         
@@ -5217,15 +5208,13 @@ myt.Destructible = new JS.Module('Destructible', {
             first if necessary. Returns a myt.TrackActivesPool */
         getAnimPool = node => node.__animPool ??= new pkg.TrackActivesPool(pkg.Animator, node);
         
-    /** A single node within a tree data structure. A node has zero or 
-        one parent node and zero or more child nodes. If a node has no 
-        parent it is a 'root' node. If a node has no child nodes it is a 
-        'leaf' node. Parent nodes and parent of parents, etc. are referred 
-        to as ancestors. Child nodes and children of children, etc. are 
-        referred to as descendants.
+    /** A single node within a tree data structure. A node has zero or one parent node and zero or 
+        more child nodes. If a node has no parent it is a 'root' node. If a node has no child nodes 
+        it is a 'leaf' node. Parent nodes and parent of parents, etc. are referred to as ancestors. 
+        Child nodes and children of children, etc. are referred to as descendants.
         
-        Lifecycle management is also provided via the 'initNode', 'destroy'
-        and 'destroyAfterOrphaning' methods.
+        Lifecycle management is also provided via the 'initNode', 'destroy' and 
+        'destroyAfterOrphaning' methods.
         
         Events:
             parent:myt.Node Fired when the parent is set.
@@ -5233,26 +5222,22 @@ myt.Destructible = new JS.Module('Destructible', {
         Attributes:
             inited:boolean Set to true after this Node has completed initializing.
             parent:myt.Node The parent of this Node.
-            name:string The name of this node. Used to reference this Node 
-                from its parent Node.
-            isBeingDestroyed:boolean Indicates that this node is in the process
-                of being destroyed. Set to true at the beginning of the destroy
-                lifecycle phase. Undefined before that.
-            placement:string The name of the subnode of this Node to add nodes 
-                to when setParent is called on the subnode. Placement can be 
-                nested using '.' For example 'foo.bar'. The special value of 
-                '*' means use the default placement. For example 'foo.*' means 
+            name:string The name of this node. Used to reference this Node from its parent Node.
+            isBeingDestroyed:boolean Indicates that this node is in the process of being destroyed. 
+                Set to true at the beginning of the destroy lifecycle phase. Undefined before that.
+            placement:string The name of the subnode of this Node to add nodes to when setParent is 
+                called on the subnode. Placement can be nested using '.' For example 'foo.bar'. The 
+                special value of '*' means use the default placement. For example 'foo.*' means 
                 place in the foo subnode and then in the default placement for foo.
-            defaultPlacement:string The name of the subnode to add nodes to 
-                when no placement is specified. Defaults to undefined which 
-                means add subnodes directly to this node.
-            ignorePlacement:boolean If set to true placement will not be 
-                processed for this Node when it is added to a parent Node.
+            defaultPlacement:string The name of the subnode to add nodes to when no placement is 
+                specified. Defaults to undefined which means add subnodes directly to this node.
+            ignorePlacement:boolean If set to true placement will not be processed for this Node 
+                when it is added to a parent Node.
         
         Private Attributes:
             __animPool:array An myt.TrackActivesPool used by the 'animate' method.
-            subnodes:array The array of child nodes for this node. Should be
-                accessed through the getSubnodes method.
+            subnodes:array The array of child nodes for this node. Should be accessed through the 
+                getSubnodes method.
         
         @class */
     pkg.Node = new JS.Class('Node', {
@@ -5273,10 +5258,9 @@ myt.Destructible = new JS.Module('Destructible', {
         
         
         // Constructor /////////////////////////////////////////////////////////
-        /** The standard JSClass initializer function. Subclasses should not
-            override this function.
-            @param {?Object} [parent] - The myt.Node (or dom element for 
-                RootViews) that will be set as the parent of this myt.Node.
+        /** The standard JSClass initializer function. Subclasses should not override this function.
+            @param {?Object} [parent] - The myt.Node (or dom element for RootViews) that will be 
+                set as the parent of this myt.Node.
             @param {?Object} [attrs] - A map of attribute names and values.
             @param {?Array} [mixins] - A list of mixins to be added onto the new instance.
             @returns {undefined} */
@@ -5299,11 +5283,10 @@ myt.Destructible = new JS.Module('Destructible', {
         
         
         // Life Cycle //////////////////////////////////////////////////////////
-        /** Called during initialization. Sets initial state for life 
-            cycle attrs, calls setter methods, sets parent and lastly, sets 
-            inited to true. Subclasses must callSuper.
-            @param {?Object} [parent] - The myt.Node (or dom element for 
-                RootViews) the parent of this Node.
+        /** Called during initialization. Sets initial state for life cycle attrs, calls setter 
+            methods, sets parent and lastly, sets inited to true. Subclasses must callSuper.
+            @param {?Object} [parent] - The myt.Node (or dom element for RootViews) the parent of 
+                this Node.
             @param {?Object} attrs - A map of attribute names and values.
             @returns {undefined} */
         initNode: function(parent, attrs) {
@@ -5341,9 +5324,8 @@ myt.Destructible = new JS.Module('Destructible', {
             self.callSuper();
         },
         
-        /** Provides a hook for subclasses to do destruction of their 
-            internals. This method is called after the parent has been 
-            unset. Subclasses must call super.
+        /** Provides a hook for subclasses to do destruction of their internals. This method is 
+            called after the parent has been unset. Subclasses must call super.
             @returns {undefined} */
         destroyAfterOrphaning: () => {/* Subclasses to implement as needed. */},
         
@@ -5353,9 +5335,8 @@ myt.Destructible = new JS.Module('Destructible', {
         setDefaultPlacement: function(v) {this.defaultPlacement = v;},
         setIgnorePlacement: function(v) {this.ignorePlacement = v;},
         
-        /** Sets the provided Node as the new parent of this Node. This is 
-            the most direct method to do reparenting. You can also use the 
-            addSubnode method but it's just a wrapper around this setter.
+        /** Sets the provided Node as the new parent of this Node. This is the most direct method 
+            to do reparenting.
             @param {?Object} newParent
             @returns {undefined} */
         setParent: function(newParent) {
@@ -5363,7 +5344,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             // Use placement if indicated
             if (newParent && !self.ignorePlacement) {
-                let placement = self.placement ?? newParent.defaultPlacement;
+                const placement = self.placement ?? newParent.defaultPlacement;
                 if (placement) newParent = newParent.determinePlacement(placement, self);
             }
             
@@ -5372,7 +5353,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 if (newParent && newParent.destroyed) return;
                 
                 // Remove ourselves from our existing parent if we have one.
-                let curParent = self.parent;
+                const curParent = self.parent;
                 if (curParent) {
                     const idx = curParent.getSubnodes().indexOf(self);
                     if (idx > -1) {
@@ -5396,10 +5377,9 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         },
         
-        /** The 'name' of a Node allows it to be referenced by name from its
-            parent node. For example a Node named 'foo' that is a child of a
-            Node stored in the variable 'bar' would be referenced like 
-            this: bar.foo or bar['foo'].
+        /** The 'name' of a Node allows it to be referenced by name from its parent node. For 
+            example a Node named 'foo' that is a child of a Node stored in the variable 'bar' 
+            would be referenced like this: bar.foo or bar['foo'].
             @param {string} name
             @returns {undefined} */
         setName: function(name) {
@@ -5415,18 +5395,11 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         },
         
-        /** Gets the subnodes for this Node and does lazy instantiation of 
-            the subnodes array if no child Nodes exist.
-            @returns {!Array} - An array of subnodes. */
-        getSubnodes: function() {
-            return this.subnodes ??= [];
-        },
-        
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Called from setParent to determine where to insert a subnode in 
-            the node hierarchy. Subclasses will not typically override this 
-            method, but if they do, they probably won't need to call super.
+        /** Called from setParent to determine where to insert a subnode in the node hierarchy. 
+            Subclasses will not typically override this method, but if they do, they probably won't 
+            need to call super.
             @param {string} placement - The placement path to use.
             @param {!Object} subnode - The sub myt.Node being placed.
             @returns {!Object} - The Node to place a subnode into. */
@@ -5452,18 +5425,19 @@ myt.Destructible = new JS.Module('Destructible', {
                     }
                 }
                 
-                // It's possible that a placement of '*' comes out here if a
-                // Node has its defaultPlacement set to '*'. This should result
-                // in a null loc when the code below runs which will end up returning 'this'.
+                // It's possible that a placement of '*' comes out here if a Node has its 
+                // defaultPlacement set to '*'. This should result in a null loc when the code 
+                // below runs which will end up returning 'this'.
             }
             
             const loc = this[placement];
             return loc ? (remainder ? loc.determinePlacement(remainder, subnode) : loc) : this;
         },
         
+        
         // Tree Methods //
-        /** Gets the root Node for this Node. The root Node is the oldest
-            ancestor or self that has no parent.
+        /** Gets the root Node for this Node. The root Node is the oldest ancestor or self that 
+            has no parent.
             @returns {!Object} - The root myt.Node. */
         getRoot: function() {
             return this.parent ? this.parent.getRoot() : this;
@@ -5483,8 +5457,8 @@ myt.Destructible = new JS.Module('Destructible', {
             if (node) {
                 if (node === self) return true;
                 if (self.parent) {
-                    // Optimization: use the dom element contains function if 
-                    // both nodes are DomElementProxy instances.
+                    // Optimization: use the dom element contains function if both nodes are 
+                    // DomElementProxy instances.
                     if (self.getIDE && node.getIDE) return node.getIDE().contains(self.getIDE());
                     return self.parent.isDescendantOf(node);
                 }
@@ -5499,7 +5473,7 @@ myt.Destructible = new JS.Module('Destructible', {
             return node ? node.isDescendantOf(this) : false;
         },
         
-        /** Gets the youngest common ancestor of this node and the provided node.
+        /** Gets the youngest common ancestor of this Node and the provided Node.
             @param {!Object} node - The myt.Node to look for a common ancestor with.
             @returns {?Object} The youngest common Node or undefined if none exists. */
         getLeastCommonAncestor: function(node) {
@@ -5511,41 +5485,36 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Find the youngest ancestor Node that is an instance of the class.
             @param {?Function} klass - The Class to search for.
-            @returns {?Object} - The myt.Node or undefined if no klass is 
-                provided or match found. */
+            @returns {?Object} - The myt.Node or undefined if no klass is provided or match found. */
         searchAncestorsForClass: function(klass) {
             if (klass) return this.searchAncestors(node => node instanceof klass);
         },
         
         /** Find the youngest ancestor Node that includes the JS.Module.
             @param {?Object} jsmodule - The JS.Module to search for.
-            @returns {?Object} - The myt.Node or undefined if no klass is 
-                provided or match found. */
+            @returns {?Object} - The myt.Node or undefined if no klass is provided or match found. */
         searchAncestorsForModule: function(jsmodule) {
             if (jsmodule) return this.searchAncestors(node => node.isA(jsmodule));
         },
         
-        /** Get the youngest ancestor of this Node for which the matcher 
-            function returns true. This is a simple wrapper around 
-            myt.Node.getMatchingAncestor(this, matcherFunc).
+        /** Get the youngest ancestor of this Node for which the matcher function returns true. 
+            This is a simple wrapper around myt.Node.getMatchingAncestor(this, matcherFunc).
             @param {!Function} matcherFunc - The function to test for matching Nodes with.
             @returns {?Object} - The myt.Node or undefined if no match is found. */
         searchAncestors: function(matcherFunc) {
             return getMatchingAncestor(this, matcherFunc);
         },
         
-        /** Get the youngest ancestor of this Node or the Node itself for which 
-            the matcher function returns true. This is a simple wrapper around 
-            myt.Node.getMatchingAncestorOrSelf(this, matcherFunc).
+        /** Get the youngest ancestor of this Node or the Node itself for which the matcher function 
+            returns true. This is a simple wrapper around myt.Node.getMatchingAncestorOrSelf(this, matcherFunc).
             @param {!Function} matcherFunc - The function to test for matching Nodes with.
             @returns {?Object} - The myt.Node or undefined if no match is found. */
         searchAncestorsOrSelf: function(matcherFunc) {
             return getMatchingAncestorOrSelf(this, matcherFunc);
         },
         
-        /** Gets an array of ancestor nodes including the node itself. The
-            oldest ancestor will be at the end of the list and the node will
-            be at the front of the list.
+        /** Gets an array of ancestor nodes including the node itself. The oldest ancestor will be 
+            at the end of the list and the node will be at the front of the list.
             @returns {!Array} - The array of ancestor nodes. */
         getAncestors: function() {
             const ancestors = [];
@@ -5557,95 +5526,39 @@ myt.Destructible = new JS.Module('Destructible', {
             return ancestors;
         },
         
+        
         // Subnode Methods //
-        /** Checks if this Node has the provided Node in the subnodes array.
-            @param {!Object} node - The sub myt.Node to check for.
-            @returns {boolean} true if the subnode is found, false otherwise. */
-        /*hasSubnode: function(node) {
-            return this.getSubnodes().includes(node);
-        },*/
+        /** Gets the subnodes for this Node and does lazy instantiation of the subnodes array.
+            @returns {!Array} - An array of subnodes. */
+        getSubnodes: function() {
+            return this.subnodes ??= [];
+        },
         
-        /** Gets the index of the provided Node in the subnodes array.
-            @param {!Object} node - The sub myt.Node to get the index for.
-            @returns {number} - The index of the subnode or -1 if not found. */
-        /*getSubnodeIndex: function(node) {
-            return this.getSubnodes().indexOf(node);
-        },*/
-        
-        /** A convienence method to make a Node a child of this Node. The
-            standard way to do this is to call the setParent method on the
-            prospective child Node.
-            @param {!Object} node - The sub myt.Node to add.
-            @returns {undefined} */
-        /*addSubnode: function(node) {
-            node.setParent(this);
-        },*/
-        
-        /** A convienence method to make a Node no longer a child of this Node. 
-            The standard way to do this is to call the setParent method with 
-            a value of null on the child Node.
-            @param {!Object} node - The sub myt.Node to remove.
-            @returns {?Object} - The removed myt.Node or undefined if 
-                removal failed. */
-        /*removeSubnode: function(node) {
-            if (node.parent === this) {
-                node.setParent();
-                return node;
-            }
-        },*/
-        
-        /** Called when a subnode is added to this node. Provides a hook for
-            subclasses. No need for subclasses to call super. Do not call this
-            method to add a subnode. Instead call addSubnode or setParent.
+        /** Called when a subnode is added to this node. Provides a hook for subclasses. No need for
+            subclasses to call super. Do not call this method to add a subnode. Instead call setParent.
             @param {!Object} node - The sub myt.Node that was added.
             @returns {undefined} */
         subnodeAdded: node => {},
         
-        /** Called when a subnode is removed from this node. Provides a hook 
-            for subclasses. No need for subclasses to call super. Do not call 
-            this method to remove a subnode. Instead call removeSubnode 
-            or setParent.
+        /** Called when a subnode is removed from this node. Provides a hook for subclasses. No need
+            for subclasses to call super. Do not call this method to remove a subnode. Instead 
+            call setParent.
             @param {!Object} node - The sub myt.Node that was removed.
             @returns {undefined} */
         subnodeRemoved: node => {},
         
-        // Animation
-        /** A wrapper on Node.animate that will only animate one time and that 
-            provides a streamlined list of the most commonly used arguments.
-            @param {!Object|string} attribute - The name of the attribute to 
-                animate. If an object is provided it should be the only 
-                argument and its keys should be the params of this method. 
-                This provides a more concise way of passing in sparse 
-                optional parameters.
-            @param {number} to - The target value to animate to.
-            @param {number} [from] - The target value to animate from.
-            @param {number} [duration]
-            @param {?Function} [easingFunction]
-            @returns {!Object} - The Animator being run. */
-        animateOnce: function(attribute, to, from, duration, easingFunction) {
-            if (typeof attribute === 'object') {
-                return this.animate(attribute);
-            } else {
-                return this.animate({
-                    attribute:attribute,
-                    to:to,
-                    from:from, 
-                    duration:duration, 
-                    easingFunction:easingFunction
-                });
-            }
-        },
         
+        // Animation //
         /** Animates an attribute using the provided parameters.
-            @param {!Object} attrs - Attributes that will be passed to
-                the myt.Animator that will be run.
-            @returns {?Object} - The Animator being run or undefined if for
-                some reason an animator could not be run. */
+            @param {!Object} attrs - Attributes that will be passed to the myt.Animator that will 
+                be run.
+            @returns {?Object} - The Animator being run or undefined if for some reason an animator 
+                could not be run. */
         animate: function(attrs) {
             if (attrs) {
                 const animPool = getAnimPool(this),
-                    // Get an animator from the pool. Use of ignorePlacement 
-                    // ensures the animator is directly attached to this node
+                    // Get an animator from the pool. Use of ignorePlacement ensures the animator 
+                    // is directly attached to this node
                     anim = animPool.getInstance({ignorePlacement:true}),
                     callback = attrs.callback;
                 delete attrs.callback;
@@ -5660,12 +5573,11 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         },
         
-        /** Gets an array of the currently running animators that were created
-            by calls to the animate method.
-            @param {?Function|string} [filterFunc] - The function that filters
-                which animations get stopped. The filter should return true for 
-                functions to be included. If the provided values is a string it 
-                will be used as a matching attribute name.
+        /** Gets an array of the currently running animators that were created by calls to the 
+            animate method.
+            @param {?Function|string} [filterFunc] - The function that filters which animations get 
+                stopped. The filter should return true for functions to be included. If the 
+                provided values is a string it will be used as a matching attribute name.
             @returns {!Array} - An array of active animators. */
         getActiveAnimators: function(filterFunc) {
             if (typeof filterFunc === 'string') {
@@ -5676,10 +5588,9 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** Stops all active animations.
-            @param {?Function|string} [filterFunc] - The function that filters 
-                which animations get stopped. The filter should return true for 
-                functions to be stopped. If the provided values is a string it 
-                will be used as a matching attribute name.
+            @param {?Function|string} [filterFunc] - The function that filters which animations get 
+                stopped. The filter should return true for functions to be stopped. If the provided 
+                values is a string it will be used as a matching attribute name.
             @param {boolean} [executeCallbacks] - If true animator 
                 callbacks will be executed if they exist.
             @returns {undefined} */
@@ -5696,10 +5607,10 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         },
         
-        // Timing and Delay
+        
+        // Timing and Delay //
         /** A convienence method to execute a method once on idle.
-            @param {string} methodName - The name of the method to execute 
-                on this object.
+            @param {string} methodName - The name of the method to execute on this object.
             @returns {undefined} */
         doOnceOnIdle: function(methodName) {
             this.attachTo(pkg.global.idle, methodName, 'idle', true);
@@ -7678,13 +7589,13 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** Called when a View is added to this View. Do not call this method 
-            to add a View. Instead call addSubnode or setParent.
+            to add a View. Instead call setParent.
             @param {!Object} sv - The myt.View that was added.
             @returns {undefined} */
         subviewAdded: sv => {},
         
         /** Called when a View is removed from this View. Do not call this 
-            method to remove a View. Instead call removeSubnode or setParent.
+            method to remove a View. Instead call setParent.
             @param {!Object} sv - The myt.View that was removed.
             @returns {undefined} */
         subviewRemoved: sv => {},
@@ -7725,13 +7636,13 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** Called when a Layout is added to this View. Do not call this 
-            method to add a Layout. Instead call addSubnode or setParent.
+            method to add a Layout. Instead call setParent.
             @param {!Object} layout - The myt.Layout that was added.
             @returns {undefined} */
         layoutAdded: layout => {},
         
         /** Called when a Layout is removed from this View. Do not call this 
-            method to remove a Layout. Instead call removeSubnode or setParent.
+            method to remove a Layout. Instead call setParent.
             @param {!Object} layout - The myt.Layout that was removed.
             @returns {undefined} */
         layoutRemoved: layout => {},
@@ -9903,6 +9814,10 @@ myt.Destructible = new JS.Module('Destructible', {
         TWO_PI = 2 * PI,
         HALF_PI = PI / 2,
         
+        globalIdle = pkg.global.idle,
+        
+        makeColorFromHexString = pkg.Color.makeColorFromHexString,
+        
         easingFunctions = {
             linear:t => t,
             
@@ -9973,16 +9888,10 @@ myt.Destructible = new JS.Module('Destructible', {
             inOutBounce:t => (t*=2) < 1 ? easingFunctions.inBounce(t)/2 : (easingFunctions.outBounce(t-1) + 1)/2
         },
         
-        globalIdle = pkg.global.idle,
+        DEFAULT_EASING = easingFunctions.inOutQuad,
         
         getTarget = animator => animator.target ?? animator.parent,
         
-        isColorAttr = animator => {
-            const target = getTarget(animator);
-            animator.__isColorAnim = (target && typeof target.isColorAttr === 'function') ? target.isColorAttr(animator.attribute) : undefined;
-        },
-        
-        makeColorFromHexString = pkg.Color.makeColorFromHexString,
         getColorValue = (from, to, motionValue, relative, value) => {
             const fromColor = makeColorFromHexString(from),
                 toColor = makeColorFromHexString(to),
@@ -9991,26 +9900,6 @@ myt.Destructible = new JS.Module('Destructible', {
             colorObj.setGreen(colorObj.green + ((toColor.green - fromColor.green) * motionValue));
             colorObj.setBlue(colorObj.blue + ((toColor.blue - fromColor.blue) * motionValue));
             return colorObj.getHtmlHexString();
-        },
-        
-        updateTarget = (animator, target, progress, oldProgress) => {
-            const relative = animator.relative,
-                duration = animator.duration,
-                attr = animator.attribute,
-                progressPercent = mathMax(0, progress / duration), 
-                oldProgressPercent = mathMax(0, oldProgress / duration);
-            
-            // Determine what "from" to use if none was provided.
-            if (animator.from == null) {
-                animator.__tmpFrom = true;
-                animator.from = relative ? (animator.__isColorAnim ? '#000' : 0) : target.get(attr);
-            }
-            
-            const motionValue = animator.easingFunction(progressPercent) - (relative ? animator.easingFunction(oldProgressPercent) : 0),
-                value = relative ? target.get(attr) : animator.from,
-                to = animator.to;
-            
-            target.set(attr, animator.__isColorAnim ? getColorValue(animator.from, to, motionValue, relative, value) : value + ((to - animator.from) * motionValue));
         },
         
         reset = animator => {
@@ -10030,20 +9919,20 @@ myt.Destructible = new JS.Module('Destructible', {
                 
                 // Determine how much time to move forward by.
                 const oldProgress = animator.__prog;
-                animator.__prog += timeDiff;
+                let progress = oldProgress + timeDiff;
                 
                 // Check for overage
                 let remainderTime = 0;
-                if (animator.__prog > duration) {
-                    remainderTime = animator.__prog - duration;
-                    animator.__prog = duration;
+                if (progress > duration) {
+                    remainderTime = progress - duration;
+                    progress = duration;
                     
                     // Increment loop count and halt looping if necessary
                     if (++animator.__loopCnt === repeat) remainderTime = 0;
-                } else if (0 > animator.__prog) {
+                } else if (0 > progress) {
                     // Reverse case
-                    remainderTime = -animator.__prog; // Flip reverse time back to forward time
-                    animator.__prog = 0;
+                    remainderTime = -progress; // Flip reverse time back to forward time
+                    progress = 0;
                     
                     // Decrement loop count and halt looping if necessary
                     if (0 > --animator.__loopCnt && repeat > 0) remainderTime = 0;
@@ -10051,7 +9940,22 @@ myt.Destructible = new JS.Module('Destructible', {
                 
                 const target = getTarget(animator);
                 if (target) {
-                    updateTarget(animator, target, animator.__prog, oldProgress);
+                    // Update Target
+                    const relative = animator.relative,
+                        attr = animator.attribute,
+                        progressPercent = mathMax(0, progress / duration), 
+                        oldProgressPercent = mathMax(0, oldProgress / duration);
+                    
+                    // Determine what "from" to use if none was provided.
+                    if (animator.from == null) {
+                        animator.__tmpFrom = true;
+                        animator.from = relative ? (animator.__isColorAnim ? '#000' : 0) : target.get(attr);
+                    }
+                    
+                    const motionValue = animator.easingFunction(progressPercent) - (relative ? animator.easingFunction(oldProgressPercent) : 0),
+                        value = relative ? target.get(attr) : animator.from,
+                        to = animator.to;
+                    target.set(attr, animator.__isColorAnim ? getColorValue(animator.from, to, motionValue, relative, value) : value + ((to - animator.from) * motionValue));
                     
                     if (
                         (!reverse && animator.__loopCnt === repeat) || // Forward check
@@ -10061,12 +9965,13 @@ myt.Destructible = new JS.Module('Destructible', {
                         animator.setRunning(false);
                         if (animator.callback) animator.callback.call(animator, true);
                     } else if (remainderTime > 0) {
-                        // Advance again if time is remaining. This occurs when
-                        // the timeDiff provided was greater than the animation
-                        // duration and the animation loops.
+                        // Advance again if time is remaining. This occurs when the timeDiff 
+                        // provided was greater than the animation duration and the animation loops.
                         animator.fireEvent('repeat', animator.__loopCnt);
                         animator.__prog = reverse ? duration : 0;
                         advance(animator, remainderTime);
+                    } else {
+                        animator.__prog = progress;
                     }
                 } else {
                     console.log('No target for animator', animator);
@@ -10074,219 +9979,212 @@ myt.Destructible = new JS.Module('Destructible', {
                     if (animator.callback) animator.callback.call(animator, false);
                 }
             }
+        };
+    
+    /** Changes the value of an attribute on a target over time.
+        
+        Events:
+            running:boolean Fired when the animation starts or stops.
+            paused:boolean Fired when the animation is paused or unpaused.
+            reverse:boolean
+            easingFunction:function
+            from:number
+            to:number
+            repeat:Fired when the animation repeats. The value is the current loop count.
+            
+        Attributes:
+            attribute:string The attribute to animate.
+            target:object The object to animate the attribute on. The default is the parent of 
+                this node.
+            from:number The starting value of the attribute. If not specified the current value 
+                on the target will be used.
+            to:number The ending value of the attribute.
+            duration:number The length of time the animation will run in millis. The default 
+                value is 1000.
+            easingFunction:string/function Controls the rate of animation.
+                string: See http://easings.net/ for more info. One of the following:
+                        linear, 
+                        inQuad, outQuad, inOutQuad(default), 
+                        inCubic, outCubic, inOutCubic, 
+                        inQuart, outQuart, inOutQuart, 
+                        inQuint, outQuint, inOutQuint, 
+                        inSine, outSine, inOutSine,
+                        inExpo ,outExpo, inOutExpo, 
+                        inCirc, outCirc, inOutCirc,
+                        inElastic ,outElastic, inOutElastic, 
+                        inBack, outBack, inOutBack, 
+                        inBounce, outBounce, inOutBounce
+                
+                function: A function that determines the rate of change of the attribute. The 
+                    arguments to the easing function are:
+                        t: Animation progress in millis
+                        c: Value change (to - from)
+                        d: Animation duration in millis
+            relative:boolean Determines if the animated value is set on the target (false), or 
+                added to the exiting value on the target (true). Note that this means the 
+                difference between the from and to values will be "added" to the existing 
+                value on the target. The default value is false.
+            repeat:number The number of times to repeat the animation. 
+                If negative the animation will repeat forever. The default value is 1.
+            reverse:boolean If true, the animation is run in reverse.
+            running:boolean Indicates if the animation is currently running. The default value 
+                is false.
+            paused:boolean Indicates if the animation is temporarily paused. The default value 
+                is false.
+            callback:function A function that gets called when the animation completes. A 
+                boolean value is passed into the function and will be true if the animation 
+                completed successfully or false if not.
+        
+        Private Attributes:
+            __loopCnt:number the loop currently being run.
+            __prog:number the number of millis currently used during the current animation loop.
+            __tmpFrom:boolean Indicates no "from" was set on the animator so we will have to 
+                generate one when needed. We want to reset back to undefined after the animation 
+                completes so that subsequent calls to start the animation will behave the same.
+            __isColorAnim:boolean Indicates this animator is animating a color attribute.
+        
+        @class */
+    pkg.Animator = new JS.Class('Animator', pkg.Node, {
+        include: [pkg.Reusable],
+        
+        
+        // Class Methods and Attributes ////////////////////////////////////
+        extend: {
+            /** An object containing easign functions. */
+            easings: easingFunctions
         },
         
-        /** Changes the value of an attribute on a target over time.
+        
+        // Life Cycle //////////////////////////////////////////////////////
+        /** @overrides myt.Node */
+        initNode: function(parent, attrs) {
+            const self = this;
             
-            Events:
-                running:boolean Fired when the animation starts or stops.
-                paused:boolean Fired when the animation is paused or unpaused.
-                reverse:boolean
-                easingFunction:function
-                from:number
-                to:number
-                repeat:Fired when the animation repeats. The value is the 
-                    current loop count.
+            self.duration = 1000;
+            self.relative = self.reverse = self.running = self.paused = false;
+            self.repeat = 1;
+            self.easingFunction = DEFAULT_EASING;
+            
+            self.callSuper(parent, attrs);
+            
+            reset(self);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////
+        setRunning: function(v) {
+            const self = this;
+            if (self.running !== v) {
+                self.running = v;
+                if (self.inited) self.fireEvent('running', v);
                 
-            Attributes:
-                attribute:string The attribute to animate.
-                target:object The object to animate the attribute on. The 
-                    default is the parent of this node.
-                from:number The starting value of the attribute. If not 
-                    specified the current value on the target will be used.
-                to:number The ending value of the attribute.
-                duration:number The length of time the animation will run 
-                    in millis. The default value is 1000.
-                easingFunction:string/function Controls the rate of animation.
-                    string: See http://easings.net/ for more info. One of the 
-                        following:
-                            linear, 
-                            inQuad, outQuad, inOutQuad(default), 
-                            inCubic, outCubic, inOutCubic, 
-                            inQuart, outQuart, inOutQuart, 
-                            inQuint, outQuint, inOutQuint, 
-                            inSine, outSine, inOutSine,
-                            inExpo ,outExpo, inOutExpo, 
-                            inCirc, outCirc, inOutCirc,
-                            inElastic ,outElastic, inOutElastic, 
-                            inBack, outBack, inOutBack, 
-                            inBounce, outBounce, inOutBounce
-                    
-                    function: A function that determines the rate of change 
-                        of the attribute. The arguments to the easing 
-                        function are:
-                            t: Animation progress in millis
-                            c: Value change (to - from)
-                            d: Animation duration in millis
-                relative:boolean Determines if the animated value is set on 
-                    the target (false), or added to the exiting value on the 
-                    target (true). Note that this means the difference between 
-                    the from and to values will be "added" to the existing 
-                    value on the target. The default value is false.
-                repeat:number The number of times to repeat the animation. 
-                    If negative the animation will repeat forever. The default 
-                    value is 1.
-                reverse:boolean If true, the animation is run in reverse.
-                running:boolean Indicates if the animation is currently 
-                    running. The default value is false.
-                paused:boolean Indicates if the animation is temporarily 
-                    paused. The default value is false.
-                callback:function A function that gets called when the 
-                    animation completes. A boolean value is passed into the 
-                    function and will be true if the animation completed 
-                    successfully or false if not.
-            
-            Private Attributes:
-                __loopCnt:number the loop currently being run.
-                __prog:number the number of millis currently used during 
-                    the current animation loop.
-                __tmpFrom:boolean Indicates no "from" was set on the 
-                    animator so we will have to generate one when needed. 
-                    We want to reset back to undefined after the animation 
-                    completes so that subsequent calls to start the animation
-                    will behave the same.
-                __isColorAnim:boolean Indicates this animator is animating a
-                    color attribute.
-            
-            @class */
-        Animator = pkg.Animator = new JS.Class('Animator', pkg.Node, {
-            include: [pkg.Reusable],
-            
-            
-            // Class Methods and Attributes ////////////////////////////////////
-            extend: {
-                /** An object containing easign functions. */
-                easings: easingFunctions,
-                
-                /** The default easing function. */
-                EASING: easingFunctions.inOutQuad
-            },
-            
-            // Life Cycle //////////////////////////////////////////////////////
-            /** @overrides myt.Node */
-            initNode: function(parent, attrs) {
-                const self = this;
-                
-                self.duration = 1000;
-                self.relative = self.reverse = self.running = self.paused = false;
-                self.repeat = 1;
-                self.easingFunction = Animator.EASING;
-                
-                self.callSuper(parent, attrs);
-                
-                reset(self);
-            },
-            
-            
-            // Accessors ///////////////////////////////////////////////////////
-            setRunning: function(v) {
-                const self = this;
-                if (self.running !== v) {
-                    self.running = v;
-                    if (self.inited) self.fireEvent('running', v);
-                    
-                    if (!self.paused) {
-                        if (v) {
-                            isColorAttr(self);
-                        } else {
-                            if (self.__tmpFrom) self.from = undefined;
-                            reset(self);
-                        }
-                        self[v ? 'attachTo' : 'detachFrom'](globalIdle, '__updateAnim', 'idle');
+                if (!self.paused) {
+                    if (v) {
+                        // Determine if we are animating a color or not. We do this by checking
+                        // an isColorAttr function on the animation target if it exists.
+                        const target = getTarget(self);
+                        self.__isColorAnim = (target && typeof target.isColorAttr === 'function') ? target.isColorAttr(self.attribute) : undefined;
+                    } else {
+                        if (self.__tmpFrom) self.from = undefined;
+                        reset(self);
                     }
+                    self[v ? 'attachTo' : 'detachFrom'](globalIdle, '__updateAnim', 'idle');
                 }
-            },
-            
-            setPaused: function(v) {
-                const self = this;
-                if (self.paused !== v) {
-                    self.paused = v;
-                    if (self.inited) self.fireEvent('paused', v);
-                    if (self.running) self[v ? 'detachFrom' : 'attachTo'](globalIdle, '__updateAnim', 'idle');
-                }
-            },
-            
-            setReverse: function(v) {
-                const self = this;
-                if (self.reverse !== v) {
-                    self.reverse = v;
-                    if (self.inited) self.fireEvent('reverse', v);
-                    if (!self.running) reset(self);
-                }
-            },
-            
-            setEasingFunction: function(v) {
-                // Lookup easing function if a string is provided.
-                if (typeof v === 'string') v = easingFunctions[v];
-                
-                // Use default if invalid
-                if (!v) v = Animator.EASING;
-                
-                this.set('easingFunction', v, true);
-            },
-            
-            setFrom: function(v) {this.set('from', v, true);},
-            setTo: function(v) {this.set('to', v, true);},
-            setCallback: function(v) {this.callback = v;},
-            
-            
-            // Methods /////////////////////////////////////////////////////////
-            /** A convienence method to set the callback to run when the 
-                animator stops running. If a callback already exists the 
-                provided callback will be executed after (but not after the
-                existing animator completes) the existing one.
-                @param {!Function} callback - The function to run.
-                @param {boolean} [replace] - If true the existing callback 
-                    will be replaced with the new callback.
-                @returns {undefined} */
-            next: function(callback, replace) {
-                const self = this,
-                    existingCallback = self.callback;
-                if (existingCallback && !replace) {
-                    self.setCallback(success => {
-                        existingCallback.call(self, success);
-                        callback.call(self, success);
-                    });
-                } else {
-                    self.setCallback(callback);
-                }
-            },
-            
-            /** Puts the animator back to an initial configured state.
-                @param {boolean} [executeCallback] - If true and the callback
-                    exists, the callback will be executed.
-                @returns {undefined} */
-            reset: function(executeCallback) {
-                const self = this;
-                
-                reset(self);
-                
-                self.setRunning(false);
-                self.setPaused(false);
-                
-                if (executeCallback && self.callback) self.callback.call(self, false);
-            },
-            
-            /** @overrides myt.Reusable */
-            clean: function() {
-                const self = this;
-                
-                self.to = self.from = self.attribute = self.callback = undefined;
-                self.duration = 1000;
-                self.relative = self.reverse = false;
-                self.repeat = 1;
-                self.easingFunction = Animator.EASING;
-                
-                self.reset(false);
-            },
-            
-            /** @private
-                @param {!Object} idleEvent
-                @returns {undefined} */
-            __updateAnim: function(idleEvent) {
-                advance(this, idleEvent.value.delta);
             }
-        });
+        },
+        
+        setPaused: function(v) {
+            const self = this;
+            if (self.paused !== v) {
+                self.paused = v;
+                if (self.inited) self.fireEvent('paused', v);
+                if (self.running) self[v ? 'detachFrom' : 'attachTo'](globalIdle, '__updateAnim', 'idle');
+            }
+        },
+        
+        setReverse: function(v) {
+            this.set('reverse', v, true);
+            if (this.inited && !this.running) reset(this);
+        },
+        
+        setRepeat: function(v) {
+            this.set('repeat', v, true);
+            if (this.inited && !this.running) reset(this);
+        },
+        
+        setDuration: function(v) {
+            this.set('duration', v, true);
+            if (this.inited && !this.running) reset(this);
+        },
+        
+        setEasingFunction: function(v) {
+            // Lookup easing function if a string is provided.
+            if (typeof v === 'string') v = easingFunctions[v];
+            
+            this.set('easingFunction', v ?? DEFAULT_EASING, true);
+        },
+        
+        setFrom: function(v) {this.set('from', v, true);},
+        setTo: function(v) {this.set('to', v, true);},
+        setCallback: function(v) {this.callback = v;},
+        
+        
+        // Methods /////////////////////////////////////////////////////////
+        /** A convienence method to set the callback to run when the animator stops running. If 
+            a callback already exists the provided callback will be executed after (but not 
+            after the existing animator completes) the existing one.
+            @param {!Function} callback - The function to run.
+            @param {boolean} [replace] - If true the existing callback will be replaced with 
+                the new callback.
+            @returns {undefined} */
+        next: function(callback, replace) {
+            const self = this,
+                existingCallback = self.callback;
+            if (existingCallback && !replace) {
+                self.setCallback(success => {
+                    existingCallback.call(self, success);
+                    callback.call(self, success);
+                });
+            } else {
+                self.setCallback(callback);
+            }
+        },
+        
+        /** Puts the animator back to an initial configured state.
+            @param {boolean} [executeCallback] - If true and the callback exists, the callback 
+                will be executed.
+            @returns {undefined} */
+        reset: function(executeCallback) {
+            const self = this;
+            
+            reset(self);
+            
+            self.setRunning(false);
+            self.setPaused(false);
+            
+            if (executeCallback && self.callback) self.callback.call(self, false);
+        },
+        
+        /** @overrides myt.Reusable */
+        clean: function() {
+            const self = this;
+            
+            self.to = self.from = self.attribute = self.callback = undefined;
+            self.duration = 1000;
+            self.relative = self.reverse = false;
+            self.repeat = 1;
+            self.easingFunction = DEFAULT_EASING;
+            
+            self.reset(false);
+        },
+        
+        /** @private
+            @param {!Object} idleEvent
+            @returns {undefined} */
+        __updateAnim: function(idleEvent) {
+            advance(this, idleEvent.value.delta);
+        }
+    });
 })(myt);
 
 
@@ -12320,11 +12218,6 @@ new JS.Singleton('GlobalMouse', {
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            // Create a dom element for the panel and insert it at the end of the body.
-            const elem = document.createElement('div');
-            elem.style.position = 'absolute';
-            pkg.getElement().appendChild(elem);
-            
             this.ignoreOwnerForHideOnMouseDown = this.ignoreOwnerForHideOnBlur = this.hideOnBlur = this.hideOnMouseDown = true;
             
             attrs.visible = attrs.focusIndicator = false;
@@ -12332,7 +12225,7 @@ new JS.Singleton('GlobalMouse', {
             // Ensure the focus starts and ends with the panel
             attrs.focusable = attrs.focusCage = true;
             
-            this.callSuper(elem, attrs);
+            this.callSuper(parent, attrs);
         },
         
         
@@ -12355,16 +12248,18 @@ new JS.Singleton('GlobalMouse', {
             if (!this.containsPoint(px, py) && 
                 (this.ignoreOwnerForHideOnMouseDown ? !this.owner.containsPoint(px, py) : true)
             ) {
-                this.doMouseDownOutside();
+                this.doMouseDownOutside(true);
             }
             return true;
         },
         
         /** Called when a mousedown occurs outside the floating panel. The default behavior is to 
             hide the panel. This gives subclasses a chance to provide different behavior.
+            @param ignoreRestoreFocus:boolean (Optional) If true the restoreFocus method will not 
+                be called. Defaults to undefined which is equivalent to false.
             @returns {undefined} */
-        doMouseDownOutside: function() {
-            if (this.hideOnMouseDown) this.hide();
+        doMouseDownOutside: function(ignoreRestoreFocus) {
+            if (this.hideOnMouseDown) this.hide(ignoreRestoreFocus);
         },
         
         /** @overrides myt.FocusObservable
@@ -20467,7 +20362,11 @@ new JS.Singleton('GlobalMouse', {
             animateToValue: function(value, speed=250) {
                 if (value != null) {
                     this.stopActiveAnimators('value');
-                    this.animateOnce('value', value, null, speed);
+                    this.animate({
+                        attribute:'value',
+                        to:value,
+                        duration:speed
+                    });
                 }
             },
             

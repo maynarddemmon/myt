@@ -3,9 +3,8 @@
         /*  The value that indicates default placement should be used. */
         DEFAULT_PLACEMENT = '*',
         
-        /*  Get the closest ancestor of the provided Node or the Node itself 
-            for which the matcher function returns true. Returns a Node or 
-            undefined if no match is found.
+        /*  Get the closest ancestor of the provided Node or the Node itself for which the matcher 
+            function returns true. Returns a Node or undefined if no match is found.
                 param node:myt.Node the Node to start searching from.
                 param matcher:function the function to test for matching Nodes with. */
         getMatchingAncestorOrSelf = (node, matcherFunc) => {
@@ -17,10 +16,10 @@
             }
         },
         
-        /*  Get the youngest ancestor of the provided Node for which the 
-            matcher function returns true. Returns a Node or undefined if no match is found.
-                param node:myt.Node the Node to start searching from. This 
-                    Node is not tested, but its parent is.
+        /*  Get the youngest ancestor of the provided Node for which the matcher function returns 
+            true. Returns a Node or undefined if no match is found.
+                param node:myt.Node the Node to start searching from. This Node is not tested, but 
+                    its parent is.
                 param matcher:function the function to test for matching Nodes with. */
         getMatchingAncestor = (node, matcherFunc) => getMatchingAncestorOrSelf(node ? node.parent : null, matcherFunc),
         
@@ -52,15 +51,13 @@
             first if necessary. Returns a myt.TrackActivesPool */
         getAnimPool = node => node.__animPool ??= new pkg.TrackActivesPool(pkg.Animator, node);
         
-    /** A single node within a tree data structure. A node has zero or 
-        one parent node and zero or more child nodes. If a node has no 
-        parent it is a 'root' node. If a node has no child nodes it is a 
-        'leaf' node. Parent nodes and parent of parents, etc. are referred 
-        to as ancestors. Child nodes and children of children, etc. are 
-        referred to as descendants.
+    /** A single node within a tree data structure. A node has zero or one parent node and zero or 
+        more child nodes. If a node has no parent it is a 'root' node. If a node has no child nodes 
+        it is a 'leaf' node. Parent nodes and parent of parents, etc. are referred to as ancestors. 
+        Child nodes and children of children, etc. are referred to as descendants.
         
-        Lifecycle management is also provided via the 'initNode', 'destroy'
-        and 'destroyAfterOrphaning' methods.
+        Lifecycle management is also provided via the 'initNode', 'destroy' and 
+        'destroyAfterOrphaning' methods.
         
         Events:
             parent:myt.Node Fired when the parent is set.
@@ -68,26 +65,22 @@
         Attributes:
             inited:boolean Set to true after this Node has completed initializing.
             parent:myt.Node The parent of this Node.
-            name:string The name of this node. Used to reference this Node 
-                from its parent Node.
-            isBeingDestroyed:boolean Indicates that this node is in the process
-                of being destroyed. Set to true at the beginning of the destroy
-                lifecycle phase. Undefined before that.
-            placement:string The name of the subnode of this Node to add nodes 
-                to when setParent is called on the subnode. Placement can be 
-                nested using '.' For example 'foo.bar'. The special value of 
-                '*' means use the default placement. For example 'foo.*' means 
+            name:string The name of this node. Used to reference this Node from its parent Node.
+            isBeingDestroyed:boolean Indicates that this node is in the process of being destroyed. 
+                Set to true at the beginning of the destroy lifecycle phase. Undefined before that.
+            placement:string The name of the subnode of this Node to add nodes to when setParent is 
+                called on the subnode. Placement can be nested using '.' For example 'foo.bar'. The 
+                special value of '*' means use the default placement. For example 'foo.*' means 
                 place in the foo subnode and then in the default placement for foo.
-            defaultPlacement:string The name of the subnode to add nodes to 
-                when no placement is specified. Defaults to undefined which 
-                means add subnodes directly to this node.
-            ignorePlacement:boolean If set to true placement will not be 
-                processed for this Node when it is added to a parent Node.
+            defaultPlacement:string The name of the subnode to add nodes to when no placement is 
+                specified. Defaults to undefined which means add subnodes directly to this node.
+            ignorePlacement:boolean If set to true placement will not be processed for this Node 
+                when it is added to a parent Node.
         
         Private Attributes:
             __animPool:array An myt.TrackActivesPool used by the 'animate' method.
-            subnodes:array The array of child nodes for this node. Should be
-                accessed through the getSubnodes method.
+            subnodes:array The array of child nodes for this node. Should be accessed through the 
+                getSubnodes method.
         
         @class */
     pkg.Node = new JS.Class('Node', {
@@ -108,10 +101,9 @@
         
         
         // Constructor /////////////////////////////////////////////////////////
-        /** The standard JSClass initializer function. Subclasses should not
-            override this function.
-            @param {?Object} [parent] - The myt.Node (or dom element for 
-                RootViews) that will be set as the parent of this myt.Node.
+        /** The standard JSClass initializer function. Subclasses should not override this function.
+            @param {?Object} [parent] - The myt.Node (or dom element for RootViews) that will be 
+                set as the parent of this myt.Node.
             @param {?Object} [attrs] - A map of attribute names and values.
             @param {?Array} [mixins] - A list of mixins to be added onto the new instance.
             @returns {undefined} */
@@ -134,11 +126,10 @@
         
         
         // Life Cycle //////////////////////////////////////////////////////////
-        /** Called during initialization. Sets initial state for life 
-            cycle attrs, calls setter methods, sets parent and lastly, sets 
-            inited to true. Subclasses must callSuper.
-            @param {?Object} [parent] - The myt.Node (or dom element for 
-                RootViews) the parent of this Node.
+        /** Called during initialization. Sets initial state for life cycle attrs, calls setter 
+            methods, sets parent and lastly, sets inited to true. Subclasses must callSuper.
+            @param {?Object} [parent] - The myt.Node (or dom element for RootViews) the parent of 
+                this Node.
             @param {?Object} attrs - A map of attribute names and values.
             @returns {undefined} */
         initNode: function(parent, attrs) {
@@ -176,9 +167,8 @@
             self.callSuper();
         },
         
-        /** Provides a hook for subclasses to do destruction of their 
-            internals. This method is called after the parent has been 
-            unset. Subclasses must call super.
+        /** Provides a hook for subclasses to do destruction of their internals. This method is 
+            called after the parent has been unset. Subclasses must call super.
             @returns {undefined} */
         destroyAfterOrphaning: () => {/* Subclasses to implement as needed. */},
         
@@ -188,9 +178,8 @@
         setDefaultPlacement: function(v) {this.defaultPlacement = v;},
         setIgnorePlacement: function(v) {this.ignorePlacement = v;},
         
-        /** Sets the provided Node as the new parent of this Node. This is 
-            the most direct method to do reparenting. You can also use the 
-            addSubnode method but it's just a wrapper around this setter.
+        /** Sets the provided Node as the new parent of this Node. This is the most direct method 
+            to do reparenting.
             @param {?Object} newParent
             @returns {undefined} */
         setParent: function(newParent) {
@@ -198,7 +187,7 @@
             
             // Use placement if indicated
             if (newParent && !self.ignorePlacement) {
-                let placement = self.placement ?? newParent.defaultPlacement;
+                const placement = self.placement ?? newParent.defaultPlacement;
                 if (placement) newParent = newParent.determinePlacement(placement, self);
             }
             
@@ -207,7 +196,7 @@
                 if (newParent && newParent.destroyed) return;
                 
                 // Remove ourselves from our existing parent if we have one.
-                let curParent = self.parent;
+                const curParent = self.parent;
                 if (curParent) {
                     const idx = curParent.getSubnodes().indexOf(self);
                     if (idx > -1) {
@@ -231,10 +220,9 @@
             }
         },
         
-        /** The 'name' of a Node allows it to be referenced by name from its
-            parent node. For example a Node named 'foo' that is a child of a
-            Node stored in the variable 'bar' would be referenced like 
-            this: bar.foo or bar['foo'].
+        /** The 'name' of a Node allows it to be referenced by name from its parent node. For 
+            example a Node named 'foo' that is a child of a Node stored in the variable 'bar' 
+            would be referenced like this: bar.foo or bar['foo'].
             @param {string} name
             @returns {undefined} */
         setName: function(name) {
@@ -250,18 +238,11 @@
             }
         },
         
-        /** Gets the subnodes for this Node and does lazy instantiation of 
-            the subnodes array if no child Nodes exist.
-            @returns {!Array} - An array of subnodes. */
-        getSubnodes: function() {
-            return this.subnodes ??= [];
-        },
-        
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Called from setParent to determine where to insert a subnode in 
-            the node hierarchy. Subclasses will not typically override this 
-            method, but if they do, they probably won't need to call super.
+        /** Called from setParent to determine where to insert a subnode in the node hierarchy. 
+            Subclasses will not typically override this method, but if they do, they probably won't 
+            need to call super.
             @param {string} placement - The placement path to use.
             @param {!Object} subnode - The sub myt.Node being placed.
             @returns {!Object} - The Node to place a subnode into. */
@@ -287,18 +268,19 @@
                     }
                 }
                 
-                // It's possible that a placement of '*' comes out here if a
-                // Node has its defaultPlacement set to '*'. This should result
-                // in a null loc when the code below runs which will end up returning 'this'.
+                // It's possible that a placement of '*' comes out here if a Node has its 
+                // defaultPlacement set to '*'. This should result in a null loc when the code 
+                // below runs which will end up returning 'this'.
             }
             
             const loc = this[placement];
             return loc ? (remainder ? loc.determinePlacement(remainder, subnode) : loc) : this;
         },
         
+        
         // Tree Methods //
-        /** Gets the root Node for this Node. The root Node is the oldest
-            ancestor or self that has no parent.
+        /** Gets the root Node for this Node. The root Node is the oldest ancestor or self that 
+            has no parent.
             @returns {!Object} - The root myt.Node. */
         getRoot: function() {
             return this.parent ? this.parent.getRoot() : this;
@@ -318,8 +300,8 @@
             if (node) {
                 if (node === self) return true;
                 if (self.parent) {
-                    // Optimization: use the dom element contains function if 
-                    // both nodes are DomElementProxy instances.
+                    // Optimization: use the dom element contains function if both nodes are 
+                    // DomElementProxy instances.
                     if (self.getIDE && node.getIDE) return node.getIDE().contains(self.getIDE());
                     return self.parent.isDescendantOf(node);
                 }
@@ -334,7 +316,7 @@
             return node ? node.isDescendantOf(this) : false;
         },
         
-        /** Gets the youngest common ancestor of this node and the provided node.
+        /** Gets the youngest common ancestor of this Node and the provided Node.
             @param {!Object} node - The myt.Node to look for a common ancestor with.
             @returns {?Object} The youngest common Node or undefined if none exists. */
         getLeastCommonAncestor: function(node) {
@@ -346,41 +328,36 @@
         
         /** Find the youngest ancestor Node that is an instance of the class.
             @param {?Function} klass - The Class to search for.
-            @returns {?Object} - The myt.Node or undefined if no klass is 
-                provided or match found. */
+            @returns {?Object} - The myt.Node or undefined if no klass is provided or match found. */
         searchAncestorsForClass: function(klass) {
             if (klass) return this.searchAncestors(node => node instanceof klass);
         },
         
         /** Find the youngest ancestor Node that includes the JS.Module.
             @param {?Object} jsmodule - The JS.Module to search for.
-            @returns {?Object} - The myt.Node or undefined if no klass is 
-                provided or match found. */
+            @returns {?Object} - The myt.Node or undefined if no klass is provided or match found. */
         searchAncestorsForModule: function(jsmodule) {
             if (jsmodule) return this.searchAncestors(node => node.isA(jsmodule));
         },
         
-        /** Get the youngest ancestor of this Node for which the matcher 
-            function returns true. This is a simple wrapper around 
-            myt.Node.getMatchingAncestor(this, matcherFunc).
+        /** Get the youngest ancestor of this Node for which the matcher function returns true. 
+            This is a simple wrapper around myt.Node.getMatchingAncestor(this, matcherFunc).
             @param {!Function} matcherFunc - The function to test for matching Nodes with.
             @returns {?Object} - The myt.Node or undefined if no match is found. */
         searchAncestors: function(matcherFunc) {
             return getMatchingAncestor(this, matcherFunc);
         },
         
-        /** Get the youngest ancestor of this Node or the Node itself for which 
-            the matcher function returns true. This is a simple wrapper around 
-            myt.Node.getMatchingAncestorOrSelf(this, matcherFunc).
+        /** Get the youngest ancestor of this Node or the Node itself for which the matcher function 
+            returns true. This is a simple wrapper around myt.Node.getMatchingAncestorOrSelf(this, matcherFunc).
             @param {!Function} matcherFunc - The function to test for matching Nodes with.
             @returns {?Object} - The myt.Node or undefined if no match is found. */
         searchAncestorsOrSelf: function(matcherFunc) {
             return getMatchingAncestorOrSelf(this, matcherFunc);
         },
         
-        /** Gets an array of ancestor nodes including the node itself. The
-            oldest ancestor will be at the end of the list and the node will
-            be at the front of the list.
+        /** Gets an array of ancestor nodes including the node itself. The oldest ancestor will be 
+            at the end of the list and the node will be at the front of the list.
             @returns {!Array} - The array of ancestor nodes. */
         getAncestors: function() {
             const ancestors = [];
@@ -392,95 +369,39 @@
             return ancestors;
         },
         
+        
         // Subnode Methods //
-        /** Checks if this Node has the provided Node in the subnodes array.
-            @param {!Object} node - The sub myt.Node to check for.
-            @returns {boolean} true if the subnode is found, false otherwise. */
-        /*hasSubnode: function(node) {
-            return this.getSubnodes().includes(node);
-        },*/
+        /** Gets the subnodes for this Node and does lazy instantiation of the subnodes array.
+            @returns {!Array} - An array of subnodes. */
+        getSubnodes: function() {
+            return this.subnodes ??= [];
+        },
         
-        /** Gets the index of the provided Node in the subnodes array.
-            @param {!Object} node - The sub myt.Node to get the index for.
-            @returns {number} - The index of the subnode or -1 if not found. */
-        /*getSubnodeIndex: function(node) {
-            return this.getSubnodes().indexOf(node);
-        },*/
-        
-        /** A convienence method to make a Node a child of this Node. The
-            standard way to do this is to call the setParent method on the
-            prospective child Node.
-            @param {!Object} node - The sub myt.Node to add.
-            @returns {undefined} */
-        /*addSubnode: function(node) {
-            node.setParent(this);
-        },*/
-        
-        /** A convienence method to make a Node no longer a child of this Node. 
-            The standard way to do this is to call the setParent method with 
-            a value of null on the child Node.
-            @param {!Object} node - The sub myt.Node to remove.
-            @returns {?Object} - The removed myt.Node or undefined if 
-                removal failed. */
-        /*removeSubnode: function(node) {
-            if (node.parent === this) {
-                node.setParent();
-                return node;
-            }
-        },*/
-        
-        /** Called when a subnode is added to this node. Provides a hook for
-            subclasses. No need for subclasses to call super. Do not call this
-            method to add a subnode. Instead call addSubnode or setParent.
+        /** Called when a subnode is added to this node. Provides a hook for subclasses. No need for
+            subclasses to call super. Do not call this method to add a subnode. Instead call setParent.
             @param {!Object} node - The sub myt.Node that was added.
             @returns {undefined} */
         subnodeAdded: node => {},
         
-        /** Called when a subnode is removed from this node. Provides a hook 
-            for subclasses. No need for subclasses to call super. Do not call 
-            this method to remove a subnode. Instead call removeSubnode 
-            or setParent.
+        /** Called when a subnode is removed from this node. Provides a hook for subclasses. No need
+            for subclasses to call super. Do not call this method to remove a subnode. Instead 
+            call setParent.
             @param {!Object} node - The sub myt.Node that was removed.
             @returns {undefined} */
         subnodeRemoved: node => {},
         
-        // Animation
-        /** A wrapper on Node.animate that will only animate one time and that 
-            provides a streamlined list of the most commonly used arguments.
-            @param {!Object|string} attribute - The name of the attribute to 
-                animate. If an object is provided it should be the only 
-                argument and its keys should be the params of this method. 
-                This provides a more concise way of passing in sparse 
-                optional parameters.
-            @param {number} to - The target value to animate to.
-            @param {number} [from] - The target value to animate from.
-            @param {number} [duration]
-            @param {?Function} [easingFunction]
-            @returns {!Object} - The Animator being run. */
-        animateOnce: function(attribute, to, from, duration, easingFunction) {
-            if (typeof attribute === 'object') {
-                return this.animate(attribute);
-            } else {
-                return this.animate({
-                    attribute:attribute,
-                    to:to,
-                    from:from, 
-                    duration:duration, 
-                    easingFunction:easingFunction
-                });
-            }
-        },
         
+        // Animation //
         /** Animates an attribute using the provided parameters.
-            @param {!Object} attrs - Attributes that will be passed to
-                the myt.Animator that will be run.
-            @returns {?Object} - The Animator being run or undefined if for
-                some reason an animator could not be run. */
+            @param {!Object} attrs - Attributes that will be passed to the myt.Animator that will 
+                be run.
+            @returns {?Object} - The Animator being run or undefined if for some reason an animator 
+                could not be run. */
         animate: function(attrs) {
             if (attrs) {
                 const animPool = getAnimPool(this),
-                    // Get an animator from the pool. Use of ignorePlacement 
-                    // ensures the animator is directly attached to this node
+                    // Get an animator from the pool. Use of ignorePlacement ensures the animator 
+                    // is directly attached to this node
                     anim = animPool.getInstance({ignorePlacement:true}),
                     callback = attrs.callback;
                 delete attrs.callback;
@@ -495,12 +416,11 @@
             }
         },
         
-        /** Gets an array of the currently running animators that were created
-            by calls to the animate method.
-            @param {?Function|string} [filterFunc] - The function that filters
-                which animations get stopped. The filter should return true for 
-                functions to be included. If the provided values is a string it 
-                will be used as a matching attribute name.
+        /** Gets an array of the currently running animators that were created by calls to the 
+            animate method.
+            @param {?Function|string} [filterFunc] - The function that filters which animations get 
+                stopped. The filter should return true for functions to be included. If the 
+                provided values is a string it will be used as a matching attribute name.
             @returns {!Array} - An array of active animators. */
         getActiveAnimators: function(filterFunc) {
             if (typeof filterFunc === 'string') {
@@ -511,10 +431,9 @@
         },
         
         /** Stops all active animations.
-            @param {?Function|string} [filterFunc] - The function that filters 
-                which animations get stopped. The filter should return true for 
-                functions to be stopped. If the provided values is a string it 
-                will be used as a matching attribute name.
+            @param {?Function|string} [filterFunc] - The function that filters which animations get 
+                stopped. The filter should return true for functions to be stopped. If the provided 
+                values is a string it will be used as a matching attribute name.
             @param {boolean} [executeCallbacks] - If true animator 
                 callbacks will be executed if they exist.
             @returns {undefined} */
@@ -531,10 +450,10 @@
             }
         },
         
-        // Timing and Delay
+        
+        // Timing and Delay //
         /** A convienence method to execute a method once on idle.
-            @param {string} methodName - The name of the method to execute 
-                on this object.
+            @param {string} methodName - The name of the method to execute on this object.
             @returns {undefined} */
         doOnceOnIdle: function(methodName) {
             this.attachTo(pkg.global.idle, methodName, 'idle', true);

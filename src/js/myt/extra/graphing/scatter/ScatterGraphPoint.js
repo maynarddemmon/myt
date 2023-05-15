@@ -82,7 +82,7 @@ myt.ScatterGraphPoint = new JS.Class('ScatterGraphPoint', {
         this._progress += timeDiff;
         if (this._progress > 1000) this._progress = 1000;
         
-        const easingFunc = this.config.easingFunction ?? myt.Animator.EASING,
+        const easingFunc = this.config.easingFunction,
             percent = this._progress / 1000;
         
         this.x = this._origX + this._xAttrDiff * easingFunc(percent);

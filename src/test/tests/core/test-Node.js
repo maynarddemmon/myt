@@ -41,9 +41,9 @@ test("Add and remove child nodes on a root node", function() {
     // Subnode tests
     ok(rootNode.subnodes != null, "Subnodes should now be defined on the root node.");
     ok(rootNode.subnodes.length === 1, "Subnodes should have a length of 1.");
-    ok(rootNode.getSubnodeIndex(childNode) === 0, "Verify getSubnodeIndex method works.");
+    ok(rootNode.getSubnodes().indexOf(childNode) === 0, "Verify getSubnodes().indexOf(node) method works.");
     ok(rootNode.subnodes[0] === childNode, "The first subnode should be the child node.");
-    ok(rootNode.hasSubnode(childNode) === true, "Verify hasSubnode method works.");
+    ok(rootNode.getSubnodes().includes(childNode) === true, "Verify getSubnodes().includes(node) method works.");
     
     // Relationship tests
     ok(childNode.isDescendantOf(rootNode) === true, "Child node is a descendant of the root node.");
@@ -62,31 +62,29 @@ test("Add and remove child nodes on a root node", function() {
     ok(orphanNode.parent === rootNode, "Orphan node has rootNode as a parent.");
     ok(orphanNode.get('parent') === rootNode, "Calling the generic getter for 'parent' should return the root node.");
     ok(rootNode.subnodes.length === 2, "Subnodes should have a length of 2.");
-    ok(rootNode.getSubnodeIndex(orphanNode) === 1, "Formerly orphaned node should have an index of 1.");
+    ok(rootNode.getSubnodes().indexOf(orphanNode) === 1, "Formerly orphaned node should have an index of 1.");
     
     // Call setParent on a node that is already a child should not change anything.
-    ok(rootNode.getSubnodeIndex(childNode) === 0, "Verify index is still 0.");
+    ok(rootNode.getSubnodes().indexOf(childNode) === 0, "Verify index is still 0.");
     childNode.setParent(rootNode);
-    ok(rootNode.getSubnodeIndex(childNode) === 0, "Verify index is again still 0.");
-    ok(rootNode.getSubnodeIndex(orphanNode) === 1, "Orphan node index should still be 1.");
+    ok(rootNode.getSubnodes().indexOf(childNode) === 0, "Verify index is again still 0.");
+    ok(rootNode.getSubnodes().indexOf(orphanNode) === 1, "Orphan node index should still be 1.");
     ok(rootNode.subnodes.length === 2, "Subnodes should still have a length of 2.");
     
-    // Create another child independently and then add it using addSubnode
+    // Create another child independently and then add it using setParent
     var orphanNode2 = new myt.Node();
-    rootNode.addSubnode(orphanNode2);
+    orphanNode2.setParent(rootNode);
     
     ok(orphanNode2.isRoot() === false, "Orphan node 2 should no longer be a root.");
     ok(orphanNode2.parent === rootNode, "Orphan node 2 has rootNode as a parent.");
     ok(orphanNode2.get('parent') === rootNode, "Calling the generic getter for 'parent' should return the root node.");
     ok(rootNode.subnodes.length === 3, "Subnodes should have a length of 3.");
-    ok(rootNode.getSubnodeIndex(orphanNode2) === 2, "Formerly orphaned node 2 should have an index of 1.");
+    ok(rootNode.getSubnodes().indexOf(orphanNode2) === 2, "Formerly orphaned node 2 should have an index of 1.");
     
-    // Remove the node using removeSubnode
-    ok(rootNode.removeSubnode(rootNode) === undefined, "Passing a node that is not a child should return undefined.");
-    var removedNode = rootNode.removeSubnode(orphanNode2);
-    ok(removedNode === orphanNode2, "Removed node should be the node returned from removeSubnode.");
+    // Remove the node using setParent
+    orphanNode2.setParent();
     ok(orphanNode2.isRoot() === true, "Orphan node 2 should be a root now.");
-    ok(rootNode.getSubnodeIndex(orphanNode2) === -1, "Index should not be -1.");
+    ok(rootNode.getSubnodes().indexOf(orphanNode2) === -1, "Index should be -1.");
     ok(rootNode.subnodes.length === 2, "Subnodes should now have a length of 2.");
     
     orphanNode2.destroy();
@@ -149,8 +147,8 @@ test("Create granchildren and do reparenting", function() {
     // Reparent one tree to another
     c3r1.setParent(c3c3r2);
     
-    ok(c3c3r2.hasSubnode(c3r1) === true, "Reparenting works for target");
-    ok(r1.hasSubnode(c3r1) === false, "Reparenting works for origin");
+    ok(c3c3r2.getSubnodes().includes(c3r1) === true, "Reparenting works for target");
+    ok(r1.getSubnodes().includes(c3r1) === false, "Reparenting works for origin");
     ok(c3c3r1.isDescendantOf(r2) === true, "Descendant check after reparenting");
     
     r2.setParent(r1);

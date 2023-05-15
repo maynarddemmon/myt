@@ -198,11 +198,6 @@
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
-            // Create a dom element for the panel and insert it at the end of the body.
-            const elem = document.createElement('div');
-            elem.style.position = 'absolute';
-            pkg.getElement().appendChild(elem);
-            
             this.ignoreOwnerForHideOnMouseDown = this.ignoreOwnerForHideOnBlur = this.hideOnBlur = this.hideOnMouseDown = true;
             
             attrs.visible = attrs.focusIndicator = false;
@@ -210,7 +205,7 @@
             // Ensure the focus starts and ends with the panel
             attrs.focusable = attrs.focusCage = true;
             
-            this.callSuper(elem, attrs);
+            this.callSuper(parent, attrs);
         },
         
         
@@ -233,16 +228,18 @@
             if (!this.containsPoint(px, py) && 
                 (this.ignoreOwnerForHideOnMouseDown ? !this.owner.containsPoint(px, py) : true)
             ) {
-                this.doMouseDownOutside();
+                this.doMouseDownOutside(true);
             }
             return true;
         },
         
         /** Called when a mousedown occurs outside the floating panel. The default behavior is to 
             hide the panel. This gives subclasses a chance to provide different behavior.
+            @param ignoreRestoreFocus:boolean (Optional) If true the restoreFocus method will not 
+                be called. Defaults to undefined which is equivalent to false.
             @returns {undefined} */
-        doMouseDownOutside: function() {
-            if (this.hideOnMouseDown) this.hide();
+        doMouseDownOutside: function(ignoreRestoreFocus) {
+            if (this.hideOnMouseDown) this.hide(ignoreRestoreFocus);
         },
         
         /** @overrides myt.FocusObservable

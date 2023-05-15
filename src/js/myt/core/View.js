@@ -994,13 +994,13 @@
         },
         
         /** Called when a View is added to this View. Do not call this method 
-            to add a View. Instead call addSubnode or setParent.
+            to add a View. Instead call setParent.
             @param {!Object} sv - The myt.View that was added.
             @returns {undefined} */
         subviewAdded: sv => {},
         
         /** Called when a View is removed from this View. Do not call this 
-            method to remove a View. Instead call removeSubnode or setParent.
+            method to remove a View. Instead call setParent.
             @param {!Object} sv - The myt.View that was removed.
             @returns {undefined} */
         subviewRemoved: sv => {},
@@ -1041,13 +1041,13 @@
         },
         
         /** Called when a Layout is added to this View. Do not call this 
-            method to add a Layout. Instead call addSubnode or setParent.
+            method to add a Layout. Instead call setParent.
             @param {!Object} layout - The myt.Layout that was added.
             @returns {undefined} */
         layoutAdded: layout => {},
         
         /** Called when a Layout is removed from this View. Do not call this 
-            method to remove a Layout. Instead call removeSubnode or setParent.
+            method to remove a Layout. Instead call setParent.
             @param {!Object} layout - The myt.Layout that was removed.
             @returns {undefined} */
         layoutRemoved: layout => {},

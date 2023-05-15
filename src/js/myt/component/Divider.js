@@ -232,7 +232,11 @@
             animateToValue: function(value, speed=250) {
                 if (value != null) {
                     this.stopActiveAnimators('value');
-                    this.animateOnce('value', value, null, speed);
+                    this.animate({
+                        attribute:'value',
+                        to:value,
+                        duration:speed
+                    });
                 }
             },
             
