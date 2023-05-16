@@ -593,8 +593,7 @@
                 
                 resetSelectionManager(timeListView);
                 
-                let hours = minTime[0],
-                    minutes = minTime[1];
+                let [hours, minutes] = minTime;
                 realDayObj = new Date(dateTime);
                 while (hours * 60 + minutes < maxTimeInMinutes) {
                     const is_past_time = hours < todayHours || (hours == todayHours && minutes < todayMinutes),

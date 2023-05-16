@@ -143,10 +143,11 @@
                             case 4:
                             case 5:
                                 // Process as: R G B ignored
+                                const [r, g, b] = value;
                                 return new Color(
-                                    parseInt(value[0] + value[0], 16),
-                                    parseInt(value[1] + value[1], 16),
-                                    parseInt(value[2] + value[2], 16)
+                                    parseInt(r + r, 16),
+                                    parseInt(g + g, 16),
+                                    parseInt(b + b, 16)
                                 );
                             case 6:
                                 // Process as RR GG BB

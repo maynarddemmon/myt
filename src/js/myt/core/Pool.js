@@ -26,8 +26,8 @@
             }
         },
         
-        /** Implements an object pool. Subclasses must at a minimum implement 
-            the createInstance method.
+        /** Implements an object pool. Subclasses must at a minimum implement the 
+            createInstance method.
             
             Private Attributes:
                 __op:array The array of objects stored in the pool.
@@ -55,31 +55,29 @@
             
             // Methods /////////////////////////////////////////////////////////
             /** Get an instance from the pool.
-                The arguments passed in will be passed to the createInstance 
-                method. Note: these have no effect if an object already exists 
-                in the pool.
+                The arguments passed in will be passed to the createInstance method. Note: these 
+                have no effect if an object already exists in the pool.
                 @returns {!Object} */
             getInstance: function() {
                 const objPool = getObjPool(this, true);
                 return objPool.length ? objPool.pop() : this.createInstance.apply(this, arguments);
             },
             
-            /** Creates a new object that can be stored in the pool. 
-                The default implementation does nothing.
+            /** Creates a new object that can be stored in the pool. The default implementation 
+                does nothing.
                 @returns {?Object} */
             createInstance: () => null,
             
-            /** Puts the object back in the pool. The object will be "cleaned"
-                before it is stored.
+            /** Puts the object back in the pool. The object will be "cleaned" before it is stored.
                 @param {!Object} obj - The object to put in the pool.
                 @returns {undefined} */
             putInstance: function(obj) {
                 getObjPool(this, true).push(this.cleanInstance(obj));
             },
             
-            /** Cleans the object in preparation for putting it back in the 
-                pool. The default implementation calls the clean method on 
-                the object if it is a function. Otherwise it does nothing.
+            /** Cleans the object in preparation for putting it back in the pool. The default 
+                implementation calls the clean method on the object if it is a function. Otherwise 
+                it does nothing.
                 @param {!Object} obj - The object to be cleaned.
                 @returns {!Object} - The cleaned object. */
             cleanInstance: obj => {
@@ -87,8 +85,8 @@
                 return obj;
             },
             
-            /** Calls the destroy method on all object stored in the pool if 
-                they have a destroy function.
+            /** Calls the destroy method on all object stored in the pool if they have a 
+                destroy function.
                 @returns {undefined} */
             destroyPooledInstances: function() {
                 destroyObjectPool(getObjPool(this));
@@ -98,20 +96,17 @@
         /** An implementation of an myt.AbstractPool.
             
             Attributes:
-                instanceClass:JS.Class (initializer only) the class to use 
-                    for new instances. Defaults to Object.
-                instanceParent:myt.Node (initializer only) The node to create 
-                    new instances on.
+                instanceClass:JS.Class (initializer only) the class to use for new instances. 
+                    Defaults to Object.
+                instanceParent:myt.Node (initializer only) The node to create new instances on.
             
             @class */
         SimplePool = pkg.SimplePool = new JSClass('SimplePool', AbstractPool, {
             // Constructor /////////////////////////////////////////////////////
             /** Create a new myt.SimplePool
-                @param {!Function} instanceClass - The JS.Class to create 
-                    instances from.
-                @param {?Object} [instanceParent] - The place to create 
-                    instances on. When instanceClass is an myt.Node this 
-                    will be the node parent.
+                @param {!Function} instanceClass - The JS.Class to create instances from.
+                @param {?Object} [instanceParent] - The place to create instances on. When 
+                    instanceClass is an myt.Node this will be the node parent.
                 @returns {undefined} */
             initialize: function(instanceClass, instanceParent) {
                 this.callSuper();
@@ -123,8 +118,8 @@
             
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.AbstractPool
-                Creates an instance of this.instanceClass and passes in 
-                this.instanceParent as the first argument if it exists.
+                Creates an instance of this.instanceClass and passes in this.instanceParent as the 
+                first argument if it exists.
                 arguments[0]:object (optional) the attrs to be passed to a 
                 created myt.Node.
                 @returns {?Object} */
@@ -133,8 +128,8 @@
             }
         }),
         
-        /** Tracks which objects are "active". An "active" object is one that 
-            has been obtained by the getInstance method.
+        /** Tracks which objects are "active". An "active" object is one that has been obtained by 
+            the getInstance method.
             
             Private Attributes:
                 __actives:array an array of active instances.
@@ -178,8 +173,7 @@
             },
             
             /** Gets an array of the active instances.
-                @param {?Function} [filterFunc] - If provided filters the 
-                    results.
+                @param {?Function} [filterFunc] - If provided filters the results.
                 @returns {!Array} */
             getActives: function(filterFunc) {
                 const actives = getActiveObjArray(this);
@@ -216,8 +210,8 @@
             include: [TrackActives]
         });
     
-    /** A pool that tracks which objects are "active" and stores objects of
-        different classes in different internal TrackActivesPools.
+    /** A pool that tracks which objects are "active" and stores objects of different classes in 
+        different internal TrackActivesPools.
         
         Private Attributes:
             __pbk:object Stores TrackActivesPools by key.
@@ -286,14 +280,13 @@
         }
     });
     
-    /** Objects that can be used in an myt.AbstractPool should use this mixin 
-        and implement the "clean" method.
+    /** Objects that can be used in an myt.AbstractPool should use this mixin and implement the 
+        "clean" method.
         
         @class */
     pkg.Reusable = new JSModule('Reusable', {
         // Methods /////////////////////////////////////////////////////////////
-        /** Puts this object back into a default state suitable for storage in
-            an myt.AbstractPool
+        /** Puts this object back into a default state suitable for storage in an myt.AbstractPool
             @returns {undefined} */
         clean: () => {}
     });

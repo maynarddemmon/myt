@@ -25,9 +25,7 @@
         
         notifyHeadersOfSortState = controller => {
             const hdrs = controller.columnHeaders,
-                sort = controller.sort,
-                sortColumnId = sort ? sort[0] : '',
-                sortOrder = sort ? sort[1] : '';
+                [sortColumnId, sortOrder] = controller.sort ?? ['',''];
             let i = hdrs.length;
             while (i) {
                 const hdr = hdrs[--i];
@@ -572,8 +570,7 @@
             initNode: function(parent, attrs) {
                 const self = this;
                 
-                attrs.resizerCursor ??= 'col-resize';
-                let resizerCursor = attrs.resizerCursor;
+                const resizerCursor = attrs.resizerCursor ?? 'col-resize';
                 delete attrs.resizerCursor;
                 
                 attrs.minValue ??= 16;
@@ -773,8 +770,7 @@
                 
                 this.callSuper(parent, attrs);
                 
-                const gc = this.gridController;
-                if (gc) gc.notifyAddRow(this);
+                this.gridController?.notifyAddRow(this);
             },
             
             destroy: function(v) {

@@ -1287,17 +1287,16 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         /** Browser local storage utility functions.
             
-            The Data methods utilize a single JSON object to store multiple 
-            values under a single local storage item.
+            The Data methods utilize a single JSON object to store multiple values under a single 
+            local storage item.
             
             @class */
         LocalStorage = pkg.LocalStorage = {
             /** Check if data has been stored under the key and storage id.
                 @param {string} key - The key to look for.
-                @param {string} [storeId] - The id of the data store to look 
-                    in. If not provided the default "myt" storeId will be used.
-                @returns {boolean} - false if an undefined or null value is 
-                    found, otherwise true. */
+                @param {string} [storeId] - The id of the data store to look in. If not provided 
+                    the default "myt" storeId will be used.
+                @returns {boolean} - false if an undefined or null value is found, otherwise true. */
             hasDatum: (key, storeId) => {
                 if (key) {
                     const data = LocalStorage.getItem(getStoreId(storeId));
@@ -1315,11 +1314,9 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             
             /** Get the data stored under the key and storage id.
                 @param {string} key - The key to get data for.
-                @param {string} [storeId] - The id of the data store to get 
-                    data for. If not provided the default "myt" storeId will 
-                    be used.
-                @returns {*} the value of the data or undefined if the
-                    datum was not found. */
+                @param {string} [storeId] - The id of the data store to get data for. If not 
+                    provided the default "myt" storeId will be used.
+                @returns {*} the value of the data or undefined if the datum was not found. */
             getDatum: (key, storeId) => {
                 if (key) {
                     const data = LocalStorage.getItem(getStoreId(storeId));
@@ -1337,15 +1334,13 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             /** Sets a single entry in a data store.
                 @param {string} key - The key to store the value under.
                 @param {*} value - The value to store.
-                @param {string} [storeId] - The id of the data store to put 
-                    data in. If not provided the default "myt" storeId will 
-                    be used.
-                @param {number} [delay] - A number of millis to wait before
-                    actually storing the data. This can be useful to prevent 
-                    excessive numbers of writes when a value will be set a 
-                    large number of times over a short time interval. For 
-                    example, when saving the position of a UI control as it 
-                    is being repositioned or a value the user is typing.
+                @param {string} [storeId] - The id of the data store to put data in. If not 
+                    provided the default "myt" storeId will be used.
+                @param {number} [delay] - A number of millis to wait before actually storing the 
+                    data. This can be useful to prevent excessive numbers of writes when a value 
+                    will be set a large number of times over a short time interval. For example, 
+                    when saving the position of a UI control as it is being repositioned or a value 
+                    the user is typing.
                 @returns {undefined} */
             setDatum: (key, value, storeId, delay) => {
                 storeId = getStoreId(storeId);
@@ -1358,11 +1353,10 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             
             /** Removes a single entry in a data store.
                 @param {string} key - The key to remove the entry for.
-                @param {string} [storeId] - The id of the data store to remove 
-                    data from. If not provided the default "myt" storeId will 
-                    be used.
-                @param {number} [delay] - A number of millis to wait before
-                    actually removing the data.
+                @param {string} [storeId] - The id of the data store to remove data from. If not 
+                    provided the default "myt" storeId will be used.
+                @param {number} [delay] - A number of millis to wait before actually removing 
+                    the data.
                 @returns {undefined} */
             removeDatum: (key, storeId, delay) => {
                 storeId = getStoreId(storeId);
@@ -1374,16 +1368,14 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             },
             
             /** Check if data has been stored under the storage id.
-                @param {string} [storeId] - THe id of the data store to look 
-                    in. If not provided the default "myt" storeId will be used.
-                @returns {boolean} - false if an undefined or null value is 
-                    found, otherwise true. */
+                @param {string} [storeId] - THe id of the data store to look in. If not provided 
+                    the default "myt" storeId will be used.
+                @returns {boolean} - false if an undefined or null value is found, otherwise true. */
             hasData: storeId => LocalStorage.getItem(getStoreId(storeId)) != null,
             
             /** Get the data store stored under storage id.
-                @param {string} [storeId] - The id of the data store to get 
-                    data for. If not provided the default "myt" storeId will 
-                    be used.
+                @param {string} [storeId] - The id of the data store to get data for. If not 
+                    provided the default "myt" storeId will be used.
                 @returns {!Object} - The store object. */
             getData: storeId => {
                 const data = LocalStorage.getItem(getStoreId(storeId));
@@ -1397,21 +1389,17 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 return {};
             },
             
-            /** Store data under the storage id. This replaces an entire data 
-                store with the new data object.
-                @param {?Object} [data] - The data object to store under the 
-                    storage id.
-                @param {string} [storeId] - The id of the data store to put 
-                    data in. If not provided the default "myt" storeId will 
-                    be used.
-                @param {number} [delay] - A number of millis to wait before
-                    actually storing the data. This can be useful to prevent 
-                    excessive numbers of writes when a value will be set a 
-                    large number of times over a short time interval. For 
-                    example, when saving the position of a UI control as it 
-                    is being repositioned or a value the user is typing.
-                @returns {boolean} - true if the data is of type object 
-                    false otherwise. */
+            /** Store data under the storage id. This replaces an entire data store with the new 
+                data object.
+                @param {?Object} [data] - The data object to store under the storage id.
+                @param {string} [storeId] - The id of the data store to put data in. If not 
+                    provided the default "myt" storeId will be used.
+                @param {number} [delay] - A number of millis to wait before actually storing the 
+                    data. This can be useful to prevent excessive numbers of writes when a value 
+                    will be set a large number of times over a short time interval. For example, 
+                    when saving the position of a UI control as it is being repositioned or a value 
+                    the user is typing.
+                @returns {boolean} - true if the data is of type object false otherwise. */
             setData: (data, storeId, delay) => {
                 storeId = getStoreId(storeId);
                 
@@ -1426,11 +1414,10 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             },
             
             /** Removes a data store.
-                @param {string} [storeId] - The id of the data store to 
-                    remove. If not provided the default "myt" storeId will 
-                    be used.
-                @param {number} [delay] - A number of millis to wait before
-                    actually removing the data.
+                @param {string} [storeId] - The id of the data store to remove. If not provided the 
+                    default "myt" storeId will be used.
+                @param {number} [delay] - A number of millis to wait beforeactually removing 
+                    the data.
                 @returns {undefined} */
             removeData: (storeId, delay) => {
                 storeId = getStoreId(storeId);
@@ -1438,8 +1425,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             },
             
             // wrapper functions on localStorage
-            /** @returns {number} - The number of data items stored in the 
-                    Storage object. */
+            /** @returns {number} - The number of data items stored in the Storage object. */
             getLength: () => localStorage.length,
             
             /** @param {number} n - The index of the key name to retrieve.
@@ -1447,12 +1433,11 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             getKey: n => localStorage.key(n),
             
             /** @param {string} key - The name of the storage entry to return.
-                @returns {*} - The value of the storage entry or null if 
-                    not found. */
+                @returns {*} - The value of the storage entry or null if not found. */
             getItem: key => localStorage.getItem(key),
             
-            /** Stores the value under the key. If a value already exists for
-                the key the value will be replaced with the new value.
+            /** Stores the value under the key. If a value already exists for the key the value 
+                will be replaced with the new value.
                 @param {string} key - The key to store the value under.
                 @param {*} value - The value to store.
                 @returns {undefined} */
@@ -1476,8 +1461,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             // Aliases for better API compatibility with some libraries.
             /** An alias for getItem.
                 @param {string} key - The name of the storage entry to return.
-                @returns {*} - The value of the storage entry or null if 
-                    not found. */
+                @returns {*} - The value of the storage entry or null if not found. */
             get: key => LocalStorage.getItem(key),
             
             /** An alias for setItem.
@@ -1664,20 +1648,15 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         Geometry = pkg.Geometry = {
             // Methods /////////////////////////////////////////////////////////
             /** Get the closest point on a line, or segment, to a given point.
-                @param {number} Ax - The x-coordinate of the first endpoint 
-                    that defines the segment.
-                @param {number} Ay - The y-coordinate of the first endpoint 
-                    that defines  the segment.
-                @param {number} Bx - The x-coordinate of the second endpoint 
-                    that defines the segment.
-                @param {number} By - The y-coordinate of the second endpoint 
-                    that defines the segment.
+                @param {number} Ax - The x-coordinate of the first endpoint that defines the segment.
+                @param {number} Ay - The y-coordinate of the first endpoint that defines  the segment.
+                @param {number} Bx - The x-coordinate of the second endpoint that defines the segment.
+                @param {number} By - The y-coordinate of the second endpoint that defines the segment.
                 @param {number} Px - The x-coordinate of the point.
                 @param {number} Py - The y-coordinate of the point.
-                @param {boolean} [isSegment] - If true the endpoints will be
-                    treated as a segment rather than an infinitely long line.
-                @returns {!Object} - A position object with x and y 
-                    properties. */
+                @param {boolean} [isSegment] - If true the endpoints will be treated as a segment 
+                    rather than an infinitely long line.
+                @returns {!Object} - A position object with x and y properties. */
             getClosestPointOnALineToAPoint: (Ax, Ay, Bx, By, Px, Py, isSegment) => {
                 const APx = Px - Ax,
                     APy = Py - Ay,
@@ -1691,14 +1670,12 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             },
             
             /** Tests if the provided point is inside this path.
-                @param {number|!Object} x - The x coordinate to test or 
-                    alternately a point object with x and y properties.
+                @param {number|!Object} x - The x coordinate to test or alternately a point object 
+                    with x and y properties.
                 @param {number} y - The y coordinate to test.
-                @param {!Object} boundingBox - A bounding box object that 
-                    bounds the path.
-                @param {!Araay} path - An array of points where the index 
-                    0,2,4,... are the x values and index 1,3,5,... are the 
-                    y values.
+                @param {!Object} boundingBox - A bounding box object that bounds the path.
+                @param {!Araay} path - An array of points where the index 0,2,4,... are the x 
+                    values and index 1,3,5,... are the y values.
                 @return {boolean} - True if inside, false otherwise. */
             isPointInPath: (x, y, boundingBox, path) => {
                 if (typeof x === 'object') {
@@ -1733,19 +1710,16 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 return false;
             },
             
-            /** Checks if the provided point is inside or on the edge of the 
-                provided rectangle.
-                @param {number|!Object} pX - The x coordinate of the point to 
-                    test or alternately a point object with properties x and y.
+            /** Checks if the provided point is inside or on the edge of the provided rectangle.
+                @param {number|!Object} pX - The x coordinate of the point to test or alternately a 
+                    point object with properties x and y.
                 @param {number} pY - The y coordinate of the point to test.
-                @param {number|!Object} rX - The x coordinate of the rectangle 
-                    or alternately a rect object with properties x, y, width 
-                    and height.
+                @param {number|!Object} rX - The x coordinate of the rectangle or alternately a 
+                    rect object with properties x, y, width and height.
                 @param {number} rY - The y coordinate of the rectangle.
                 @param {number} rW - The width of the rectangle.
                 @param {number} rH - The height of the rectangle.
-                @returns {boolean} - True if the point is inside or on the 
-                    rectangle. */
+                @returns {boolean} - True if the point is inside or on the rectangle. */
             rectContainsPoint: (pX, pY, rX, rY, rW, rH) => {
                 if (typeof pX === 'object') {
                     rH = rW;
@@ -1766,17 +1740,13 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 return pX >= rX && pY >= rY && pX <= rX + rW && pY <= rY + rH;
             },
             
-            /** Checks if the provided point lies inside or on the edge of the
-                provided circle.
+            /** Checks if the provided point lies inside or on the edge of the provided circle.
                 @param {number} pX - The x coordinate of the point to test.
                 @param {number} pY - The y coordinate of the point to test.
-                @param {number} cX - The x coordinate of the center of 
-                    the circle.
-                @param {number} cY - The y coordinate of the center of 
-                    the circle.
+                @param {number} cX - The x coordinate of the center of the circle.
+                @param {number} cY - The y coordinate of the center of the circle.
                 @param {number} cR - The radius of the circle.
-                @return {boolean} - True if the point is inside or on 
-                    the circle. */
+                @return {boolean} - True if the point is inside or on the circle. */
             circleContainsPoint: (pX, pY, cX, cY, cR) => Geometry.measureDistance(pX, pY, cX, cY, true) <= cR * cR,
             
             /** Measure the distance between two points.
@@ -1784,8 +1754,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 @param {number} y1 - The y position of the first point.
                 @param {number} x2 - The x position of the second point.
                 @param {number} y2 - The y position of the second point.
-                @param {boolean} [squared] - If true, the squared distance will
-                    be returned.
+                @param {boolean} [squared] - If true, the squared distance will be returned.
                 @returns {number} - The distance between the two points. */
             measureDistance: (x1, y1, x2, y2, squared) => {
                 const diffX = x2 - x1, 
@@ -1805,33 +1774,25 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             radiansToDegrees: rad => rad * 180 / PI,
             
             // Geometry on a sphere
-            /** Checks if the provided lat/lng point lies inside or on the edge 
-                of the provided circle.
+            /** Checks if the provided lat/lng point lies inside or on the edge of the provided circle.
                 @param {number} pLat - The latitude of the point to test.
                 @param {number} pLng - The longitude of the point to test.
-                @param {number} cLat - The latitude of the center of 
-                    the circle.
-                @param {number} cLng - The longitude of the center of 
-                    the circle.
+                @param {number} cLat - The latitude of the center of the circle.
+                @param {number} cLng - The longitude of the center of the circle.
                 @param {number} cR - The radius of the circle in kilometers.
-                @param {number} [sphereRadius] - The radius of the sphere the
-                    measurement is being taken on in kilometers. If not 
-                    provided the radius of the earth is used.
-                @return {boolean} - True if the point is inside or on 
-                    the circle. */
+                @param {number} [sphereRadius] - The radius of the sphere the measurement is being 
+                    taken on in kilometers. If not provided the radius of the earth is used.
+                @return {boolean} - True if the point is inside or on the circle. */
             circleContainsLatLng: (pLat, pLng, cLat, cLng, cR, sphereRadius) => Geometry.measureLatLngDistance(pLat, pLng, cLat, cLng, sphereRadius) <= cR,
             
-            /** Measures the distance between two points on a sphere using 
-                latitude and longitude.
+            /** Measures the distance between two points on a sphere using latitude and longitude.
                 @param {number} lat1 - the latitude of the first point.
                 @param {number} lng1 - the longitude of the first point.
                 @param {number} lat2 - the latitude of the second point.
                 @param {number} lng2 - the longitude of the second point.
-                @param {number} [sphereRadius] - The radius of the sphere the
-                    measurement is being taken on in kilometers. If not provided 
-                    the radius of the earth is used.
-                @returns {number} - The distance between the points 
-                    in kilometers. */
+                @param {number} [sphereRadius] - The radius of the sphere the measurement is being 
+                    taken on in kilometers. If not provided the radius of the earth is used.
+                @returns {number} - The distance between the points in kilometers. */
             measureLatLngDistance: (lat1, lng1, lat2, lng2, sphereRadius) => {
                 // Taken from: http://www.movable-type.co.uk/scripts/latlong.html
                 if (sphereRadius === undefined) sphereRadius = 6371; // kilometers for earth
@@ -1846,16 +1807,11 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             },
             
             /** Convert from polar to cartesian coordinates.
-                @param {number} radius - The radius of the point to convert 
-                    relative to the circle.
-                @param {number} degrees - The angle coordinate of the point 
-                    to convert.
-                @param {number} [cx] - The x coordinate of the center of 
-                    the circle.
-                @param {number} [cy] - The y coordinate of the center of 
-                    the circle.
-                @returns {!Array} - Where index 0 is the x coordinate and index 
-                    1 is the y coordinate. */
+                @param {number} radius - The radius of the point to convert relative to the circle.
+                @param {number} degrees - The angle coordinate of the point to convert.
+                @param {number} [cx] - The x coordinate of the center of the circle.
+                @param {number} [cy] - The y coordinate of the center of the circle.
+                @returns {!Array} - Where index 0 is the x coordinate and index 1 is the y coordinate. */
             polarToCartesian: (radius, degrees, cx, cy) => {
                 cx ??= 0;
                 cy ??= 0;
@@ -1887,15 +1843,12 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             /** Convert from cartesian to polar coordinates.
                 @param {number} x - The x coordinate to transform.
                 @param {number} y - The y coordinate to transform.
-                @param {number} [cx] - The x coordinate of the center of the
-                    circle.
-                @param {number} [cy] - The y coordinate of the center of the
-                    circle.
-                @param {boolean} [useRadians] - If true the angle returned will
-                    be in radians otherwise it will be degrees.
-                @return {!Array} An array where index 0 is the radius and 
-                    index 1 is angle in degrees (or radians if userRadians 
-                    is true). */
+                @param {number} [cx] - The x coordinate of the center of the circle.
+                @param {number} [cy] - The y coordinate of the center of the circle.
+                @param {boolean} [useRadians] - If true the angle returned will be in radians 
+                    otherwise it will be degrees.
+                @return {!Array} An array where index 0 is the radius and index 1 is angle in 
+                    degrees (or radians if userRadians is true). */
             cartesianToPolar: (x, y, cx, cy, useRadians) => {
                 cx ??= 0;
                 cy ??= 0;
@@ -2445,11 +2398,10 @@ new JS.Singleton('GlobalError', {
         
         mathMax = Math.max;
     
-    /** Provides dom elements for this instance. Typically only a single dom
-        element will exist but some components will make use of two nested
-        elements: an inner dom element and an outer dom element. Also assigns 
-        a reference to this DomElementProxy to a property named "model" on 
-        the dom elements.
+    /** Provides dom elements for this instance. Typically only a single dom element will exist but 
+        some components will make use of two nested elements: an inner dom element and an outer 
+        dom element. Also assigns a reference to this DomElementProxy to a property named "model" 
+        on the dom elements.
         
         @class */
     const DomElementProxy = pkg.DomElementProxy = new JS.Module('DomElementProxy', {
@@ -2457,10 +2409,9 @@ new JS.Singleton('GlobalError', {
         extend: {
             /** Creates a new dom element.
                 @param {string} tagname - The name of the element to create.
-                @param {?Object} [styles] - A map of style keys and values to 
-                    add to the style property of the new element.
-                @param {?Object} [props] - A map of keys and values to add to 
-                    the new element.
+                @param {?Object} [styles] - A map of style keys and values to add to the style 
+                    property of the new element.
+                @param {?Object} [props] - A map of keys and values to add to the new element.
                 @returns {!Object} the created element. */
             createElement: (tagname, styles, props) => {
                 const elem = DOCUMENT_ELEMENT.createElement(tagname);
@@ -2473,8 +2424,7 @@ new JS.Singleton('GlobalError', {
                 @param {!Object} elem - The dom element to check visibility for.
                 @returns {boolean} - True if visible, false otherwise. */
             isDomElementVisible: elem => {
-                // Special Case: hidden input elements should be considered 
-                // not visible.
+                // Special Case: hidden input elements should be considered not visible.
                 if (elem.nodeName === 'INPUT' && elem.type === 'hidden') return false;
                 
                 while (elem) {
@@ -2488,8 +2438,7 @@ new JS.Singleton('GlobalError', {
                 return false;
             },
             
-            /** Gets the z-index of a dom element relative to an ancestor 
-                dom element.
+            /** Gets the z-index of a dom element relative to an ancestor dom element.
                 @param {?Object} elem
                 @param {?Object} ancestor
                 @returns {number} */
@@ -2511,11 +2460,9 @@ new JS.Singleton('GlobalError', {
                 return 0;
             },
             
-            /** Gets an array of ancestor dom elements including the element
-                itself.
+            /** Gets an array of ancestor dom elements including the element itself.
                 @param {!Object} elem - The dom element to start from.
-                @param {?Object} ancestor - The dom element to stop
-                    getting ancestors at.
+                @param {?Object} ancestor - The dom element to stop getting ancestors at.
                 @returns {!Array} - An array of ancestor dom elements. */
             getAncestorArray: (elem, ancestor) => {
                 const ancestors = [];
@@ -2527,8 +2474,8 @@ new JS.Singleton('GlobalError', {
                 return ancestors;
             },
             
-            /** Gets the z-index of the dom element or, if it does not define 
-                a stacking context, the highest z-index of any of the dom 
+            /** Gets the z-index of the dom element or, if it does not define a stacking context, 
+                the highest z-index of any of the dom 
                 element's descendants.
                 @param {!Object} elem - A dom element
                 @returns {number} - An int */
@@ -2552,20 +2499,19 @@ new JS.Singleton('GlobalError', {
                 return zIdx;
             },
             
-            /** Gets the x and y position of the dom element relative to the 
-                ancestor dom element or the page. Transforms are not supported.
-                Use getTruePosition if you need support for transforms.
+            /** Gets the x and y position of the dom element relative to the ancestor dom element 
+                or the page. Transforms are not supported. Use getTruePosition if you need support 
+                for transforms.
                 @param {!Object} elem - The dom element to get the position for.
-                @param {?Object} [ancestorElem] - The ancestor dom element
-                    that if encountered will halt the page position calculation
-                    thus giving the position of elem relative to ancestorElem.
-                @returns {?Object} - An object with 'x' and 'y' keys or 
-                    undefined if an error has occurred. */
+                @param {?Object} [ancestorElem] - The ancestor dom element that if encountered will 
+                    halt the page position calculation thus giving the position of elem relative 
+                    to ancestorElem.
+                @returns {?Object} - An object with 'x' and 'y' keys or undefined if an error 
+                    has occurred. */
             getRelativePosition: (elem, ancestorElem) => {
                 if (elem) {
-                    // elem.nodeName !== 'BODY' test prevents looking at the 
-                    // body which causes problems when the document is scrolled 
-                    // on webkit.
+                    // elem.nodeName !== 'BODY' test prevents looking at the body which causes 
+                    // problems when the document is scrolled on webkit.
                     let x = 0, 
                         y = 0;
                     while (elem && elem.nodeName !== 'BODY' && elem !== ancestorElem) {
@@ -2582,11 +2528,11 @@ new JS.Singleton('GlobalError', {
                 }
             },
             
-            /** Gets the x and y position of the dom element relative to the 
-                page with support for transforms.
+            /** Gets the x and y position of the dom element relative to the page with support 
+                for transforms.
                 @param {!Object} elem - The dom element to get the position for.
-                @returns {?Object} - An object with 'x' and 'y' keys or 
-                    undefined if an error has occurred. */
+                @returns {?Object} - An object with 'x' and 'y' keys or undefined if an error 
+                    has occurred. */
             getTruePosition: elem => {
                 if (elem) {
                     const pos = elem.getBoundingClientRect();
@@ -2596,12 +2542,10 @@ new JS.Singleton('GlobalError', {
             
             /** Generates a dom event on a dom element. Adapted from:
                     http://stackoverflow.com/questions/6157929/how-to-simulate-mouse-click-using-javascript
-                @param {!Object} elem - The dom element to simulate 
-                    the event on.
-                @param {string} eventName - The name of the dom event 
-                    to generate.
-                @param {?Object} [customOpts] - A map of options that will
-                    be added onto the dom event object.
+                @param {!Object} elem - The dom element to simulate the event on.
+                @param {string} eventName - The name of the dom event to generate.
+                @param {?Object} [customOpts] - A map of options that will be added onto the dom 
+                    event object.
                 @returns {undefined} */
             simulateDomEvent: (elem, eventName, customOpts) => {
                 if (elem) {
@@ -2665,52 +2609,60 @@ new JS.Singleton('GlobalError', {
         
         
         // Accessors ///////////////////////////////////////////////////////////
-        /** Gets the inner dom element. If only one dom element exists then 
-            this will be the same as the outer dom element.
+        /** Gets the inner dom element. If only one dom element exists then this will be the same 
+            as the outer dom element.
             @returns {?Object} */
         getIDE: function() {return this.__iE;},
         
-        /** Gets the outer dom element. If only one dom element exists then 
-            this will be the same as the inner dom element.
+        /** Gets the outer dom element. If only one dom element exists then this will be the same 
+            as the inner dom element.
             @returns {?Object} */
         getODE: function() {return this.__oE;},
         
-        /** Gets the style attribute of the inner dom element. If only 
-            one dom element exists then this will be the same as the 
-            outer dom style.
+        /** Gets the style attribute of the inner dom element. If only one dom element exists then 
+            this will be the same as the outer dom style.
             @returns {?Object} */
         getIDS: function() {return this.__iS;},
         
-        /** Gets the style attribute of the outer dom element. If only 
-            one dom element exists then this will be the same as the 
-            inner dom style.
+        /** Gets the style attribute of the outer dom element. If only one dom element exists then 
+            this will be the same as the inner dom style.
             @returns {?Object} */
         getODS: function() {return this.__oS;},
         
-        /** Sets the dom element(s) to the provided ones. To set the inner
-            and outer dom elements to different dom elements provide an array
-            of two dom elements.
+        /** Sets the dom element(s) to the provided ones. To set the inner and outer dom elements 
+            to different dom elements provide an array of two dom elements.
             @param {?Object} v
             @returns {undefined} */
         setDomElement: function(v) {
-            // Support an inner and outer dom element if an array of elements is provided.
-            const self = this,
-                isArray = Array.isArray(v),
-                outerElem = self.__oE = isArray ? v[0] : v,
-                innerElem = self.__iE = isArray ? v[1] : v;
-            
-            // Store a reference to the dom element style property since it is accessed often.
-            self.__iS = innerElem.style;
-            self.__oS = outerElem.style;
-            
-            // Setup a reference from the dom element to this model. This will 
-            // allow access to the model from code that uses JQuery or some 
-            // other mechanism to select dom elements.
-            innerElem.model = outerElem.model = self;
+            const self = this;
+            if (Array.isArray(v)) {
+                // Support an inner and outer dom element if an array of elements is provided.
+                const [outerElem, innerElem] = v;
+                self.__oE = outerElem;
+                self.__iE = innerElem;
+                
+                // Store a reference to the dom element style property since it is accessed often.
+                self.__iS = innerElem.style;
+                self.__oS = outerElem.style;
+                
+                // Setup a reference from the dom element to this model. This will allow access to 
+                // the model from code that uses some other mechanism to select dom elements.
+                innerElem.model = outerElem.model = self;
+            } else {
+                // The inner and outer dom element are the same element since an array of elements
+                // was not provided.
+                self.__oE = self.__iE = v;
+                
+                // Store a reference to the dom element style property since it is accessed often.
+                self.__iS = self.__oS = v.style;
+                
+                // Setup a reference from the dom element to this model. This will allow access to 
+                // the model from code that uses some other mechanism to select dom elements.
+                v.model = self;
+            }
         },
         
-        /** Removes this DomElementProxy's outer dom element from its 
-            parent node.
+        /** Removes this DomElementProxy's outer dom element from its parent node.
             @returns {undefined} */
         removeDomElement: function() {
             this.__oE.parentNode.removeChild(this.__oE);
@@ -2734,8 +2686,7 @@ new JS.Singleton('GlobalError', {
             this.__iE.className = this.domClass = v;
         },
         
-        /** Adds a dom "class" to the existing dom classes on the inner
-            dom element.
+        /** Adds a dom "class" to the existing dom classes on the inner dom element.
             @param {string} v - The dom class to add.
             @returns {undefined} */
         addDomClass: function(v) {
@@ -2788,18 +2739,17 @@ new JS.Singleton('GlobalError', {
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Gets the x and y position of the underlying inner dom element 
-            relative to the page. Transforms are not supported by default.
-            @param {boolean} [transformSupport] If true then transforms
-                applied to the dom elements are supported.
-            @returns {?Object} - An object with 'x' and 'y' keys or undefined 
-                if an error has occurred. */
+        /** Gets the x and y position of the underlying inner dom element relative to the page. 
+            Transforms are not supported by default.
+            @param {boolean} [transformSupport] If true then transforms applied to the dom elements 
+                are supported.
+            @returns {?Object} - An object with 'x' and 'y' keys or undefined if an error 
+                has occurred. */
         getPagePosition: function(transformSupport) {
             return DomElementProxy['get' + (transformSupport ? 'True' : 'Relative') + 'Position'](this.__iE);
         },
         
-        /** Generates a dom event "click" on this DomElementProxy's inner 
-            dom element.
+        /** Generates a dom event "click" on this DomElementProxy's inner dom element.
             @returns {undefined} */
         simulateClick: function() {
             DomElementProxy.simulateDomEvent(this.__iE, 'click');
@@ -2811,10 +2761,9 @@ new JS.Singleton('GlobalError', {
             return DomElementProxy.getHighestZIndex(this.__iE);
         },
         
-        /** Gets the highest z-index of any of the descendant dom elements 
-            of the inner dom element of this DomElementProxy.
-            @param {boolean} [skipChild] - A dom element to skip over
-                when determining the z-index.
+        /** Gets the highest z-index of any of the descendant dom elements of the inner dom element 
+            of this DomElementProxy.
+            @param {boolean} [skipChild] - A dom element to skip over when determining the z-index.
             @returns {number} - An int. */
         getHighestChildZIndex: function(skipChild) {
             const children = this.__iE.childNodes;
@@ -2827,18 +2776,17 @@ new JS.Singleton('GlobalError', {
             return zIdx;
         },
         
-        /** Makes this DomElementProxy's outer dom element the one with the 
-            highest z-index relative to its sibling dom elements.
+        /** Makes this DomElementProxy's outer dom element the one with the highest z-index 
+            relative to its sibling dom elements.
             @returns {undefined} */
         makeHighestZIndex: function() {
             this.setZIndex(this.parent.getHighestChildZIndex(this.__iE) + 1);
         },
         
-        /** Scrolls the dom element to the provided position or zero if no
-            value is provided.
+        /** Scrolls the dom element to the provided position or zero if no value is provided.
             @param {number} [value] - The value to scroll to.
-            @param {boolean} [scrollInner] - Indicates if the inner dom element
-                should be used instead of the outer dom element.
+            @param {boolean} [scrollInner] - Indicates if the inner dom element should be used 
+                instead of the outer dom element.
             @returns {undefined} */
         scrollYTo: function(value, scrollInner) {
             (scrollInner ? this.__iE : this.__oE).scrollTop = value || 0;
@@ -4881,8 +4829,8 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         },
         
-        /** Implements an object pool. Subclasses must at a minimum implement 
-            the createInstance method.
+        /** Implements an object pool. Subclasses must at a minimum implement the 
+            createInstance method.
             
             Private Attributes:
                 __op:array The array of objects stored in the pool.
@@ -4910,31 +4858,29 @@ myt.Destructible = new JS.Module('Destructible', {
             
             // Methods /////////////////////////////////////////////////////////
             /** Get an instance from the pool.
-                The arguments passed in will be passed to the createInstance 
-                method. Note: these have no effect if an object already exists 
-                in the pool.
+                The arguments passed in will be passed to the createInstance method. Note: these 
+                have no effect if an object already exists in the pool.
                 @returns {!Object} */
             getInstance: function() {
                 const objPool = getObjPool(this, true);
                 return objPool.length ? objPool.pop() : this.createInstance.apply(this, arguments);
             },
             
-            /** Creates a new object that can be stored in the pool. 
-                The default implementation does nothing.
+            /** Creates a new object that can be stored in the pool. The default implementation 
+                does nothing.
                 @returns {?Object} */
             createInstance: () => null,
             
-            /** Puts the object back in the pool. The object will be "cleaned"
-                before it is stored.
+            /** Puts the object back in the pool. The object will be "cleaned" before it is stored.
                 @param {!Object} obj - The object to put in the pool.
                 @returns {undefined} */
             putInstance: function(obj) {
                 getObjPool(this, true).push(this.cleanInstance(obj));
             },
             
-            /** Cleans the object in preparation for putting it back in the 
-                pool. The default implementation calls the clean method on 
-                the object if it is a function. Otherwise it does nothing.
+            /** Cleans the object in preparation for putting it back in the pool. The default 
+                implementation calls the clean method on the object if it is a function. Otherwise 
+                it does nothing.
                 @param {!Object} obj - The object to be cleaned.
                 @returns {!Object} - The cleaned object. */
             cleanInstance: obj => {
@@ -4942,8 +4888,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 return obj;
             },
             
-            /** Calls the destroy method on all object stored in the pool if 
-                they have a destroy function.
+            /** Calls the destroy method on all object stored in the pool if they have a 
+                destroy function.
                 @returns {undefined} */
             destroyPooledInstances: function() {
                 destroyObjectPool(getObjPool(this));
@@ -4953,20 +4899,17 @@ myt.Destructible = new JS.Module('Destructible', {
         /** An implementation of an myt.AbstractPool.
             
             Attributes:
-                instanceClass:JS.Class (initializer only) the class to use 
-                    for new instances. Defaults to Object.
-                instanceParent:myt.Node (initializer only) The node to create 
-                    new instances on.
+                instanceClass:JS.Class (initializer only) the class to use for new instances. 
+                    Defaults to Object.
+                instanceParent:myt.Node (initializer only) The node to create new instances on.
             
             @class */
         SimplePool = pkg.SimplePool = new JSClass('SimplePool', AbstractPool, {
             // Constructor /////////////////////////////////////////////////////
             /** Create a new myt.SimplePool
-                @param {!Function} instanceClass - The JS.Class to create 
-                    instances from.
-                @param {?Object} [instanceParent] - The place to create 
-                    instances on. When instanceClass is an myt.Node this 
-                    will be the node parent.
+                @param {!Function} instanceClass - The JS.Class to create instances from.
+                @param {?Object} [instanceParent] - The place to create instances on. When 
+                    instanceClass is an myt.Node this will be the node parent.
                 @returns {undefined} */
             initialize: function(instanceClass, instanceParent) {
                 this.callSuper();
@@ -4978,8 +4921,8 @@ myt.Destructible = new JS.Module('Destructible', {
             
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.AbstractPool
-                Creates an instance of this.instanceClass and passes in 
-                this.instanceParent as the first argument if it exists.
+                Creates an instance of this.instanceClass and passes in this.instanceParent as the 
+                first argument if it exists.
                 arguments[0]:object (optional) the attrs to be passed to a 
                 created myt.Node.
                 @returns {?Object} */
@@ -4988,8 +4931,8 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         }),
         
-        /** Tracks which objects are "active". An "active" object is one that 
-            has been obtained by the getInstance method.
+        /** Tracks which objects are "active". An "active" object is one that has been obtained by 
+            the getInstance method.
             
             Private Attributes:
                 __actives:array an array of active instances.
@@ -5033,8 +4976,7 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** Gets an array of the active instances.
-                @param {?Function} [filterFunc] - If provided filters the 
-                    results.
+                @param {?Function} [filterFunc] - If provided filters the results.
                 @returns {!Array} */
             getActives: function(filterFunc) {
                 const actives = getActiveObjArray(this);
@@ -5071,8 +5013,8 @@ myt.Destructible = new JS.Module('Destructible', {
             include: [TrackActives]
         });
     
-    /** A pool that tracks which objects are "active" and stores objects of
-        different classes in different internal TrackActivesPools.
+    /** A pool that tracks which objects are "active" and stores objects of different classes in 
+        different internal TrackActivesPools.
         
         Private Attributes:
             __pbk:object Stores TrackActivesPools by key.
@@ -5141,14 +5083,13 @@ myt.Destructible = new JS.Module('Destructible', {
         }
     });
     
-    /** Objects that can be used in an myt.AbstractPool should use this mixin 
-        and implement the "clean" method.
+    /** Objects that can be used in an myt.AbstractPool should use this mixin and implement the 
+        "clean" method.
         
         @class */
     pkg.Reusable = new JSModule('Reusable', {
         // Methods /////////////////////////////////////////////////////////////
-        /** Puts this object back into a default state suitable for storage in
-            an myt.AbstractPool
+        /** Puts this object back into a default state suitable for storage in an myt.AbstractPool
             @returns {undefined} */
         clean: () => {}
     });
@@ -6601,12 +6542,11 @@ myt.Destructible = new JS.Module('Destructible', {
         
         getDomStyle = (view, isInnerElem ) => isInnerElem ? view.getIDS() : view.getODS(),
         
-        /*  Preserves focus and scroll position during dom updates. Focus can 
-            get lost in webkit when an element is removed from the dom.
+        /*  Preserves focus and scroll position during dom updates. Focus can get lost in webkit 
+            when an element is removed from the dom.
                 param viewBeingRemoved:myt.View
-                param wrapperFunc:function a function to execute that 
-                    manipulates the dom in some way, typically a remove 
-                    followed by an insert. */
+                param wrapperFunc:function a function to execute that manipulates the dom in some 
+                    way, typically a remove followed by an insert. */
         retainFocusDuringDomUpdate = (viewBeingRemoved, wrappedFunc) => {
             const restoreFocus = pkg.global.focus.focusedView, 
                 elem = viewBeingRemoved.getIDE();
@@ -6632,15 +6572,13 @@ myt.Destructible = new JS.Module('Destructible', {
             elem.scrollLeft = restoreScrollLeft;
         },
         
-        /*  Implements isBehind and isInFrontOf methods. Returns a boolean
-            indicating front or behind respective to the "front" param.
+        /*  Implements isBehind and isInFrontOf methods. Returns a boolean indicating front or 
+            behind respective to the "front" param.
                 param firstView:View The view to check position for
-                param view:View The view to check the position of the first
-                    view against.
-                param front:boolean indicates if this is the isInFrontOf 
-                    test or not.
-                param checkZIndex:boolean If true z-index will 
-                    first be used to check if the view is in front or not. */
+                param view:View The view to check the position of the first view against.
+                param front:boolean indicates if this is the isInFrontOf test or not.
+                param checkZIndex:boolean If true z-index will first be used to check if the view 
+                    is in front or not. */
         comparePosition = (firstView, secondView, front, checkZIndex) => {
             if (secondView && typeof secondView === 'object') {
                 if (checkZIndex) {
@@ -6661,8 +6599,7 @@ myt.Destructible = new JS.Module('Destructible', {
                         } else if (otherZIdx < zIdx) {
                             return false;
                         }
-                        // Fall through to dom comparison since z-indices 
-                        // are equal.
+                        // Fall through to dom comparison since z-indices are equal.
                     }
                 }
                 
@@ -6679,8 +6616,8 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         },
         
-        /*  Calculates the effective scale for the provided view and all its
-            ancestors. Returns the effective scale for the provided view. */
+        /*  Calculates the effective scale for the provided view and all its ancestors. Returns the 
+            effective scale for the provided view. */
         calculateEffectiveScale = view => {
             const ancestorsAndSelf = view.getAncestors();
             let i = ancestorsAndSelf.length, 
@@ -6770,14 +6707,13 @@ myt.Destructible = new JS.Module('Destructible', {
         /*  A convienence method to set a single rounded corner on an element.
             @param {!Object} view
             @param {number} radius - The radius of the corner.
-            @param {string} corner - One of 'TopLeft', 'TopRight', 
-                'BottomLeft' or 'BottomRight'. */
+            @param {string} corner - One of 'TopLeft', 'TopRight', 'BottomLeft' or 'BottomRight'. */
         setRoundedCorner = (view, radius, corner) => {
             view.getODS()['border' + corner + 'Radius'] = radius + 'px';
         };
     
-    /** A Node that can be viewed. Instances of view are typically backed by
-        an absolutely positioned div element.
+    /** A Node that can be viewed. Instances of view are typically backed by an absolutely 
+        positioned div element.
         
         Events:
             domClass:string Fired when the domClass setter is called.
@@ -6791,8 +6727,7 @@ myt.Destructible = new JS.Module('Destructible', {
             width:number (suppressable)
             height:number (suppressable)
             boundsWidth:number Fired when the bounds width of the view changes.
-            boundsHeight:number Fired when the bounds height of the 
-                view changes.
+            boundsHeight:number Fired when the bounds height of the view changes.
             textColor:string
             bgColor:string
             opacity:number
@@ -6805,95 +6740,80 @@ myt.Destructible = new JS.Module('Destructible', {
             layoutRemoved:myt.Layout Fired when a layout is removed from this view.
         
         Attributes:
-            tagName:string Determines the name of the DOM element to create for
-                this instance. This is not a normal attribute. It is only used
-                during initialization and it will be deleted from the attrs 
-                object upon use. If no tagName is provided "div" will be used.
-            focusTrap:boolean Determines if focus traversal can move above this 
-                view or not. The default is undefined which is equivalent to 
-                false. Can be ignored using a key modifier. The key modifier 
-                is typically 'option'.
-            focusCage:boolean Determines if focus traversal can move above this 
-                view or not. The default is undefined which is equivalent to 
-                false. This is the same as focusTrap except it can't be ignored 
-                using a key modifier.
-            maskFocus:boolean Prevents focus from traversing into this view 
-                or any of its subviews. The default is undefined which is 
-                equivalent to false.
-            ignoreLayout:boolean Determines if this view should be included 
-                in layouts or not. Default is undefined which is equivalent to false.
-            layoutHint:* A value that indicates this view is treated as 
-                "special" by the layout. The interpretation of this value 
-                is up to the layout managing the view.
-            align:string Aligns the view horizontally within its parent. 
-                Supported values are: 'left', 'center', 'right' and ''. 
-                The default is undefined which is equivalent to ''.
+            tagName:string Determines the name of the DOM element to create for this instance. This 
+                is not a normal attribute. It is only used during initialization and it will be 
+                deleted from the attrs object upon use. If no tagName is provided "div" will be used.
+            focusTrap:boolean Determines if focus traversal can move above this view or not. The 
+                default is undefined which is equivalent to false. Can be ignored using a key 
+                modifier. The key modifier is typically 'option'.
+            focusCage:boolean Determines if focus traversal can move above this view or not. The 
+                default is undefined which is equivalent to false. This is the same as focusTrap 
+                except it can't be ignored using a key modifier.
+            maskFocus:boolean Prevents focus from traversing into this view or any of its subviews. 
+                The default is undefined which is equivalent to false.
+            ignoreLayout:boolean Determines if this view should be included in layouts or not. 
+                Default is undefined which is equivalent to false.
+            layoutHint:* A value that indicates this view is treated as "special" by the layout. 
+                The interpretation of this value is up to the layout managing the view.
+            align:string Aligns the view horizontally within its parent. Supported values are: 
+                'left', 'center', 'right' and ''. The default is undefined which is equivalent to ''.
             alignOffset:number A pixel offset to use when aligning a view.
-            valign:string Aligns the view vertically within its parent. 
-                Supported values are: 'top', 'middle', 'bottom' and ''. 
-                The default is undefined which is equivalent to ''.
+            valign:string Aligns the view vertically within its parent. Supported values are: 'top', 
+                'middle', 'bottom' and ''. The default is undefined which is equivalent to ''.
             valignOffset:number A pixel offset to use when valigning a view.
             x:number The x-position of this view in pixels. Defaults to 0.
             y:number The y-position of this view in pixels. Defaults to 0.
             width:number The width of this view in pixels. Defaults to 0.
             height:number the height of this view in pixels. Defaults to 0.
-            boundsWidth:number (read only) The actual bounds of the view in 
-                the x-dimension. This value is in pixels relative to the 
-                RootView and thus compensates for rotation and scaling.
-            boundsHeight:number (read only) The actual bounds of the view in 
-                the y-dimension. This value is in pixels relative to the 
-                RootView and thus compensates for rotation and scaling.
-            textColor:string The color used for text. Will be inherited by 
-                descendant views if they don't themselves set textColor or if 
-                they set textColor to 'inherit'. Defaults to undefined which 
-                is equivalent to 'inherit'.
-            bgColor:string The background color of this view. Use a value of 
-                'transparent' to make this view transparent. Defaults 
-                to 'transparent'.
-            opacity:number The opacity of this view. The value should be a 
-                number between 0 and 1. Defaults to 1.
-            overflow:string Determines how descendant content overflows the 
-                bounds. Allowed values: 'visible', 'hidden', 'scroll', 'auto', 
-                'autoy', 'autox' and 'inherit'. Defaults to undefined which 
-                is equivalent to 'visible'.
-            visible:boolean Makes this view visible or not. The default 
-                value is true which means visbility is inherited from the parent view.
-            cursor:string Determines what cursor to show when moused over the 
-                view. Allowed values: 'auto', 'move', 'no-drop', 'col-resize', 
-                'all-scroll', 'pointer', 'not-allowed', 'row-resize', 
-                'crosshair', 'progress', 'e-resize', 'ne-resize', 'default', 
-                'text', 'n-resize', 'nw-resize', 'help', 'vertical-text', 
-                's-resize', 'se-resize', 'inherit', 'wait', 'w-resize', 
-                'sw-resize'. Defaults to undefined which is equivalent 
-                to 'auto'.
-            pointerEvents:string Determines if this view responds to pointer 
-                events or not. Supported values: 'none', 'auto' and 'inherit'. 
-                Defaults to undefined which is equivalent to 'auto'.
-            outlineWidth:number The width of the CSS outline. If a value 
-                equivalent to false is provided 0 will be used.
-            outlineStyle:string The CSS outline style. If null or undefined is 
-                provided 'none' will be used. Supported values: 'none', 
-                'dotted', 'dashed', 'solid', 'double', 'groove', 'ridge', 
-                'inset', 'outset', 'inherit'.
-            outlineColor:string Sets the color of the CSS outline. If null or 
-                undefined is provided '#000' will be used.
-            borderWidth:number The width of the CSS border. If a value 
-                equivalent to false is provided 0 will be used.
-            borderStyle:string The CSS border style. If null or undefined is 
-                provided 'none' will be used. Supported values: 'none', 
-                'dotted', 'dashed', 'solid', 'double', 'groove', 'ridge', 
-                'inset', 'outset', 'inherit'.
-            borderColor:string Sets the color of the CSS border. If null or 
-                undefined is provided '#000' will be used.
-            tooltip:string Sets a tooltip for this view. The basic 
-                implementation uses the dom element's title property. For a 
-                richer tooltip display use myt.TooltipMixin.
+            boundsWidth:number (read only) The actual bounds of the view in the x-dimension. This 
+                value is in pixels relative to the RootView and thus compensates for rotation 
+                and scaling.
+            boundsHeight:number (read only) The actual bounds of the view in the y-dimension. This 
+                value is in pixels relative to the RootView and thus compensates for rotation 
+                and scaling.
+            textColor:string The color used for text. Will be inherited by descendant views if they 
+                don't themselves set textColor or if they set textColor to 'inherit'. Defaults to 
+                undefined which is equivalent to 'inherit'.
+            bgColor:string The background color of this view. Use a value of 'transparent' to make 
+                this view transparent. Defaults to 'transparent'.
+            opacity:number The opacity of this view. The value should be a number between 0 and 1. 
+                Defaults to 1.
+            overflow:string Determines how descendant content overflows the bounds. Allowed values: 
+                'visible', 'hidden', 'scroll', 'auto', 'autoy', 'autox' and 'inherit'. Defaults to 
+                undefined which is equivalent to 'visible'.
+            visible:boolean Makes this view visible or not. The default value is true which means 
+                visbility is inherited from the parent view.
+            cursor:string Determines what cursor to show when moused over the view. Allowed values: 
+                'auto', 'move', 'no-drop', 'col-resize', 'all-scroll', 'pointer', 'not-allowed', 
+                'row-resize', 'crosshair', 'progress', 'e-resize', 'ne-resize', 'default', 'text', 
+                'n-resize', 'nw-resize', 'help', 'vertical-text', 's-resize', 'se-resize', 
+                'inherit', 'wait', 'w-resize', 'sw-resize'. Defaults to undefined which is 
+                equivalent to 'auto'.
+            pointerEvents:string Determines if this view responds to pointer events or not. 
+                Supported values: 'none', 'auto' and 'inherit'. Defaults to undefined which is 
+                equivalent to 'auto'.
+            outlineWidth:number The width of the CSS outline. If a value equivalent to false is 
+                provided 0 will be used.
+            outlineStyle:string The CSS outline style. If null or undefined is provided 'none' will 
+                be used. Supported values: 'none', 'dotted', 'dashed', 'solid', 'double', 'groove', 
+                'ridge', 'inset', 'outset', 'inherit'.
+            outlineColor:string Sets the color of the CSS outline. If null or undefined is provided 
+                '#000' will be used.
+            borderWidth:number The width of the CSS border. If a value equivalent to false is 
+                provided 0 will be used.
+            borderStyle:string The CSS border style. If null or undefined is provided 'none' will 
+                be used. Supported values: 'none', 'dotted', 'dashed', 'solid', 'double', 'groove', 
+                'ridge', 'inset', 'outset', 'inherit'.
+            borderColor:string Sets the color of the CSS border. If null or undefined is provided 
+                '#000' will be used.
+            tooltip:string Sets a tooltip for this view. The basic implementation uses the dom 
+                element's title property. For a richer tooltip display use myt.TooltipMixin.
         
         Private Attributes:
-            subviews:array The array of child myt.Views for this view. Should 
-                be accessed through the getSubviews method.
-            layouts:array The array of child myt.Layouts for this view. Should
-                be accessed through the getLayouts method.
+            subviews:array The array of child myt.Views for this view. Should be accessed through 
+                the getSubviews method.
+            layouts:array The array of child myt.Layouts for this view. Should be accessed through 
+                the getLayouts method.
         
         @class */
     pkg.View = new JS.Class('View', pkg.Node, {
@@ -6927,30 +6847,29 @@ myt.Destructible = new JS.Module('Destructible', {
             delete attrs.tagName;
             self.setDomElement(self.createOurDomElement(parent));
             
-            // Necessary since x and y of 0 won't update the dom element 
-            // style so this gets things initialized correctly. Without 
-            // this RootViews will have an incorrect initial position for x or y of 0.
+            // Necessary since x and y of 0 won't update the dom element style so this gets things 
+            // initialized correctly. Without this RootViews will have an incorrect initial 
+            // position for x or y of 0.
             const ods = self.getODS();
             ods.left = ods.top = '0px';
             
             self.callSuper(parent, attrs);
             
-            // Must be done after the dom element is inserted so that calls 
-            // to getBoundingClientRect will work.
+            // Must be done after the dom element is inserted so that calls to 
+            // getBoundingClientRect will work.
             self.__updateBounds(self.width, self.height);
             
-            // Set default bgcolor afterwards if still undefined. This allows 
-            // BaseInputText to override the default for input:text via attrs.
+            // Set default bgcolor afterwards if still undefined. This allows BaseInputText to 
+            // override the default for input:text via attrs.
             if (self.bgColor === undefined) self.bgColor = 'transparent';
         },
         
-        /** Creates the dom element we will be a proxy for. Called during View
-            initialization. Gives subclasses a change to change how the view is
-            backed. This implementation also looks for a this.tagName property
-            which it will use as the name for the dom element that gets created.
-            If no this.tagName property is found "div" will be used.
-            @param {!Object} parent - The dom element that will be the parent
-                of the newly created dom element.
+        /** Creates the dom element we will be a proxy for. Called during View initialization. 
+            Gives subclasses a change to change how the view is backed. This implementation also 
+            looks for a this.tagName property which it will use as the name for the dom element 
+            that gets created. If no this.tagName property is found "div" will be used.
+            @param {!Object} parent - The dom element that will be the parent of the newly created 
+                dom element.
             @returns {!Object} a dom element */
         createOurDomElement: function(parent) {
             const elem = document.createElement(this.tagName ?? 'div');
@@ -7009,14 +6928,12 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** Gets the views that are our siblings.
-            @returns {!Array} of myt.View or undefined if this view 
-                is orphaned. */
+            @returns {!Array} of myt.View or undefined if this view is orphaned. */
         getSiblingViews: function() {
             if (this.parent) {
-                // Using filter ensures we have a copy of the subviews since 
-                // we will modify it and do not want to modify the original 
-                // array. Remove ourselves from the subviews since we only 
-                // want siblings.
+                // Using filter ensures we have a copy of the subviews since we will modify it and 
+                // do not want to modify the original array. Remove ourselves from the subviews 
+                // since we only want siblings.
                 return this.parent.getSubviews().filter(sv => sv !== this);
             }
         },
@@ -7222,8 +7139,7 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         },
         
-        /** Used by myt.Animator to determine if an attribute is a color 
-            attribute or not.
+        /** Used by myt.Animator to determine if an attribute is a color attribute or not.
             @param {string} attrName
             @returns {boolean} */
         isColorAttr: attrName => attrName === 'bgColor' || attrName === 'textColor',
@@ -7264,10 +7180,9 @@ myt.Destructible = new JS.Module('Destructible', {
                 const ods = self.getODS();
                 ods.visibility = v ? 'inherit' : 'hidden';
                 
-                // Move invisible elements to a very negative location so 
-                // they won't effect scrollable area. Ideally we could use 
-                // display:none but we can't because that makes measuring 
-                // bounds not work.
+                // Move invisible elements to a very negative location so they won't effect 
+                // scrollable area. Ideally we could use display:none but we can't because that 
+                // makes measuring bounds not work.
                 ods.left = v ? self.x + 'px' : '-100000px';
                 ods.top = v ? self.y + 'px' : '-100000px';
                 
@@ -7302,17 +7217,16 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         // Outlines
-        /** Sets outlineWidth, outlineStyle and outlineColor via a single 
-            array. If a value equivalent to false is provided the outline 
-            will be suppressed.
-            @param {?Array} v - An array where index 0 is outlineWidth, index 
-                1 is outline style and index 2 is outlineColor.
+        /** Sets outlineWidth, outlineStyle and outlineColor via a single array. If a value 
+            equivalent to false is provided the outline will be suppressed.
+            @param {?Array} v - An array where index 0 is outlineWidth, index 1 is outline style 
+                and index 2 is outlineColor.
             @returns {undefined} */
         setOutline: function(v) {
-            v = v || [];
-            this.setOutlineWidth(v[0]);
-            this.setOutlineStyle(v[1]);
-            this.setOutlineColor(v[2]);
+            const [width, style, color] = v ?? [];
+            this.setOutlineWidth(width);
+            this.setOutlineStyle(style);
+            this.setOutlineColor(color);
         },
         
         setOutlineWidth: function(v) {
@@ -7329,17 +7243,16 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         // Borders
-        /** Sets borderWidth, borderStyle and borderColor via a single 
-            array. If a value equivalent to false is provided the border 
-            will be suppressed.
-            @param {?Array} v - An array where index 0 is borderWidth, index 
-                1 is border style and index 2 is borderColor.
+        /** Sets borderWidth, borderStyle and borderColor via a single array. If a value equivalent 
+            to false is provided the border will be suppressed.
+            @param {?Array} v - An array where index 0 is borderWidth, index 1 is border style and 
+                index 2 is borderColor.
             @returns {undefined} */
         setBorder: function(v) {
-            v = v || [];
-            this.setBorderWidth(v[0]);
-            this.setBorderStyle(v[1]);
-            this.setBorderColor(v[2]);
+            const [width, style, color] = v ?? [];
+            this.setBorderWidth(width);
+            this.setBorderStyle(style);
+            this.setBorderColor(color);
         },
         
         setBorderWidth: function(v) {
@@ -7392,31 +7305,28 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** Sets the CSS boxShadow property.
-            @param {?Array} v - An array where index 0 is the horizontal 
-                shadow offset, index 1 is the vertical shadow offset, index 
-                2 is the blur amount, and index 3 is the color.
+            @param {?Array} v - An array where index 0 is the horizontal shadow offset, index 1 is 
+                the vertical shadow offset, index 2 is the blur amount, and index 3 is the color.
             @returns {undefined} */
         setBoxShadow: function(v) {
-            this.getODS().boxShadow = v ? (v[0] || 0) + 'px ' + (v[1] || 0) + 'px ' + (v[2] || 7) + 'px ' + (v[3] || '#000') : 'none';
+            const [horizontalShadowOffset, verticalShadowOffset, blurAmt, color] = v ?? [];
+            this.getODS().boxShadow = v ? (horizontalShadowOffset || 0) + 'px ' + (verticalShadowOffset || 0) + 'px ' + (blurAmt || 7) + 'px ' + (color || '#000') : 'none';
         },
         
-        /** Sets the CSS liner-gradient or radial-gradient property. Setting 
-            this property will take the place of any bgColor used in the view.
+        /** Sets the CSS liner-gradient or radial-gradient property. Setting this property will 
+            take the place of any bgColor used in the view.
             @param {?Array} v - An array where:
                 index 0: is the gradient type: linear or radial
                 index 1: is the geometry of the gradient.
-                    radial: The value "cover" / "farthest-corner" or 
-                        "contain" / "closest-side"
-                    linear: A number will be interpreted as the degrees or a
-                        string must be one of: top, top right, right, bottom 
-                        right, bottom, bottom left, left, top left
-                index 3+: Are the color stops which must be a valid CSS color. 
-                    If the first and second color stops will default to the 
-                    textColor and bgColor properties of this view if not 
-                    provided. Use of the rgba(0-255,0-255,0-255,0-1) syntax is 
-                    a good way to designate colors since it will let you use 
-                    an opacity. For a more comprehensive description of how to 
-                    specify color stops see: https://developer.mozilla.org/en-US/docs/Web/CSS/linear-gradient
+                    radial: The value "cover" / "farthest-corner" or "contain" / "closest-side"
+                    linear: A number will be interpreted as the degrees or a string must be one of: 
+                        top, top right, right, bottom  right, bottom, bottom left, left, top left
+                index 3+: Are the color stops which must be a valid CSS color. If the first and 
+                    second color stops will default to the textColor and bgColor properties of this 
+                    view if not provided. Use of the rgba(0-255,0-255,0-255,0-1) syntax is a good 
+                    way to designate colors since it will let you use an opacity. For a more 
+                    comprehensive description of how to specify color stops 
+                    see: https://developer.mozilla.org/en-US/docs/Web/CSS/linear-gradient
             @returns {undefined} */
         setGradient: function(v) {
             const self = this,
@@ -7475,8 +7385,8 @@ myt.Destructible = new JS.Module('Destructible', {
                     }
                 }
                 
-                // Use colors that may have already been configured if less
-                // than 2 color stops are provided
+                // Use colors that may have already been configured if less than 2 color stops 
+                // are provided
                 const pushColor = color => {
                     v.push(color && color !== 'inherit' ? color : 'transparent');
                 };
@@ -7488,8 +7398,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 ods.background = 'none';
             }
             
-            // Wipe the bgColor property since setting style.background 
-            // replaces the bgColor.
+            // Wipe the bgColor property since setting style.background replaces the bgColor.
             self.bgColor = undefined;
         },
         
@@ -7505,21 +7414,17 @@ myt.Destructible = new JS.Module('Destructible', {
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Checks that this view is visible and each view in the parent 
-            chain up to the RootView is also visible. Dom elements are not 
-            explicitly checked. If you need to check dom elements as well,
-            use myt.DomElementProxy.isDomElementVisible.
+        /** Checks that this view is visible and each view in the parent chain up to the RootView is 
+            also visible. Dom elements are not explicitly checked. If you need to check dom elements 
+            as well, use myt.DomElementProxy.isDomElementVisible.
             @returns {boolean} true if this view is visible, false otherwise. */
         isVisible: function() {
             return this.searchAncestorsOrSelf(v => !v.visible) == null;
         },
         
-        /** Finds the youngest ancestor (or self) that is a focusTrap 
-            or focusCage.
-            @param {boolean} ignoreFocusTrap - Indicates focusTraps should 
-                be ignored.
-            @returns {?Object} a View with focusTrap set to true or undefined 
-                if not found. */
+        /** Finds the youngest ancestor (or self) that is a focusTrap or focusCage.
+            @param {boolean} ignoreFocusTrap - Indicates focusTraps should be ignored.
+            @returns {?Object} a View with focusTrap set to true or undefined if not found. */
         getFocusTrap: function(ignoreFocusTrap) {
             return this.searchAncestorsOrSelf(v => v.focusCage || (v.focusTrap && !ignoreFocusTrap));
         },
@@ -7549,10 +7454,9 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {!Object} node
             @returns {undefined}
             
-            @fires subviewRemoved event with the provided Node if it's a View
-                and removal succeeds. 
-            @fires layoutRemoved event with the provided Node if it's a Layout
-                and removal succeeds. */
+            @fires subviewRemoved event with the provided Node if it's a View and removal succeeds. 
+            @fires layoutRemoved event with the provided Node if it's a Layout and removal 
+                succeeds. */
         subnodeRemoved: function(node) {
             let idx;
             if (node instanceof pkg.View) {
@@ -7588,21 +7492,20 @@ myt.Destructible = new JS.Module('Destructible', {
             return this.getSubviews().indexOf(sv);
         },
         
-        /** Called when a View is added to this View. Do not call this method 
-            to add a View. Instead call setParent.
+        /** Called when a View is added to this View. Do not call this method to add a View. 
+            Instead call setParent.
             @param {!Object} sv - The myt.View that was added.
             @returns {undefined} */
         subviewAdded: sv => {},
         
-        /** Called when a View is removed from this View. Do not call this 
-            method to remove a View. Instead call setParent.
+        /** Called when a View is removed from this View. Do not call this method to remove a View. 
+            Instead call setParent.
             @param {!Object} sv - The myt.View that was removed.
             @returns {undefined} */
         subviewRemoved: sv => {},
         
         /** Gets the next sibling view based on lexical ordering of dom elements.
-            @returns {?Object} - The next sibling myt.View or undefined if 
-                none exists. */
+            @returns {?Object} - The next sibling myt.View or undefined if none exists. */
         getNextSibling: function() {
             if (this.parent) {
                 const nextDomElement = this.getODE().nextElementSibling;
@@ -7611,8 +7514,7 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** Gets the previous sibling view.
-            @returns {?Object} - The previous sibling myt.View or undefined if 
-                none exists. */
+            @returns {?Object} - The previous sibling myt.View or undefined if none exists. */
         getPrevSibling: function() {
             if (this.parent) {
                 const prevDomElement = this.getODE().previousElementSibling;
@@ -7635,37 +7537,35 @@ myt.Destructible = new JS.Module('Destructible', {
             return this.getLayouts().indexOf(layout);
         },
         
-        /** Called when a Layout is added to this View. Do not call this 
-            method to add a Layout. Instead call setParent.
+        /** Called when a Layout is added to this View. Do not call this method to add a Layout. 
+            Instead call setParent.
             @param {!Object} layout - The myt.Layout that was added.
             @returns {undefined} */
         layoutAdded: layout => {},
         
-        /** Called when a Layout is removed from this View. Do not call this 
-            method to remove a Layout. Instead call setParent.
+        /** Called when a Layout is removed from this View. Do not call this method to remove a 
+            Layout. Instead call setParent.
             @param {!Object} layout - The myt.Layout that was removed.
             @returns {undefined} */
         layoutRemoved: layout => {},
         
         // Dom-Ordering //
-        /** Test if the provided view is behind this view. The view to test can
-            be anywhere in the document.
+        /** Test if the provided view is behind this view. The view to test can be anywhere in 
+            the document.
             @param {!Object} view - The myt.View to check.
-            @param {boolean} [checkZIndex] - If true z-index will first be
-                used to check if the view is behind or not.
-            @returns {boolean} true if the view is behind this view, 
-                false otherwise. */
+            @param {boolean} [checkZIndex] - If true z-index will first be used to check if the 
+                view is behind or not.
+            @returns {boolean} true if the view is behind this view, false otherwise. */
         isBehind: function(view, checkZIndex) {
             return comparePosition(this, view, false, checkZIndex);
         },
         
-        /** Test if the provided view is front of this view. The view to test 
-            can be anywhere in the document.
+        /** Test if the provided view is front of this view. The view to test can be anywhere in 
+            the document.
             @param {!Object} view - The myt.View to check.
-            @param {boolean} [checkZIndex] - If true z-index will first be
-                used to check if the view is in front or not.
-            @returns {boolean} true if the view is in front of this view, 
-                false otherwise. */
+            @param {boolean} [checkZIndex] - If true z-index will first be used to check if the 
+                view is in front or not.
+            @returns {boolean} true if the view is in front of this view, false otherwise. */
         isInFrontOf: function(view, checkZIndex) {
             return comparePosition(this, view, true, checkZIndex);
         },
@@ -7696,10 +7596,10 @@ myt.Destructible = new JS.Module('Destructible', {
             this.parent.sendSubviewInFrontOf(this, sv);
         },
         
-        /** Called whenever the subviews are reordered in the DOM using
-            one of the reordering functions of myt.View.
-            @param {?Object} sv The subview that was reorderd or null
-                if no specific subview can be determined.
+        /** Called whenever the subviews are reordered in the DOM using one of the reordering 
+            functions of myt.View.
+            @param {?Object} sv The subview that was reorderd or null if no specific subview can 
+                be determined.
             @returns {undefined} */
         doSubviewsReorderedInDom: sv => {/* Subclasses to implement. */},
         
@@ -7720,8 +7620,7 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** Sends the provided subview to the back.
-            @param {?Object} sv - The sub myt.View of this myt.View to send 
-                to back.
+            @param {?Object} sv - The sub myt.View of this myt.View to send to back.
             @returns {undefined} */
         sendSubviewToBack: function(sv) {
             const self = this;
@@ -7737,10 +7636,8 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** Sends the subview behind the existing subview.
-            @param {!Object} sv - The sub myt.View to send behind the 
-                existing myt.View.
-            @param {?Object} existing - The sub myt.View to send the other 
-                sub myt.View behind.
+            @param {!Object} sv - The sub myt.View to send behind the existing myt.View.
+            @param {?Object} existing - The sub myt.View to send the other sub myt.View behind.
             @returns {undefined} */
         sendSubviewBehind: function(sv, existing) {
             const self = this;
@@ -7754,10 +7651,8 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** Sends the subview in front of the existing subview.
-            @param {!Object} sv - the subview to send in front of the 
-                existing view.
-            @param {!Object} existing - the subview to send the other subview 
-                in front of.
+            @param {!Object} sv - the subview to send in front of the existing view.
+            @param {!Object} existing - the subview to send the other subview in front of.
             @returns {undefined} */
         sendSubviewInFrontOf: function(sv, existing) {
             const self = this;
@@ -7770,11 +7665,9 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         },
         
-        /** Sorts the subviews array according to the provided sort function.
-            Also rearranges the dom elements so that focus navigation and z
-            ordering get updated.
-            @param {!Function} sortFunc - The sort function to sort the 
-                subviews with.
+        /** Sorts the subviews array according to the provided sort function. Also rearranges the 
+            dom elements so that focus navigation and z-ordering get updated.
+            @param {!Function} sortFunc - The sort function to sort the subviews with.
             @returns {undefined} */
         sortSubviews: function(sortFunc) {
             // Sort subviews
@@ -7792,8 +7685,8 @@ myt.Destructible = new JS.Module('Destructible', {
                     parentElem.removeChild(outerElem);
                 }
                 
-                // Copy the dom elements in the correct order to a document
-                // fragment and then add that fragment back to the dom.
+                // Copy the dom elements in the correct order to a document fragment and then add 
+                // that fragment back to the dom.
                 const fragment = document.createDocumentFragment(),
                     len = svs.length;
                 for (let i = 0; len > i;) fragment.appendChild(svs[i++].getODE());
@@ -7810,11 +7703,9 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Checks if the provided location is inside this view or not.
             @param {number} locX - the x position to test.
             @param {number} locY - the y position to test.
-            @param {?Object} [referenceFrameDomElem] - The dom element
-                the locX and locY are relative to. If not provided the page 
-                is assumed.
-            @returns {boolean} True if the location is inside this view, false 
-                if not. */
+            @param {?Object} [referenceFrameDomElem] - The dom element the locX and locY are 
+                relative to. If not provided the page is assumed.
+            @returns {boolean} True if the location is inside this view, false if not. */
         containsPoint: function(locX, locY, referenceFrameDomElem) {
             const outerElem = this.getODE();
             if (!outerElem) return false;
@@ -7823,8 +7714,8 @@ myt.Destructible = new JS.Module('Destructible', {
             return rectContainsPoint(locX, locY, pos.x, pos.y, this.width, this.height);
         },
         
-        /** Checks if the provided location is visible on this view and is not
-            masked by the bounding box of the view or any of its ancestor views.
+        /** Checks if the provided location is visible on this view and is not masked by the 
+            bounding box of the view or any of its ancestor views.
             @param {number} locX
             @param {number} locY
             @returns {boolean} true if visible, false otherwise. */
@@ -9604,10 +9495,11 @@ myt.Destructible = new JS.Module('Destructible', {
                             case 4:
                             case 5:
                                 // Process as: R G B ignored
+                                const [r, g, b] = value;
                                 return new Color(
-                                    parseInt(value[0] + value[0], 16),
-                                    parseInt(value[1] + value[1], 16),
-                                    parseInt(value[2] + value[2], 16)
+                                    parseInt(r + r, 16),
+                                    parseInt(g + g, 16),
+                                    parseInt(b + b, 16)
                                 );
                             case 6:
                                 // Process as RR GG BB
@@ -18612,8 +18504,7 @@ new JS.Singleton('GlobalMouse', {
                 
                 resetSelectionManager(timeListView);
                 
-                let hours = minTime[0],
-                    minutes = minTime[1];
+                let [hours, minutes] = minTime;
                 realDayObj = new Date(dateTime);
                 while (hours * 60 + minutes < maxTimeInMinutes) {
                     const is_past_time = hours < todayHours || (hours == todayHours && minutes < todayMinutes),
@@ -20433,9 +20324,7 @@ new JS.Singleton('GlobalMouse', {
         
         notifyHeadersOfSortState = controller => {
             const hdrs = controller.columnHeaders,
-                sort = controller.sort,
-                sortColumnId = sort ? sort[0] : '',
-                sortOrder = sort ? sort[1] : '';
+                [sortColumnId, sortOrder] = controller.sort ?? ['',''];
             let i = hdrs.length;
             while (i) {
                 const hdr = hdrs[--i];
@@ -20980,8 +20869,7 @@ new JS.Singleton('GlobalMouse', {
             initNode: function(parent, attrs) {
                 const self = this;
                 
-                attrs.resizerCursor ??= 'col-resize';
-                let resizerCursor = attrs.resizerCursor;
+                const resizerCursor = attrs.resizerCursor ?? 'col-resize';
                 delete attrs.resizerCursor;
                 
                 attrs.minValue ??= 16;
@@ -21181,8 +21069,7 @@ new JS.Singleton('GlobalMouse', {
                 
                 this.callSuper(parent, attrs);
                 
-                const gc = this.gridController;
-                if (gc) gc.notifyAddRow(this);
+                this.gridController?.notifyAddRow(this);
             },
             
             destroy: function(v) {

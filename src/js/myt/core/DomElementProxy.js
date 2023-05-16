@@ -5,11 +5,10 @@
         
         mathMax = Math.max;
     
-    /** Provides dom elements for this instance. Typically only a single dom
-        element will exist but some components will make use of two nested
-        elements: an inner dom element and an outer dom element. Also assigns 
-        a reference to this DomElementProxy to a property named "model" on 
-        the dom elements.
+    /** Provides dom elements for this instance. Typically only a single dom element will exist but 
+        some components will make use of two nested elements: an inner dom element and an outer 
+        dom element. Also assigns a reference to this DomElementProxy to a property named "model" 
+        on the dom elements.
         
         @class */
     const DomElementProxy = pkg.DomElementProxy = new JS.Module('DomElementProxy', {
@@ -17,10 +16,9 @@
         extend: {
             /** Creates a new dom element.
                 @param {string} tagname - The name of the element to create.
-                @param {?Object} [styles] - A map of style keys and values to 
-                    add to the style property of the new element.
-                @param {?Object} [props] - A map of keys and values to add to 
-                    the new element.
+                @param {?Object} [styles] - A map of style keys and values to add to the style 
+                    property of the new element.
+                @param {?Object} [props] - A map of keys and values to add to the new element.
                 @returns {!Object} the created element. */
             createElement: (tagname, styles, props) => {
                 const elem = DOCUMENT_ELEMENT.createElement(tagname);
@@ -33,8 +31,7 @@
                 @param {!Object} elem - The dom element to check visibility for.
                 @returns {boolean} - True if visible, false otherwise. */
             isDomElementVisible: elem => {
-                // Special Case: hidden input elements should be considered 
-                // not visible.
+                // Special Case: hidden input elements should be considered not visible.
                 if (elem.nodeName === 'INPUT' && elem.type === 'hidden') return false;
                 
                 while (elem) {
@@ -48,8 +45,7 @@
                 return false;
             },
             
-            /** Gets the z-index of a dom element relative to an ancestor 
-                dom element.
+            /** Gets the z-index of a dom element relative to an ancestor dom element.
                 @param {?Object} elem
                 @param {?Object} ancestor
                 @returns {number} */
@@ -71,11 +67,9 @@
                 return 0;
             },
             
-            /** Gets an array of ancestor dom elements including the element
-                itself.
+            /** Gets an array of ancestor dom elements including the element itself.
                 @param {!Object} elem - The dom element to start from.
-                @param {?Object} ancestor - The dom element to stop
-                    getting ancestors at.
+                @param {?Object} ancestor - The dom element to stop getting ancestors at.
                 @returns {!Array} - An array of ancestor dom elements. */
             getAncestorArray: (elem, ancestor) => {
                 const ancestors = [];
@@ -87,8 +81,8 @@
                 return ancestors;
             },
             
-            /** Gets the z-index of the dom element or, if it does not define 
-                a stacking context, the highest z-index of any of the dom 
+            /** Gets the z-index of the dom element or, if it does not define a stacking context, 
+                the highest z-index of any of the dom 
                 element's descendants.
                 @param {!Object} elem - A dom element
                 @returns {number} - An int */
@@ -112,20 +106,19 @@
                 return zIdx;
             },
             
-            /** Gets the x and y position of the dom element relative to the 
-                ancestor dom element or the page. Transforms are not supported.
-                Use getTruePosition if you need support for transforms.
+            /** Gets the x and y position of the dom element relative to the ancestor dom element 
+                or the page. Transforms are not supported. Use getTruePosition if you need support 
+                for transforms.
                 @param {!Object} elem - The dom element to get the position for.
-                @param {?Object} [ancestorElem] - The ancestor dom element
-                    that if encountered will halt the page position calculation
-                    thus giving the position of elem relative to ancestorElem.
-                @returns {?Object} - An object with 'x' and 'y' keys or 
-                    undefined if an error has occurred. */
+                @param {?Object} [ancestorElem] - The ancestor dom element that if encountered will 
+                    halt the page position calculation thus giving the position of elem relative 
+                    to ancestorElem.
+                @returns {?Object} - An object with 'x' and 'y' keys or undefined if an error 
+                    has occurred. */
             getRelativePosition: (elem, ancestorElem) => {
                 if (elem) {
-                    // elem.nodeName !== 'BODY' test prevents looking at the 
-                    // body which causes problems when the document is scrolled 
-                    // on webkit.
+                    // elem.nodeName !== 'BODY' test prevents looking at the body which causes 
+                    // problems when the document is scrolled on webkit.
                     let x = 0, 
                         y = 0;
                     while (elem && elem.nodeName !== 'BODY' && elem !== ancestorElem) {
@@ -142,11 +135,11 @@
                 }
             },
             
-            /** Gets the x and y position of the dom element relative to the 
-                page with support for transforms.
+            /** Gets the x and y position of the dom element relative to the page with support 
+                for transforms.
                 @param {!Object} elem - The dom element to get the position for.
-                @returns {?Object} - An object with 'x' and 'y' keys or 
-                    undefined if an error has occurred. */
+                @returns {?Object} - An object with 'x' and 'y' keys or undefined if an error 
+                    has occurred. */
             getTruePosition: elem => {
                 if (elem) {
                     const pos = elem.getBoundingClientRect();
@@ -156,12 +149,10 @@
             
             /** Generates a dom event on a dom element. Adapted from:
                     http://stackoverflow.com/questions/6157929/how-to-simulate-mouse-click-using-javascript
-                @param {!Object} elem - The dom element to simulate 
-                    the event on.
-                @param {string} eventName - The name of the dom event 
-                    to generate.
-                @param {?Object} [customOpts] - A map of options that will
-                    be added onto the dom event object.
+                @param {!Object} elem - The dom element to simulate the event on.
+                @param {string} eventName - The name of the dom event to generate.
+                @param {?Object} [customOpts] - A map of options that will be added onto the dom 
+                    event object.
                 @returns {undefined} */
             simulateDomEvent: (elem, eventName, customOpts) => {
                 if (elem) {
@@ -225,52 +216,60 @@
         
         
         // Accessors ///////////////////////////////////////////////////////////
-        /** Gets the inner dom element. If only one dom element exists then 
-            this will be the same as the outer dom element.
+        /** Gets the inner dom element. If only one dom element exists then this will be the same 
+            as the outer dom element.
             @returns {?Object} */
         getIDE: function() {return this.__iE;},
         
-        /** Gets the outer dom element. If only one dom element exists then 
-            this will be the same as the inner dom element.
+        /** Gets the outer dom element. If only one dom element exists then this will be the same 
+            as the inner dom element.
             @returns {?Object} */
         getODE: function() {return this.__oE;},
         
-        /** Gets the style attribute of the inner dom element. If only 
-            one dom element exists then this will be the same as the 
-            outer dom style.
+        /** Gets the style attribute of the inner dom element. If only one dom element exists then 
+            this will be the same as the outer dom style.
             @returns {?Object} */
         getIDS: function() {return this.__iS;},
         
-        /** Gets the style attribute of the outer dom element. If only 
-            one dom element exists then this will be the same as the 
-            inner dom style.
+        /** Gets the style attribute of the outer dom element. If only one dom element exists then 
+            this will be the same as the inner dom style.
             @returns {?Object} */
         getODS: function() {return this.__oS;},
         
-        /** Sets the dom element(s) to the provided ones. To set the inner
-            and outer dom elements to different dom elements provide an array
-            of two dom elements.
+        /** Sets the dom element(s) to the provided ones. To set the inner and outer dom elements 
+            to different dom elements provide an array of two dom elements.
             @param {?Object} v
             @returns {undefined} */
         setDomElement: function(v) {
-            // Support an inner and outer dom element if an array of elements is provided.
-            const self = this,
-                isArray = Array.isArray(v),
-                outerElem = self.__oE = isArray ? v[0] : v,
-                innerElem = self.__iE = isArray ? v[1] : v;
-            
-            // Store a reference to the dom element style property since it is accessed often.
-            self.__iS = innerElem.style;
-            self.__oS = outerElem.style;
-            
-            // Setup a reference from the dom element to this model. This will 
-            // allow access to the model from code that uses JQuery or some 
-            // other mechanism to select dom elements.
-            innerElem.model = outerElem.model = self;
+            const self = this;
+            if (Array.isArray(v)) {
+                // Support an inner and outer dom element if an array of elements is provided.
+                const [outerElem, innerElem] = v;
+                self.__oE = outerElem;
+                self.__iE = innerElem;
+                
+                // Store a reference to the dom element style property since it is accessed often.
+                self.__iS = innerElem.style;
+                self.__oS = outerElem.style;
+                
+                // Setup a reference from the dom element to this model. This will allow access to 
+                // the model from code that uses some other mechanism to select dom elements.
+                innerElem.model = outerElem.model = self;
+            } else {
+                // The inner and outer dom element are the same element since an array of elements
+                // was not provided.
+                self.__oE = self.__iE = v;
+                
+                // Store a reference to the dom element style property since it is accessed often.
+                self.__iS = self.__oS = v.style;
+                
+                // Setup a reference from the dom element to this model. This will allow access to 
+                // the model from code that uses some other mechanism to select dom elements.
+                v.model = self;
+            }
         },
         
-        /** Removes this DomElementProxy's outer dom element from its 
-            parent node.
+        /** Removes this DomElementProxy's outer dom element from its parent node.
             @returns {undefined} */
         removeDomElement: function() {
             this.__oE.parentNode.removeChild(this.__oE);
@@ -294,8 +293,7 @@
             this.__iE.className = this.domClass = v;
         },
         
-        /** Adds a dom "class" to the existing dom classes on the inner
-            dom element.
+        /** Adds a dom "class" to the existing dom classes on the inner dom element.
             @param {string} v - The dom class to add.
             @returns {undefined} */
         addDomClass: function(v) {
@@ -348,18 +346,17 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** Gets the x and y position of the underlying inner dom element 
-            relative to the page. Transforms are not supported by default.
-            @param {boolean} [transformSupport] If true then transforms
-                applied to the dom elements are supported.
-            @returns {?Object} - An object with 'x' and 'y' keys or undefined 
-                if an error has occurred. */
+        /** Gets the x and y position of the underlying inner dom element relative to the page. 
+            Transforms are not supported by default.
+            @param {boolean} [transformSupport] If true then transforms applied to the dom elements 
+                are supported.
+            @returns {?Object} - An object with 'x' and 'y' keys or undefined if an error 
+                has occurred. */
         getPagePosition: function(transformSupport) {
             return DomElementProxy['get' + (transformSupport ? 'True' : 'Relative') + 'Position'](this.__iE);
         },
         
-        /** Generates a dom event "click" on this DomElementProxy's inner 
-            dom element.
+        /** Generates a dom event "click" on this DomElementProxy's inner dom element.
             @returns {undefined} */
         simulateClick: function() {
             DomElementProxy.simulateDomEvent(this.__iE, 'click');
@@ -371,10 +368,9 @@
             return DomElementProxy.getHighestZIndex(this.__iE);
         },
         
-        /** Gets the highest z-index of any of the descendant dom elements 
-            of the inner dom element of this DomElementProxy.
-            @param {boolean} [skipChild] - A dom element to skip over
-                when determining the z-index.
+        /** Gets the highest z-index of any of the descendant dom elements of the inner dom element 
+            of this DomElementProxy.
+            @param {boolean} [skipChild] - A dom element to skip over when determining the z-index.
             @returns {number} - An int. */
         getHighestChildZIndex: function(skipChild) {
             const children = this.__iE.childNodes;
@@ -387,18 +383,17 @@
             return zIdx;
         },
         
-        /** Makes this DomElementProxy's outer dom element the one with the 
-            highest z-index relative to its sibling dom elements.
+        /** Makes this DomElementProxy's outer dom element the one with the highest z-index 
+            relative to its sibling dom elements.
             @returns {undefined} */
         makeHighestZIndex: function() {
             this.setZIndex(this.parent.getHighestChildZIndex(this.__iE) + 1);
         },
         
-        /** Scrolls the dom element to the provided position or zero if no
-            value is provided.
+        /** Scrolls the dom element to the provided position or zero if no value is provided.
             @param {number} [value] - The value to scroll to.
-            @param {boolean} [scrollInner] - Indicates if the inner dom element
-                should be used instead of the outer dom element.
+            @param {boolean} [scrollInner] - Indicates if the inner dom element should be used 
+                instead of the outer dom element.
             @returns {undefined} */
         scrollYTo: function(value, scrollInner) {
             (scrollInner ? this.__iE : this.__oE).scrollTop = value || 0;
