@@ -117,37 +117,36 @@
             /** Called by the FloatingPanel to determine where to position itself horizontally. By 
                 default this returns the floatingAlign attribute. Subclasses and instances should 
                 override this if panel specific behavior is needed.
-                @param {string} panelId - The ID of the panel being positioned.
+                @param {?Object} panel - The panel being positioned.
                 @returns {string|number} - An alignment identifer or absolute position. */
-            getFloatingAlignForPanelId: function(panelId) {
+            getFloatingAlignForPanel: function(panel) {
                 return this.floatingAlign;
             },
             
             /** Called by the FloatingPanel to determine where to position itself vertically. By 
                 default this returns the floatingAlign attribute. Subclasses and instances should 
                 override this if panel specific behavior is needed.
-                @param {string} panelId - The ID of the panel being positioned.
-                @returns {string|number} - An alignment identifer or absolute 
-                    position. */
-            getFloatingValignForPanelId: function(panelId) {
+                @param {?Object} panel - The panel being positioned.
+                @returns {string|number} - An alignment identifer or absolute position. */
+            getFloatingValignForPanel: function(panel) {
                 return this.floatingValign;
             },
             
             /** Called by the FloatingPanel to determine where to position itself horizontally. By 
                 default this returns the floatingAlignOffset attribute. Subclasses and instances 
                 should override this if panel specific behavior is needed.
-                @param {string} panelId - The ID of the panel being positioned.
+                @param {?Object} panel - The panel being positioned.
                 @returns {number} the offset to use. */
-            getFloatingAlignOffsetForPanelId: function(panelId) {
+            getFloatingAlignOffsetForPanel: function(panel) {
                 return this.floatingAlignOffset;
             },
             
             /** Called by the FloatingPanel to determine where to position itself vertically. By 
                 default this returns the floatingValignOffset attribute. Subclasses and instances 
                 should override this if panel specific behavior is needed.
-                @param {string} panelId - The ID of the panel being positioned.
+                @param {?Object} panel - The panel being positioned.
                 @returns {number} the offset to use. */
-            getFloatingValignOffsetForPanelId: function(panelId) {
+            getFloatingValignOffsetForPanel: function(panel) {
                 return this.floatingValignOffset;
             },
             
@@ -156,7 +155,7 @@
                     Otherwise it returns the default. */
             getNextFocus: function() {
                 const last = this.lastFloatingPanelShown;
-                if (last && last.isShown()) return last;
+                if (last?.isShown()) return last;
                 if (this.callSuper) return this.callSuper();
             },
             
@@ -337,17 +336,16 @@
             @returns {undefined} */
         updateLocation: function(panelAnchor) {
             this.setOwner(panelAnchor);
-            
-            const panelId = this.panelId,
-                align = panelAnchor.getFloatingAlignForPanelId(panelId),
-                valign = panelAnchor.getFloatingValignForPanelId(panelId),
-                anchorLocation = panelAnchor.getPagePosition();
-            let x = 0,
-                y = 0,
+            this.updateLocationX(panelAnchor);
+            this.updateLocationY(panelAnchor);
+        },
+        
+        updateLocationX: function(panelAnchor) {
+            const align = panelAnchor.getFloatingAlignForPanel(this),
                 type = typeof align;
-            
+            let x;
             if (type === 'string') {
-                x = anchorLocation.x + panelAnchor.getFloatingAlignOffsetForPanelId(panelId);
+                x = panelAnchor.getPagePosition().x + panelAnchor.getFloatingAlignOffsetForPanel(this);
                 switch (align) {
                     case 'outsideRight': x += panelAnchor.width; break;
                     case 'insideRight': x += panelAnchor.width - this.width; break;
@@ -362,12 +360,14 @@
                 console.warn('Invalid align type', type, align);
             }
             this.setX(x);
-            
-            // Vertical positioning
-            type = typeof valign;
-            
+        },
+        
+        updateLocationY: function(panelAnchor) {
+            const valign = panelAnchor.getFloatingValignForPanel(this),
+                type = typeof valign;
+            let y;
             if (type === 'string') {
-                y = anchorLocation.y + panelAnchor.getFloatingValignOffsetForPanelId(panelId);
+                y = panelAnchor.getPagePosition().y + panelAnchor.getFloatingValignOffsetForPanel(this);
                 switch (valign) {
                     case 'outsideBottom': y += panelAnchor.height; break;
                     case 'insideBottom': y += panelAnchor.height - this.height; break;

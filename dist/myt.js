@@ -541,7 +541,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
-            version:20230507.1717,
+            version:20230602.1558,
             
             /** Generates a globally unique id, (GUID).
                 @returns {number} */
@@ -12029,37 +12029,36 @@ new JS.Singleton('GlobalMouse', {
             /** Called by the FloatingPanel to determine where to position itself horizontally. By 
                 default this returns the floatingAlign attribute. Subclasses and instances should 
                 override this if panel specific behavior is needed.
-                @param {string} panelId - The ID of the panel being positioned.
+                @param {?Object} panel - The panel being positioned.
                 @returns {string|number} - An alignment identifer or absolute position. */
-            getFloatingAlignForPanelId: function(panelId) {
+            getFloatingAlignForPanel: function(panel) {
                 return this.floatingAlign;
             },
             
             /** Called by the FloatingPanel to determine where to position itself vertically. By 
                 default this returns the floatingAlign attribute. Subclasses and instances should 
                 override this if panel specific behavior is needed.
-                @param {string} panelId - The ID of the panel being positioned.
-                @returns {string|number} - An alignment identifer or absolute 
-                    position. */
-            getFloatingValignForPanelId: function(panelId) {
+                @param {?Object} panel - The panel being positioned.
+                @returns {string|number} - An alignment identifer or absolute position. */
+            getFloatingValignForPanel: function(panel) {
                 return this.floatingValign;
             },
             
             /** Called by the FloatingPanel to determine where to position itself horizontally. By 
                 default this returns the floatingAlignOffset attribute. Subclasses and instances 
                 should override this if panel specific behavior is needed.
-                @param {string} panelId - The ID of the panel being positioned.
+                @param {?Object} panel - The panel being positioned.
                 @returns {number} the offset to use. */
-            getFloatingAlignOffsetForPanelId: function(panelId) {
+            getFloatingAlignOffsetForPanel: function(panel) {
                 return this.floatingAlignOffset;
             },
             
             /** Called by the FloatingPanel to determine where to position itself vertically. By 
                 default this returns the floatingValignOffset attribute. Subclasses and instances 
                 should override this if panel specific behavior is needed.
-                @param {string} panelId - The ID of the panel being positioned.
+                @param {?Object} panel - The panel being positioned.
                 @returns {number} the offset to use. */
-            getFloatingValignOffsetForPanelId: function(panelId) {
+            getFloatingValignOffsetForPanel: function(panel) {
                 return this.floatingValignOffset;
             },
             
@@ -12068,7 +12067,7 @@ new JS.Singleton('GlobalMouse', {
                     Otherwise it returns the default. */
             getNextFocus: function() {
                 const last = this.lastFloatingPanelShown;
-                if (last && last.isShown()) return last;
+                if (last?.isShown()) return last;
                 if (this.callSuper) return this.callSuper();
             },
             
@@ -12249,17 +12248,16 @@ new JS.Singleton('GlobalMouse', {
             @returns {undefined} */
         updateLocation: function(panelAnchor) {
             this.setOwner(panelAnchor);
-            
-            const panelId = this.panelId,
-                align = panelAnchor.getFloatingAlignForPanelId(panelId),
-                valign = panelAnchor.getFloatingValignForPanelId(panelId),
-                anchorLocation = panelAnchor.getPagePosition();
-            let x = 0,
-                y = 0,
+            this.updateLocationX(panelAnchor);
+            this.updateLocationY(panelAnchor);
+        },
+        
+        updateLocationX: function(panelAnchor) {
+            const align = panelAnchor.getFloatingAlignForPanel(this),
                 type = typeof align;
-            
+            let x;
             if (type === 'string') {
-                x = anchorLocation.x + panelAnchor.getFloatingAlignOffsetForPanelId(panelId);
+                x = panelAnchor.getPagePosition().x + panelAnchor.getFloatingAlignOffsetForPanel(this);
                 switch (align) {
                     case 'outsideRight': x += panelAnchor.width; break;
                     case 'insideRight': x += panelAnchor.width - this.width; break;
@@ -12274,12 +12272,14 @@ new JS.Singleton('GlobalMouse', {
                 console.warn('Invalid align type', type, align);
             }
             this.setX(x);
-            
-            // Vertical positioning
-            type = typeof valign;
-            
+        },
+        
+        updateLocationY: function(panelAnchor) {
+            const valign = panelAnchor.getFloatingValignForPanel(this),
+                type = typeof valign;
+            let y;
             if (type === 'string') {
-                y = anchorLocation.y + panelAnchor.getFloatingValignOffsetForPanelId(panelId);
+                y = panelAnchor.getPagePosition().y + panelAnchor.getFloatingValignOffsetForPanel(this);
                 switch (valign) {
                     case 'outsideBottom': y += panelAnchor.height; break;
                     case 'insideBottom': y += panelAnchor.height - this.height; break;
@@ -12491,6 +12491,7 @@ new JS.Singleton('GlobalMouse', {
         setHeight: function(v, suppressEvent) {
             // Limit height if necessary
             this.callSuper(this.maxHeight >= 0 ? Math.min(this.maxHeight, v) : v, suppressEvent);
+            if (this.inited && this.owner) this.updateLocationY(this.owner);
         },
         
         
@@ -12500,7 +12501,7 @@ new JS.Singleton('GlobalMouse', {
             @param {!Object} itemView
             @returns {undefined} */
         doItemActivated: function(itemView) {
-            if (this.owner) this.owner.doItemActivated(itemView);
+            this?.owner.doItemActivated(itemView);
         },
         
         /** @overrides myt.FloatingPanel */
@@ -12509,31 +12510,19 @@ new JS.Singleton('GlobalMouse', {
         },
         
         getFirstFocusableItem: function() {
-            const items = this.items, 
-                len = items.length;
-            for (let i = 0; len > i;) {
-                const item = items[i++];
-                if (item.isFocusable()) return item;
-            }
+            return this.items.find(item => item.isFocusable());
         },
         
         getLastFocusableItem: function() {
-            const items = this.items;
-            let i = items.length;
-            while (i) {
-                const item = items[--i];
-                if (item.isFocusable()) return item;
-            }
+            return this.items.findLast(item => item.isFocusable());
         },
         
         focusToLastItem: function() {
-            const item = this.getLastFocusableItem();
-            if (item) item.focus();
+            this.getLastFocusableItem()?.focus();
         },
         
         focusToFirstItem: function() {
-            const item = this.getFirstFocusableItem();
-            if (item) item.focus();
+            this.getFirstFocusableItem()?.focus();
         },
         
         updateItemWidth: (item, width) => {
@@ -12578,6 +12567,34 @@ new JS.Singleton('GlobalMouse', {
         
         
         // Methods /////////////////////////////////////////////////////////////
+        /** @overrides */
+        getFloatingValignForPanel: function(panel) {
+            const self = this,
+                panelHeight = panel.height,
+                heightAbove = self.getPagePosition().y,
+                heightBelow = G.windowResize.getHeight() - self.getPagePosition().y - self.height,
+                diffAbove = heightAbove - panelHeight,
+                diffBelow = heightBelow - panelHeight,
+                moreHeightAbove = heightAbove > heightBelow;
+            
+            let valign = self.floatingValign;
+            switch (valign) {
+                case 'outsideBottom':
+                    if (diffBelow < 0 && moreHeightAbove) valign = 'outsideTop';
+                    break;
+                case 'insideBottom':
+                    if (diffBelow < 0 && moreHeightAbove) valign = 'insideTop';
+                    break;
+                case 'outsideTop':
+                    if (diffAbove < 0 && !moreHeightAbove) valign = 'outsideBottom';
+                    break;
+                case 'insideTop':
+                    if (diffAbove < 0 && !moreHeightAbove) valign = 'insideBottom';
+                    break;
+            }
+            return valign;
+        },
+        
         /** Called by the list view when an item is activated. By default it hides the list view.
             @param {!Object} itemView
             @returns {undefined} */
@@ -12648,6 +12665,25 @@ new JS.Singleton('GlobalMouse', {
         focusToFirstItem: function() {
             const fp = this.getFloatingPanel();
             if (fp && fp.isShown()) fp.focusToFirstItem();
+        },
+        
+        // List Manipulation
+        /** Updates an attr of an itemConfig entry with a matching value.
+            @param {*} value
+            @param {string} attrName
+            @param {*} attrValue
+            @returns {?Object} - The entry if a match was found, otherwise undefined. */
+        updateEntryAttr: function(value, attrName, attrValue) {
+            const entry = this.getEntryByValue(value);
+            if (entry) entry.attrs[attrName] = attrValue;
+            return entry;
+        },
+        
+        /** Gets the first itemConfig entry with an attrs.value exactly equal to the provided value.
+            @param {*} value
+            @returns {?Object} - The itemConfig entry or undefined if no match found. */
+        getEntryByValue: function(value) {
+            return this.itemConfig.find(entry => entry?.attrs && entry.attrs.value === value);
         }
     });
     

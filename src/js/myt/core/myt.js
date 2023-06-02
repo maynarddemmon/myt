@@ -93,7 +93,7 @@
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
-            version:20230507.1717,
+            version:20230602.1558,
             
             /** Generates a globally unique id, (GUID).
                 @returns {number} */

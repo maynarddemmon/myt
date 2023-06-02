@@ -190,6 +190,7 @@
         setHeight: function(v, suppressEvent) {
             // Limit height if necessary
             this.callSuper(this.maxHeight >= 0 ? Math.min(this.maxHeight, v) : v, suppressEvent);
+            if (this.inited && this.owner) this.updateLocationY(this.owner);
         },
         
         
@@ -199,7 +200,7 @@
             @param {!Object} itemView
             @returns {undefined} */
         doItemActivated: function(itemView) {
-            if (this.owner) this.owner.doItemActivated(itemView);
+            this?.owner.doItemActivated(itemView);
         },
         
         /** @overrides myt.FloatingPanel */
@@ -208,31 +209,19 @@
         },
         
         getFirstFocusableItem: function() {
-            const items = this.items, 
-                len = items.length;
-            for (let i = 0; len > i;) {
-                const item = items[i++];
-                if (item.isFocusable()) return item;
-            }
+            return this.items.find(item => item.isFocusable());
         },
         
         getLastFocusableItem: function() {
-            const items = this.items;
-            let i = items.length;
-            while (i) {
-                const item = items[--i];
-                if (item.isFocusable()) return item;
-            }
+            return this.items.findLast(item => item.isFocusable());
         },
         
         focusToLastItem: function() {
-            const item = this.getLastFocusableItem();
-            if (item) item.focus();
+            this.getLastFocusableItem()?.focus();
         },
         
         focusToFirstItem: function() {
-            const item = this.getFirstFocusableItem();
-            if (item) item.focus();
+            this.getFirstFocusableItem()?.focus();
         },
         
         updateItemWidth: (item, width) => {
@@ -277,6 +266,34 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
+        /** @overrides */
+        getFloatingValignForPanel: function(panel) {
+            const self = this,
+                panelHeight = panel.height,
+                heightAbove = self.getPagePosition().y,
+                heightBelow = G.windowResize.getHeight() - self.getPagePosition().y - self.height,
+                diffAbove = heightAbove - panelHeight,
+                diffBelow = heightBelow - panelHeight,
+                moreHeightAbove = heightAbove > heightBelow;
+            
+            let valign = self.floatingValign;
+            switch (valign) {
+                case 'outsideBottom':
+                    if (diffBelow < 0 && moreHeightAbove) valign = 'outsideTop';
+                    break;
+                case 'insideBottom':
+                    if (diffBelow < 0 && moreHeightAbove) valign = 'insideTop';
+                    break;
+                case 'outsideTop':
+                    if (diffAbove < 0 && !moreHeightAbove) valign = 'outsideBottom';
+                    break;
+                case 'insideTop':
+                    if (diffAbove < 0 && !moreHeightAbove) valign = 'insideBottom';
+                    break;
+            }
+            return valign;
+        },
+        
         /** Called by the list view when an item is activated. By default it hides the list view.
             @param {!Object} itemView
             @returns {undefined} */
@@ -347,6 +364,25 @@
         focusToFirstItem: function() {
             const fp = this.getFloatingPanel();
             if (fp && fp.isShown()) fp.focusToFirstItem();
+        },
+        
+        // List Manipulation
+        /** Updates an attr of an itemConfig entry with a matching value.
+            @param {*} value
+            @param {string} attrName
+            @param {*} attrValue
+            @returns {?Object} - The entry if a match was found, otherwise undefined. */
+        updateEntryAttr: function(value, attrName, attrValue) {
+            const entry = this.getEntryByValue(value);
+            if (entry) entry.attrs[attrName] = attrValue;
+            return entry;
+        },
+        
+        /** Gets the first itemConfig entry with an attrs.value exactly equal to the provided value.
+            @param {*} value
+            @returns {?Object} - The itemConfig entry or undefined if no match found. */
+        getEntryByValue: function(value) {
+            return this.itemConfig.find(entry => entry?.attrs && entry.attrs.value === value);
         }
     });
     
