@@ -18,9 +18,8 @@
                 restoreFocus._ignoreFocus = true;
             }
             
-            // Also maintain scrollTop/scrollLeft since those also
-            // get reset when a dom element is removed. Note: descendant
-            // elements with scroll positions won't get maintained.
+            // Also maintain scrollTop/scrollLeft since those also get reset when a dom element is 
+            // removed. Note: descendant elements with scroll positions won't get maintained.
             const restoreScrollTop = elem.scrollTop,
                 restoreScrollLeft = elem.scrollLeft;
             
@@ -166,14 +165,6 @@
                     default: // Do nothing
                 }
             }
-        },
-        
-        /*  A convienence method to set a single rounded corner on an element.
-            @param {!Object} view
-            @param {number} radius - The radius of the corner.
-            @param {string} corner - One of 'TopLeft', 'TopRight', 'BottomLeft' or 'BottomRight'. */
-        setRoundedCorner = (view, radius, corner) => {
-            view.getODS()['border' + corner + 'Radius'] = radius + 'px';
         };
     
     /** A Node that can be viewed. Instances of view are typically backed by an absolutely 
@@ -311,21 +302,11 @@
             delete attrs.tagName;
             self.setDomElement(self.createOurDomElement(parent));
             
-            // Necessary since x and y of 0 won't update the dom element style so this gets things 
-            // initialized correctly. Without this RootViews will have an incorrect initial 
-            // position for x or y of 0.
-            const ods = self.getODS();
-            ods.left = ods.top = '0px';
-            
             self.callSuper(parent, attrs);
             
             // Must be done after the dom element is inserted so that calls to 
             // getBoundingClientRect will work.
             self.__updateBounds(self.width, self.height);
-            
-            // Set default bgcolor afterwards if still undefined. This allows BaseInputText to 
-            // override the default for input:text via attrs.
-            if (self.bgColor === undefined) self.bgColor = 'transparent';
         },
         
         /** Creates the dom element we will be a proxy for. Called during View initialization. 
@@ -340,8 +321,7 @@
             elem.style.position = 'absolute';
             
             // Make dom elements easier to location via selectors
-            const klass = this.klass;
-            elem.className = klass.__cssClassName ??= 'myt-' + klass.__displayName.split('.').join('-');
+            elem.className = this.klass.__cssClassName ??= 'myt-' + this.klass.__displayName.split('.').join('-');
             
             return elem;
         },
@@ -744,28 +724,28 @@
             @param {number} radius - The radius of the corner.
             @returns {undefined} */
         setRoundedTopLeftCorner: function(radius) {
-            setRoundedCorner(this, radius, 'TopLeft');
+            this.getODS().borderTopLeftRadius = radius + 'px';
         },
         
         /** A convienence method to round the top right corner.
             @param {number} radius - The radius of the corner.
             @returns {undefined} */
         setRoundedTopRightCorner: function(radius) {
-            setRoundedCorner(this, radius, 'TopRight');
+            this.getODS().borderTopRightRadius = radius + 'px';
         },
         
         /** A convienence method to round the bottom left corner.
             @param {number} radius - The radius of the corner.
             @returns {undefined} */
         setRoundedBottomLeftCorner: function(radius) {
-            setRoundedCorner(this, radius, 'BottomLeft');
+            this.getODS().borderBottomLeftRadius = radius + 'px';
         },
         
         /** A convienence method to round the bottom right corner.
             @param {number} radius - The radius of the corner.
             @returns {undefined} */
         setRoundedBottomRightCorner: function(radius) {
-            setRoundedCorner(this, radius, 'BottomRight');
+            this.getODS().borderBottomRightRadius = radius + 'px';
         },
         
         /** Sets the CSS boxShadow property.
@@ -971,19 +951,13 @@
         /** Gets the next sibling view based on lexical ordering of dom elements.
             @returns {?Object} - The next sibling myt.View or undefined if none exists. */
         getNextSibling: function() {
-            if (this.parent) {
-                const nextDomElement = this.getODE().nextElementSibling;
-                if (nextDomElement) return nextDomElement.model;
-            }
+            if (this.parent) return this.getODE().nextElementSibling?.model;
         },
         
         /** Gets the previous sibling view.
             @returns {?Object} - The previous sibling myt.View or undefined if none exists. */
         getPrevSibling: function() {
-            if (this.parent) {
-                const prevDomElement = this.getODE().previousElementSibling;
-                if (prevDomElement) return prevDomElement.model;
-            }
+            if (this.parent) return this.getODE().previousElementSibling?.model;
         },
         
         // Layouts //

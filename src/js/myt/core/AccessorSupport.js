@@ -4,7 +4,24 @@
         
         generateName = (attrName, prefix) => prefix + attrName.charAt(0).toUpperCase() + attrName.slice(1),
         generateSetterName = attrName => SETTER_NAMES.get(attrName) ?? (SETTER_NAMES.set(attrName, generateName(attrName, 'set')), SETTER_NAMES.get(attrName)),
-        generateGetterName = attrName => GETTER_NAMES.get(attrName) ?? (GETTER_NAMES.set(attrName, generateName(attrName, 'get')), GETTER_NAMES.get(attrName));
+        generateGetterName = attrName => GETTER_NAMES.get(attrName) ?? (GETTER_NAMES.set(attrName, generateName(attrName, 'get')), GETTER_NAMES.get(attrName)),
+        
+        doNormalSetters = (self, attrs) => {
+            let canFireEvent;
+            for (const attrName in attrs) {
+                // Optimization: Inlined self.set for performance.
+                const value = attrs[attrName],
+                    setterName = generateSetterName(attrName);
+                if (setterName in self) {
+                    // Call a defined setter function.
+                    self[setterName](value);
+                } else if (self[attrName] !== value) {
+                    // Generic Setter
+                    self[attrName] = value;
+                    if (canFireEvent ??= self.inited !== false && self.fireEvent) self.fireEvent(attrName, value); // !== false allows this to work with non-nodes.
+                }
+            }
+        };
     
     /** Provides support for getter and setter functions on an object.
         
@@ -81,44 +98,49 @@
             const self = this,
                 earlyAttrs = self.earlyAttrs,
                 lateAttrs = self.lateAttrs;
-            let extractedLateAttrs;
             if (earlyAttrs || lateAttrs) {
-                // Make a shallow copy of attrs since we can't guarantee that attrs won't be reused.
-                attrs = Object.assign({}, attrs);
+                // 01% case is when early or later attrs exist.
+                
+                // Make a shallow copy of attrs since we will be deleting entries from it and we
+                // can't guarantee that it won't be reused.
+                const attrsCopy = {...attrs};
                 
                 // Do early setters
                 if (earlyAttrs) {
                     const len = earlyAttrs.length;
                     for (let i = 0; i < len;) {
                         const attrName = earlyAttrs[i++];
-                        if (attrName in attrs) {
-                            self.set(attrName, attrs[attrName]);
-                            delete attrs[attrName];
+                        if (attrName in attrsCopy) {
+                            self.set(attrName, attrsCopy[attrName]);
+                            delete attrsCopy[attrName];
                         }
                     }
                 }
                 
                 // Extract late setters for later execution
+                let extractedLateAttrs;
                 if (lateAttrs) {
                     extractedLateAttrs = [];
                     const len = lateAttrs.length;
                     for (let i = 0; i < len;) {
                         const attrName = lateAttrs[i++];
-                        if (attrName in attrs) {
-                            extractedLateAttrs.push(attrName, attrs[attrName]);
-                            delete attrs[attrName];
+                        if (attrName in attrsCopy) {
+                            extractedLateAttrs.push(attrName, attrsCopy[attrName]);
+                            delete attrsCopy[attrName];
                         }
                     }
                 }
-            }
-            
-            // Do normal setters
-            for (const attrName in attrs) self.set(attrName, attrs[attrName]);
-            
-            // Do late setters
-            if (extractedLateAttrs) {
-                const len = extractedLateAttrs.length;
-                for (let i = 0; i < len;) self.set(extractedLateAttrs[i++], extractedLateAttrs[i++]);
+                
+                doNormalSetters(self, attrsCopy);
+                
+                // Do late setters
+                if (extractedLateAttrs) {
+                    const len = extractedLateAttrs.length;
+                    for (let i = 0; i < len;) self.set(extractedLateAttrs[i++], extractedLateAttrs[i++]);
+                }
+            } else {
+                // 99% case is just do normal setters.
+                doNormalSetters(self, attrs);
             }
         },
         
@@ -144,10 +166,12 @@
             const self = this;
             
             if (!skipSetter) {
+                // Try to call a defined setter function.
                 const setterName = generateSetterName(attrName);
                 if (setterName in self) return self[setterName](v);
             }
             
+            // Generic Setter
             if (self[attrName] !== v) {
                 self[attrName] = v;
                 if (self.inited !== false && self.fireEvent) self.fireEvent(attrName, v); // !== false allows this to work with non-nodes.

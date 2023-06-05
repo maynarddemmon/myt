@@ -5,7 +5,7 @@
         
         Private Attributes:
             __obsbt:object Stores arrays of myt.Observers and method names by event type
-            __aet:Set Stores active event type strings. An event type is active if it has been 
+            __aet:Object Stores active event type strings. An event type is active if it has been 
                 fired from this Observable as part of the current call stack. If an event type 
                 is "active" it will not be fired again. This provides protection against infinite 
                 event loops.
@@ -100,9 +100,7 @@
             @returns boolean: True if any exist, false otherwise. */
         hasObservers: function(type) {
             const observersByType = this.__obsbt;
-            if (!observersByType) return false;
-            const observers = observersByType[type];
-            return observers && observers.length > 0;
+            return observersByType ? observersByType[type]?.length > 0 : false;
         },
         
         /** Creates a new event with the type and value and using this as the source.
@@ -123,14 +121,17 @@
         fireEvent: function(type, value, observers) {
             // Determine observers to use
             const self = this;
+            
+            // We avoid using getObservers since that lazy instantiates __obsbt and fireEvent will
+            // get called predominantly when no observers exist.
             observers = observers ?? (self.hasObservers(type) ? self.__obsbt[type] : null);
             
             // Fire event
             if (observers) {
                 // Prevent "active" events from being fired again
                 const event = {source:self, type:type, value:value}, // Inlined from this.createEvent
-                    activeEventTypes = self.__aet ??= new Set();
-                if (activeEventTypes.has(type)) {
+                    activeEventTypes = self.__aet ??= {};
+                if (activeEventTypes[type]) {
                     pkg.global.error.notify(
                         'warn', 'eventLoop', 'Abort refiring event:' + type, null, {
                             observable:self,
@@ -140,7 +141,7 @@
                     );
                 } else {
                     // Mark event type as "active"
-                    activeEventTypes.add(type);
+                    activeEventTypes[type] = true;
                     
                     // Walk through observers backwards so that if the observer is detached by the 
                     // event handler the index won't get messed up.
@@ -149,10 +150,12 @@
                     for (let i = observers.length - 2; i >= 0; i -= 2) {
                         const [methodName, observer] = observers.slice(i);
                         
-                        // Sometimes the list gets shortened by the method we called so just 
-                        // continue decrementing downwards.
+                        // Sometimes the list gets shortened as a side effect of the method we 
+                        // called thus resulting in a nullish observer and methodName. In that case 
+                        // just continue decrementing downwards.
                         if (observer && methodName) {
-                            // Stop firing the event if it was "consumed".
+                            // Stop firing the event if it was "consumed". An event is considered
+                            // consumed if the invoked function returns true.
                             try {
                                 if (typeof methodName === 'function') {
                                     if (methodName.call(observer, event)) break;
@@ -167,7 +170,7 @@
                     }
                     
                     // Mark event type as "inactive"
-                    activeEventTypes.delete(type);
+                    activeEventTypes[type] = false;
                 }
             }
         }
@@ -259,9 +262,7 @@
             @returns true if any exist, false otherwise. */
         hasObservables: function(eventType) {
             const observablesByType = this.__obt;
-            if (!observablesByType) return false;
-            const observables = observablesByType[eventType];
-            return observables && observables.length > 0;
+            return observablesByType ? observablesByType[eventType]?.length > 0 : false;
         },
         
         /** Registers this Observer with the provided Observable for the provided eventType.

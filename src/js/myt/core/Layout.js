@@ -780,10 +780,9 @@
             const measureAttrName = this.measureAttrName, 
                 svs = this.subviews;
             let value = 0, 
-                sv, 
                 i = svs.length;
             while (i) {
-                sv = svs[--i];
+                const sv = svs[--i];
                 if (this.skipSubview(sv)) continue;
                 value = value > sv[measureAttrName] ? value : sv[measureAttrName];
             }

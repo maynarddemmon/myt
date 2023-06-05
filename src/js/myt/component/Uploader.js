@@ -161,8 +161,8 @@
                 self.callSuper(parent, attrs);
                 
                 // Support click to upload too.
-                new pkg.NativeInputWrapper(self, {
-                    name:'fileInput', percentOfParentWidth:100, percentOfParentHeight:100,
+                self.fileInput = new pkg.NativeInputWrapper(self, {
+                    percentOfParentWidth:100, percentOfParentHeight:100,
                     opacity:0.01, disabled:self.disabled, overflow:'hidden'
                 }, [pkg.SizeToParent, {
                     initNode: function(parent, attrs) {

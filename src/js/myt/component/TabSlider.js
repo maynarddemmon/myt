@@ -52,8 +52,7 @@
                 attrs.fillColorReady ??= '#fff';
                 attrs.minContainerHeight ??= 100;
                 
-                // Selection must be done via the select method on 
-                // the tabContainer
+                // Selection must be done via the select method on the tabContainer
                 if (attrs.selected) {
                     initiallySelected = true;
                     delete attrs.selected;
@@ -61,8 +60,8 @@
                 
                 self.callSuper(parent, attrs);
                 
-                new self.buttonClass(self, {
-                    name:'button', ignorePlacement:true, zIndex:1,
+                self.button = new self.buttonClass(self, {
+                    ignorePlacement:true, zIndex:1,
                     height:self.buttonHeight,
                     focusIndicator:true,
                     groupId:self.parent.parent.groupId,
@@ -89,9 +88,9 @@
                     }
                 }]);
                 
-                const wrapper = new View(self, {
-                    name:'wrapper', ignorePlacement:true,
-                    y:self.buttonHeight, height:0,
+                const wrapper = self.wrapper = new View(self, {
+                    ignorePlacement:true,
+                    y:self.buttonHeight, 
                     visible:false, maskFocus:true,
                     overflow:'hidden', percentOfParentWidth:100
                 }, [SizeToParent, {
@@ -104,7 +103,7 @@
                     }
                 }]);
                 
-                new pkg.SizeToChildren(new View(wrapper, {name:'container'}), {axis:'y'});
+                new pkg.SizeToChildren(wrapper.container = new View(wrapper), {axis:'y'});
                 
                 self.constrain('__updateHeight', [wrapper, 'y', wrapper, 'height']);
                 
@@ -274,8 +273,9 @@
                 
                 this.callSuper(parent, attrs);
                 
-                new pkg.Text(this.button, {
-                    name:'label', domClass:'myt-Text mytTextTabSliderLabel', ignorePlacement:true,
+                const button = this.button;
+                button.label = new pkg.Text(button, {
+                    domClass:'myt-Text mytTextTabSliderLabel', ignorePlacement:true,
                     text:this.text, align:'center', valign:'middle', 
                     textColor:this.__getTextColor()
                 });
@@ -345,8 +345,8 @@
                 
                 self.callSuper(parent, attrs);
                 
-                const container = new View(self, {
-                    name:'container', ignorePlacement:true, percentOfParentWidth:100
+                const container = self.container = new View(self, {
+                    ignorePlacement:true, percentOfParentWidth:100
                 }, [SizeToParent, {
                     /** @overrides myt.View */
                     subnodeAdded: function(node) {
@@ -370,7 +370,7 @@
                         this.callSuper(node);
                     }
                 }]);
-                new pkg.SpacedLayout(container, {name:'layout', axis:'y', spacing:self.spacing, collapseParent:true});
+                container.layout = new pkg.SpacedLayout(container, {axis:'y', spacing:self.spacing, collapseParent:true});
                 
                 self.attachTo(self, 'updateLayout', 'height');
             },

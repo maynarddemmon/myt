@@ -43,8 +43,7 @@
                 
                 self.callSuper(parent, attrs);
                 
-                new View(self, {
-                    name:'overlay',
+                self.overlay = new View(self, {
                     ignorePlacement:true, 
                     opacity:Dimmer.OPACITY,
                     bgColor:Dimmer.COLOR,

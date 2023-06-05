@@ -1871,7 +1871,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         Private Attributes:
             __obsbt:object Stores arrays of myt.Observers and method names by event type
-            __aet:Set Stores active event type strings. An event type is active if it has been 
+            __aet:Object Stores active event type strings. An event type is active if it has been 
                 fired from this Observable as part of the current call stack. If an event type 
                 is "active" it will not be fired again. This provides protection against infinite 
                 event loops.
@@ -1966,9 +1966,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             @returns boolean: True if any exist, false otherwise. */
         hasObservers: function(type) {
             const observersByType = this.__obsbt;
-            if (!observersByType) return false;
-            const observers = observersByType[type];
-            return observers && observers.length > 0;
+            return observersByType ? observersByType[type]?.length > 0 : false;
         },
         
         /** Creates a new event with the type and value and using this as the source.
@@ -1989,14 +1987,17 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         fireEvent: function(type, value, observers) {
             // Determine observers to use
             const self = this;
+            
+            // We avoid using getObservers since that lazy instantiates __obsbt and fireEvent will
+            // get called predominantly when no observers exist.
             observers = observers ?? (self.hasObservers(type) ? self.__obsbt[type] : null);
             
             // Fire event
             if (observers) {
                 // Prevent "active" events from being fired again
                 const event = {source:self, type:type, value:value}, // Inlined from this.createEvent
-                    activeEventTypes = self.__aet ??= new Set();
-                if (activeEventTypes.has(type)) {
+                    activeEventTypes = self.__aet ??= {};
+                if (activeEventTypes[type]) {
                     pkg.global.error.notify(
                         'warn', 'eventLoop', 'Abort refiring event:' + type, null, {
                             observable:self,
@@ -2006,7 +2007,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     );
                 } else {
                     // Mark event type as "active"
-                    activeEventTypes.add(type);
+                    activeEventTypes[type] = true;
                     
                     // Walk through observers backwards so that if the observer is detached by the 
                     // event handler the index won't get messed up.
@@ -2015,10 +2016,12 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     for (let i = observers.length - 2; i >= 0; i -= 2) {
                         const [methodName, observer] = observers.slice(i);
                         
-                        // Sometimes the list gets shortened by the method we called so just 
-                        // continue decrementing downwards.
+                        // Sometimes the list gets shortened as a side effect of the method we 
+                        // called thus resulting in a nullish observer and methodName. In that case 
+                        // just continue decrementing downwards.
                         if (observer && methodName) {
-                            // Stop firing the event if it was "consumed".
+                            // Stop firing the event if it was "consumed". An event is considered
+                            // consumed if the invoked function returns true.
                             try {
                                 if (typeof methodName === 'function') {
                                     if (methodName.call(observer, event)) break;
@@ -2033,7 +2036,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     }
                     
                     // Mark event type as "inactive"
-                    activeEventTypes.delete(type);
+                    activeEventTypes[type] = false;
                 }
             }
         }
@@ -2125,9 +2128,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             @returns true if any exist, false otherwise. */
         hasObservables: function(eventType) {
             const observablesByType = this.__obt;
-            if (!observablesByType) return false;
-            const observables = observablesByType[eventType];
-            return observables && observables.length > 0;
+            return observablesByType ? observablesByType[eventType]?.length > 0 : false;
         },
         
         /** Registers this Observer with the provided Observable for the provided eventType.
@@ -3024,9 +3025,7 @@ new JS.Singleton('GlobalError', {
         G = pkg.global,
         GlobalFocus = G.focus,
         
-        makeEmptyEvent = () => {
-            return {source:null, type:null, value:null};
-        },
+        makeEmptyEvent = () => ({source:null, type:null, value:null}),
         
         getCodeFromEvent = event => event.value.code,
         
@@ -3063,7 +3062,7 @@ new JS.Singleton('GlobalError', {
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.DomObservable */
             createDomHandler: function(domObserver, methodName, type) {
-                return this.createStandardDomHandler(domObserver, methodName, type, KeyObservable) || 
+                return this.createStandardDomHandler(domObserver, methodName, type, KeyObservable) ?? 
                     this.callSuper(domObserver, methodName, type);
             }
         }),
@@ -3114,7 +3113,7 @@ new JS.Singleton('GlobalError', {
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.DomObservable */
             createDomHandler: function(domObserver, methodName, type) {
-                return this.createStandardDomHandler(domObserver, methodName, type, MouseObservable, true) || 
+                return this.createStandardDomHandler(domObserver, methodName, type, MouseObservable, true) ?? 
                     this.callSuper(domObserver, methodName, type);
             }
         }),
@@ -3149,7 +3148,7 @@ new JS.Singleton('GlobalError', {
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.DomObservable */
             createDomHandler: function(domObserver, methodName, type) {
-                return this.createStandardDomHandler(domObserver, methodName, type, ScrollObservable) || 
+                return this.createStandardDomHandler(domObserver, methodName, type, ScrollObservable) ?? 
                     this.callSuper(domObserver, methodName, type);
             }
         }),
@@ -3178,7 +3177,7 @@ new JS.Singleton('GlobalError', {
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.DomObservable */
             createDomHandler: function(domObserver, methodName, type) {
-                return this.createStandardDomHandler(domObserver, methodName, type, TouchObservable, false) || 
+                return this.createStandardDomHandler(domObserver, methodName, type, TouchObservable, false) ?? 
                     this.callSuper(domObserver, methodName, type);
             }
         }),
@@ -3445,7 +3444,7 @@ new JS.Singleton('GlobalError', {
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.DomObservable */
             createDomHandler: function(domObserver, methodName, type) {
-                return this.createStandardDomHandler(domObserver, methodName, type, InputObservable) || 
+                return this.createStandardDomHandler(domObserver, methodName, type, InputObservable) ?? 
                     this.callSuper(domObserver, methodName, type);
             }
         }),
@@ -3474,7 +3473,7 @@ new JS.Singleton('GlobalError', {
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.DomObservable */
             createDomHandler: function(domObserver, methodName, type) {
-                return this.createStandardDomHandler(domObserver, methodName, type, DragDropObservable, true) || 
+                return this.createStandardDomHandler(domObserver, methodName, type, DragDropObservable, true) ?? 
                     this.callSuper(domObserver, methodName, type);
             }
         });
@@ -3508,12 +3507,12 @@ new JS.Singleton('GlobalError', {
                     
                     // Lazy instantiate dom observers array for type and insert observer.
                     const domObservers = domObserversByType[type];
-                    if (!domObservers) {
-                        // Create list with observer
-                        domObserversByType[type] = [domObserver, methodName, methodRef, capture];
-                    } else {
+                    if (domObservers) {
                         // Add dom observer to the end of the list
                         domObservers.push(domObserver, methodName, methodRef, capture);
+                    } else {
+                        // Create list with observer
+                        domObserversByType[type] = [domObserver, methodName, methodRef, capture];
                     }
                     
                     pkg.addEventListener(this.getDomElementForDomObservable(type), type, methodRef, capture, passive);
@@ -3649,8 +3648,7 @@ new JS.Singleton('GlobalError', {
                 capture = !!capture;
                 
                 // Lazy instantiate __dobt map.
-                const observablesByType = this.__dobt ??= {},
-                    observables = observablesByType[type] ??= [];
+                const observables = (this.__dobt ??= {})[type] ??= [];
                 
                 // Attach this DomObserver to the DomObservable
                 if (observable.attachDomObserver(this, methodName, type, capture, passive)) {
@@ -4611,7 +4609,24 @@ new JS.Singleton('GlobalTouch', {
         
         generateName = (attrName, prefix) => prefix + attrName.charAt(0).toUpperCase() + attrName.slice(1),
         generateSetterName = attrName => SETTER_NAMES.get(attrName) ?? (SETTER_NAMES.set(attrName, generateName(attrName, 'set')), SETTER_NAMES.get(attrName)),
-        generateGetterName = attrName => GETTER_NAMES.get(attrName) ?? (GETTER_NAMES.set(attrName, generateName(attrName, 'get')), GETTER_NAMES.get(attrName));
+        generateGetterName = attrName => GETTER_NAMES.get(attrName) ?? (GETTER_NAMES.set(attrName, generateName(attrName, 'get')), GETTER_NAMES.get(attrName)),
+        
+        doNormalSetters = (self, attrs) => {
+            let canFireEvent;
+            for (const attrName in attrs) {
+                // Optimization: Inlined self.set for performance.
+                const value = attrs[attrName],
+                    setterName = generateSetterName(attrName);
+                if (setterName in self) {
+                    // Call a defined setter function.
+                    self[setterName](value);
+                } else if (self[attrName] !== value) {
+                    // Generic Setter
+                    self[attrName] = value;
+                    if (canFireEvent ??= self.inited !== false && self.fireEvent) self.fireEvent(attrName, value); // !== false allows this to work with non-nodes.
+                }
+            }
+        };
     
     /** Provides support for getter and setter functions on an object.
         
@@ -4688,44 +4703,49 @@ new JS.Singleton('GlobalTouch', {
             const self = this,
                 earlyAttrs = self.earlyAttrs,
                 lateAttrs = self.lateAttrs;
-            let extractedLateAttrs;
             if (earlyAttrs || lateAttrs) {
-                // Make a shallow copy of attrs since we can't guarantee that attrs won't be reused.
-                attrs = Object.assign({}, attrs);
+                // 01% case is when early or later attrs exist.
+                
+                // Make a shallow copy of attrs since we will be deleting entries from it and we
+                // can't guarantee that it won't be reused.
+                const attrsCopy = {...attrs};
                 
                 // Do early setters
                 if (earlyAttrs) {
                     const len = earlyAttrs.length;
                     for (let i = 0; i < len;) {
                         const attrName = earlyAttrs[i++];
-                        if (attrName in attrs) {
-                            self.set(attrName, attrs[attrName]);
-                            delete attrs[attrName];
+                        if (attrName in attrsCopy) {
+                            self.set(attrName, attrsCopy[attrName]);
+                            delete attrsCopy[attrName];
                         }
                     }
                 }
                 
                 // Extract late setters for later execution
+                let extractedLateAttrs;
                 if (lateAttrs) {
                     extractedLateAttrs = [];
                     const len = lateAttrs.length;
                     for (let i = 0; i < len;) {
                         const attrName = lateAttrs[i++];
-                        if (attrName in attrs) {
-                            extractedLateAttrs.push(attrName, attrs[attrName]);
-                            delete attrs[attrName];
+                        if (attrName in attrsCopy) {
+                            extractedLateAttrs.push(attrName, attrsCopy[attrName]);
+                            delete attrsCopy[attrName];
                         }
                     }
                 }
-            }
-            
-            // Do normal setters
-            for (const attrName in attrs) self.set(attrName, attrs[attrName]);
-            
-            // Do late setters
-            if (extractedLateAttrs) {
-                const len = extractedLateAttrs.length;
-                for (let i = 0; i < len;) self.set(extractedLateAttrs[i++], extractedLateAttrs[i++]);
+                
+                doNormalSetters(self, attrsCopy);
+                
+                // Do late setters
+                if (extractedLateAttrs) {
+                    const len = extractedLateAttrs.length;
+                    for (let i = 0; i < len;) self.set(extractedLateAttrs[i++], extractedLateAttrs[i++]);
+                }
+            } else {
+                // 99% case is just do normal setters.
+                doNormalSetters(self, attrs);
             }
         },
         
@@ -4751,10 +4771,12 @@ new JS.Singleton('GlobalTouch', {
             const self = this;
             
             if (!skipSetter) {
+                // Try to call a defined setter function.
                 const setterName = generateSetterName(attrName);
                 if (setterName in self) return self[setterName](v);
             }
             
+            // Generic Setter
             if (self[attrName] !== v) {
                 self[attrName] = v;
                 if (self.inited !== false && self.fireEvent) self.fireEvent(attrName, v); // !== false allows this to work with non-nodes.
@@ -5381,7 +5403,7 @@ myt.Destructible = new JS.Module('Destructible', {
             has no parent.
             @returns {!Object} - The root myt.Node. */
         getRoot: function() {
-            return this.parent ? this.parent.getRoot() : this;
+            return this.parent?.getRoot() ?? this;
         },
         
         /** Checks if this Node is a root Node.
@@ -6342,10 +6364,9 @@ myt.Destructible = new JS.Module('Destructible', {
             const measureAttrName = this.measureAttrName, 
                 svs = this.subviews;
             let value = 0, 
-                sv, 
                 i = svs.length;
             while (i) {
-                sv = svs[--i];
+                const sv = svs[--i];
                 if (this.skipSubview(sv)) continue;
                 value = value > sv[measureAttrName] ? value : sv[measureAttrName];
             }
@@ -6554,9 +6575,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 restoreFocus._ignoreFocus = true;
             }
             
-            // Also maintain scrollTop/scrollLeft since those also
-            // get reset when a dom element is removed. Note: descendant
-            // elements with scroll positions won't get maintained.
+            // Also maintain scrollTop/scrollLeft since those also get reset when a dom element is 
+            // removed. Note: descendant elements with scroll positions won't get maintained.
             const restoreScrollTop = elem.scrollTop,
                 restoreScrollLeft = elem.scrollLeft;
             
@@ -6702,14 +6722,6 @@ myt.Destructible = new JS.Module('Destructible', {
                     default: // Do nothing
                 }
             }
-        },
-        
-        /*  A convienence method to set a single rounded corner on an element.
-            @param {!Object} view
-            @param {number} radius - The radius of the corner.
-            @param {string} corner - One of 'TopLeft', 'TopRight', 'BottomLeft' or 'BottomRight'. */
-        setRoundedCorner = (view, radius, corner) => {
-            view.getODS()['border' + corner + 'Radius'] = radius + 'px';
         };
     
     /** A Node that can be viewed. Instances of view are typically backed by an absolutely 
@@ -6847,21 +6859,11 @@ myt.Destructible = new JS.Module('Destructible', {
             delete attrs.tagName;
             self.setDomElement(self.createOurDomElement(parent));
             
-            // Necessary since x and y of 0 won't update the dom element style so this gets things 
-            // initialized correctly. Without this RootViews will have an incorrect initial 
-            // position for x or y of 0.
-            const ods = self.getODS();
-            ods.left = ods.top = '0px';
-            
             self.callSuper(parent, attrs);
             
             // Must be done after the dom element is inserted so that calls to 
             // getBoundingClientRect will work.
             self.__updateBounds(self.width, self.height);
-            
-            // Set default bgcolor afterwards if still undefined. This allows BaseInputText to 
-            // override the default for input:text via attrs.
-            if (self.bgColor === undefined) self.bgColor = 'transparent';
         },
         
         /** Creates the dom element we will be a proxy for. Called during View initialization. 
@@ -6876,8 +6878,7 @@ myt.Destructible = new JS.Module('Destructible', {
             elem.style.position = 'absolute';
             
             // Make dom elements easier to location via selectors
-            const klass = this.klass;
-            elem.className = klass.__cssClassName ??= 'myt-' + klass.__displayName.split('.').join('-');
+            elem.className = this.klass.__cssClassName ??= 'myt-' + this.klass.__displayName.split('.').join('-');
             
             return elem;
         },
@@ -7280,28 +7281,28 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {number} radius - The radius of the corner.
             @returns {undefined} */
         setRoundedTopLeftCorner: function(radius) {
-            setRoundedCorner(this, radius, 'TopLeft');
+            this.getODS().borderTopLeftRadius = radius + 'px';
         },
         
         /** A convienence method to round the top right corner.
             @param {number} radius - The radius of the corner.
             @returns {undefined} */
         setRoundedTopRightCorner: function(radius) {
-            setRoundedCorner(this, radius, 'TopRight');
+            this.getODS().borderTopRightRadius = radius + 'px';
         },
         
         /** A convienence method to round the bottom left corner.
             @param {number} radius - The radius of the corner.
             @returns {undefined} */
         setRoundedBottomLeftCorner: function(radius) {
-            setRoundedCorner(this, radius, 'BottomLeft');
+            this.getODS().borderBottomLeftRadius = radius + 'px';
         },
         
         /** A convienence method to round the bottom right corner.
             @param {number} radius - The radius of the corner.
             @returns {undefined} */
         setRoundedBottomRightCorner: function(radius) {
-            setRoundedCorner(this, radius, 'BottomRight');
+            this.getODS().borderBottomRightRadius = radius + 'px';
         },
         
         /** Sets the CSS boxShadow property.
@@ -7507,19 +7508,13 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Gets the next sibling view based on lexical ordering of dom elements.
             @returns {?Object} - The next sibling myt.View or undefined if none exists. */
         getNextSibling: function() {
-            if (this.parent) {
-                const nextDomElement = this.getODE().nextElementSibling;
-                if (nextDomElement) return nextDomElement.model;
-            }
+            if (this.parent) return this.getODE().nextElementSibling?.model;
         },
         
         /** Gets the previous sibling view.
             @returns {?Object} - The previous sibling myt.View or undefined if none exists. */
         getPrevSibling: function() {
-            if (this.parent) {
-                const prevDomElement = this.getODE().previousElementSibling;
-                if (prevDomElement) return prevDomElement.model;
-            }
+            if (this.parent) return this.getODE().previousElementSibling?.model;
         },
         
         // Layouts //
@@ -9022,6 +9017,17 @@ myt.Destructible = new JS.Module('Destructible', {
                 roots.addRoot(this);
                 
                 RootView.setupCaptureDrop(this);
+            },
+            
+            /** @overrides myt.DomElementProxy */
+            setDomElement: function(v) {
+                this.callSuper(v);
+                
+                // Necessary since x and y of 0 won't update the dom element style so this gets 
+                // things initialized correctly. Without this RootViews will have an incorrect 
+                // initial position for x or y of 0.
+                const ods = this.getODS();
+                ods.left = ods.top = '0px';
             },
             
             /** @overrides myt.View */
@@ -11305,13 +11311,13 @@ new JS.Singleton('GlobalMouse', {
         /** @overrides myt.View */
         initNode: function(parent, attrs) {
             const self = this;
-            let isDraggable = true;
             
             self.isDraggable = self.isDragging = false;
             self.draggableAllowBubble = true;
             self.distanceBeforeDrag = self.dragOffsetX = self.dragOffsetY = 0;
             
             // Will be set after init since the draggable subview probably doesn't exist yet.
+            let isDraggable = true;
             if (attrs.isDraggable != null) {
                 isDraggable = attrs.isDraggable;
                 delete attrs.isDraggable;
@@ -11795,7 +11801,6 @@ new JS.Singleton('GlobalMouse', {
             // Build UI
             const textY = self.textY,
                 textAttrs = {
-                    name:'textView', 
                     whiteSpace: self.shrinkToFit ? 'nowrap' : 'normal', 
                     text:self.text,
                     domClass:'myt-Text mytButtonText'
@@ -11805,7 +11810,7 @@ new JS.Singleton('GlobalMouse', {
             } else {
                 textAttrs.y = textY;
             }
-            const textView = new pkg.Text(self, textAttrs);
+            const textView = self.textView = new pkg.Text(self, textAttrs);
             
             // Setup the constraint after adoption since the textView won't have been sized to the 
             // dom until it's added in.
@@ -13497,8 +13502,7 @@ new JS.Singleton('GlobalMouse', {
                 attrs.fillColorReady ??= '#fff';
                 attrs.minContainerHeight ??= 100;
                 
-                // Selection must be done via the select method on 
-                // the tabContainer
+                // Selection must be done via the select method on the tabContainer
                 if (attrs.selected) {
                     initiallySelected = true;
                     delete attrs.selected;
@@ -13506,8 +13510,8 @@ new JS.Singleton('GlobalMouse', {
                 
                 self.callSuper(parent, attrs);
                 
-                new self.buttonClass(self, {
-                    name:'button', ignorePlacement:true, zIndex:1,
+                self.button = new self.buttonClass(self, {
+                    ignorePlacement:true, zIndex:1,
                     height:self.buttonHeight,
                     focusIndicator:true,
                     groupId:self.parent.parent.groupId,
@@ -13534,9 +13538,9 @@ new JS.Singleton('GlobalMouse', {
                     }
                 }]);
                 
-                const wrapper = new View(self, {
-                    name:'wrapper', ignorePlacement:true,
-                    y:self.buttonHeight, height:0,
+                const wrapper = self.wrapper = new View(self, {
+                    ignorePlacement:true,
+                    y:self.buttonHeight, 
                     visible:false, maskFocus:true,
                     overflow:'hidden', percentOfParentWidth:100
                 }, [SizeToParent, {
@@ -13549,7 +13553,7 @@ new JS.Singleton('GlobalMouse', {
                     }
                 }]);
                 
-                new pkg.SizeToChildren(new View(wrapper, {name:'container'}), {axis:'y'});
+                new pkg.SizeToChildren(wrapper.container = new View(wrapper), {axis:'y'});
                 
                 self.constrain('__updateHeight', [wrapper, 'y', wrapper, 'height']);
                 
@@ -13719,8 +13723,9 @@ new JS.Singleton('GlobalMouse', {
                 
                 this.callSuper(parent, attrs);
                 
-                new pkg.Text(this.button, {
-                    name:'label', domClass:'myt-Text mytTextTabSliderLabel', ignorePlacement:true,
+                const button = this.button;
+                button.label = new pkg.Text(button, {
+                    domClass:'myt-Text mytTextTabSliderLabel', ignorePlacement:true,
                     text:this.text, align:'center', valign:'middle', 
                     textColor:this.__getTextColor()
                 });
@@ -13790,8 +13795,8 @@ new JS.Singleton('GlobalMouse', {
                 
                 self.callSuper(parent, attrs);
                 
-                const container = new View(self, {
-                    name:'container', ignorePlacement:true, percentOfParentWidth:100
+                const container = self.container = new View(self, {
+                    ignorePlacement:true, percentOfParentWidth:100
                 }, [SizeToParent, {
                     /** @overrides myt.View */
                     subnodeAdded: function(node) {
@@ -13815,7 +13820,7 @@ new JS.Singleton('GlobalMouse', {
                         this.callSuper(node);
                     }
                 }]);
-                new pkg.SpacedLayout(container, {name:'layout', axis:'y', spacing:self.spacing, collapseParent:true});
+                container.layout = new pkg.SpacedLayout(container, {axis:'y', spacing:self.spacing, collapseParent:true});
                 
                 self.attachTo(self, 'updateLayout', 'height');
             },
@@ -14062,8 +14067,7 @@ new JS.Singleton('GlobalMouse', {
                 
                 this.callSuper(parent, attrs);
                 
-                new pkg.SpacedLayout(this, {
-                    name:'layout',
+                this.layout = new pkg.SpacedLayout(this, {
                     axis:this.location === 'left' || this.location === 'right' ? 'y' : 'x',
                     spacing:this.spacing,
                     inset:this.inset,
@@ -17069,8 +17073,8 @@ new JS.Singleton('GlobalMouse', {
                 self.callSuper(parent, attrs);
                 
                 // Support click to upload too.
-                new pkg.NativeInputWrapper(self, {
-                    name:'fileInput', percentOfParentWidth:100, percentOfParentHeight:100,
+                self.fileInput = new pkg.NativeInputWrapper(self, {
+                    percentOfParentWidth:100, percentOfParentHeight:100,
                     opacity:0.01, disabled:self.disabled, overflow:'hidden'
                 }, [pkg.SizeToParent, {
                     initNode: function(parent, attrs) {
@@ -17383,13 +17387,12 @@ new JS.Singleton('GlobalMouse', {
 
 (pkg => {
     const updateMonitoringSubview = (stc, sv, func) => {
-            const axis = stc.axis;
             func = func.bind(stc);
-            if (axis !== 'y') {
+            if (stc.axis !== 'y') {
                 func(sv, 'update', 'x');
                 func(sv, 'update', 'boundsWidth');
             }
-            if (axis !== 'x') {
+            if (stc.axis !== 'x') {
                 func(sv, 'update', 'y');
                 func(sv, 'update', 'boundsHeight');
             }
@@ -17467,7 +17470,8 @@ new JS.Singleton('GlobalMouse', {
                 // Prevent inadvertent loops
                 this.incrementLockedCounter();
                 
-                if (!this.parent.isBeingDestroyed) {
+                const parent = this.parent;
+                if (!parent.isBeingDestroyed) {
                     const svs = this.subviews, 
                         len = svs.length,
                         axis = this.axis;
@@ -17480,7 +17484,7 @@ new JS.Singleton('GlobalMouse', {
                             const sv = svs[--i];
                             if (sv.visible) max = Math.max(max, sv.x + (sv.boundsWidth > 0 ? sv.boundsWidth : 0));
                         }
-                        this.updateSize(max + this.paddingX, true);
+                        parent.setWidth(max + this.paddingX);
                     }
                     if (axis !== 'x') {
                         i = len;
@@ -17489,7 +17493,7 @@ new JS.Singleton('GlobalMouse', {
                             const sv = svs[--i];
                             if (sv.visible) max = Math.max(max, sv.y + (sv.boundsHeight > 0 ? sv.boundsHeight : 0));
                         }
-                        this.updateSize(max + this.paddingY, false);
+                        parent.setHeight(max + this.paddingY);
                     }
                 }
                 
@@ -17497,19 +17501,15 @@ new JS.Singleton('GlobalMouse', {
             }
         },
         
-        updateSize: function(v, isWidth) {
-            this.parent[isWidth ? 'setWidth' : 'setHeight'](v);
-        },
-        
         /** @overrides myt.Layout
-            Provides a default implementation that calls update when the visibility of a 
+            Provides a default implementation that calls update when the visibility or extent of a 
             subview changes. */
         startMonitoringSubview: function(sv) {
             updateMonitoringSubview(this, sv, this.attachTo);
         },
         
         /** @overrides myt.Layout
-            Provides a default implementation that calls update when the visibility of a 
+            Provides a default implementation that calls update when the visibility or extent of a 
             subview changes. */
         stopMonitoringSubview: function(sv) {
             updateMonitoringSubview(this, sv, this.detachFrom);
@@ -17563,8 +17563,7 @@ new JS.Singleton('GlobalMouse', {
                 
                 self.callSuper(parent, attrs);
                 
-                new View(self, {
-                    name:'overlay',
+                self.overlay = new View(self, {
                     ignorePlacement:true, 
                     opacity:Dimmer.OPACITY,
                     bgColor:Dimmer.COLOR,
@@ -18795,8 +18794,7 @@ new JS.Singleton('GlobalMouse', {
                 @param {!Object} targetView - The myt.View to create the button on.
                 @returns {!Object} - The created myt.Button. */
             makeCloseButton: function(targetView) {
-                return this.makeButton(targetView, {
-                    name:'closeBtn',
+                return targetView.closeBtn = this.makeButton(targetView, {
                     ignoreLayout:true,
                     y:2,
                     align:'right',
@@ -18901,8 +18899,7 @@ new JS.Singleton('GlobalMouse', {
                 
                 self.setCallbackFunction(callbackFunction);
                 
-                const msgView = new Text(content, {
-                    name:'msg',
+                const msgView = content.msg = new Text(content, {
                     text:msg,
                     whiteSpace:opts.whiteSpace,
                     wordWrap:opts.wordWrap,
@@ -18945,8 +18942,8 @@ new JS.Singleton('GlobalMouse', {
                 content.sizeToChildren.setPaddingX(1);
                 self.setCallbackFunction(callbackFunction);
                 
-                const contentContainer = new View(content, {
-                    name:'contentContainer', x:1, y:25, overflow:'auto'
+                const contentContainer = content.contentContainer = new View(content, {
+                    x:1, y:25, overflow:'auto'
                 }, [{
                     setHeight: function(v) {
                         if (v > maxHeight) v = maxHeight;
@@ -18997,8 +18994,8 @@ new JS.Singleton('GlobalMouse', {
                 self.setCallbackFunction(callbackFunction);
                 
                 // Setup form
-                const contentContainer = new View(content, {
-                    name:'contentContainer', x:1, y:25, overflow:'auto'
+                const contentContainer = content.contentContainer = new View(content, {
+                    x:1, y:25, overflow:'auto'
                 }, [{
                     setHeight: function(v) {
                         this.callSuper(v > maxHeight ? maxHeight : v);
@@ -19153,7 +19150,7 @@ new JS.Singleton('GlobalMouse', {
                     roundedTopLeftCorner:radius,
                     roundedTopRightCorner:radius
                 })).sendToBack();
-                new Text(content, {name:'title', x:radius, y:4, text:titleTxt, fontWeight:'bold'});
+                content.title = new Text(content, {x:radius, y:4, text:titleTxt, fontWeight:'bold'});
             },
             
             /** @private 
@@ -19165,7 +19162,7 @@ new JS.Singleton('GlobalMouse', {
                     content = self.content, 
                     DPY = ModalPanel.PADDING_Y,
                     HALF_DPY = DPY / 2,
-                    btnContainer = new View(content, {name:'btnContainer', y:mainView.y + mainView.height + DPY, align:'center'}),
+                    btnContainer = content.btnContainer = new View(content, {y:mainView.y + mainView.height + DPY, align:'center'}),
                     btnConfigKeys = ['active','hover','ready','text'];
                 
                 // Cancel Button
@@ -19816,7 +19813,7 @@ new JS.Singleton('GlobalMouse', {
         initNode: function(parent, attrs) {
             this.callSuper(parent, attrs);
             
-            const rangeFillView = new View(this, {name:'rangeFill', bgColor:'#666'});
+            const rangeFillView = this.rangeFill = new View(this, {bgColor:'#666'});
             if (this.axis === 'x') {
                 rangeFillView.setY(this.thumbOffset);
                 rangeFillView.setHeight(this.thumbHeight);
@@ -19827,8 +19824,8 @@ new JS.Singleton('GlobalMouse', {
                 rangeFillView.setRoundedCorners(this.thumbWidth / 2);
             }
             
-            new SliderThumb(this, {name:'thumbLower'});
-            new SliderThumb(this, {name:'thumbUpper'});
+            this.thumbLower = new SliderThumb(this);
+            this.thumbUpper = new SliderThumb(this);
             
             this._syncRangeFillToValue();
         },
@@ -19950,7 +19947,7 @@ new JS.Singleton('GlobalMouse', {
         initNode: function(parent, attrs) {
             this.callSuper(parent, attrs);
             
-            new SliderThumb(this, {name:'thumb'});
+            this.thumb = new SliderThumb(this);
         },
         
         
@@ -21174,14 +21171,14 @@ new JS.Singleton('GlobalMouse', {
             self.callSuper(parent, attrs);
             
             // Build UI
-            const header = new View(self, {name:'header', overflow:'hidden'});
-            new SpacedLayout(header, {name:'xLayout', locked:true, collapseParent:true, spacing:self.columnSpacing});
-            new pkg.SizeToChildren(header, {name:'yLayout', locked:true, axis:'y'});
+            const header = self.header = new View(self, {overflow:'hidden'});
+            header.xLayout = new SpacedLayout(header, {locked:true, collapseParent:true, spacing:self.columnSpacing});
+            header.yLayout = new pkg.SizeToChildren(header, {locked:true, axis:'y'});
             
             const sizeHeightToRows = self.sizeHeightToRows,
                 contentMixins = isAutoScrolling ? [pkg.AutoScroller] : [],
-                content = new View(self, {name:'content', overflow:sizeHeightToRows ? 'hidden' : 'autoy'}, contentMixins);
-            new SpacedLayout(content, {name:'yLayout', locked:true, axis:'y', spacing:self.rowSpacing, collapseParent:sizeHeightToRows});
+                content = self.content = new View(self, {overflow:sizeHeightToRows ? 'hidden' : 'autoy'}, contentMixins);
+            content.yLayout = new SpacedLayout(content, {locked:true, axis:'y', spacing:self.rowSpacing, collapseParent:sizeHeightToRows});
             
             self.syncTo(self, 'setGridWidth', 'width');
             self.syncTo(header, '_updateContentWidth', 'width');
@@ -21337,8 +21334,8 @@ new JS.Singleton('GlobalMouse', {
             
             self.callSuper(parent, attrs);
             
-            new pkg.FontAwesome(self, {
-                name:'sortIcon', align:'right', alignOffset:3, valign:'middle', textColor:self.sortIconColor
+            self.sortIcon = new pkg.FontAwesome(self, {
+                align:'right', alignOffset:3, valign:'middle', textColor:self.sortIconColor
             }, [{
                 initNode: function(parent, attrs) {
                     this.callSuper(parent, attrs);
@@ -23432,11 +23429,9 @@ myt.Eventable = new JS.Class('Eventable', {
                 
                 this.callSuper(parent, attrs);
                 
-                new pkg.Text(this, {
-                    name:'_tipText', fontSize:'12px',
-                    x:this.insetH, y:this.insetV,
-                    textColor:this.tipTextColor,
-                    whiteSpace:'inherit'
+                this._tipText = new pkg.Text(this, {
+                    fontSize:'12px', x:this.insetH, y:this.insetV,
+                    textColor:this.tipTextColor, whiteSpace:'inherit'
                 });
             },
             

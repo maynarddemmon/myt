@@ -1,12 +1,11 @@
 (pkg => {
     const updateMonitoringSubview = (stc, sv, func) => {
-            const axis = stc.axis;
             func = func.bind(stc);
-            if (axis !== 'y') {
+            if (stc.axis !== 'y') {
                 func(sv, 'update', 'x');
                 func(sv, 'update', 'boundsWidth');
             }
-            if (axis !== 'x') {
+            if (stc.axis !== 'x') {
                 func(sv, 'update', 'y');
                 func(sv, 'update', 'boundsHeight');
             }
@@ -84,7 +83,8 @@
                 // Prevent inadvertent loops
                 this.incrementLockedCounter();
                 
-                if (!this.parent.isBeingDestroyed) {
+                const parent = this.parent;
+                if (!parent.isBeingDestroyed) {
                     const svs = this.subviews, 
                         len = svs.length,
                         axis = this.axis;
@@ -97,7 +97,7 @@
                             const sv = svs[--i];
                             if (sv.visible) max = Math.max(max, sv.x + (sv.boundsWidth > 0 ? sv.boundsWidth : 0));
                         }
-                        this.updateSize(max + this.paddingX, true);
+                        parent.setWidth(max + this.paddingX);
                     }
                     if (axis !== 'x') {
                         i = len;
@@ -106,7 +106,7 @@
                             const sv = svs[--i];
                             if (sv.visible) max = Math.max(max, sv.y + (sv.boundsHeight > 0 ? sv.boundsHeight : 0));
                         }
-                        this.updateSize(max + this.paddingY, false);
+                        parent.setHeight(max + this.paddingY);
                     }
                 }
                 
@@ -114,19 +114,15 @@
             }
         },
         
-        updateSize: function(v, isWidth) {
-            this.parent[isWidth ? 'setWidth' : 'setHeight'](v);
-        },
-        
         /** @overrides myt.Layout
-            Provides a default implementation that calls update when the visibility of a 
+            Provides a default implementation that calls update when the visibility or extent of a 
             subview changes. */
         startMonitoringSubview: function(sv) {
             updateMonitoringSubview(this, sv, this.attachTo);
         },
         
         /** @overrides myt.Layout
-            Provides a default implementation that calls update when the visibility of a 
+            Provides a default implementation that calls update when the visibility or extent of a 
             subview changes. */
         stopMonitoringSubview: function(sv) {
             updateMonitoringSubview(this, sv, this.detachFrom);

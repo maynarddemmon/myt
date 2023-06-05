@@ -283,7 +283,7 @@
             has no parent.
             @returns {!Object} - The root myt.Node. */
         getRoot: function() {
-            return this.parent ? this.parent.getRoot() : this;
+            return this.parent?.getRoot() ?? this;
         },
         
         /** Checks if this Node is a root Node.

@@ -4,9 +4,7 @@
         G = pkg.global,
         GlobalFocus = G.focus,
         
-        makeEmptyEvent = () => {
-            return {source:null, type:null, value:null};
-        },
+        makeEmptyEvent = () => ({source:null, type:null, value:null}),
         
         getCodeFromEvent = event => event.value.code,
         
@@ -43,7 +41,7 @@
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.DomObservable */
             createDomHandler: function(domObserver, methodName, type) {
-                return this.createStandardDomHandler(domObserver, methodName, type, KeyObservable) || 
+                return this.createStandardDomHandler(domObserver, methodName, type, KeyObservable) ?? 
                     this.callSuper(domObserver, methodName, type);
             }
         }),
@@ -94,7 +92,7 @@
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.DomObservable */
             createDomHandler: function(domObserver, methodName, type) {
-                return this.createStandardDomHandler(domObserver, methodName, type, MouseObservable, true) || 
+                return this.createStandardDomHandler(domObserver, methodName, type, MouseObservable, true) ?? 
                     this.callSuper(domObserver, methodName, type);
             }
         }),
@@ -129,7 +127,7 @@
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.DomObservable */
             createDomHandler: function(domObserver, methodName, type) {
-                return this.createStandardDomHandler(domObserver, methodName, type, ScrollObservable) || 
+                return this.createStandardDomHandler(domObserver, methodName, type, ScrollObservable) ?? 
                     this.callSuper(domObserver, methodName, type);
             }
         }),
@@ -158,7 +156,7 @@
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.DomObservable */
             createDomHandler: function(domObserver, methodName, type) {
-                return this.createStandardDomHandler(domObserver, methodName, type, TouchObservable, false) || 
+                return this.createStandardDomHandler(domObserver, methodName, type, TouchObservable, false) ?? 
                     this.callSuper(domObserver, methodName, type);
             }
         }),
@@ -425,7 +423,7 @@
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.DomObservable */
             createDomHandler: function(domObserver, methodName, type) {
-                return this.createStandardDomHandler(domObserver, methodName, type, InputObservable) || 
+                return this.createStandardDomHandler(domObserver, methodName, type, InputObservable) ?? 
                     this.callSuper(domObserver, methodName, type);
             }
         }),
@@ -454,7 +452,7 @@
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.DomObservable */
             createDomHandler: function(domObserver, methodName, type) {
-                return this.createStandardDomHandler(domObserver, methodName, type, DragDropObservable, true) || 
+                return this.createStandardDomHandler(domObserver, methodName, type, DragDropObservable, true) ?? 
                     this.callSuper(domObserver, methodName, type);
             }
         });
@@ -488,12 +486,12 @@
                     
                     // Lazy instantiate dom observers array for type and insert observer.
                     const domObservers = domObserversByType[type];
-                    if (!domObservers) {
-                        // Create list with observer
-                        domObserversByType[type] = [domObserver, methodName, methodRef, capture];
-                    } else {
+                    if (domObservers) {
                         // Add dom observer to the end of the list
                         domObservers.push(domObserver, methodName, methodRef, capture);
+                    } else {
+                        // Create list with observer
+                        domObserversByType[type] = [domObserver, methodName, methodRef, capture];
                     }
                     
                     pkg.addEventListener(this.getDomElementForDomObservable(type), type, methodRef, capture, passive);
@@ -629,8 +627,7 @@
                 capture = !!capture;
                 
                 // Lazy instantiate __dobt map.
-                const observablesByType = this.__dobt ??= {},
-                    observables = observablesByType[type] ??= [];
+                const observables = (this.__dobt ??= {})[type] ??= [];
                 
                 // Attach this DomObserver to the DomObservable
                 if (observable.attachDomObserver(this, methodName, type, capture, passive)) {

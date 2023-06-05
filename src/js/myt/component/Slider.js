@@ -261,7 +261,7 @@
         initNode: function(parent, attrs) {
             this.callSuper(parent, attrs);
             
-            const rangeFillView = new View(this, {name:'rangeFill', bgColor:'#666'});
+            const rangeFillView = this.rangeFill = new View(this, {bgColor:'#666'});
             if (this.axis === 'x') {
                 rangeFillView.setY(this.thumbOffset);
                 rangeFillView.setHeight(this.thumbHeight);
@@ -272,8 +272,8 @@
                 rangeFillView.setRoundedCorners(this.thumbWidth / 2);
             }
             
-            new SliderThumb(this, {name:'thumbLower'});
-            new SliderThumb(this, {name:'thumbUpper'});
+            this.thumbLower = new SliderThumb(this);
+            this.thumbUpper = new SliderThumb(this);
             
             this._syncRangeFillToValue();
         },
@@ -395,7 +395,7 @@
         initNode: function(parent, attrs) {
             this.callSuper(parent, attrs);
             
-            new SliderThumb(this, {name:'thumb'});
+            this.thumb = new SliderThumb(this);
         },
         
         

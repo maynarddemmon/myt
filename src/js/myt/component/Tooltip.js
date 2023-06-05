@@ -184,11 +184,9 @@
                 
                 this.callSuper(parent, attrs);
                 
-                new pkg.Text(this, {
-                    name:'_tipText', fontSize:'12px',
-                    x:this.insetH, y:this.insetV,
-                    textColor:this.tipTextColor,
-                    whiteSpace:'inherit'
+                this._tipText = new pkg.Text(this, {
+                    fontSize:'12px', x:this.insetH, y:this.insetV,
+                    textColor:this.tipTextColor, whiteSpace:'inherit'
                 });
             },
             

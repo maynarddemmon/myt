@@ -271,7 +271,6 @@
             // Build UI
             const textY = self.textY,
                 textAttrs = {
-                    name:'textView', 
                     whiteSpace: self.shrinkToFit ? 'nowrap' : 'normal', 
                     text:self.text,
                     domClass:'myt-Text mytButtonText'
@@ -281,7 +280,7 @@
             } else {
                 textAttrs.y = textY;
             }
-            const textView = new pkg.Text(self, textAttrs);
+            const textView = self.textView = new pkg.Text(self, textAttrs);
             
             // Setup the constraint after adoption since the textView won't have been sized to the 
             // dom until it's added in.

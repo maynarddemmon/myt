@@ -488,13 +488,13 @@
         /** @overrides myt.View */
         initNode: function(parent, attrs) {
             const self = this;
-            let isDraggable = true;
             
             self.isDraggable = self.isDragging = false;
             self.draggableAllowBubble = true;
             self.distanceBeforeDrag = self.dragOffsetX = self.dragOffsetY = 0;
             
             // Will be set after init since the draggable subview probably doesn't exist yet.
+            let isDraggable = true;
             if (attrs.isDraggable != null) {
                 isDraggable = attrs.isDraggable;
                 delete attrs.isDraggable;

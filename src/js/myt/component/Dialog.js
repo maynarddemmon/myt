@@ -848,8 +848,7 @@
                 @param {!Object} targetView - The myt.View to create the button on.
                 @returns {!Object} - The created myt.Button. */
             makeCloseButton: function(targetView) {
-                return this.makeButton(targetView, {
-                    name:'closeBtn',
+                return targetView.closeBtn = this.makeButton(targetView, {
                     ignoreLayout:true,
                     y:2,
                     align:'right',
@@ -954,8 +953,7 @@
                 
                 self.setCallbackFunction(callbackFunction);
                 
-                const msgView = new Text(content, {
-                    name:'msg',
+                const msgView = content.msg = new Text(content, {
                     text:msg,
                     whiteSpace:opts.whiteSpace,
                     wordWrap:opts.wordWrap,
@@ -998,8 +996,8 @@
                 content.sizeToChildren.setPaddingX(1);
                 self.setCallbackFunction(callbackFunction);
                 
-                const contentContainer = new View(content, {
-                    name:'contentContainer', x:1, y:25, overflow:'auto'
+                const contentContainer = content.contentContainer = new View(content, {
+                    x:1, y:25, overflow:'auto'
                 }, [{
                     setHeight: function(v) {
                         if (v > maxHeight) v = maxHeight;
@@ -1050,8 +1048,8 @@
                 self.setCallbackFunction(callbackFunction);
                 
                 // Setup form
-                const contentContainer = new View(content, {
-                    name:'contentContainer', x:1, y:25, overflow:'auto'
+                const contentContainer = content.contentContainer = new View(content, {
+                    x:1, y:25, overflow:'auto'
                 }, [{
                     setHeight: function(v) {
                         this.callSuper(v > maxHeight ? maxHeight : v);
@@ -1206,7 +1204,7 @@
                     roundedTopLeftCorner:radius,
                     roundedTopRightCorner:radius
                 })).sendToBack();
-                new Text(content, {name:'title', x:radius, y:4, text:titleTxt, fontWeight:'bold'});
+                content.title = new Text(content, {x:radius, y:4, text:titleTxt, fontWeight:'bold'});
             },
             
             /** @private 
@@ -1218,7 +1216,7 @@
                     content = self.content, 
                     DPY = ModalPanel.PADDING_Y,
                     HALF_DPY = DPY / 2,
-                    btnContainer = new View(content, {name:'btnContainer', y:mainView.y + mainView.height + DPY, align:'center'}),
+                    btnContainer = content.btnContainer = new View(content, {y:mainView.y + mainView.height + DPY, align:'center'}),
                     btnConfigKeys = ['active','hover','ready','text'];
                 
                 // Cancel Button

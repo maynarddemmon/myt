@@ -839,14 +839,14 @@
             self.callSuper(parent, attrs);
             
             // Build UI
-            const header = new View(self, {name:'header', overflow:'hidden'});
-            new SpacedLayout(header, {name:'xLayout', locked:true, collapseParent:true, spacing:self.columnSpacing});
-            new pkg.SizeToChildren(header, {name:'yLayout', locked:true, axis:'y'});
+            const header = self.header = new View(self, {overflow:'hidden'});
+            header.xLayout = new SpacedLayout(header, {locked:true, collapseParent:true, spacing:self.columnSpacing});
+            header.yLayout = new pkg.SizeToChildren(header, {locked:true, axis:'y'});
             
             const sizeHeightToRows = self.sizeHeightToRows,
                 contentMixins = isAutoScrolling ? [pkg.AutoScroller] : [],
-                content = new View(self, {name:'content', overflow:sizeHeightToRows ? 'hidden' : 'autoy'}, contentMixins);
-            new SpacedLayout(content, {name:'yLayout', locked:true, axis:'y', spacing:self.rowSpacing, collapseParent:sizeHeightToRows});
+                content = self.content = new View(self, {overflow:sizeHeightToRows ? 'hidden' : 'autoy'}, contentMixins);
+            content.yLayout = new SpacedLayout(content, {locked:true, axis:'y', spacing:self.rowSpacing, collapseParent:sizeHeightToRows});
             
             self.syncTo(self, 'setGridWidth', 'width');
             self.syncTo(header, '_updateContentWidth', 'width');
@@ -1002,8 +1002,8 @@
             
             self.callSuper(parent, attrs);
             
-            new pkg.FontAwesome(self, {
-                name:'sortIcon', align:'right', alignOffset:3, valign:'middle', textColor:self.sortIconColor
+            self.sortIcon = new pkg.FontAwesome(self, {
+                align:'right', alignOffset:3, valign:'middle', textColor:self.sortIconColor
             }, [{
                 initNode: function(parent, attrs) {
                     this.callSuper(parent, attrs);

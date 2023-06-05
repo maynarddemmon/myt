@@ -152,8 +152,7 @@
                 
                 this.callSuper(parent, attrs);
                 
-                new pkg.SpacedLayout(this, {
-                    name:'layout',
+                this.layout = new pkg.SpacedLayout(this, {
                     axis:this.location === 'left' || this.location === 'right' ? 'y' : 'x',
                     spacing:this.spacing,
                     inset:this.inset,
