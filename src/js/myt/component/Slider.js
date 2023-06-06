@@ -5,12 +5,10 @@
         mathMin = math.min,
         mathMax = math.max,
         
-        GlobalKeys = pkg.global.keys,
-        
         View = pkg.View,
         
         SliderThumb = new JSClass('SliderThumb', pkg.SimpleButton, {
-            include: [pkg.Draggable],
+            include: [pkg.Draggable, pkg.ArrowKeyActivation],
             
             
             // Life Cycle //////////////////////////////////////////////////////
@@ -19,7 +17,7 @@
                     height = attrs.height = parent.thumbHeight;
                 attrs.roundedCorners = mathMin(height, width) / 2;
                 attrs.repeatKeyDown = true;
-                attrs.activationKeys = GlobalKeys.ARROW_KEYS;
+                attrs.activationKeys = pkg.global.keys.ARROW_KEYS;
                 attrs.activeColor = '#bbb';
                 attrs.readyColor = '#ccc';
                 attrs.hoverColor = '#ddd';
@@ -91,24 +89,24 @@
                 }
             },
             
-            /** @overrides myt.Button. */
-            doActivationKeyDown: function(code, isRepeat) {
-                const parent = this.parent;
-                switch (code) {
-                    case GlobalKeys.CODE_ARROW_LEFT:
-                        parent.nudgeValueLeft(this);
-                        break;
-                    case GlobalKeys.CODE_ARROW_UP:
-                        parent.nudgeValueUp(this);
-                        break;
-                    case GlobalKeys.CODE_ARROW_RIGHT:
-                        parent.nudgeValueRight(this);
-                        break;
-                    case GlobalKeys.CODE_ARROW_DOWN:
-                        parent.nudgeValueDown(this);
-                        break;
+            /** @overrides myt.ArrowKeyActivation. */
+            doKeyArrowLeftOrUp: function(isLeft, isRepeat) {
+                if (isLeft) {
+                    this.parent.nudgeValueLeft(this);
+                } else {
+                    this.parent.nudgeValueUp(this);
                 }
-                this.callSuper(code, isRepeat);
+                return true;
+            },
+            
+            /** @overrides myt.ArrowKeyActivation. */
+            doKeyArrowRightOrDown: function(isRight, isRepeat) {
+                if (isRight) {
+                    this.parent.nudgeValueRight(this);
+                } else {
+                    this.parent.nudgeValueDown(this);
+                }
+                return true;
             }
         }),
         
@@ -486,7 +484,7 @@
         /** @overrides */
         setWidth: function(v, suppressEvent) {
             this.callSuper(v, suppressEvent);
-            if (this.labelTxt) this.labelTxt.updateX(true);
+            this.labelTxt?.updateX(true);
         },
         
         setText: function(event, noAnim) {

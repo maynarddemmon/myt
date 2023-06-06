@@ -158,7 +158,7 @@
                     ) {
                         // Stop animation since loop count exceeded repeat count.
                         animator.setRunning(false);
-                        if (animator.callback) animator.callback.call(animator, true);
+                        animator.callback?.call(animator, true);
                     } else if (remainderTime > 0) {
                         // Advance again if time is remaining. This occurs when the timeDiff 
                         // provided was greater than the animation duration and the animation loops.
@@ -171,7 +171,7 @@
                 } else {
                     console.log('No target for animator', animator);
                     animator.setRunning(false);
-                    if (animator.callback) animator.callback.call(animator, false);
+                    animator.callback?.call(animator, false);
                 }
             }
         };
@@ -357,7 +357,7 @@
             self.setRunning(false);
             self.setPaused(false);
             
-            if (executeCallback && self.callback) self.callback.call(self, false);
+            if (executeCallback) self.callback?.call(self, false);
         },
         
         /** @overrides myt.Reusable */

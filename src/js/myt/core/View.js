@@ -1131,7 +1131,7 @@
                 self.getIDE().appendChild(fragment);
                 
                 // Put this dom element back in the dom
-                if (parentElem) parentElem.insertBefore(outerElem, nextDe);
+                parentElem?.insertBefore(outerElem, nextDe);
                 
                 self.doSubviewsReorderedInDom(null);
             });

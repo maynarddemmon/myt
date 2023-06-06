@@ -3395,7 +3395,7 @@ new JS.Singleton('GlobalError', {
                         // See myt.VariableLayout for more detail.
                         if (self._ignoreFocus) {
                             domEvent.cancelBubble = true;
-                            if (domEvent.stopPropagation) domEvent.stopPropagation();
+                            domEvent.stopPropagation?.();
                             domEvent.preventDefault();
                             return;
                         }
@@ -3409,7 +3409,7 @@ new JS.Singleton('GlobalError', {
                         const allowBubble = domObserver[methodName](event);
                         if (!allowBubble) {
                             domEvent.cancelBubble = true;
-                            if (domEvent.stopPropagation) domEvent.stopPropagation();
+                            domEvent.stopPropagation?.();
                         }
                         
                         event.source = undefined;
@@ -3563,7 +3563,7 @@ new JS.Singleton('GlobalError', {
                     // returned false.
                     if (!domObserver[methodName](event)) {
                         domEvent.cancelBubble = true;
-                        if (domEvent.stopPropagation) domEvent.stopPropagation();
+                        domEvent.stopPropagation?.();
                         if (preventDefault) domEvent.preventDefault();
                     }
                     
@@ -3830,7 +3830,7 @@ new JS.Singleton('GlobalError', {
             });
             
             globalKeys.ARROW_KEYS = [globalKeys.CODE_ARROW_LEFT, globalKeys.CODE_ARROW_UP, globalKeys.CODE_ARROW_RIGHT, globalKeys.CODE_ARROW_DOWN];
-            (globalKeys.LIST_KEYS = [globalKeys.CODE_ENTER, globalKeys.CODE_SPACE, globalKeys.CODE_ESC]).push(...globalKeys.ARROW_KEYS);
+            globalKeys.LIST_KEYS = [globalKeys.CODE_ENTER, globalKeys.CODE_SPACE, globalKeys.CODE_ESC, ...globalKeys.ARROW_KEYS];
             
             
             globalKeys.setDomElement(document);
@@ -4779,7 +4779,7 @@ new JS.Singleton('GlobalTouch', {
             // Generic Setter
             if (self[attrName] !== v) {
                 self[attrName] = v;
-                if (self.inited !== false && self.fireEvent) self.fireEvent(attrName, v); // !== false allows this to work with non-nodes.
+                if (self.inited !== false) self?.fireEvent(attrName, v); // !== false allows this to work with non-nodes.
             }
         }
     });
@@ -7688,7 +7688,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 self.getIDE().appendChild(fragment);
                 
                 // Put this dom element back in the dom
-                if (parentElem) parentElem.insertBefore(outerElem, nextDe);
+                parentElem?.insertBefore(outerElem, nextDe);
                 
                 self.doSubviewsReorderedInDom(null);
             });
@@ -9861,7 +9861,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     ) {
                         // Stop animation since loop count exceeded repeat count.
                         animator.setRunning(false);
-                        if (animator.callback) animator.callback.call(animator, true);
+                        animator.callback?.call(animator, true);
                     } else if (remainderTime > 0) {
                         // Advance again if time is remaining. This occurs when the timeDiff 
                         // provided was greater than the animation duration and the animation loops.
@@ -9874,7 +9874,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 } else {
                     console.log('No target for animator', animator);
                     animator.setRunning(false);
-                    if (animator.callback) animator.callback.call(animator, false);
+                    animator.callback?.call(animator, false);
                 }
             }
         };
@@ -10060,7 +10060,7 @@ myt.Destructible = new JS.Module('Destructible', {
             self.setRunning(false);
             self.setPaused(false);
             
-            if (executeCallback && self.callback) self.callback.call(self, false);
+            if (executeCallback) self.callback?.call(self, false);
         },
         
         /** @overrides myt.Reusable */
@@ -10908,10 +10908,9 @@ new JS.Singleton('GlobalMouse', {
             @returns {undefined} */
         doDisabled: function() {
             if (this.inited) {
-                // Give away focus if we become disabled and this instance 
-                // is a FocusObservable
-                if (this.disabled && this.giveAwayFocus) this.giveAwayFocus();
-                if (this.updateUI) this.updateUI();
+                // Give away focus if we become disabled and this instance is a FocusObservable
+                if (this.disabled) this.giveAwayFocus?.();
+                this.updateUI?.();
             }
         }
     });
@@ -11045,14 +11044,14 @@ new JS.Singleton('GlobalMouse', {
         },
         
         /** Called when an activation key is pressed down. Default implementation does nothing.
-            @param code:string the key code that is down.
-            @param isRepeat:boolean Indicates if this is a key repeat event or not.
+            @param code:string - The key code that is down.
+            @param isRepeat:boolean - Indicates if this is a key repeat event or not.
             @returns {undefined} */
         doActivationKeyDown: (code, isRepeat) => {/* Subclasses to implement as needed. */},
         
         /** Called when an activation key is release up. This executes the "doActivated" method 
             by default. 
-            @param code:string the keycode that is up.
+            @param code:string - The keycode that is up.
             @returns {undefined} */
         doActivationKeyUp: function(code) {
             this.doActivated();
@@ -11060,10 +11059,44 @@ new JS.Singleton('GlobalMouse', {
         
         /** Called when focus is lost while an activation key is down. Default implementation 
             does nothing.
-            @param code:string the keycode that is down.
+            @param code:string - The keycode that is down.
             @returns {undefined} */
         doActivationKeyAborted: code => {/* Subclasses to implement as needed. */}
     });
+    
+    pkg.ArrowKeyActivation = new JSModule('KeyActivation', {
+        /** @overrides myt.KeyActivation. */
+        doActivationKeyDown: function(code, isRepeat) {
+            switch (code) {
+                case GlobalKeys.CODE_ARROW_LEFT: 
+                    if (this.doKeyArrowLeftOrUp(true, isRepeat)) return;
+                    break;
+                case GlobalKeys.CODE_ARROW_UP: 
+                    if (this.doKeyArrowLeftOrUp(false, isRepeat)) return;
+                    break;
+                case GlobalKeys.CODE_ARROW_RIGHT: 
+                    if (this.doKeyArrowRightOrDown(true, isRepeat)) return;
+                    break;
+                case GlobalKeys.CODE_ARROW_DOWN: 
+                    if (this.doKeyArrowRightOrDown(false, isRepeat)) return;
+                    break;
+            }
+            
+            this.callSuper(code, isRepeat);
+        },
+        
+        /** Called when the Left or Up arrow key triggers a down event.
+            @param {boolean} isLeft - Indicates if the Left or Up key triggered the event.
+            @param isRepeat:boolean Indicates if this is a key repeat event or not.
+            @returns {boolean} If true doActivationKeyDown will not callSuper. */
+        doKeyArrowLeftOrUp: (isLeft, isRepeat) => {/* Subclasses to implement as needed. */},
+        
+        /** Called when the Right or Down arrow key triggers a down event.
+            @param {boolean} isRight - Indicates if the Right or Down key triggered the event.
+            @param isRepeat:boolean - Indicates if this is a key repeat event or not.
+            @returns {boolean} If true doActivationKeyDown will not callSuper. */
+        doKeyArrowRightOrDown: (isRight, isRepeat) => {/* Subclasses to implement as needed. */}
+    }),
     
     /** Provides a 'mouseOver' attribute that tracks mouse over/out state. Also provides a 
         mechanism to smoothe over/out events so only one call to 'doSmoothMouseOver' occurs per 
@@ -11151,7 +11184,7 @@ new JS.Singleton('GlobalMouse', {
             @param {boolean} isOver
             @returns {undefined} */
         doSmoothMouseOver: function(isOver) {
-            if (this.inited && this.updateUI) this.updateUI();
+            if (this.inited) this.updateUI?.();
         },
         
         /** Called when the mouse is over this view. Subclasses must call super.
@@ -11203,7 +11236,7 @@ new JS.Singleton('GlobalMouse', {
                 // No event needed
                 if (this.inited) {
                     if (v && this.isFocusable()) this.focus(true);
-                    if (this.updateUI) this.updateUI();
+                    this.updateUI?.();
                 }
             }
         },
@@ -11265,7 +11298,7 @@ new JS.Singleton('GlobalMouse', {
             @param {!Object} event
             @returns {undefined} */
         doMouseUpInside: function(event) {
-            if (this.doActivated) this.doActivated();
+            this.doActivated?.();
         }
     });
     
@@ -11992,7 +12025,7 @@ new JS.Singleton('GlobalMouse', {
             
             toggleFloatingPanel: function(panelId) {
                 const fp = this.getFloatingPanel(panelId ??= this.floatingPanelId);
-                if (fp && fp.isShown()) {
+                if (fp?.isShown()) {
                     this.hideFloatingPanel(panelId);
                 } else {
                     this.showFloatingPanel(panelId);
@@ -12020,7 +12053,7 @@ new JS.Singleton('GlobalMouse', {
                 @returns {undefined} */
             notifyPanelShown: function(panel) {
                 // Subclasses to implement as needed.
-                if (this.callSuper) this.callSuper();
+                this.callSuper?.();
             },
             
             /** Called when a floating panel has been hidden for this anchor.
@@ -12028,7 +12061,7 @@ new JS.Singleton('GlobalMouse', {
                 @returns {undefined} */
             notifyPanelHidden: function(panel) {
                 // Subclasses to implement as needed.
-                if (this.callSuper) this.callSuper();
+                this.callSuper?.();
             },
             
             /** Called by the FloatingPanel to determine where to position itself horizontally. By 
@@ -12073,7 +12106,7 @@ new JS.Singleton('GlobalMouse', {
             getNextFocus: function() {
                 const last = this.lastFloatingPanelShown;
                 if (last?.isShown()) return last;
-                if (this.callSuper) return this.callSuper();
+                return this.callSuper?.();
             },
             
             /** Called by the floating panel owned by this anchor to determine where to go to next 
@@ -12244,7 +12277,7 @@ new JS.Singleton('GlobalMouse', {
         /** Sends the focus back to the owner. Can be overridden to send the focus elsewhere.
             @returns {undefined} */
         restoreFocus: function() {
-            if (this.owner) this.owner.focus();
+            this.owner?.focus();
         },
         
         /** Updates the x and y position of the floating panel for the provided floating 
@@ -12548,7 +12581,7 @@ new JS.Singleton('GlobalMouse', {
         
         @class */
     pkg.ListViewAnchor = new JSModule('ListViewAnchor', {
-        include: [pkg.FloatingPanelAnchor],
+        include: [pkg.FloatingPanelAnchor, pkg.ArrowKeyActivation],
         
         
         // Life Cycle //////////////////////////////////////////////////////////
@@ -12628,18 +12661,18 @@ new JS.Singleton('GlobalMouse', {
                 this.hideFloatingPanel();
             } else {
                 // Select first/last if the list view is already open
-                switch (code) {
-                    case GlobalKeys.CODE_ARROW_LEFT:
-                    case GlobalKeys.CODE_ARROW_UP:
-                        this.focusToLastItem();
-                        break;
-                    case GlobalKeys.CODE_ARROW_RIGHT:
-                    case GlobalKeys.CODE_ARROW_DOWN:
-                        this.focusToFirstItem();
-                        break;
-                }
                 this.callSuper(code, isRepeat);
             }
+        },
+        
+        /** @overrides myt.ArrowKeyActivation. */
+        doKeyArrowLeftOrUp: function(isLeft, isRepeat) {
+            this.focusToLastItem();
+        },
+        
+        /** @overrides myt.ArrowKeyActivation. */
+        doKeyArrowRightOrDown: function(isRight, isRepeat) {
+            this.focusToFirstItem();
         },
         
         /** @overrides myt.KeyActivation. */
@@ -12664,12 +12697,12 @@ new JS.Singleton('GlobalMouse', {
         
         focusToLastItem: function() {
             const fp = this.getFloatingPanel();
-            if (fp && fp.isShown()) fp.focusToLastItem();
+            if (fp?.isShown()) fp.focusToLastItem();
         },
         
         focusToFirstItem: function() {
             const fp = this.getFloatingPanel();
-            if (fp && fp.isShown()) fp.focusToFirstItem();
+            if (fp?.isShown()) fp.focusToFirstItem();
         },
         
         // List Manipulation
@@ -12696,7 +12729,7 @@ new JS.Singleton('GlobalMouse', {
         
         @class */
     pkg.ListViewItem = new JSClass('ListViewItem', pkg.TextButton, {
-        include: [ListViewItemMixin],
+        include: [ListViewItemMixin, pkg.ArrowKeyActivation],
         
         
         // Life Cycle //////////////////////////////////////////////////////////
@@ -12746,21 +12779,21 @@ new JS.Singleton('GlobalMouse', {
         
         /** @overrides myt.KeyActivation. */
         doActivationKeyDown: function(code, isRepeat) {
-            switch (code) {
-                case GlobalKeys.CODE_ESC:
-                    this.listView.owner.hideFloatingPanel();
-                    return;
-                case GlobalKeys.CODE_ARROW_LEFT:
-                case GlobalKeys.CODE_ARROW_UP:
-                    GlobalFocus.prev();
-                    break;
-                case GlobalKeys.CODE_ARROW_RIGHT:
-                case GlobalKeys.CODE_ARROW_DOWN:
-                    GlobalFocus.next();
-                    break;
+            if (code === GlobalKeys.CODE_ESC) {
+                this.listView.owner.hideFloatingPanel();
+            } else {
+                this.callSuper(code, isRepeat);
             }
-            
-            this.callSuper(code, isRepeat);
+        },
+        
+        /** @overrides myt.ArrowKeyActivation. */
+        doKeyArrowLeftOrUp: function(isLeft, isRepeat) {
+            GlobalFocus.prev();
+        },
+        
+        /** @overrides myt.ArrowKeyActivation. */
+        doKeyArrowRightOrDown: function(isRight, isRepeat) {
+            GlobalFocus.next();
         }
     });
     
@@ -13093,7 +13126,7 @@ new JS.Singleton('GlobalMouse', {
             
             if (this.selected) {
                 const bag = getBooleanAttributeGroup(this);
-                if (bag) bag.setTrue(this);
+                bag?.setTrue(this);
             }
             
             pkg.FontAwesome.registerForNotification(this);
@@ -19557,12 +19590,10 @@ new JS.Singleton('GlobalMouse', {
         mathMin = math.min,
         mathMax = math.max,
         
-        GlobalKeys = pkg.global.keys,
-        
         View = pkg.View,
         
         SliderThumb = new JSClass('SliderThumb', pkg.SimpleButton, {
-            include: [pkg.Draggable],
+            include: [pkg.Draggable, pkg.ArrowKeyActivation],
             
             
             // Life Cycle //////////////////////////////////////////////////////
@@ -19571,7 +19602,7 @@ new JS.Singleton('GlobalMouse', {
                     height = attrs.height = parent.thumbHeight;
                 attrs.roundedCorners = mathMin(height, width) / 2;
                 attrs.repeatKeyDown = true;
-                attrs.activationKeys = GlobalKeys.ARROW_KEYS;
+                attrs.activationKeys = pkg.global.keys.ARROW_KEYS;
                 attrs.activeColor = '#bbb';
                 attrs.readyColor = '#ccc';
                 attrs.hoverColor = '#ddd';
@@ -19643,24 +19674,24 @@ new JS.Singleton('GlobalMouse', {
                 }
             },
             
-            /** @overrides myt.Button. */
-            doActivationKeyDown: function(code, isRepeat) {
-                const parent = this.parent;
-                switch (code) {
-                    case GlobalKeys.CODE_ARROW_LEFT:
-                        parent.nudgeValueLeft(this);
-                        break;
-                    case GlobalKeys.CODE_ARROW_UP:
-                        parent.nudgeValueUp(this);
-                        break;
-                    case GlobalKeys.CODE_ARROW_RIGHT:
-                        parent.nudgeValueRight(this);
-                        break;
-                    case GlobalKeys.CODE_ARROW_DOWN:
-                        parent.nudgeValueDown(this);
-                        break;
+            /** @overrides myt.ArrowKeyActivation. */
+            doKeyArrowLeftOrUp: function(isLeft, isRepeat) {
+                if (isLeft) {
+                    this.parent.nudgeValueLeft(this);
+                } else {
+                    this.parent.nudgeValueUp(this);
                 }
-                this.callSuper(code, isRepeat);
+                return true;
+            },
+            
+            /** @overrides myt.ArrowKeyActivation. */
+            doKeyArrowRightOrDown: function(isRight, isRepeat) {
+                if (isRight) {
+                    this.parent.nudgeValueRight(this);
+                } else {
+                    this.parent.nudgeValueDown(this);
+                }
+                return true;
             }
         }),
         
@@ -20038,7 +20069,7 @@ new JS.Singleton('GlobalMouse', {
         /** @overrides */
         setWidth: function(v, suppressEvent) {
             this.callSuper(v, suppressEvent);
-            if (this.labelTxt) this.labelTxt.updateX(true);
+            this.labelTxt?.updateX(true);
         },
         
         setText: function(event, noAnim) {
@@ -20096,7 +20127,7 @@ new JS.Singleton('GlobalMouse', {
             
             @class */
         BaseDivider = new JSClass('BaseDivider', pkg.SimpleButton, {
-            include: [pkg.BoundedValueComponent, pkg.Draggable],
+            include: [pkg.BoundedValueComponent, pkg.Draggable, pkg.ArrowKeyActivation],
             
             
             // Life Cycle //////////////////////////////////////////////////////
@@ -20112,7 +20143,7 @@ new JS.Singleton('GlobalMouse', {
                 attrs.expansionState ??= STATE_RESTORED_JUST_EXPANDED;
                 attrs.focusIndicator ??= false;
                 attrs.repeatKeyDown ??= true;
-                attrs.activationKeys ??= [GlobalKeys.CODE_ARROW_LEFT, GlobalKeys.CODE_ARROW_UP, GlobalKeys.CODE_ARROW_RIGHT, GlobalKeys.CODE_ARROW_DOWN, GlobalKeys.CODE_ENTER, GlobalKeys.CODE_SPACE];
+                attrs.activationKeys ??= [GlobalKeys.CODE_ENTER, GlobalKeys.CODE_SPACE, ...GlobalKeys.ARROW_KEYS];
                 
                 if (attrs.axis === 'y') {
                     attrs.height ??= 6;
@@ -20198,37 +20229,42 @@ new JS.Singleton('GlobalMouse', {
                 self.setMaxValue(self.parent[dim] - self.limitToParent - self[dim]);
             },
             
-            /** Nudge the divider when the arrow keys are used. Nudging accelerates up to a limit 
-                if the key is held down.
-                @overrides myt.Button. */
+            /** @overrides myt.Button. */
             doActivationKeyDown: function(key, isRepeat) {
-                const self = this;
+                this.callSuper(key, isRepeat);
                 
-                self.callSuper(key, isRepeat);
-                
-                // Determine nudge direction
-                let dir = 0;
                 switch (key) {
-                    case GlobalKeys.CODE_ARROW_UP:
-                    case GlobalKeys.CODE_ARROW_LEFT:
-                        dir = -1;
-                        break;
-                    case GlobalKeys.CODE_ARROW_DOWN:
-                    case GlobalKeys.CODE_ARROW_RIGHT:
-                        dir = 1;
-                        break;
                     case GlobalKeys.CODE_ENTER:
                     case GlobalKeys.CODE_SPACE:
-                    default:
-                        self.doPrimaryAction();
-                        return;
+                        this.doPrimaryAction();
                 }
+            },
+            
+            /** @overrides myt.ArrowKeyActivation. */
+            doKeyArrowLeftOrUp: function(isLeft, isRepeat) {
+                return this.nudge(false, isRepeat);
+            },
+            
+            /** @overrides myt.ArrowKeyActivation. */
+            doKeyArrowRightOrDown: function(isRight, isRepeat) {
+                return this.nudge(true, isRepeat);
+            },
+            
+            /** Nudge the divider when the arrow keys are used. Nudging accelerates up to a limit 
+                if the key is held down.
+                @param {boolean} direction - When true indicates right/down.
+                @param {boolean} isRepeat - Indicates if this is the result of a repeated key event.
+                @returns {boolean}  */
+            nudge: function(direction, isRepeat) {
+                const self = this;
                 
                 // Update nudge amount, but never nudge more than 64.
                 self.__nudgeAcc = isRepeat ? Math.min(self.__nudgeAcc + 1, 64) : 1;
                 
-                self.setValue(self.value + dir * self.__nudgeAcc, true);
+                self.setValue(self.value + (direction ? 1 : -1) * self.__nudgeAcc, true);
                 self.setExpansionState(STATE_RESTORED_JUST_EXPANDED);
+                
+                return true;
             },
             
             doPrimaryAction: function() {
@@ -21737,7 +21773,7 @@ new JS.Singleton('GlobalMouse', {
                 // Clear or reassign focus since the row will get reused and the reused row will 
                 // likely not be the appropriate focus.
                 const currentFocus = GlobalFocus.focusedView;
-                if (currentFocus && currentFocus.isDescendantOf(row)) {
+                if (currentFocus?.isDescendantOf(row)) {
                     const focusTrap = this.getFocusTrap();
                     if (focusTrap) {
                         focusTrap.focus();
@@ -21832,7 +21868,7 @@ new JS.Singleton('GlobalMouse', {
             
             @class */
         SimpleSelectableInfiniteListRow = pkg.SimpleSelectableInfiniteListRow = new JSClass('SimpleSelectableInfiniteListRow', pkg.SimpleButton, {
-            include: [SelectableInfiniteListRow],
+            include: [SelectableInfiniteListRow, pkg.ArrowKeyActivation],
             
             
             // Life Cycle //////////////////////////////////////////////////////
@@ -21879,21 +21915,23 @@ new JS.Singleton('GlobalMouse', {
             },
             
             doActivationKeyDown: function(code, isRepeat) {
-                const owner = this.infiniteOwner,
-                    model = this.model;
-                switch (code) {
-                    case GlobalKeys.CODE_ESC:
-                        if (this.selected) owner.setSelectedRow();
-                        break;
-                    case GlobalKeys.CODE_ARROW_LEFT:
-                    case GlobalKeys.CODE_ARROW_UP:
-                        owner.selectPrevRowForModel(model);
-                        break;
-                    case GlobalKeys.CODE_ARROW_RIGHT:
-                    case GlobalKeys.CODE_ARROW_DOWN:
-                        owner.selectNextRowForModel(model);
-                        break;
+                if (code === GlobalKeys.CODE_ESC) {
+                    if (this.selected) this.infiniteOwner.setSelectedRow();
+                } else {
+                    this.callSuper(code, isRepeat);
                 }
+            },
+            
+            /** @overrides myt.ArrowKeyActivation. */
+            doKeyArrowLeftOrUp: function(isLeft, isRepeat) {
+                this.infiniteOwner.selectPrevRowForModel(this.model);
+                return true;
+            },
+            
+            /** @overrides myt.ArrowKeyActivation. */
+            doKeyArrowRightOrDown: function(isRight, isRepeat) {
+                this.infiniteOwner.selectNextRowForModel(this.model);
+                return true;
             },
             
             doActivationKeyUp: function(code) {
@@ -21919,7 +21957,7 @@ new JS.Singleton('GlobalMouse', {
             setSelectedRow: function(row) {
                 const existing = this.selectedRow;
                 if (row !== existing) {
-                    if (existing) existing.setSelected(false);
+                    existing?.setSelected(false);
                     this.setSelectedRowModel();
                     this.set('selectedRow', row, true);
                     if (row) {
@@ -21949,10 +21987,7 @@ new JS.Singleton('GlobalMouse', {
                     this.refreshListUI();
                     
                     // Focus on the newly selected row
-                    if (focus) {
-                        const row = this.getActiveSelectedRow();
-                        if (row) row.focus();
-                    }
+                    if (focus) this.getActiveSelectedRow()?.focus();
                 }
             },
             
@@ -22002,26 +22037,22 @@ new JS.Singleton('GlobalMouse', {
         InfiniteGridRowMixin = new JSModule('InfiniteGridRowMixin', {
             // Methods /////////////////////////////////////////////////////////
             notifyXChange: function(columnHeader) {
-                const sv = getSubview(this, columnHeader);
-                if (sv) sv.setX(columnHeader.x + columnHeader.cellXAdj);
+                getSubview(this, columnHeader)?.setX(columnHeader.x + columnHeader.cellXAdj);
             },
             
             notifyWidthChange: function(columnHeader) {
-                const sv = getSubview(this, columnHeader);
-                if (sv) sv.setWidth(columnHeader.width + columnHeader.cellWidthAdj);
+                getSubview(this, columnHeader)?.setWidth(columnHeader.width + columnHeader.cellWidthAdj);
             },
             
             notifyVisibilityChange: function(columnHeader) {
-                const sv = getSubview(this, columnHeader);
-                if (sv) sv.setVisible(columnHeader.visible);
+                getSubview(this, columnHeader)?.setVisible(columnHeader.visible);
             }
         }),
         
         InfiniteGridMixin = new JSModule('InfiniteGridMixin', {
             // Accessors ///////////////////////////////////////////////////////
             setGridHeader: function(v) {
-                this.gridHeader = v;
-                if (v) v.setGrid(this);
+                (this.gridHeader = v)?.setGrid(this);
             },
             
             
@@ -22045,13 +22076,11 @@ new JS.Singleton('GlobalMouse', {
             
             /** @overrides myt.InfiniteList */
             updateRow: function(row) {
-                if (this.gridHeader) {
-                    this.gridHeader.columnHeaders.forEach(hdr => {
-                        row.notifyXChange(hdr);
-                        row.notifyWidthChange(hdr);
-                        row.notifyVisibilityChange(hdr);
-                    });
-                }
+                this.gridHeader?.columnHeaders.forEach(hdr => {
+                    row.notifyXChange(hdr);
+                    row.notifyWidthChange(hdr);
+                    row.notifyVisibilityChange(hdr);
+                });
             },
             
             notifyXChange: function(columnHeader) {

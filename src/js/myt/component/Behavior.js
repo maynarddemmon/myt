@@ -85,10 +85,9 @@
             @returns {undefined} */
         doDisabled: function() {
             if (this.inited) {
-                // Give away focus if we become disabled and this instance 
-                // is a FocusObservable
-                if (this.disabled && this.giveAwayFocus) this.giveAwayFocus();
-                if (this.updateUI) this.updateUI();
+                // Give away focus if we become disabled and this instance is a FocusObservable
+                if (this.disabled) this.giveAwayFocus?.();
+                this.updateUI?.();
             }
         }
     });
@@ -222,14 +221,14 @@
         },
         
         /** Called when an activation key is pressed down. Default implementation does nothing.
-            @param code:string the key code that is down.
-            @param isRepeat:boolean Indicates if this is a key repeat event or not.
+            @param code:string - The key code that is down.
+            @param isRepeat:boolean - Indicates if this is a key repeat event or not.
             @returns {undefined} */
         doActivationKeyDown: (code, isRepeat) => {/* Subclasses to implement as needed. */},
         
         /** Called when an activation key is release up. This executes the "doActivated" method 
             by default. 
-            @param code:string the keycode that is up.
+            @param code:string - The keycode that is up.
             @returns {undefined} */
         doActivationKeyUp: function(code) {
             this.doActivated();
@@ -237,10 +236,44 @@
         
         /** Called when focus is lost while an activation key is down. Default implementation 
             does nothing.
-            @param code:string the keycode that is down.
+            @param code:string - The keycode that is down.
             @returns {undefined} */
         doActivationKeyAborted: code => {/* Subclasses to implement as needed. */}
     });
+    
+    pkg.ArrowKeyActivation = new JSModule('KeyActivation', {
+        /** @overrides myt.KeyActivation. */
+        doActivationKeyDown: function(code, isRepeat) {
+            switch (code) {
+                case GlobalKeys.CODE_ARROW_LEFT: 
+                    if (this.doKeyArrowLeftOrUp(true, isRepeat)) return;
+                    break;
+                case GlobalKeys.CODE_ARROW_UP: 
+                    if (this.doKeyArrowLeftOrUp(false, isRepeat)) return;
+                    break;
+                case GlobalKeys.CODE_ARROW_RIGHT: 
+                    if (this.doKeyArrowRightOrDown(true, isRepeat)) return;
+                    break;
+                case GlobalKeys.CODE_ARROW_DOWN: 
+                    if (this.doKeyArrowRightOrDown(false, isRepeat)) return;
+                    break;
+            }
+            
+            this.callSuper(code, isRepeat);
+        },
+        
+        /** Called when the Left or Up arrow key triggers a down event.
+            @param {boolean} isLeft - Indicates if the Left or Up key triggered the event.
+            @param isRepeat:boolean Indicates if this is a key repeat event or not.
+            @returns {boolean} If true doActivationKeyDown will not callSuper. */
+        doKeyArrowLeftOrUp: (isLeft, isRepeat) => {/* Subclasses to implement as needed. */},
+        
+        /** Called when the Right or Down arrow key triggers a down event.
+            @param {boolean} isRight - Indicates if the Right or Down key triggered the event.
+            @param isRepeat:boolean - Indicates if this is a key repeat event or not.
+            @returns {boolean} If true doActivationKeyDown will not callSuper. */
+        doKeyArrowRightOrDown: (isRight, isRepeat) => {/* Subclasses to implement as needed. */}
+    }),
     
     /** Provides a 'mouseOver' attribute that tracks mouse over/out state. Also provides a 
         mechanism to smoothe over/out events so only one call to 'doSmoothMouseOver' occurs per 
@@ -328,7 +361,7 @@
             @param {boolean} isOver
             @returns {undefined} */
         doSmoothMouseOver: function(isOver) {
-            if (this.inited && this.updateUI) this.updateUI();
+            if (this.inited) this.updateUI?.();
         },
         
         /** Called when the mouse is over this view. Subclasses must call super.
@@ -380,7 +413,7 @@
                 // No event needed
                 if (this.inited) {
                     if (v && this.isFocusable()) this.focus(true);
-                    if (this.updateUI) this.updateUI();
+                    this.updateUI?.();
                 }
             }
         },
@@ -442,7 +475,7 @@
             @param {!Object} event
             @returns {undefined} */
         doMouseUpInside: function(event) {
-            if (this.doActivated) this.doActivated();
+            this.doActivated?.();
         }
     });
     

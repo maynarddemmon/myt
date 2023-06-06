@@ -242,7 +242,7 @@
         
         @class */
     pkg.ListViewAnchor = new JSModule('ListViewAnchor', {
-        include: [pkg.FloatingPanelAnchor],
+        include: [pkg.FloatingPanelAnchor, pkg.ArrowKeyActivation],
         
         
         // Life Cycle //////////////////////////////////////////////////////////
@@ -322,18 +322,18 @@
                 this.hideFloatingPanel();
             } else {
                 // Select first/last if the list view is already open
-                switch (code) {
-                    case GlobalKeys.CODE_ARROW_LEFT:
-                    case GlobalKeys.CODE_ARROW_UP:
-                        this.focusToLastItem();
-                        break;
-                    case GlobalKeys.CODE_ARROW_RIGHT:
-                    case GlobalKeys.CODE_ARROW_DOWN:
-                        this.focusToFirstItem();
-                        break;
-                }
                 this.callSuper(code, isRepeat);
             }
+        },
+        
+        /** @overrides myt.ArrowKeyActivation. */
+        doKeyArrowLeftOrUp: function(isLeft, isRepeat) {
+            this.focusToLastItem();
+        },
+        
+        /** @overrides myt.ArrowKeyActivation. */
+        doKeyArrowRightOrDown: function(isRight, isRepeat) {
+            this.focusToFirstItem();
         },
         
         /** @overrides myt.KeyActivation. */
@@ -358,12 +358,12 @@
         
         focusToLastItem: function() {
             const fp = this.getFloatingPanel();
-            if (fp && fp.isShown()) fp.focusToLastItem();
+            if (fp?.isShown()) fp.focusToLastItem();
         },
         
         focusToFirstItem: function() {
             const fp = this.getFloatingPanel();
-            if (fp && fp.isShown()) fp.focusToFirstItem();
+            if (fp?.isShown()) fp.focusToFirstItem();
         },
         
         // List Manipulation
@@ -390,7 +390,7 @@
         
         @class */
     pkg.ListViewItem = new JSClass('ListViewItem', pkg.TextButton, {
-        include: [ListViewItemMixin],
+        include: [ListViewItemMixin, pkg.ArrowKeyActivation],
         
         
         // Life Cycle //////////////////////////////////////////////////////////
@@ -440,21 +440,21 @@
         
         /** @overrides myt.KeyActivation. */
         doActivationKeyDown: function(code, isRepeat) {
-            switch (code) {
-                case GlobalKeys.CODE_ESC:
-                    this.listView.owner.hideFloatingPanel();
-                    return;
-                case GlobalKeys.CODE_ARROW_LEFT:
-                case GlobalKeys.CODE_ARROW_UP:
-                    GlobalFocus.prev();
-                    break;
-                case GlobalKeys.CODE_ARROW_RIGHT:
-                case GlobalKeys.CODE_ARROW_DOWN:
-                    GlobalFocus.next();
-                    break;
+            if (code === GlobalKeys.CODE_ESC) {
+                this.listView.owner.hideFloatingPanel();
+            } else {
+                this.callSuper(code, isRepeat);
             }
-            
-            this.callSuper(code, isRepeat);
+        },
+        
+        /** @overrides myt.ArrowKeyActivation. */
+        doKeyArrowLeftOrUp: function(isLeft, isRepeat) {
+            GlobalFocus.prev();
+        },
+        
+        /** @overrides myt.ArrowKeyActivation. */
+        doKeyArrowRightOrDown: function(isRight, isRepeat) {
+            GlobalFocus.next();
         }
     });
     

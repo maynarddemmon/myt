@@ -374,7 +374,7 @@
                         // See myt.VariableLayout for more detail.
                         if (self._ignoreFocus) {
                             domEvent.cancelBubble = true;
-                            if (domEvent.stopPropagation) domEvent.stopPropagation();
+                            domEvent.stopPropagation?.();
                             domEvent.preventDefault();
                             return;
                         }
@@ -388,7 +388,7 @@
                         const allowBubble = domObserver[methodName](event);
                         if (!allowBubble) {
                             domEvent.cancelBubble = true;
-                            if (domEvent.stopPropagation) domEvent.stopPropagation();
+                            domEvent.stopPropagation?.();
                         }
                         
                         event.source = undefined;
@@ -542,7 +542,7 @@
                     // returned false.
                     if (!domObserver[methodName](event)) {
                         domEvent.cancelBubble = true;
-                        if (domEvent.stopPropagation) domEvent.stopPropagation();
+                        domEvent.stopPropagation?.();
                         if (preventDefault) domEvent.preventDefault();
                     }
                     

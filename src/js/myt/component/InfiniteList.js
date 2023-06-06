@@ -336,7 +336,7 @@
                 // Clear or reassign focus since the row will get reused and the reused row will 
                 // likely not be the appropriate focus.
                 const currentFocus = GlobalFocus.focusedView;
-                if (currentFocus && currentFocus.isDescendantOf(row)) {
+                if (currentFocus?.isDescendantOf(row)) {
                     const focusTrap = this.getFocusTrap();
                     if (focusTrap) {
                         focusTrap.focus();
@@ -431,7 +431,7 @@
             
             @class */
         SimpleSelectableInfiniteListRow = pkg.SimpleSelectableInfiniteListRow = new JSClass('SimpleSelectableInfiniteListRow', pkg.SimpleButton, {
-            include: [SelectableInfiniteListRow],
+            include: [SelectableInfiniteListRow, pkg.ArrowKeyActivation],
             
             
             // Life Cycle //////////////////////////////////////////////////////
@@ -478,21 +478,23 @@
             },
             
             doActivationKeyDown: function(code, isRepeat) {
-                const owner = this.infiniteOwner,
-                    model = this.model;
-                switch (code) {
-                    case GlobalKeys.CODE_ESC:
-                        if (this.selected) owner.setSelectedRow();
-                        break;
-                    case GlobalKeys.CODE_ARROW_LEFT:
-                    case GlobalKeys.CODE_ARROW_UP:
-                        owner.selectPrevRowForModel(model);
-                        break;
-                    case GlobalKeys.CODE_ARROW_RIGHT:
-                    case GlobalKeys.CODE_ARROW_DOWN:
-                        owner.selectNextRowForModel(model);
-                        break;
+                if (code === GlobalKeys.CODE_ESC) {
+                    if (this.selected) this.infiniteOwner.setSelectedRow();
+                } else {
+                    this.callSuper(code, isRepeat);
                 }
+            },
+            
+            /** @overrides myt.ArrowKeyActivation. */
+            doKeyArrowLeftOrUp: function(isLeft, isRepeat) {
+                this.infiniteOwner.selectPrevRowForModel(this.model);
+                return true;
+            },
+            
+            /** @overrides myt.ArrowKeyActivation. */
+            doKeyArrowRightOrDown: function(isRight, isRepeat) {
+                this.infiniteOwner.selectNextRowForModel(this.model);
+                return true;
             },
             
             doActivationKeyUp: function(code) {
@@ -518,7 +520,7 @@
             setSelectedRow: function(row) {
                 const existing = this.selectedRow;
                 if (row !== existing) {
-                    if (existing) existing.setSelected(false);
+                    existing?.setSelected(false);
                     this.setSelectedRowModel();
                     this.set('selectedRow', row, true);
                     if (row) {
@@ -548,10 +550,7 @@
                     this.refreshListUI();
                     
                     // Focus on the newly selected row
-                    if (focus) {
-                        const row = this.getActiveSelectedRow();
-                        if (row) row.focus();
-                    }
+                    if (focus) this.getActiveSelectedRow()?.focus();
                 }
             },
             
@@ -601,26 +600,22 @@
         InfiniteGridRowMixin = new JSModule('InfiniteGridRowMixin', {
             // Methods /////////////////////////////////////////////////////////
             notifyXChange: function(columnHeader) {
-                const sv = getSubview(this, columnHeader);
-                if (sv) sv.setX(columnHeader.x + columnHeader.cellXAdj);
+                getSubview(this, columnHeader)?.setX(columnHeader.x + columnHeader.cellXAdj);
             },
             
             notifyWidthChange: function(columnHeader) {
-                const sv = getSubview(this, columnHeader);
-                if (sv) sv.setWidth(columnHeader.width + columnHeader.cellWidthAdj);
+                getSubview(this, columnHeader)?.setWidth(columnHeader.width + columnHeader.cellWidthAdj);
             },
             
             notifyVisibilityChange: function(columnHeader) {
-                const sv = getSubview(this, columnHeader);
-                if (sv) sv.setVisible(columnHeader.visible);
+                getSubview(this, columnHeader)?.setVisible(columnHeader.visible);
             }
         }),
         
         InfiniteGridMixin = new JSModule('InfiniteGridMixin', {
             // Accessors ///////////////////////////////////////////////////////
             setGridHeader: function(v) {
-                this.gridHeader = v;
-                if (v) v.setGrid(this);
+                (this.gridHeader = v)?.setGrid(this);
             },
             
             
@@ -644,13 +639,11 @@
             
             /** @overrides myt.InfiniteList */
             updateRow: function(row) {
-                if (this.gridHeader) {
-                    this.gridHeader.columnHeaders.forEach(hdr => {
-                        row.notifyXChange(hdr);
-                        row.notifyWidthChange(hdr);
-                        row.notifyVisibilityChange(hdr);
-                    });
-                }
+                this.gridHeader?.columnHeaders.forEach(hdr => {
+                    row.notifyXChange(hdr);
+                    row.notifyWidthChange(hdr);
+                    row.notifyVisibilityChange(hdr);
+                });
             },
             
             notifyXChange: function(columnHeader) {

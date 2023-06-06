@@ -42,7 +42,7 @@
             
             @class */
         BaseDivider = new JSClass('BaseDivider', pkg.SimpleButton, {
-            include: [pkg.BoundedValueComponent, pkg.Draggable],
+            include: [pkg.BoundedValueComponent, pkg.Draggable, pkg.ArrowKeyActivation],
             
             
             // Life Cycle //////////////////////////////////////////////////////
@@ -58,7 +58,7 @@
                 attrs.expansionState ??= STATE_RESTORED_JUST_EXPANDED;
                 attrs.focusIndicator ??= false;
                 attrs.repeatKeyDown ??= true;
-                attrs.activationKeys ??= [GlobalKeys.CODE_ARROW_LEFT, GlobalKeys.CODE_ARROW_UP, GlobalKeys.CODE_ARROW_RIGHT, GlobalKeys.CODE_ARROW_DOWN, GlobalKeys.CODE_ENTER, GlobalKeys.CODE_SPACE];
+                attrs.activationKeys ??= [GlobalKeys.CODE_ENTER, GlobalKeys.CODE_SPACE, ...GlobalKeys.ARROW_KEYS];
                 
                 if (attrs.axis === 'y') {
                     attrs.height ??= 6;
@@ -144,37 +144,42 @@
                 self.setMaxValue(self.parent[dim] - self.limitToParent - self[dim]);
             },
             
-            /** Nudge the divider when the arrow keys are used. Nudging accelerates up to a limit 
-                if the key is held down.
-                @overrides myt.Button. */
+            /** @overrides myt.Button. */
             doActivationKeyDown: function(key, isRepeat) {
-                const self = this;
+                this.callSuper(key, isRepeat);
                 
-                self.callSuper(key, isRepeat);
-                
-                // Determine nudge direction
-                let dir = 0;
                 switch (key) {
-                    case GlobalKeys.CODE_ARROW_UP:
-                    case GlobalKeys.CODE_ARROW_LEFT:
-                        dir = -1;
-                        break;
-                    case GlobalKeys.CODE_ARROW_DOWN:
-                    case GlobalKeys.CODE_ARROW_RIGHT:
-                        dir = 1;
-                        break;
                     case GlobalKeys.CODE_ENTER:
                     case GlobalKeys.CODE_SPACE:
-                    default:
-                        self.doPrimaryAction();
-                        return;
+                        this.doPrimaryAction();
                 }
+            },
+            
+            /** @overrides myt.ArrowKeyActivation. */
+            doKeyArrowLeftOrUp: function(isLeft, isRepeat) {
+                return this.nudge(false, isRepeat);
+            },
+            
+            /** @overrides myt.ArrowKeyActivation. */
+            doKeyArrowRightOrDown: function(isRight, isRepeat) {
+                return this.nudge(true, isRepeat);
+            },
+            
+            /** Nudge the divider when the arrow keys are used. Nudging accelerates up to a limit 
+                if the key is held down.
+                @param {boolean} direction - When true indicates right/down.
+                @param {boolean} isRepeat - Indicates if this is the result of a repeated key event.
+                @returns {boolean}  */
+            nudge: function(direction, isRepeat) {
+                const self = this;
                 
                 // Update nudge amount, but never nudge more than 64.
                 self.__nudgeAcc = isRepeat ? Math.min(self.__nudgeAcc + 1, 64) : 1;
                 
-                self.setValue(self.value + dir * self.__nudgeAcc, true);
+                self.setValue(self.value + (direction ? 1 : -1) * self.__nudgeAcc, true);
                 self.setExpansionState(STATE_RESTORED_JUST_EXPANDED);
+                
+                return true;
             },
             
             doPrimaryAction: function() {

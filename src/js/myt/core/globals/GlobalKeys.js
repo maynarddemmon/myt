@@ -117,7 +117,7 @@
             });
             
             globalKeys.ARROW_KEYS = [globalKeys.CODE_ARROW_LEFT, globalKeys.CODE_ARROW_UP, globalKeys.CODE_ARROW_RIGHT, globalKeys.CODE_ARROW_DOWN];
-            (globalKeys.LIST_KEYS = [globalKeys.CODE_ENTER, globalKeys.CODE_SPACE, globalKeys.CODE_ESC]).push(...globalKeys.ARROW_KEYS);
+            globalKeys.LIST_KEYS = [globalKeys.CODE_ENTER, globalKeys.CODE_SPACE, globalKeys.CODE_ESC, ...globalKeys.ARROW_KEYS];
             
             
             globalKeys.setDomElement(document);

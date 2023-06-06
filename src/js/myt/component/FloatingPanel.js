@@ -75,7 +75,7 @@
             
             toggleFloatingPanel: function(panelId) {
                 const fp = this.getFloatingPanel(panelId ??= this.floatingPanelId);
-                if (fp && fp.isShown()) {
+                if (fp?.isShown()) {
                     this.hideFloatingPanel(panelId);
                 } else {
                     this.showFloatingPanel(panelId);
@@ -103,7 +103,7 @@
                 @returns {undefined} */
             notifyPanelShown: function(panel) {
                 // Subclasses to implement as needed.
-                if (this.callSuper) this.callSuper();
+                this.callSuper?.();
             },
             
             /** Called when a floating panel has been hidden for this anchor.
@@ -111,7 +111,7 @@
                 @returns {undefined} */
             notifyPanelHidden: function(panel) {
                 // Subclasses to implement as needed.
-                if (this.callSuper) this.callSuper();
+                this.callSuper?.();
             },
             
             /** Called by the FloatingPanel to determine where to position itself horizontally. By 
@@ -156,7 +156,7 @@
             getNextFocus: function() {
                 const last = this.lastFloatingPanelShown;
                 if (last?.isShown()) return last;
-                if (this.callSuper) return this.callSuper();
+                return this.callSuper?.();
             },
             
             /** Called by the floating panel owned by this anchor to determine where to go to next 
@@ -327,7 +327,7 @@
         /** Sends the focus back to the owner. Can be overridden to send the focus elsewhere.
             @returns {undefined} */
         restoreFocus: function() {
-            if (this.owner) this.owner.focus();
+            this.owner?.focus();
         },
         
         /** Updates the x and y position of the floating panel for the provided floating 

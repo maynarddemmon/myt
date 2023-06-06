@@ -174,7 +174,7 @@
             // Generic Setter
             if (self[attrName] !== v) {
                 self[attrName] = v;
-                if (self.inited !== false && self.fireEvent) self.fireEvent(attrName, v); // !== false allows this to work with non-nodes.
+                if (self.inited !== false) self?.fireEvent(attrName, v); // !== false allows this to work with non-nodes.
             }
         }
     });

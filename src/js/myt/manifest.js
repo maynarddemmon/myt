@@ -62,7 +62,7 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'BaseViews.js'       ).provides('myt.Flexbox','myt.Frame','myt.Markup','myt.Text','myt.PaddedText','myt.Image','myt.BackView')
         .requires('myt.View','myt.FlexboxSupport','myt.TextSupport','myt.PaddedTextSupport','myt.ImageSupport','myt.SizeToDom');
     file(MYT_COMPONENT_ROOT + 'Behavior.js'        )
-        .provides('myt.Activateable','myt.UpdateableUI','myt.Disableable','myt.KeyActivation','myt.MouseOver','myt.MouseDown','myt.MouseOverAndDown','myt.Draggable')
+        .provides('myt.Activateable','myt.UpdateableUI','myt.Disableable','myt.KeyActivation','myt.ArrowKeyActivation','myt.MouseOver','myt.MouseDown','myt.MouseOverAndDown','myt.Draggable')
         .requires('myt.global.keys','myt.global.mouse','myt.global.idle','myt.global.dragManager','myt.AccessorSupport','myt.MouseObservable','myt.KeyObservable','myt.FocusObservable','myt.Geometry');
     file(MYT_COMPONENT_ROOT + 'Button.js'          )
         .provides('myt.Button','myt.SimpleButtonStyle','myt.SimpleButton','myt.SimpleTextButton','myt.TextButton')
@@ -73,7 +73,7 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'Dialog.js'          ).provides('myt.Dialog','myt.ColorPicker','myt.DatePicker')
         .requires('myt.ModalPanel','myt.Spinner','myt.TextButton','myt.Color','myt.Text','myt.FontAwesome', 'myt.Draggable','myt.SelectionManager');
     file(MYT_COMPONENT_ROOT + 'Dimmer.js'          ).provides('myt.Dimmer','myt.ModalPanel').requires('myt.RootView','myt.SizeToChildren');
-    file(MYT_COMPONENT_ROOT + 'Divider.js'         ).provides('myt.HorizontalDivider','myt.VerticalDivider').requires('myt.SimpleButton','myt.BoundedValueComponent','myt.Draggable');
+    file(MYT_COMPONENT_ROOT + 'Divider.js'         ).provides('myt.HorizontalDivider','myt.VerticalDivider').requires('myt.SimpleButton','myt.BoundedValueComponent','myt.Draggable','myt.ArrowKeyActivation');
     file(MYT_COMPONENT_ROOT + 'FloatingPanel.js'   ).provides('myt.FloatingPanelAnchor','myt.FloatingPanel').requires('myt.RootView','myt.global.mouse','myt.global.focus');
     file(MYT_COMPONENT_ROOT + 'FontAwesome.js'     ).provides('myt.FontAwesome').requires('myt.Markup');
     file(MYT_COMPONENT_ROOT + 'Form.js'            )
@@ -92,9 +92,9 @@ JS.Packages(function() {
             'myt.InfiniteList','myt.InfiniteListRow','myt.SelectableInfiniteList','myt.SelectableInfiniteListRow','myt.SimpleSelectableInfiniteListRow',
             'myt.InfiniteGrid','myt.InfiniteGridRow','myt.InfiniteGridHeader','myt.SelectableInfiniteGrid','myt.SelectableInfiniteGridRow','myt.SimpleSelectableInfiniteGridRow'
         )
-        .requires('myt.Reusable','myt.Selectable','myt.SimpleButton','myt.GridController','myt.global.focus','myt.global.keys');
+        .requires('myt.Reusable','myt.Selectable','myt.SimpleButton','myt.GridController','myt.global.focus','myt.global.keys','myt.ArrowKeyActivation');
     file(MYT_COMPONENT_ROOT + 'ListView.js'        ).provides('myt.ListView','myt.ListViewAnchor','myt.ListViewItemMixin','myt.ListViewSeparator','myt.ListViewItem')
-        .requires('myt.FloatingPanel','myt.FloatingPanelAnchor','myt.SimpleTextButton','myt.global.focus','myt.global.keys');
+        .requires('myt.FloatingPanel','myt.FloatingPanelAnchor','myt.SimpleTextButton','myt.global.focus','myt.global.keys','myt.ArrowKeyActivation');
     file(MYT_COMPONENT_ROOT + 'ModelMixins.js'     ).provides('myt.ValueComponent','myt.RangeComponent','myt.BoundedValueComponent','myt.BoundedRangeComponent').requires('myt');
     file(MYT_COMPONENT_ROOT + 'NativeInput.js'     )
         .provides('myt.NativeInputWrapper','myt.BaseInputText','myt.InputText','myt.ComboBox','myt.InputTextArea','myt.EditableText','myt.InputSelect','myt.InputSelectOption')
@@ -110,7 +110,7 @@ JS.Packages(function() {
     file(MYT_COMPONENT_ROOT + 'SizeToParent.js'    ).provides('myt.SizeToParent'  ).requires('myt.View');
     file(MYT_COMPONENT_ROOT + 'SizeToWindow.js'    ).provides('myt.SizeToWindow','myt.SizeToWindowWidth','myt.SizeToWindowHeight').requires('myt.RootView','myt.global.windowResize');
     file(MYT_COMPONENT_ROOT + 'Slider.js'          ).provides('myt.BaseSlider','myt.Slider','myt.RangeSlider','myt.LabelSlider')
-        .requires('myt.View','myt.Draggable','myt.Disableable','myt.BoundedValueComponent','myt.BoundedRangeComponent','myt.SimpleButton');
+        .requires('myt.View','myt.Draggable','myt.Disableable','myt.BoundedValueComponent','myt.BoundedRangeComponent','myt.SimpleButton','myt.ArrowKeyActivation');
     file(MYT_COMPONENT_ROOT + 'Spinner.js'         ).provides('myt.Spinner').requires('myt.View');
     file(MYT_COMPONENT_ROOT + 'StateMachine.js'    ).provides('myt.StateMachine').requires('myt.Node');
     file(MYT_COMPONENT_ROOT + 'Tab.js'             ).provides('myt.TabContainer','myt.Tab').requires('myt.SelectionManager','myt.Selectable','myt.SimpleTextButton');
