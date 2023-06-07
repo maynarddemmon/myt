@@ -42,7 +42,7 @@ new JS.Singleton('GlobalError', {
         @returns {undefined} */
     notify: function(consoleFuncName, eventType, msg, err, extraInfo) {
         // Generate Stacktrace
-        if (!err) err = new Error(msg ?? eventType);
+        err ??= new Error(msg ?? eventType);
         const stacktrace = err.stack ?? err.stacktrace,
             eventValue = {msg:msg, stacktrace:stacktrace};
         if (extraInfo) Object.assign(eventValue, extraInfo);

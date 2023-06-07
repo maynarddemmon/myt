@@ -167,14 +167,14 @@
             setSpacing: function(v) {
                 if (this.spacing !== v) {
                     this.spacing = v;
-                    if (this.layout) this.layout.setSpacing(v);
+                    this.layout?.setSpacing(v);
                 }
             },
             
             setInset: function(v) {
                 if (this.inset !== v) {
                     this.inset = v;
-                    if (this.layout) this.layout.setInset(v);
+                    this.layout?.setInset(v);
                 }
             },
             

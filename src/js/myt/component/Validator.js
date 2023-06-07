@@ -59,7 +59,7 @@
                     be pushed onto thiis array if it is provided.
                 @returns {boolean} true if the form is valid, false otherwise. */
             isFormValid: function(form, config, errorMessages) {
-                if (!config) config = {};
+                config ??= {};
                 config.form = form;
                 return this.isValid(form.getValue(), config, errorMessages);
             }
@@ -72,7 +72,7 @@
             /** @overrides myt.Validator */
             isValid: function(value, config, errorMessages) {
                 if (value == null || value === '' || (typeof value === 'string' && value.trim() === '')) {
-                    if (errorMessages) errorMessages.push('This value is required.');
+                    errorMessages?.push('This value is required.');
                     return false;
                 }
                 
@@ -88,7 +88,7 @@
             isValid: function(value, config, errorMessages) {
                 const rbv = config.form.getRollbackValue();
                 if (value && rbv && value.toLowerCase() === rbv.toLowerCase()) {
-                    if (errorMessages) errorMessages.push('Value must differ by more than just case.');
+                    errorMessages?.push('Value must differ by more than just case.');
                     return false;
                 }
                 
@@ -113,7 +113,7 @@
             isValid: function(value, config, errorMessages) {
                 const uri = new pkg.URI(value);
                 if (uri.toString(this.originalRawQuery) !== value) {
-                    if (errorMessages) errorMessages.push('Invalid URL.');
+                    errorMessages?.push('Invalid URL.');
                     return false;
                 }
                 return true;
@@ -130,7 +130,7 @@
                     JSON.parse(value);
                     return true;
                 } catch(e) {
-                    if (errorMessages) errorMessages.push(e);
+                    errorMessages?.push(e);
                     return false;
                 }
             }
@@ -155,7 +155,7 @@
         isValid: function(value, config, errorMessages) {
             if (value && this.fieldA.getValue() === this.fieldB.getValue()) return true;
             
-            if (errorMessages) errorMessages.push('The field "' + this.fieldA.key + '" must be equal to the field "' + this.fieldB.key + '".');
+            errorMessages?.push('The field "' + this.fieldA.key + '" must be equal to the field "' + this.fieldB.key + '".');
             return false;
         }
     });
@@ -183,13 +183,13 @@
             
             // Test min
             if (min !== undefined && min > len) {
-                if (errorMessages) errorMessages.push('The value must not be less than ' + min + ' characters long.');
+                errorMessages?.push('The value must not be less than ' + min + ' characters long.');
                 return false;
             }
             
             // Test max
             if (max !== undefined && max < len) {
-                if (errorMessages) errorMessages.push('The value must not be greater than ' + max + ' characters long.');
+                errorMessages?.push('The value must not be greater than ' + max + ' characters long.');
                 return false;
             }
             
@@ -222,19 +222,19 @@
                 min = this.min,
                 max = this.max;
             if (isNaN(numericValue)) {
-                if (errorMessages) errorMessages.push('Value is not a number.');
+                errorMessages?.push('Value is not a number.');
                 return false;
             }
             
             // Test min
             if (min !== undefined && min > numericValue) {
-                if (errorMessages) errorMessages.push('Value must not be less than ' + min + '.');
+                errorMessages?.push('Value must not be less than ' + min + '.');
                 return false;
             }
             
             // Test max
             if (max !== undefined && max < numericValue) {
-                if (errorMessages) errorMessages.push('Value must not be greater than ' + max + '.');
+                errorMessages?.push('Value must not be greater than ' + max + '.');
                 return false;
             }
             
@@ -259,10 +259,9 @@
             this.callSuper(id);
             
             // Make sure each arg is an myt.Validator
-            let i = args.length,
-                validator;
+            let i = args.length;
             while (i) {
-                validator = args[--i];
+                let validator = args[--i];
                 if (typeof validator === 'string') {
                     args[i] = validator = getValidator(validator);
                     if (!validator) args.splice(i, 1);

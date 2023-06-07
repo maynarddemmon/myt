@@ -58,10 +58,7 @@
             
             this.setValue(value);
             
-            if (this.selected) {
-                const bag = getBooleanAttributeGroup(this);
-                bag?.setTrue(this);
-            }
+            if (this.selected) getBooleanAttributeGroup(this)?.setTrue(this);
             
             pkg.FontAwesome.registerForNotification(this);
             

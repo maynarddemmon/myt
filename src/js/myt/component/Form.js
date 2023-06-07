@@ -270,12 +270,12 @@
                 
                 self.callSuper(parent, attrs);
                 
-                if (self.form && self.form.isA(Form)) self.form.addSubForm(self);
+                if (self.form?.isA(Form)) self.form.addSubForm(self);
             },
             
             /** @overrides myt.Node. */
             destroy: function() {
-                if (this.form && this.form.isA(Form)) this.form.removeSubForm(this.id);
+                if (this.form?.isA(Form)) this.form.removeSubForm(this.id);
                 
                 this.callSuper();
             },
@@ -313,8 +313,8 @@
                 if (this.form !== v) {
                     const existingForm = this.form;
                     this.form = v;
-                    if (existingForm) existingForm.removeSubForm(this.id);
-                    if (v && this.inited) v.addSubForm(this);
+                    existingForm?.removeSubForm(this.id);
+                    if (this.inited) v?.addSubForm(this);
                 }
             },
             
@@ -391,7 +391,7 @@
                 @returns the value that was actually set. */
             setValue: function(value) {
                 // Allow for superclass to have custom setValue behavior.
-                if (this.callSuper) this.callSuper(value);
+                this.callSuper?.(value);
                 
                 // Only do "form" behavior for true forms, not for form elements.
                 if (typeof value === 'object' && !this.isA(FormElement)) {
@@ -406,7 +406,7 @@
                 }
                 
                 // Notify parent form of value change.
-                if (this.form) this.form.notifyValueChanged(this);
+                this.form?.notifyValueChanged(this);
                 
                 return value;
             },
@@ -493,8 +493,7 @@
                 @param value:* (optional) The value to pass to the function.
                 @returns {undefined} */
             invokeAccelerator: function(id, value) {
-                const accelerator = this.__acc[id];
-                if (accelerator) accelerator.call(this, value ?? null);
+                this.__acc[id]?.call(this, value ?? null);
             },
             
             /** Adds a validator to this form.
@@ -634,7 +633,7 @@
                 @param sourceForm:myt.Form the form that had a value change.
                 @returns {undefined} */
             notifyValueChanged: function(sourceForm) {
-                if (this.form) this.form.notifyValueChanged(sourceForm);
+                this.form?.notifyValueChanged(sourceForm);
             },
             
             /** Called when a subform changed to the "changed" state.
@@ -1038,7 +1037,7 @@
                         case ACCELERATOR_SCOPE_ELEMENT:
                             this.rollbackForm();
                             this.getRootForm().doValidation();
-                            if (this.form) this.form.verifyChangedState(this);
+                            this.form?.verifyChangedState(this);
                             break;
                         case ACCELERATOR_SCOPE_NONE:
                         default:
@@ -1221,7 +1220,7 @@
                     case ACCELERATOR_SCOPE_ELEMENT:
                         this.rollbackForm();
                         this.getRootForm().doValidation();
-                        if (this.form) this.form.verifyChangedState(this);
+                        this.form?.verifyChangedState(this);
                         break;
                     case ACCELERATOR_SCOPE_NONE:
                     default:

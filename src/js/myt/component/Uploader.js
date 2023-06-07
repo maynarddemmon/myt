@@ -203,8 +203,7 @@
             /** @overrides myt.Disableable */
             setDisabled: function(v) {
                 this.callSuper(v);
-                
-                if (this.fileInput) this.fileInput.setDisabled(v);
+                this.fileInput?.setDisabled(v);
             },
             
             setMaxFiles: function(v) {
@@ -328,7 +327,7 @@
                 if (!self.value) self.fileInput.getIDE().value = '';
                 
                 self.verifyChangedState(); // FIXME: mimics what happens in myt.FormElement setValue
-                if (self.form) self.form.notifyValueChanged(self); // FIXME: mimics what happens in myt.Form setValue
+                self.form?.notifyValueChanged(self); // FIXME: mimics what happens in myt.Form setValue
                 
                 self.fireEvent('value', self.value);
             },

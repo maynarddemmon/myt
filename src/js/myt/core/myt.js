@@ -344,7 +344,7 @@
                         docFonts.add(font);
                         notifyFontLoaded(font);
                     });
-                    if (callback) callback(loadedFonts);
+                    callback?.(loadedFonts);
                 });
             },
             
@@ -353,7 +353,7 @@
                 fontFace.loaded.then(loadedFontFace => {
                     docFonts.add(loadedFontFace);
                     notifyFontLoaded(loadedFontFace);
-                    if (callback) callback(loadedFontFace);
+                    callback?.(loadedFontFace);
                 });
                 fontFace.load();
             },
@@ -661,7 +661,7 @@
                     }
                 }
             ).finally(
-                () => {if (finallyFunc) finallyFunc();}
+                () => {finallyFunc?.();}
             ),
             
             // I18N

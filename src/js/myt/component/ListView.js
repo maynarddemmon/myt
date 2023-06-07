@@ -48,7 +48,7 @@
                 }
                 
                 // Create a new item if no item exists
-                if (!item) item = items[i] = new cfgClass(contentView, Object.assign({}, itemAttrs));
+                item ??= items[i] = new cfgClass(contentView, {...itemAttrs});
                 
                 // Apply config to item
                 if (item) {

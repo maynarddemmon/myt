@@ -1,7 +1,7 @@
 (pkg => {
     const JSModule = JS.Module,
         GlobalKeys = pkg.global.keys,
-    
+        
         /** Makes an object selectable.
             
             Events:
@@ -17,7 +17,7 @@
                 v = this.valueFromEvent(v);
                 if (this.selected !== v) {
                     this.selected = v;
-                    if (this.inited && this.fireEvent) this.fireEvent('selected', v);
+                    if (this.inited) this.fireEvent?.('selected', v);
                 }
             },
             

@@ -14,12 +14,11 @@
         pre;
     
     const searchString = data => {
-            let dataItem, 
-                i = data.length;
+            let i = data.length;
             while (i) {
-                dataItem = data[--i];
+                const dataItem = data[--i];
                 versionSearchString = dataItem.ver ?? dataItem.id;
-                if ((dataItem.str && dataItem.str.includes(dataItem.sub)) || dataItem.prop) return dataItem.id;
+                if (dataItem.str?.includes(dataItem.sub) || dataItem.prop) return dataItem.id;
             }
         },
         
@@ -792,7 +791,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                         docFonts.add(font);
                         notifyFontLoaded(font);
                     });
-                    if (callback) callback(loadedFonts);
+                    callback?.(loadedFonts);
                 });
             },
             
@@ -801,7 +800,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 fontFace.loaded.then(loadedFontFace => {
                     docFonts.add(loadedFontFace);
                     notifyFontLoaded(loadedFontFace);
-                    if (callback) callback(loadedFontFace);
+                    callback?.(loadedFontFace);
                 });
                 fontFace.load();
             },
@@ -1109,7 +1108,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     }
                 }
             ).finally(
-                () => {if (finallyFunc) finallyFunc();}
+                () => {finallyFunc?.();}
             ),
             
             // I18N
@@ -1152,8 +1151,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
 
 
 (pkg => {
-    const objectAssign = Object.assign,
-        
+    const 
         /*  Function to convert a stored cookie value into a value that can be returned. */
         converted = (s, useJson) => {
             // This is a quoted cookie as according to RFC2068, unescape
@@ -1191,7 +1189,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                             before it is returned.
                 @returns {*} - The cookie value string or a parsed cookie value. */
             read: (key, options) => {
-                options = objectAssign({}, Cookie.defaults, options);
+                options = {...Cookie.defaults, ...options};
                 
                 const decodeFunc = options.raw ? str => str : str => decodeURIComponent(str.split('+').join(' ')),
                     useJson = options.json,
@@ -1226,7 +1224,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                         json:boolean If true JSON.stringify will be used to encode the cookie value.
                 @returns {undefined} */
             write: (key, value, options) => {
-                options = objectAssign({}, Cookie.defaults, options);
+                options = {...Cookie.defaults, ...options};
                 
                 if (typeof options.expires === 'number') {
                     const days = options.expires,
@@ -1251,12 +1249,11 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             /** Removes a stored cookie by setting its expires option to -1 days.
                 @param {string} key - the name of the cookie to remove.
                 @param {?Object} options - Options used to read/write the cookie.
-                @returns {boolean} - true if a cookie was removed, 
-                    false otherwise. */
+                @returns {boolean} - true if a cookie was removed, false otherwise. */
             remove: (key, options) => {
                 if (Cookie.read(key, options) !== undefined) {
                     // Must not alter options, thus extending a fresh object.
-                    Cookie.write(key, '', objectAssign({}, options, {expires: -1}));
+                    Cookie.write(key, '', {...options, expires: -1});
                     return true;
                 }
                 return false;
@@ -2382,7 +2379,7 @@ new JS.Singleton('GlobalError', {
         @returns {undefined} */
     notify: function(consoleFuncName, eventType, msg, err, extraInfo) {
         // Generate Stacktrace
-        if (!err) err = new Error(msg ?? eventType);
+        err ??= new Error(msg ?? eventType);
         const stacktrace = err.stack ?? err.stacktrace,
             eventValue = {msg:msg, stacktrace:stacktrace};
         if (extraInfo) Object.assign(eventValue, extraInfo);
@@ -2828,7 +2825,7 @@ new JS.Singleton('GlobalError', {
             if (activeElem) {
                 elem = startElem = activeElem;
                 model = startElem.model;
-                if (!model) model = globalFocus.findModelForDomElement(startElem);
+                model ??= globalFocus.findModelForDomElement(startElem);
                 if (model) {
                     const focusTrap = model.getFocusTrap(ignoreFocusTrap);
                     if (focusTrap) rootElem = focusTrap.getIDE();
@@ -2893,7 +2890,7 @@ new JS.Singleton('GlobalError', {
                             ) {
                                 // Make sure the dom element isn't inside a maskFocus
                                 model = globalFocus.findModelForDomElement(elem);
-                                if (model && model.searchAncestorsOrSelf(n => n.maskFocus === true)) {
+                                if (model?.searchAncestorsOrSelf(n => n.maskFocus === true)) {
                                     // Is a masked dom element so ignore.
                                 } else {
                                     elem.focus();
@@ -2993,16 +2990,14 @@ new JS.Singleton('GlobalError', {
             @param {boolean} ignoreFocusTrap - If true focus traps will be skipped over.
             @returns {undefined} */
         next: ignoreFocusTrap => {
-            const next = traverse(true, ignoreFocusTrap);
-            if (next) next.focus();
+            traverse(true, ignoreFocusTrap)?.focus();
         },
         
         /** Move focus to the previous focusable element.
             @param {boolean} ignoreFocusTrap - If true focus traps will be skipped over.
             @returns {undefined} */
         prev: ignoreFocusTrap => {
-            const prev = traverse(false, ignoreFocusTrap);
-            if (prev) prev.focus();
+            traverse(false, ignoreFocusTrap)?.focus();
         },
         
         /** Finds the closest model for the provided dom element.
@@ -3389,7 +3384,7 @@ new JS.Singleton('GlobalError', {
                 if (FocusObservable.EVENT_TYPES[type]) {
                     const self = this;
                     return domEvent => {
-                        if (!domEvent) domEvent = window.event;
+                        domEvent ??= window.event;
                         
                         // OPTIMIZATION: prevent extra focus events under special circumstances. 
                         // See myt.VariableLayout for more detail.
@@ -5313,7 +5308,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             if (self.parent !== newParent) {
                 // Abort if the new parent is in the destroyed life-cycle state.
-                if (newParent && newParent.destroyed) return;
+                if (newParent?.destroyed) return;
                 
                 // Remove ourselves from our existing parent if we have one.
                 const curParent = self.parent;
@@ -9210,12 +9205,12 @@ myt.Destructible = new JS.Module('Destructible', {
         globalIdle = G.idle,
         doc = window.document;
     
-    /** Provides events when the window's body is resized. Registered with 
-        myt.global as 'windowResize'.
+    /** Provides events when the window's body is resized. Registered with myt.global 
+        as 'windowResize'.
         
         Events:
-            resize:object Fired when the window.document.body is resized. The 
-                type is 'resize' and the value is an object containing:
+            resize:object Fired when the window.document.body is resized. The type is 'resize' and 
+                the value is an object containing:
                     w:number the new window.document.body clientWidth.
                     h:number the new window.document.body clientHeight.
         
@@ -10127,7 +10122,7 @@ myt.Destructible = new JS.Module('Destructible', {
             // transition completes.
             if (stateMachine.__transInProgress) {
                 let deferredTransitions = stateMachine.__deferredTransitions;
-                if (!deferredTransitions) deferredTransitions = stateMachine.__deferredTransitions = [];
+                deferredTransitions ??= stateMachine.__deferredTransitions = [];
                 deferredTransitions.unshift(args);
             } else {
                 stateMachine.__transInProgress = true;
@@ -10145,7 +10140,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 }
                 
                 let to = stateMachine.map[stateMachine.current][transitionName];
-                if (!to) to = stateMachine.map[WILDCARD][transitionName];
+                to ??= stateMachine.map[WILDCARD][transitionName];
                 if (to) {
                     stateMachine.__pendingTransition = transitionName;
                     stateMachine.__transDestinationState = to;
@@ -10612,12 +10607,12 @@ new JS.Singleton('GlobalMouse', {
         overView;
         
     const
-        /*  The list of myt.AutoScrollers currently registered for notification
-            when drags start and stop. */
+        /*  The list of myt.AutoScrollers currently registered for notification when drags start 
+            and stop. */
         autoScrollers = [],
         
-        /*  The list of myt.DropTargets currently registered for notification 
-            when drag and drop events occur. */
+        /*  The list of myt.DropTargets currently registered for notification when drag and drop 
+            events occur. */
         dropTargets = [],
         
         setOverView = v => {
@@ -10703,17 +10698,13 @@ new JS.Singleton('GlobalMouse', {
     /** Provides global drag and drop functionality.
         
         Events:
-            dragLeave:myt.DropTarget Fired when a myt.Dropable is dragged out 
-                of the drop target.
-            dragEnter:myt.DropTarget Fired when a myt.Dropable is dragged over
-                the drop target.
-            startDrag:object Fired when a drag starts. Value is the object
+            dragLeave:myt.DropTarget Fired when a myt.Dropable is dragged out of the drop target.
+            dragEnter:myt.DropTarget Fired when a myt.Dropable is dragged over the drop target.
+            startDrag:object Fired when a drag starts. Value is the object being dragged.
+            stopDrag:object Fired when a drag ends. Value is the object that is no longer 
                 being dragged.
-            stopDrag:object Fired when a drag ends. Value is the object 
-                that is no longer being dragged.
-            drop:object Fired when a drag ends over a drop target. The value 
-                is an array containing the dropable at index 0 and the drop 
-                target at index 1.
+            drop:object Fired when a drag ends over a drop target. The value is an array containing 
+                the dropable at index 0 and the drop target at index 1.
         
         @class */
     new JS.Singleton('GlobalDragManager', {
@@ -10770,15 +10761,13 @@ new JS.Singleton('GlobalMouse', {
         },
         
         /** Called by a myt.Dropable when a drag stops.
-            @param {!Object} event -The mouse event that triggered the 
-                stop drag.
-            @param {!Object} dropable - The myt.Dropable that stopped 
-                being dragged.
+            @param {!Object} event -The mouse event that triggered the stop drag.
+            @param {!Object} dropable - The myt.Dropable that stopped being dragged.
             @param {boolean} isAbort
             @returns {undefined} */
         stopDrag: (event, dropable, isAbort) => {
             dropable.notifyDropped(overView, isAbort);
-            if (overView && !isAbort) overView.notifyDrop(dropable);
+            if (!isAbort) overView?.notifyDrop(dropable);
             
             setOverView();
             setDragView();
@@ -10791,9 +10780,8 @@ new JS.Singleton('GlobalMouse', {
             @param {!Object} dropable - The myt.Dropable that is being dragged.
             @returns {undefined} */
         updateDrag: (event, dropable) => {
-            // Get the frontmost myt.DropTarget that is registered with this 
-            // manager and is under the current mouse location and has a 
-            // matching drag group.
+            // Get the frontmost myt.DropTarget that is registered with this manager and is under 
+            // the current mouse location and has a matching drag group.
             const filteredDropTargets = filterList(dropable, dropTargets);
             let i = filteredDropTargets.length,
                 topDropTarget;
@@ -11876,12 +11864,11 @@ new JS.Singleton('GlobalMouse', {
         },
         
         setShrinkToFit: function(v) {
-            const self = this,
-                textView = self.textView;
+            const self = this;
             if (self.shrinkToFit !== v) {
                 self.shrinkToFit = v;
                 if (self.inited) {
-                    if (textView) textView.setWhiteSpace(v ? 'nowrap' : 'normal');
+                    self.textView?.setWhiteSpace(v ? 'nowrap' : 'normal');
                     self.fireEvent('shrinkToFit', v);
                 }
             }
@@ -12387,7 +12374,7 @@ new JS.Singleton('GlobalMouse', {
                 }
                 
                 // Create a new item if no item exists
-                if (!item) item = items[i] = new cfgClass(contentView, Object.assign({}, itemAttrs));
+                item ??= items[i] = new cfgClass(contentView, {...itemAttrs});
                 
                 // Apply config to item
                 if (item) {
@@ -13124,10 +13111,7 @@ new JS.Singleton('GlobalMouse', {
             
             this.setValue(value);
             
-            if (this.selected) {
-                const bag = getBooleanAttributeGroup(this);
-                bag?.setTrue(this);
-            }
+            if (this.selected) getBooleanAttributeGroup(this)?.setTrue(this);
             
             pkg.FontAwesome.registerForNotification(this);
             
@@ -13204,7 +13188,7 @@ new JS.Singleton('GlobalMouse', {
 (pkg => {
     const JSModule = JS.Module,
         GlobalKeys = pkg.global.keys,
-    
+        
         /** Makes an object selectable.
             
             Events:
@@ -13220,7 +13204,7 @@ new JS.Singleton('GlobalMouse', {
                 v = this.valueFromEvent(v);
                 if (this.selected !== v) {
                     this.selected = v;
-                    if (this.inited && this.fireEvent) this.fireEvent('selected', v);
+                    if (this.inited) this.fireEvent?.('selected', v);
                 }
             },
             
@@ -13601,7 +13585,7 @@ new JS.Singleton('GlobalMouse', {
             /** @overrides myt.Selectable */
             setSelected: function(v) {
                 this.callSuper(v);
-                if (this.button) this.button.updateUI();
+                this.button?.updateUI();
             },
             
             setTabId: function(v) {this.tabId = v;},
@@ -13650,8 +13634,7 @@ new JS.Singleton('GlobalMouse', {
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.Disableable */
             doDisabled: function() {
-                const btn = this.button;
-                if (btn) btn.setDisabled(this.disabled);
+                this.button?.setDisabled(this.disabled);
             },
             
             /** Called whenever the button is redrawn. Gives subclasses/instances a chance to do 
@@ -13756,8 +13739,7 @@ new JS.Singleton('GlobalMouse', {
                 
                 this.callSuper(parent, attrs);
                 
-                const button = this.button;
-                button.label = new pkg.Text(button, {
+                this.button.label = new pkg.Text(this.button, {
                     domClass:'myt-Text mytTextTabSliderLabel', ignorePlacement:true,
                     text:this.text, align:'center', valign:'middle', 
                     textColor:this.__getTextColor()
@@ -13772,8 +13754,7 @@ new JS.Singleton('GlobalMouse', {
             setText: function(v) {
                 if (this.text !== v) {
                     this.text = v;
-                    const button = this.button;
-                    if (button && button.label) button.label.setText(v);
+                    this.button?.label?.setText(v);
                 }
             },
             
@@ -13781,8 +13762,7 @@ new JS.Singleton('GlobalMouse', {
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.TabSlider */
             notifyButtonRedraw: function() {
-                const label = this.button.label;
-                if (label) label.setTextColor(this.__getTextColor());
+                this.button.label?.setTextColor(this.__getTextColor());
             },
             
             /** @private
@@ -13863,7 +13843,7 @@ new JS.Singleton('GlobalMouse', {
             setSpacing: function(v) {
                 if (this.spacing !== v) {
                     this.spacing = v;
-                    if (this.layout) this.layout.setSpacing(v);
+                    this.layout?.setSpacing(v);
                 }
             },
             
@@ -14115,14 +14095,14 @@ new JS.Singleton('GlobalMouse', {
             setSpacing: function(v) {
                 if (this.spacing !== v) {
                     this.spacing = v;
-                    if (this.layout) this.layout.setSpacing(v);
+                    this.layout?.setSpacing(v);
                 }
             },
             
             setInset: function(v) {
                 if (this.inset !== v) {
                     this.inset = v;
-                    if (this.layout) this.layout.setInset(v);
+                    this.layout?.setInset(v);
                 }
             },
             
@@ -14774,7 +14754,7 @@ new JS.Singleton('GlobalMouse', {
         
         /** @overrides */
         destroy: function() {
-            if (this.__resizeObserver) this.__resizeObserver.unobserve(this.getIDE());
+            this.__resizeObserver?.unobserve(this.getIDE());
             this.callSuper();
         },
         
@@ -15754,12 +15734,12 @@ new JS.Singleton('GlobalMouse', {
                 
                 self.callSuper(parent, attrs);
                 
-                if (self.form && self.form.isA(Form)) self.form.addSubForm(self);
+                if (self.form?.isA(Form)) self.form.addSubForm(self);
             },
             
             /** @overrides myt.Node. */
             destroy: function() {
-                if (this.form && this.form.isA(Form)) this.form.removeSubForm(this.id);
+                if (this.form?.isA(Form)) this.form.removeSubForm(this.id);
                 
                 this.callSuper();
             },
@@ -15797,8 +15777,8 @@ new JS.Singleton('GlobalMouse', {
                 if (this.form !== v) {
                     const existingForm = this.form;
                     this.form = v;
-                    if (existingForm) existingForm.removeSubForm(this.id);
-                    if (v && this.inited) v.addSubForm(this);
+                    existingForm?.removeSubForm(this.id);
+                    if (this.inited) v?.addSubForm(this);
                 }
             },
             
@@ -15875,7 +15855,7 @@ new JS.Singleton('GlobalMouse', {
                 @returns the value that was actually set. */
             setValue: function(value) {
                 // Allow for superclass to have custom setValue behavior.
-                if (this.callSuper) this.callSuper(value);
+                this.callSuper?.(value);
                 
                 // Only do "form" behavior for true forms, not for form elements.
                 if (typeof value === 'object' && !this.isA(FormElement)) {
@@ -15890,7 +15870,7 @@ new JS.Singleton('GlobalMouse', {
                 }
                 
                 // Notify parent form of value change.
-                if (this.form) this.form.notifyValueChanged(this);
+                this.form?.notifyValueChanged(this);
                 
                 return value;
             },
@@ -15977,8 +15957,7 @@ new JS.Singleton('GlobalMouse', {
                 @param value:* (optional) The value to pass to the function.
                 @returns {undefined} */
             invokeAccelerator: function(id, value) {
-                const accelerator = this.__acc[id];
-                if (accelerator) accelerator.call(this, value ?? null);
+                this.__acc[id]?.call(this, value ?? null);
             },
             
             /** Adds a validator to this form.
@@ -16118,7 +16097,7 @@ new JS.Singleton('GlobalMouse', {
                 @param sourceForm:myt.Form the form that had a value change.
                 @returns {undefined} */
             notifyValueChanged: function(sourceForm) {
-                if (this.form) this.form.notifyValueChanged(sourceForm);
+                this.form?.notifyValueChanged(sourceForm);
             },
             
             /** Called when a subform changed to the "changed" state.
@@ -16522,7 +16501,7 @@ new JS.Singleton('GlobalMouse', {
                         case ACCELERATOR_SCOPE_ELEMENT:
                             this.rollbackForm();
                             this.getRootForm().doValidation();
-                            if (this.form) this.form.verifyChangedState(this);
+                            this.form?.verifyChangedState(this);
                             break;
                         case ACCELERATOR_SCOPE_NONE:
                         default:
@@ -16705,7 +16684,7 @@ new JS.Singleton('GlobalMouse', {
                     case ACCELERATOR_SCOPE_ELEMENT:
                         this.rollbackForm();
                         this.getRootForm().doValidation();
-                        if (this.form) this.form.verifyChangedState(this);
+                        this.form?.verifyChangedState(this);
                         break;
                     case ACCELERATOR_SCOPE_NONE:
                     default:
@@ -17148,8 +17127,7 @@ new JS.Singleton('GlobalMouse', {
             /** @overrides myt.Disableable */
             setDisabled: function(v) {
                 this.callSuper(v);
-                
-                if (this.fileInput) this.fileInput.setDisabled(v);
+                this.fileInput?.setDisabled(v);
             },
             
             setMaxFiles: function(v) {
@@ -17273,7 +17251,7 @@ new JS.Singleton('GlobalMouse', {
                 if (!self.value) self.fileInput.getIDE().value = '';
                 
                 self.verifyChangedState(); // FIXME: mimics what happens in myt.FormElement setValue
-                if (self.form) self.form.notifyValueChanged(self); // FIXME: mimics what happens in myt.Form setValue
+                self.form?.notifyValueChanged(self); // FIXME: mimics what happens in myt.Form setValue
                 
                 self.fireEvent('value', self.value);
             },
@@ -17652,7 +17630,7 @@ new JS.Singleton('GlobalMouse', {
                 if (self.visible) {
                     self.setVisible(false);
                     
-                    if (!ignoreRestoreFocus && self.restoreFocus && self.prevFocus) self.prevFocus.focus();
+                    if (!ignoreRestoreFocus && self.restoreFocus) self.prevFocus?.focus();
                 }
             }
         }),
@@ -17715,7 +17693,7 @@ new JS.Singleton('GlobalMouse', {
             initNode: function(parent, attrs) {
                 const self = this,
                     viewAttrs = {name:'content', ignorePlacement:true},
-                    centeredViewAttrs = Object.assign({}, viewAttrs, {align:'center', valign:'middle'});
+                    centeredViewAttrs = {...viewAttrs, align:'center', valign:'middle'};
                 
                 self.defaultPlacement = 'content';
                 
@@ -17742,14 +17720,15 @@ new JS.Singleton('GlobalMouse', {
                         });
                         break;
                     case 'parent':
-                        new View(self, Object.assign(viewAttrs, {
+                        new View(self, {
+                            ...viewAttrs, 
                             x:self.marginLeft,
                             y:self.marginTop,
                             percentOfParentWidthOffset:-self.marginLeft - self.marginRight,
                             percentOfParentHeightOffset:-self.marginTop - self.marginBottom,
                             percentOfParentWidth:100,
-                            percentOfParentHeight:100,
-                        }), [SizeToParent]);
+                            percentOfParentHeight:100
+                        }, [SizeToParent]);
                         break;
                     case 'basic':
                         new View(self, centeredViewAttrs);
@@ -18037,8 +18016,6 @@ new JS.Singleton('GlobalMouse', {
         
         makeTag = pkg.FontAwesome.makeTag,
         
-        objectAssign = Object.assign,
-        
         mathMin = Math.min,
         mathMax = Math.max,
         
@@ -18080,7 +18057,7 @@ new JS.Singleton('GlobalMouse', {
         
         initializePaletteLookup = palette => {
             palette.forEach(color => {
-                if (color && color.length === 7) color += 'ff';
+                if (color?.length === 7) color += 'ff';
                 paletteLookup[color] = true;
             });
         },
@@ -18111,7 +18088,7 @@ new JS.Singleton('GlobalMouse', {
                 }
             },
             setBgColor: function(v) {
-                if (this.colorView) this.colorView.setBgColor(v);
+                this.colorView?.setBgColor(v);
                 this.setTooltip(v);
             },
             doActivated: function() {
@@ -18604,7 +18581,7 @@ new JS.Singleton('GlobalMouse', {
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides */
             initNode: function(parent, attrs) {
-                const opt = objectAssign({
+                const opt = {
                     current:null,
                     dateOnly:false,
                     timeOnly:false,
@@ -18617,8 +18594,9 @@ new JS.Singleton('GlobalMouse', {
                     maxDate:null,
                     minTime:'00:00',
                     maxTime:'23:59',
-                    allowedDays:null // An array of day nums: [1,2,3,4,5] for week days only.
-                }, attrs.opt);
+                    allowedDays:null, // An array of day nums: [1,2,3,4,5] for week days only.
+                    ...attrs.opt
+                };
                 delete attrs.opt;
                 
                 this.callSuper(parent, attrs);
@@ -18906,7 +18884,7 @@ new JS.Singleton('GlobalMouse', {
                 this.destroyContent();
                 
                 this.content.setVisible(false);
-                if (opts && opts.bgColor) this.overlay.setBgColor(opts.bgColor);
+                if (opts?.bgColor) this.overlay.setBgColor(opts.bgColor);
                 
                 this.show();
             },
@@ -18926,7 +18904,7 @@ new JS.Singleton('GlobalMouse', {
                     content = self.content, 
                     closeBtn = content.closeBtn;
                 
-                opts = objectAssign({}, Dialog.WRAP_TEXT_DEFAULTS, opts);
+                opts = {...Dialog.WRAP_TEXT_DEFAULTS, ...opts};
                 
                 self.destroyContent();
                 
@@ -18999,22 +18977,22 @@ new JS.Singleton('GlobalMouse', {
                 }
                 
                 // Set initial focus
-                if (contentContainer.initialFocus) contentContainer.initialFocus.focus();
+                contentContainer.initialFocus?.focus();
                 
-                if (afterSetupFunc) afterSetupFunc(self);
+                afterSetupFunc?.(self);
             },
             
             showConfirm: function(msg, callbackFunction, opts) {
                 const self = this;
                 
-                opts = objectAssign({}, Dialog.CONFIRM_DEFAULTS, opts);
+                opts = {...Dialog.CONFIRM_DEFAULTS, ...opts};
                 
                 self.showMessage(msg, callbackFunction, opts);
                 self.setupFooterButtons(self.content.msg, opts);
             },
             
             showContentConfirm: function(contentBuilderFunc, callbackFunction, opts, afterSetupFunc) {
-                opts = objectAssign({}, Dialog.CONFIRM_DEFAULTS, opts);
+                opts = {...Dialog.CONFIRM_DEFAULTS, ...opts};
                 
                 const self = this,
                     content = self.content,
@@ -19049,9 +19027,9 @@ new JS.Singleton('GlobalMouse', {
                 self.setupFooterButtons(contentContainer, opts);
                 
                 // Set initial focus
-                if (contentContainer.initialFocus) contentContainer.initialFocus.focus();
+                contentContainer.initialFocus?.focus();
                 
-                if (afterSetupFunc) afterSetupFunc(self);
+                afterSetupFunc?.(self);
             },
             
             /** Shows a dialog with a spinner and a message and no standard cancel button.
@@ -19063,7 +19041,7 @@ new JS.Singleton('GlobalMouse', {
                 const self = this,
                     content = self.content;
                 
-                opts = objectAssign({}, Dialog.NO_WRAP_TEXT_DEFAULTS, opts);
+                opts = {...Dialog.NO_WRAP_TEXT_DEFAULTS, ...opts};
                 
                 self.destroyContent();
                 
@@ -19096,7 +19074,7 @@ new JS.Singleton('GlobalMouse', {
                 const self = this,
                     content = self.content,
                     closeBtn = content.closeBtn;
-                opts = objectAssign({}, Dialog.COLOR_PICKER_DEFAULTS, opts);
+                opts = {...Dialog.COLOR_PICKER_DEFAULTS, ...opts};
                 self.destroyContent();
                 
                 // Set the callback function to one wrapped to handle each button type.
@@ -19136,7 +19114,7 @@ new JS.Singleton('GlobalMouse', {
                 const self = this,
                     content = self.content,
                     closeBtn = content.closeBtn;
-                opts = objectAssign({}, Dialog.DATE_PICKER_DEFAULTS, opts);
+                opts = {...Dialog.DATE_PICKER_DEFAULTS, ...opts};
                 self.destroyContent();
                 
                 // Set the callback function to one wrapped to handle each button type.
@@ -19306,7 +19284,7 @@ new JS.Singleton('GlobalMouse', {
                     be pushed onto thiis array if it is provided.
                 @returns {boolean} true if the form is valid, false otherwise. */
             isFormValid: function(form, config, errorMessages) {
-                if (!config) config = {};
+                config ??= {};
                 config.form = form;
                 return this.isValid(form.getValue(), config, errorMessages);
             }
@@ -19319,7 +19297,7 @@ new JS.Singleton('GlobalMouse', {
             /** @overrides myt.Validator */
             isValid: function(value, config, errorMessages) {
                 if (value == null || value === '' || (typeof value === 'string' && value.trim() === '')) {
-                    if (errorMessages) errorMessages.push('This value is required.');
+                    errorMessages?.push('This value is required.');
                     return false;
                 }
                 
@@ -19335,7 +19313,7 @@ new JS.Singleton('GlobalMouse', {
             isValid: function(value, config, errorMessages) {
                 const rbv = config.form.getRollbackValue();
                 if (value && rbv && value.toLowerCase() === rbv.toLowerCase()) {
-                    if (errorMessages) errorMessages.push('Value must differ by more than just case.');
+                    errorMessages?.push('Value must differ by more than just case.');
                     return false;
                 }
                 
@@ -19360,7 +19338,7 @@ new JS.Singleton('GlobalMouse', {
             isValid: function(value, config, errorMessages) {
                 const uri = new pkg.URI(value);
                 if (uri.toString(this.originalRawQuery) !== value) {
-                    if (errorMessages) errorMessages.push('Invalid URL.');
+                    errorMessages?.push('Invalid URL.');
                     return false;
                 }
                 return true;
@@ -19377,7 +19355,7 @@ new JS.Singleton('GlobalMouse', {
                     JSON.parse(value);
                     return true;
                 } catch(e) {
-                    if (errorMessages) errorMessages.push(e);
+                    errorMessages?.push(e);
                     return false;
                 }
             }
@@ -19402,7 +19380,7 @@ new JS.Singleton('GlobalMouse', {
         isValid: function(value, config, errorMessages) {
             if (value && this.fieldA.getValue() === this.fieldB.getValue()) return true;
             
-            if (errorMessages) errorMessages.push('The field "' + this.fieldA.key + '" must be equal to the field "' + this.fieldB.key + '".');
+            errorMessages?.push('The field "' + this.fieldA.key + '" must be equal to the field "' + this.fieldB.key + '".');
             return false;
         }
     });
@@ -19430,13 +19408,13 @@ new JS.Singleton('GlobalMouse', {
             
             // Test min
             if (min !== undefined && min > len) {
-                if (errorMessages) errorMessages.push('The value must not be less than ' + min + ' characters long.');
+                errorMessages?.push('The value must not be less than ' + min + ' characters long.');
                 return false;
             }
             
             // Test max
             if (max !== undefined && max < len) {
-                if (errorMessages) errorMessages.push('The value must not be greater than ' + max + ' characters long.');
+                errorMessages?.push('The value must not be greater than ' + max + ' characters long.');
                 return false;
             }
             
@@ -19469,19 +19447,19 @@ new JS.Singleton('GlobalMouse', {
                 min = this.min,
                 max = this.max;
             if (isNaN(numericValue)) {
-                if (errorMessages) errorMessages.push('Value is not a number.');
+                errorMessages?.push('Value is not a number.');
                 return false;
             }
             
             // Test min
             if (min !== undefined && min > numericValue) {
-                if (errorMessages) errorMessages.push('Value must not be less than ' + min + '.');
+                errorMessages?.push('Value must not be less than ' + min + '.');
                 return false;
             }
             
             // Test max
             if (max !== undefined && max < numericValue) {
-                if (errorMessages) errorMessages.push('Value must not be greater than ' + max + '.');
+                errorMessages?.push('Value must not be greater than ' + max + '.');
                 return false;
             }
             
@@ -19506,10 +19484,9 @@ new JS.Singleton('GlobalMouse', {
             this.callSuper(id);
             
             // Make sure each arg is an myt.Validator
-            let i = args.length,
-                validator;
+            let i = args.length;
             while (i) {
-                validator = args[--i];
+                let validator = args[--i];
                 if (typeof validator === 'string') {
                     args[i] = validator = getValidator(validator);
                     if (!validator) args.splice(i, 1);
@@ -20467,7 +20444,7 @@ new JS.Singleton('GlobalMouse', {
                     // Distribute
                     resizeInfo.forEach(info => {info.hdr.setValue(info.hdr.value + info.amt);});
                     
-                    if (nextFunc) nextFunc(extra);
+                    nextFunc?.(extra);
                 }
             }
         },
@@ -20584,7 +20561,7 @@ new JS.Singleton('GlobalMouse', {
         
         updateTextWidth = gridHeader => {
             const textView = gridHeader.textView;
-            if (textView) textView.setWidth(gridHeader.width - gridHeader.outset - textView.x);
+            textView?.setWidth(gridHeader.width - gridHeader.outset - textView.x);
         },
         
         /** Coordinates the behavior of a grid.
@@ -20649,9 +20626,9 @@ new JS.Singleton('GlobalMouse', {
             setLastColumn: function(v) {
                 const cur = this.lastColumn;
                 if (cur !== v) {
-                    if (cur) cur.setLast(false);
+                    cur?.setLast(false);
                     this.lastColumn = v;
-                    if (v) v.setLast(true);
+                    v?.setLast(true);
                 }
             },
             
@@ -21059,7 +21036,7 @@ new JS.Singleton('GlobalMouse', {
             setGridController: function(v) {
                 const existing = this.gridController;
                 if (existing !== v) {
-                    if (existing) existing.notifyRemoveHdr(this);
+                    existing?.notifyRemoveHdr(this);
                     this.gridController = v;
                     if (this.inited && v) {
                         v.notifyAddHdr(this);
@@ -21082,7 +21059,7 @@ new JS.Singleton('GlobalMouse', {
                     oldMinValue = self.minValue ?? 0, 
                     gc = self.gridController;
                 self.callSuper(v);
-                if (gc && self.inited && oldMinValue !== self.minValue) gc.setMinWidth(gc.minWidth + self.minValue - oldMinValue);
+                if (self.inited && oldMinValue !== self.minValue) gc?.setMinWidth(gc.minWidth + self.minValue - oldMinValue);
             },
             
             /** @overrides myt.BoundedValueComponent */
@@ -21092,34 +21069,31 @@ new JS.Singleton('GlobalMouse', {
                     gc = self.gridController;
                 v ??= defaultMaxValue;
                 self.callSuper(v);
-                if (gc && self.inited && oldMaxValue !== self.maxValue) gc.setMaxWidth(gc.maxWidth + self.maxValue - oldMaxValue);
+                if (self.inited && oldMaxValue !== self.maxValue) gc?.setMaxWidth(gc.maxWidth + self.maxValue - oldMaxValue);
             },
             
             /** @overrides myt.View */
             setWidth: function(v, suppressEvent) {
                 const self = this,
-                    cur = self.width,
-                    gc = self.gridController;
+                    cur = self.width;
                 self.callSuper(v, suppressEvent);
-                if (gc && self.inited && cur !== self.width) gc.notifyHdrWidthChange(self);
+                if (self.inited && cur !== self.width) self.gridController?.notifyHdrWidthChange(self);
             },
             
             /** @overrides myt.View */
             setX: function(v) {
                 const self = this,
-                    cur = self.x,
-                    gc = self.gridController;
+                    cur = self.x;
                 self.callSuper(v);
-                if (gc && self.inited && cur !== self.x) gc.notifyHdrXChange(self);
+                if (self.inited && cur !== self.x) self.gridController?.notifyHdrXChange(self);
             },
             
             /** @overrides myt.View */
             setVisible: function(v) {
                 const self = this,
-                    cur = self.visible,
-                    gc = self.gridController;
+                    cur = self.visible;
                 self.callSuper(v);
-                if (self.inited && gc && cur !== self.visible) gc.notifyHdrVisibilityChange(self);
+                if (self.inited && cur !== self.visible) self.gridController?.notifyHdrVisibilityChange(self);
             }
         }),
         
@@ -21151,27 +21125,24 @@ new JS.Singleton('GlobalMouse', {
             setGridController: function(v) {
                 const existing = this.gridController;
                 if (existing !== v) {
-                    if (existing) existing.notifyRemoveRow(this);
+                    existing?.notifyRemoveRow(this);
                     this.gridController = v;
-                    if (this.inited && v) v.notifyAddRow(this);
+                    if (this.inited) v?.notifyAddRow(this);
                 }
             },
             
             
             // Methods /////////////////////////////////////////////////////////
             notifyHdrXChange: function(columnHeader) {
-                const sv = getRowSubview(this, columnHeader);
-                if (sv) sv.setX(columnHeader.x + columnHeader.cellXAdj);
+                getRowSubview(this, columnHeader)?.setX(columnHeader.x + columnHeader.cellXAdj);
             },
             
             notifyHdrWidthChange: function(columnHeader) {
-                const sv = getRowSubview(this, columnHeader);
-                if (sv) sv.setWidth(columnHeader.width + columnHeader.cellWidthAdj);
+                getRowSubview(this, columnHeader)?.setWidth(columnHeader.width + columnHeader.cellWidthAdj);
             },
             
             notifyHdrVisibilityChange: function(columnHeader) {
-                const sv = getRowSubview(this, columnHeader);
-                if (sv) sv.setVisible(columnHeader.visible);
+                getRowSubview(this, columnHeader)?.setVisible(columnHeader.visible);
             }
         });
     
@@ -21395,7 +21366,7 @@ new JS.Singleton('GlobalMouse', {
         // Accessors ///////////////////////////////////////////////////////////
         setSortIconColor: function(v) {
             this.sortIconColor = v;
-            if (this.sortIcon) this.sortIcon.setTextColor(v);
+            this.sortIcon?.setTextColor(v);
         },
         
         /** @overrides myt.GridColHdr */
@@ -22258,8 +22229,7 @@ new JS.Singleton('GlobalMouse', {
             @returns {undefined} */
         __updateWidth: function(event) {
             // Only resize the active panel
-            const panel = this.getActivePanel();
-            if (panel) panel.setWidth(event.value);
+            this.getActivePanel()?.setWidth(event.value);
         },
         
         /** @private
@@ -22267,8 +22237,7 @@ new JS.Singleton('GlobalMouse', {
             @returns {undefined} */
         __updateHeight: function(event) {
             // Only resize the active panel
-            const panel = this.getActivePanel();
-            if (panel) panel.setHeight(event.value);
+            this.getActivePanel()?.setHeight(event.value);
         },
         
         /** Gets the selected panel.
@@ -22745,7 +22714,7 @@ new JS.Singleton('GlobalMouse', {
                 dropParent = this.dropParent;
             if (dropClass && dropParent) {
                 const pos = pkg.DomElementProxy.getRelativePosition(this.getIDE(), dropParent.getIDE());
-                return new dropClass(dropParent, Object.assign({}, this.dropClassAttrs, {x:pos.x ?? 0, y:pos.y ?? 0}));
+                return new dropClass(dropParent, {...this.dropClassAttrs, x:pos.x ?? 0, y:pos.y ?? 0});
             }
         }
     });
@@ -23206,7 +23175,7 @@ myt.Eventable = new JS.Class('Eventable', {
         
         makeSVG = (elementName, parentElem) => {
             const svgElem = document.createElementNS('http://www.w3.org/2000/svg', elementName);
-            if (parentElem) parentElem.appendChild(svgElem);
+            parentElem?.appendChild(svgElem);
             return svgElem;
         },
          

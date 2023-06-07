@@ -1,6 +1,5 @@
 (pkg => {
-    const objectAssign = Object.assign,
-        
+    const 
         /*  Function to convert a stored cookie value into a value that can be returned. */
         converted = (s, useJson) => {
             // This is a quoted cookie as according to RFC2068, unescape
@@ -38,7 +37,7 @@
                             before it is returned.
                 @returns {*} - The cookie value string or a parsed cookie value. */
             read: (key, options) => {
-                options = objectAssign({}, Cookie.defaults, options);
+                options = {...Cookie.defaults, ...options};
                 
                 const decodeFunc = options.raw ? str => str : str => decodeURIComponent(str.split('+').join(' ')),
                     useJson = options.json,
@@ -73,7 +72,7 @@
                         json:boolean If true JSON.stringify will be used to encode the cookie value.
                 @returns {undefined} */
             write: (key, value, options) => {
-                options = objectAssign({}, Cookie.defaults, options);
+                options = {...Cookie.defaults, ...options};
                 
                 if (typeof options.expires === 'number') {
                     const days = options.expires,
@@ -98,12 +97,11 @@
             /** Removes a stored cookie by setting its expires option to -1 days.
                 @param {string} key - the name of the cookie to remove.
                 @param {?Object} options - Options used to read/write the cookie.
-                @returns {boolean} - true if a cookie was removed, 
-                    false otherwise. */
+                @returns {boolean} - true if a cookie was removed, false otherwise. */
             remove: (key, options) => {
                 if (Cookie.read(key, options) !== undefined) {
                     // Must not alter options, thus extending a fresh object.
-                    Cookie.write(key, '', objectAssign({}, options, {expires: -1}));
+                    Cookie.write(key, '', {...options, expires: -1});
                     return true;
                 }
                 return false;

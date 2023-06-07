@@ -101,7 +101,7 @@
         
         makeSVG = (elementName, parentElem) => {
             const svgElem = document.createElementNS('http://www.w3.org/2000/svg', elementName);
-            if (parentElem) parentElem.appendChild(svgElem);
+            parentElem?.appendChild(svgElem);
             return svgElem;
         },
          

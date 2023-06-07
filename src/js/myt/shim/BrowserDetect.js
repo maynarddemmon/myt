@@ -14,12 +14,11 @@
         pre;
     
     const searchString = data => {
-            let dataItem, 
-                i = data.length;
+            let i = data.length;
             while (i) {
-                dataItem = data[--i];
+                const dataItem = data[--i];
                 versionSearchString = dataItem.ver ?? dataItem.id;
-                if ((dataItem.str && dataItem.str.includes(dataItem.sub)) || dataItem.prop) return dataItem.id;
+                if (dataItem.str?.includes(dataItem.sub) || dataItem.prop) return dataItem.id;
             }
         },
         

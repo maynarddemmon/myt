@@ -10,12 +10,12 @@
         globalIdle = G.idle,
         doc = window.document;
     
-    /** Provides events when the window's body is resized. Registered with 
-        myt.global as 'windowResize'.
+    /** Provides events when the window's body is resized. Registered with myt.global 
+        as 'windowResize'.
         
         Events:
-            resize:object Fired when the window.document.body is resized. The 
-                type is 'resize' and the value is an object containing:
+            resize:object Fired when the window.document.body is resized. The type is 'resize' and 
+                the value is an object containing:
                     w:number the new window.document.body clientWidth.
                     h:number the new window.document.body clientHeight.
         

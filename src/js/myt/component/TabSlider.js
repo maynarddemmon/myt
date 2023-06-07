@@ -118,7 +118,7 @@
             /** @overrides myt.Selectable */
             setSelected: function(v) {
                 this.callSuper(v);
-                if (this.button) this.button.updateUI();
+                this.button?.updateUI();
             },
             
             setTabId: function(v) {this.tabId = v;},
@@ -167,8 +167,7 @@
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.Disableable */
             doDisabled: function() {
-                const btn = this.button;
-                if (btn) btn.setDisabled(this.disabled);
+                this.button?.setDisabled(this.disabled);
             },
             
             /** Called whenever the button is redrawn. Gives subclasses/instances a chance to do 
@@ -273,8 +272,7 @@
                 
                 this.callSuper(parent, attrs);
                 
-                const button = this.button;
-                button.label = new pkg.Text(button, {
+                this.button.label = new pkg.Text(this.button, {
                     domClass:'myt-Text mytTextTabSliderLabel', ignorePlacement:true,
                     text:this.text, align:'center', valign:'middle', 
                     textColor:this.__getTextColor()
@@ -289,8 +287,7 @@
             setText: function(v) {
                 if (this.text !== v) {
                     this.text = v;
-                    const button = this.button;
-                    if (button && button.label) button.label.setText(v);
+                    this.button?.label?.setText(v);
                 }
             },
             
@@ -298,8 +295,7 @@
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.TabSlider */
             notifyButtonRedraw: function() {
-                const label = this.button.label;
-                if (label) label.setTextColor(this.__getTextColor());
+                this.button.label?.setTextColor(this.__getTextColor());
             },
             
             /** @private
@@ -380,7 +376,7 @@
             setSpacing: function(v) {
                 if (this.spacing !== v) {
                     this.spacing = v;
-                    if (this.layout) this.layout.setSpacing(v);
+                    this.layout?.setSpacing(v);
                 }
             },
             

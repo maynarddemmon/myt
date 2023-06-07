@@ -8,12 +8,12 @@
         overView;
         
     const
-        /*  The list of myt.AutoScrollers currently registered for notification
-            when drags start and stop. */
+        /*  The list of myt.AutoScrollers currently registered for notification when drags start 
+            and stop. */
         autoScrollers = [],
         
-        /*  The list of myt.DropTargets currently registered for notification 
-            when drag and drop events occur. */
+        /*  The list of myt.DropTargets currently registered for notification when drag and drop 
+            events occur. */
         dropTargets = [],
         
         setOverView = v => {
@@ -99,17 +99,13 @@
     /** Provides global drag and drop functionality.
         
         Events:
-            dragLeave:myt.DropTarget Fired when a myt.Dropable is dragged out 
-                of the drop target.
-            dragEnter:myt.DropTarget Fired when a myt.Dropable is dragged over
-                the drop target.
-            startDrag:object Fired when a drag starts. Value is the object
+            dragLeave:myt.DropTarget Fired when a myt.Dropable is dragged out of the drop target.
+            dragEnter:myt.DropTarget Fired when a myt.Dropable is dragged over the drop target.
+            startDrag:object Fired when a drag starts. Value is the object being dragged.
+            stopDrag:object Fired when a drag ends. Value is the object that is no longer 
                 being dragged.
-            stopDrag:object Fired when a drag ends. Value is the object 
-                that is no longer being dragged.
-            drop:object Fired when a drag ends over a drop target. The value 
-                is an array containing the dropable at index 0 and the drop 
-                target at index 1.
+            drop:object Fired when a drag ends over a drop target. The value is an array containing 
+                the dropable at index 0 and the drop target at index 1.
         
         @class */
     new JS.Singleton('GlobalDragManager', {
@@ -166,15 +162,13 @@
         },
         
         /** Called by a myt.Dropable when a drag stops.
-            @param {!Object} event -The mouse event that triggered the 
-                stop drag.
-            @param {!Object} dropable - The myt.Dropable that stopped 
-                being dragged.
+            @param {!Object} event -The mouse event that triggered the stop drag.
+            @param {!Object} dropable - The myt.Dropable that stopped being dragged.
             @param {boolean} isAbort
             @returns {undefined} */
         stopDrag: (event, dropable, isAbort) => {
             dropable.notifyDropped(overView, isAbort);
-            if (overView && !isAbort) overView.notifyDrop(dropable);
+            if (!isAbort) overView?.notifyDrop(dropable);
             
             setOverView();
             setDragView();
@@ -187,9 +181,8 @@
             @param {!Object} dropable - The myt.Dropable that is being dragged.
             @returns {undefined} */
         updateDrag: (event, dropable) => {
-            // Get the frontmost myt.DropTarget that is registered with this 
-            // manager and is under the current mouse location and has a 
-            // matching drag group.
+            // Get the frontmost myt.DropTarget that is registered with this manager and is under 
+            // the current mouse location and has a matching drag group.
             const filteredDropTargets = filterList(dropable, dropTargets);
             let i = filteredDropTargets.length,
                 topDropTarget;

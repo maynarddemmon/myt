@@ -368,7 +368,7 @@
                 if (FocusObservable.EVENT_TYPES[type]) {
                     const self = this;
                     return domEvent => {
-                        if (!domEvent) domEvent = window.event;
+                        domEvent ??= window.event;
                         
                         // OPTIMIZATION: prevent extra focus events under special circumstances. 
                         // See myt.VariableLayout for more detail.

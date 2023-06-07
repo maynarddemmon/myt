@@ -598,7 +598,7 @@
         
         /** @overrides */
         destroy: function() {
-            if (this.__resizeObserver) this.__resizeObserver.unobserve(this.getIDE());
+            this.__resizeObserver?.unobserve(this.getIDE());
             this.callSuper();
         },
         

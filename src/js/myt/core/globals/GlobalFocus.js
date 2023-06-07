@@ -30,7 +30,7 @@
             if (activeElem) {
                 elem = startElem = activeElem;
                 model = startElem.model;
-                if (!model) model = globalFocus.findModelForDomElement(startElem);
+                model ??= globalFocus.findModelForDomElement(startElem);
                 if (model) {
                     const focusTrap = model.getFocusTrap(ignoreFocusTrap);
                     if (focusTrap) rootElem = focusTrap.getIDE();
@@ -95,7 +95,7 @@
                             ) {
                                 // Make sure the dom element isn't inside a maskFocus
                                 model = globalFocus.findModelForDomElement(elem);
-                                if (model && model.searchAncestorsOrSelf(n => n.maskFocus === true)) {
+                                if (model?.searchAncestorsOrSelf(n => n.maskFocus === true)) {
                                     // Is a masked dom element so ignore.
                                 } else {
                                     elem.focus();
@@ -195,16 +195,14 @@
             @param {boolean} ignoreFocusTrap - If true focus traps will be skipped over.
             @returns {undefined} */
         next: ignoreFocusTrap => {
-            const next = traverse(true, ignoreFocusTrap);
-            if (next) next.focus();
+            traverse(true, ignoreFocusTrap)?.focus();
         },
         
         /** Move focus to the previous focusable element.
             @param {boolean} ignoreFocusTrap - If true focus traps will be skipped over.
             @returns {undefined} */
         prev: ignoreFocusTrap => {
-            const prev = traverse(false, ignoreFocusTrap);
-            if (prev) prev.focus();
+            traverse(false, ignoreFocusTrap)?.focus();
         },
         
         /** Finds the closest model for the provided dom element.

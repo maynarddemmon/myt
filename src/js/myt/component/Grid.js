@@ -99,7 +99,7 @@
                     // Distribute
                     resizeInfo.forEach(info => {info.hdr.setValue(info.hdr.value + info.amt);});
                     
-                    if (nextFunc) nextFunc(extra);
+                    nextFunc?.(extra);
                 }
             }
         },
@@ -216,7 +216,7 @@
         
         updateTextWidth = gridHeader => {
             const textView = gridHeader.textView;
-            if (textView) textView.setWidth(gridHeader.width - gridHeader.outset - textView.x);
+            textView?.setWidth(gridHeader.width - gridHeader.outset - textView.x);
         },
         
         /** Coordinates the behavior of a grid.
@@ -281,9 +281,9 @@
             setLastColumn: function(v) {
                 const cur = this.lastColumn;
                 if (cur !== v) {
-                    if (cur) cur.setLast(false);
+                    cur?.setLast(false);
                     this.lastColumn = v;
-                    if (v) v.setLast(true);
+                    v?.setLast(true);
                 }
             },
             
@@ -691,7 +691,7 @@
             setGridController: function(v) {
                 const existing = this.gridController;
                 if (existing !== v) {
-                    if (existing) existing.notifyRemoveHdr(this);
+                    existing?.notifyRemoveHdr(this);
                     this.gridController = v;
                     if (this.inited && v) {
                         v.notifyAddHdr(this);
@@ -714,7 +714,7 @@
                     oldMinValue = self.minValue ?? 0, 
                     gc = self.gridController;
                 self.callSuper(v);
-                if (gc && self.inited && oldMinValue !== self.minValue) gc.setMinWidth(gc.minWidth + self.minValue - oldMinValue);
+                if (self.inited && oldMinValue !== self.minValue) gc?.setMinWidth(gc.minWidth + self.minValue - oldMinValue);
             },
             
             /** @overrides myt.BoundedValueComponent */
@@ -724,34 +724,31 @@
                     gc = self.gridController;
                 v ??= defaultMaxValue;
                 self.callSuper(v);
-                if (gc && self.inited && oldMaxValue !== self.maxValue) gc.setMaxWidth(gc.maxWidth + self.maxValue - oldMaxValue);
+                if (self.inited && oldMaxValue !== self.maxValue) gc?.setMaxWidth(gc.maxWidth + self.maxValue - oldMaxValue);
             },
             
             /** @overrides myt.View */
             setWidth: function(v, suppressEvent) {
                 const self = this,
-                    cur = self.width,
-                    gc = self.gridController;
+                    cur = self.width;
                 self.callSuper(v, suppressEvent);
-                if (gc && self.inited && cur !== self.width) gc.notifyHdrWidthChange(self);
+                if (self.inited && cur !== self.width) self.gridController?.notifyHdrWidthChange(self);
             },
             
             /** @overrides myt.View */
             setX: function(v) {
                 const self = this,
-                    cur = self.x,
-                    gc = self.gridController;
+                    cur = self.x;
                 self.callSuper(v);
-                if (gc && self.inited && cur !== self.x) gc.notifyHdrXChange(self);
+                if (self.inited && cur !== self.x) self.gridController?.notifyHdrXChange(self);
             },
             
             /** @overrides myt.View */
             setVisible: function(v) {
                 const self = this,
-                    cur = self.visible,
-                    gc = self.gridController;
+                    cur = self.visible;
                 self.callSuper(v);
-                if (self.inited && gc && cur !== self.visible) gc.notifyHdrVisibilityChange(self);
+                if (self.inited && cur !== self.visible) self.gridController?.notifyHdrVisibilityChange(self);
             }
         }),
         
@@ -783,27 +780,24 @@
             setGridController: function(v) {
                 const existing = this.gridController;
                 if (existing !== v) {
-                    if (existing) existing.notifyRemoveRow(this);
+                    existing?.notifyRemoveRow(this);
                     this.gridController = v;
-                    if (this.inited && v) v.notifyAddRow(this);
+                    if (this.inited) v?.notifyAddRow(this);
                 }
             },
             
             
             // Methods /////////////////////////////////////////////////////////
             notifyHdrXChange: function(columnHeader) {
-                const sv = getRowSubview(this, columnHeader);
-                if (sv) sv.setX(columnHeader.x + columnHeader.cellXAdj);
+                getRowSubview(this, columnHeader)?.setX(columnHeader.x + columnHeader.cellXAdj);
             },
             
             notifyHdrWidthChange: function(columnHeader) {
-                const sv = getRowSubview(this, columnHeader);
-                if (sv) sv.setWidth(columnHeader.width + columnHeader.cellWidthAdj);
+                getRowSubview(this, columnHeader)?.setWidth(columnHeader.width + columnHeader.cellWidthAdj);
             },
             
             notifyHdrVisibilityChange: function(columnHeader) {
-                const sv = getRowSubview(this, columnHeader);
-                if (sv) sv.setVisible(columnHeader.visible);
+                getRowSubview(this, columnHeader)?.setVisible(columnHeader.visible);
             }
         });
     
@@ -1027,7 +1021,7 @@
         // Accessors ///////////////////////////////////////////////////////////
         setSortIconColor: function(v) {
             this.sortIconColor = v;
-            if (this.sortIcon) this.sortIcon.setTextColor(v);
+            this.sortIcon?.setTextColor(v);
         },
         
         /** @overrides myt.GridColHdr */

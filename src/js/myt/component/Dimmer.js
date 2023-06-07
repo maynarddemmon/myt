@@ -99,7 +99,7 @@
                 if (self.visible) {
                     self.setVisible(false);
                     
-                    if (!ignoreRestoreFocus && self.restoreFocus && self.prevFocus) self.prevFocus.focus();
+                    if (!ignoreRestoreFocus && self.restoreFocus) self.prevFocus?.focus();
                 }
             }
         }),
@@ -162,7 +162,7 @@
             initNode: function(parent, attrs) {
                 const self = this,
                     viewAttrs = {name:'content', ignorePlacement:true},
-                    centeredViewAttrs = Object.assign({}, viewAttrs, {align:'center', valign:'middle'});
+                    centeredViewAttrs = {...viewAttrs, align:'center', valign:'middle'};
                 
                 self.defaultPlacement = 'content';
                 
@@ -189,14 +189,15 @@
                         });
                         break;
                     case 'parent':
-                        new View(self, Object.assign(viewAttrs, {
+                        new View(self, {
+                            ...viewAttrs, 
                             x:self.marginLeft,
                             y:self.marginTop,
                             percentOfParentWidthOffset:-self.marginLeft - self.marginRight,
                             percentOfParentHeightOffset:-self.marginTop - self.marginBottom,
                             percentOfParentWidth:100,
-                            percentOfParentHeight:100,
-                        }), [SizeToParent]);
+                            percentOfParentHeight:100
+                        }, [SizeToParent]);
                         break;
                     case 'basic':
                         new View(self, centeredViewAttrs);

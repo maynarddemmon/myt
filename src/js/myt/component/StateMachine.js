@@ -39,7 +39,7 @@
             // transition completes.
             if (stateMachine.__transInProgress) {
                 let deferredTransitions = stateMachine.__deferredTransitions;
-                if (!deferredTransitions) deferredTransitions = stateMachine.__deferredTransitions = [];
+                deferredTransitions ??= stateMachine.__deferredTransitions = [];
                 deferredTransitions.unshift(args);
             } else {
                 stateMachine.__transInProgress = true;
@@ -57,7 +57,7 @@
                 }
                 
                 let to = stateMachine.map[stateMachine.current][transitionName];
-                if (!to) to = stateMachine.map[WILDCARD][transitionName];
+                to ??= stateMachine.map[WILDCARD][transitionName];
                 if (to) {
                     stateMachine.__pendingTransition = transitionName;
                     stateMachine.__transDestinationState = to;

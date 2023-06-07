@@ -193,7 +193,7 @@
             
             if (self.parent !== newParent) {
                 // Abort if the new parent is in the destroyed life-cycle state.
-                if (newParent && newParent.destroyed) return;
+                if (newParent?.destroyed) return;
                 
                 // Remove ourselves from our existing parent if we have one.
                 const curParent = self.parent;

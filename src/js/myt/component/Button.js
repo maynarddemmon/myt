@@ -313,12 +313,11 @@
         },
         
         setShrinkToFit: function(v) {
-            const self = this,
-                textView = self.textView;
+            const self = this;
             if (self.shrinkToFit !== v) {
                 self.shrinkToFit = v;
                 if (self.inited) {
-                    if (textView) textView.setWhiteSpace(v ? 'nowrap' : 'normal');
+                    self.textView?.setWhiteSpace(v ? 'nowrap' : 'normal');
                     self.fireEvent('shrinkToFit', v);
                 }
             }

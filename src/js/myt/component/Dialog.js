@@ -58,8 +58,6 @@
         
         makeTag = pkg.FontAwesome.makeTag,
         
-        objectAssign = Object.assign,
-        
         mathMin = Math.min,
         mathMax = Math.max,
         
@@ -101,7 +99,7 @@
         
         initializePaletteLookup = palette => {
             palette.forEach(color => {
-                if (color && color.length === 7) color += 'ff';
+                if (color?.length === 7) color += 'ff';
                 paletteLookup[color] = true;
             });
         },
@@ -132,7 +130,7 @@
                 }
             },
             setBgColor: function(v) {
-                if (this.colorView) this.colorView.setBgColor(v);
+                this.colorView?.setBgColor(v);
                 this.setTooltip(v);
             },
             doActivated: function() {
@@ -625,7 +623,7 @@
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides */
             initNode: function(parent, attrs) {
-                const opt = objectAssign({
+                const opt = {
                     current:null,
                     dateOnly:false,
                     timeOnly:false,
@@ -638,8 +636,9 @@
                     maxDate:null,
                     minTime:'00:00',
                     maxTime:'23:59',
-                    allowedDays:null // An array of day nums: [1,2,3,4,5] for week days only.
-                }, attrs.opt);
+                    allowedDays:null, // An array of day nums: [1,2,3,4,5] for week days only.
+                    ...attrs.opt
+                };
                 delete attrs.opt;
                 
                 this.callSuper(parent, attrs);
@@ -927,7 +926,7 @@
                 this.destroyContent();
                 
                 this.content.setVisible(false);
-                if (opts && opts.bgColor) this.overlay.setBgColor(opts.bgColor);
+                if (opts?.bgColor) this.overlay.setBgColor(opts.bgColor);
                 
                 this.show();
             },
@@ -947,7 +946,7 @@
                     content = self.content, 
                     closeBtn = content.closeBtn;
                 
-                opts = objectAssign({}, Dialog.WRAP_TEXT_DEFAULTS, opts);
+                opts = {...Dialog.WRAP_TEXT_DEFAULTS, ...opts};
                 
                 self.destroyContent();
                 
@@ -1020,22 +1019,22 @@
                 }
                 
                 // Set initial focus
-                if (contentContainer.initialFocus) contentContainer.initialFocus.focus();
+                contentContainer.initialFocus?.focus();
                 
-                if (afterSetupFunc) afterSetupFunc(self);
+                afterSetupFunc?.(self);
             },
             
             showConfirm: function(msg, callbackFunction, opts) {
                 const self = this;
                 
-                opts = objectAssign({}, Dialog.CONFIRM_DEFAULTS, opts);
+                opts = {...Dialog.CONFIRM_DEFAULTS, ...opts};
                 
                 self.showMessage(msg, callbackFunction, opts);
                 self.setupFooterButtons(self.content.msg, opts);
             },
             
             showContentConfirm: function(contentBuilderFunc, callbackFunction, opts, afterSetupFunc) {
-                opts = objectAssign({}, Dialog.CONFIRM_DEFAULTS, opts);
+                opts = {...Dialog.CONFIRM_DEFAULTS, ...opts};
                 
                 const self = this,
                     content = self.content,
@@ -1070,9 +1069,9 @@
                 self.setupFooterButtons(contentContainer, opts);
                 
                 // Set initial focus
-                if (contentContainer.initialFocus) contentContainer.initialFocus.focus();
+                contentContainer.initialFocus?.focus();
                 
-                if (afterSetupFunc) afterSetupFunc(self);
+                afterSetupFunc?.(self);
             },
             
             /** Shows a dialog with a spinner and a message and no standard cancel button.
@@ -1084,7 +1083,7 @@
                 const self = this,
                     content = self.content;
                 
-                opts = objectAssign({}, Dialog.NO_WRAP_TEXT_DEFAULTS, opts);
+                opts = {...Dialog.NO_WRAP_TEXT_DEFAULTS, ...opts};
                 
                 self.destroyContent();
                 
@@ -1117,7 +1116,7 @@
                 const self = this,
                     content = self.content,
                     closeBtn = content.closeBtn;
-                opts = objectAssign({}, Dialog.COLOR_PICKER_DEFAULTS, opts);
+                opts = {...Dialog.COLOR_PICKER_DEFAULTS, ...opts};
                 self.destroyContent();
                 
                 // Set the callback function to one wrapped to handle each button type.
@@ -1157,7 +1156,7 @@
                 const self = this,
                     content = self.content,
                     closeBtn = content.closeBtn;
-                opts = objectAssign({}, Dialog.DATE_PICKER_DEFAULTS, opts);
+                opts = {...Dialog.DATE_PICKER_DEFAULTS, ...opts};
                 self.destroyContent();
                 
                 // Set the callback function to one wrapped to handle each button type.

@@ -199,7 +199,7 @@
                 dropParent = this.dropParent;
             if (dropClass && dropParent) {
                 const pos = pkg.DomElementProxy.getRelativePosition(this.getIDE(), dropParent.getIDE());
-                return new dropClass(dropParent, Object.assign({}, this.dropClassAttrs, {x:pos.x ?? 0, y:pos.y ?? 0}));
+                return new dropClass(dropParent, {...this.dropClassAttrs, x:pos.x ?? 0, y:pos.y ?? 0});
             }
         }
     });

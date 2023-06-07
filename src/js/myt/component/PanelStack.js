@@ -54,8 +54,7 @@
             @returns {undefined} */
         __updateWidth: function(event) {
             // Only resize the active panel
-            const panel = this.getActivePanel();
-            if (panel) panel.setWidth(event.value);
+            this.getActivePanel()?.setWidth(event.value);
         },
         
         /** @private
@@ -63,8 +62,7 @@
             @returns {undefined} */
         __updateHeight: function(event) {
             // Only resize the active panel
-            const panel = this.getActivePanel();
-            if (panel) panel.setHeight(event.value);
+            this.getActivePanel()?.setHeight(event.value);
         },
         
         /** Gets the selected panel.
