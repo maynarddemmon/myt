@@ -14870,7 +14870,7 @@ new JS.Singleton('GlobalMouse', {
         
         /** @overrides */
         doItemActivated: function(itemView) {
-            this.setValue(itemView.text);
+            this.setValue(itemView.value == null ? itemView.text : itemView.value);
             this.callSuper(itemView);
         },
         
