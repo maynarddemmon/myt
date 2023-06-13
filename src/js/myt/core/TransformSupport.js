@@ -156,23 +156,18 @@
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides
             @private */
-        __updateBounds: function(w, h) {
-            const r = this.rotation,
-                sx = this.scaleX,
-                sy = this.scaleY,
-                notScaled = (sx == null || sx === 1) && (sy == null || sy === 1);
-            if (notScaled && (r == null || r === 0 || r === 180)) {
+        __updateBounds: function(width, height) {
+            const {rotation, scaleX, scaleY} = this,
+                notScaled = (scaleX == null || scaleX === 1) && (scaleY == null || scaleY === 1);
+            if (notScaled && (rotation == null || rotation === 0 || rotation === 180)) {
                 // Do nothing
-            } else if (notScaled && (r === 90 || r === 270)) {
-                w = this.height;
-                h = this.width;
+            } else if (notScaled && (rotation === 90 || rotation === 270)) {
+                // Swap x and y.
+                ({width:height, height:width} = this);
             } else {
-                const b = this.getODE().getBoundingClientRect();
-                w = b.width;
-                h = b.height;
+                ({width, height} = this.getODE().getBoundingClientRect());
             }
-            
-            this.callSuper(w, h);
+            this.callSuper(width, height);
         }
     });
 })(myt);

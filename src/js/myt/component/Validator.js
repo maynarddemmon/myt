@@ -25,9 +25,6 @@
         
         /** Tests if a value is "valid" or not.
             
-            Events:
-                None
-            
             Attributes:
                 id:string the ideally unique ID for this Validator so it can be stored and 
                     retreived from the myt.global.validators registry.
@@ -250,8 +247,7 @@
         @class */
     pkg.CompoundValidator = new JSClass('CompoundValidator', Validator, {
         // Constructor /////////////////////////////////////////////////////////
-        /** Creates a new CompoundValidator for the ID and 0 or more Validators
-            provided.
+        /** Creates a new CompoundValidator for the ID and 0 or more Validators provided.
             @param {string} id
             @param arguments:args - Every argument after the first argument must be a myt.Validator 
                 or a myt.Validator ID from the myt.global.validators registry.*/

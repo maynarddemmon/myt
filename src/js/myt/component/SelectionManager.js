@@ -120,10 +120,7 @@
             /** Gets the currently selected items.
                 @returns {!Array} The selected items. */
             getSelected: function() {
-                const retval = [], 
-                    items = this.__selected;
-                for (const key in items) retval.push(items[key]);
-                return retval;
+                return Object.values(this.__selected);
             },
             
             /** Selects the provided item.

@@ -117,13 +117,15 @@
             hideTip: function(event) {
                 clearCheckTipTimer(this);
                 
-                const ttp = this.tooltip.parent;
-                this.detachFromDom(ttp, 'hideTip', 'mousedown', true);
-                this.detachFromDom(ttp, 'hideTip', 'mouseup', true);
-                this.detachFromDom(GlobalMouse, '__hndl_mousemove', 'mousemove', true);
-                
-                this.nextTipDelay = this.tipDelay;
-                this.setVisible(false);
+                const ttp = this.tooltip?.parent;
+                if (ttp) {
+                    this.detachFromDom(ttp, 'hideTip', 'mousedown', true);
+                    this.detachFromDom(ttp, 'hideTip', 'mouseup', true);
+                    this.detachFromDom(GlobalMouse, '__hndl_mousemove', 'mousemove', true);
+                    
+                    this.nextTipDelay = this.tipDelay;
+                    this.setVisible(false);
+                }
                 
                 // Don't consume mouse event since we just want to close the tip as a side effect 
                 // of the user action. The typical case for this is the user clicking on a button 

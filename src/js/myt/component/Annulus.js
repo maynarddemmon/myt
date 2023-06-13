@@ -32,29 +32,28 @@
             
             const mathCos = math.cos,
                 mathSin = math.sin,
-                points = [
-                    [center + outerRadius * mathCos(startAngle), center + outerRadius * mathSin(startAngle)],
-                    [center + outerRadius * mathCos(endAngle),   center + outerRadius * mathSin(endAngle)],
-                    [center + innerRadius * mathCos(endAngle),   center + innerRadius * mathSin(endAngle)],
-                    [center + innerRadius * mathCos(startAngle), center + innerRadius * mathSin(startAngle)]
-                ],
-                commands = ['M' + points[0].join()];
+                outerStartPoint = [center + outerRadius * mathCos(startAngle), center + outerRadius * mathSin(startAngle)],
+                outerEndPoint =   [center + outerRadius * mathCos(endAngle),   center + outerRadius * mathSin(endAngle)],
+                innerEndPoint =   [center + innerRadius * mathCos(endAngle),   center + innerRadius * mathSin(endAngle)],
+                innerStartPoint = [center + innerRadius * mathCos(startAngle), center + innerRadius * mathSin(startAngle)],
+                
+                commands = ['M' + outerStartPoint.join()];
             if (isFull) {
                 commands.push(
-                    'A' + [outerRadius, outerRadius, 0, 1, 1, points[1]].join(),
-                    'A' + [outerRadius, outerRadius, 0, 1, 1, points[0]].join(),
-                    'L' + points[2].join(),
-                    'A' + [innerRadius, innerRadius, 0, 1, 0, points[3]].join(),
-                    'A' + [innerRadius, innerRadius, 0, 1, 0, points[2]].join()
+                    'A' + [outerRadius, outerRadius, 0, 1, 1, outerEndPoint].join(),
+                    'A' + [outerRadius, outerRadius, 0, 1, 1, outerStartPoint].join(),
+                    'L' + innerEndPoint.join(),
+                    'A' + [innerRadius, innerRadius, 0, 1, 0, innerStartPoint].join(),
+                    'A' + [innerRadius, innerRadius, 0, 1, 0, innerEndPoint].join()
                 );
             } else {
                 const largeArc = (angleDiff % (2 * PI)) > PI ? 1 : 0,
                     halfThickness = thickness / 2;
                 commands.push(
-                    'A' + [outerRadius, outerRadius, 0, largeArc, 1, points[1]].join(),
-                    annulus.endCapRounding ? 'A' + [halfThickness, halfThickness, 0, 0, 1, points[2]].join() : 'L' + points[2].join(),
-                    'A' + [innerRadius, innerRadius, 0, largeArc, 0, points[3]].join(),
-                    annulus.startCapRounding ? 'A' + [halfThickness, halfThickness, 0, 0, 1, points[0]].join() : ''
+                    'A' + [outerRadius, outerRadius, 0, largeArc, 1, outerEndPoint].join(),
+                    annulus.endCapRounding ? 'A' + [halfThickness, halfThickness, 0, 0, 1, innerEndPoint].join() : 'L' + innerEndPoint.join(),
+                    'A' + [innerRadius, innerRadius, 0, largeArc, 0, innerStartPoint].join(),
+                    annulus.startCapRounding ? 'A' + [halfThickness, halfThickness, 0, 0, 1, outerStartPoint].join() : ''
                 );
             }
             commands.push('z');

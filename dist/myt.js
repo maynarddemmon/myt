@@ -2534,7 +2534,9 @@ new JS.Singleton('GlobalError', {
             getTruePosition: elem => {
                 if (elem) {
                     const pos = elem.getBoundingClientRect();
-                    return {x:pos.left + GLOBAL.scrollX, y:pos.top + GLOBAL.scrollY};
+                    pos.left += GLOBAL.scrollX;
+                    pos.top += GLOBAL.scrollY;
+                    return pos;
                 }
             },
             
@@ -3091,9 +3093,7 @@ new JS.Singleton('GlobalError', {
                     @param {!Object} event Event value is a dom event.
                     @returns {!Object} An object with 'x' and 'y' keys containing the x and y 
                         mouse position. */
-                getMouseFromEvent: event => {
-                    return {x:event.value.pageX, y:event.value.pageY};
-                },
+                getMouseFromEvent: event => ({x:event.value.pageX, y:event.value.pageY}),
                 
                 getMouseFromEventRelativeToView: (event, view) => {
                     const viewPos = view.getPagePosition(),
@@ -3946,18 +3946,15 @@ new JS.Singleton('GlobalTouch', {
         
         adjustListOfViews = (svs, isX, adjAmount, compounded, i=0) => {
             const len = svs.length;
-            let compoundAdj = adjAmount;
-            for (; i < len; i++) {
-                const sv = svs[i];
-                adjustPositionAttrOnChild(sv, isX, compoundAdj);
+            for (let compoundAdj = adjAmount; i < len; i++) {
+                adjustPositionAttrOnChild(svs[i], isX, compoundAdj);
                 if (compounded) compoundAdj += adjAmount;
             }
         },
         
         adjustListOfFlows = (flows, adjAmount, compounded, i=0) => {
             const len = flows.length;
-            let compoundAdj = adjAmount;
-            for (; i < len;) {
+            for (let compoundAdj = adjAmount; i < len;) {
                 flows[i++].crossPos += compoundAdj;
                 if (compounded) compoundAdj += adjAmount;
             }
@@ -6850,8 +6847,10 @@ myt.Destructible = new JS.Module('Destructible', {
             self.opacity = 1;
             self.visible = true;
             
-            self.tagName = attrs.tagName;
-            delete attrs.tagName;
+            if (attrs.tagName) {
+                self.tagName = attrs.tagName;
+                delete attrs.tagName;
+            }
             self.setDomElement(self.createOurDomElement(parent));
             
             self.callSuper(parent, attrs);
@@ -6918,7 +6917,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 len = children.length;
             for (let i = 0; i < len;) {
                 const sv = children[i++].model;
-                if (sv && sv.parent === self) retval.push(sv);
+                if (sv?.parent === self) retval.push(sv);
             }
             return retval;
         },
@@ -7226,8 +7225,7 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         setOutlineWidth: function(v) {
-            this.outlineWidth = v || 0;
-            this.getODS().outlineWidth = this.outlineWidth + 'px';
+            this.getODS().outlineWidth = (this.outlineWidth = v || 0) + 'px';
         },
         
         setOutlineStyle: function(v) {
@@ -7252,8 +7250,7 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         setBorderWidth: function(v) {
-            this.borderWidth = v || 0;
-            this.getODS().borderWidth = this.borderWidth + 'px';
+            this.getODS().borderWidth = (this.borderWidth = v || 0) + 'px';
         },
         
         setBorderStyle: function(v) {
@@ -7699,9 +7696,8 @@ myt.Destructible = new JS.Module('Destructible', {
         containsPoint: function(locX, locY, referenceFrameDomElem) {
             const outerElem = this.getODE();
             if (!outerElem) return false;
-            
-            const pos = DomElementProxy.getRelativePosition(outerElem, referenceFrameDomElem);
-            return rectContainsPoint(locX, locY, pos.x, pos.y, this.width, this.height);
+            const {x, y} = DomElementProxy.getRelativePosition(outerElem, referenceFrameDomElem);
+            return rectContainsPoint(locX, locY, x, y, this.width, this.height);
         },
         
         /** Checks if the provided location is visible on this view and is not masked by the 
@@ -7710,9 +7706,9 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {number} locY
             @returns {boolean} true if visible, false otherwise. */
         isPointVisible: function(locX, locY) {
-            const pos = this.getPagePosition(true);
+            const {x, y} = this.getPagePosition(true);
             calculateEffectiveScale(this);
-            return isPointVisible(this, locX - pos.x, locY - pos.y);
+            return isPointVisible(this, locX - x, locY - y);
         },
         
         getEffectiveScale: function() {
@@ -7888,23 +7884,18 @@ myt.Destructible = new JS.Module('Destructible', {
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides
             @private */
-        __updateBounds: function(w, h) {
-            const r = this.rotation,
-                sx = this.scaleX,
-                sy = this.scaleY,
-                notScaled = (sx == null || sx === 1) && (sy == null || sy === 1);
-            if (notScaled && (r == null || r === 0 || r === 180)) {
+        __updateBounds: function(width, height) {
+            const {rotation, scaleX, scaleY} = this,
+                notScaled = (scaleX == null || scaleX === 1) && (scaleY == null || scaleY === 1);
+            if (notScaled && (rotation == null || rotation === 0 || rotation === 180)) {
                 // Do nothing
-            } else if (notScaled && (r === 90 || r === 270)) {
-                w = this.height;
-                h = this.width;
+            } else if (notScaled && (rotation === 90 || rotation === 270)) {
+                // Swap x and y.
+                ({width:height, height:width} = this);
             } else {
-                const b = this.getODE().getBoundingClientRect();
-                w = b.width;
-                h = b.height;
+                ({width, height} = this.getODE().getBoundingClientRect());
             }
-            
-            this.callSuper(w, h);
+            this.callSuper(width, height);
         }
     });
 })(myt);
@@ -8788,8 +8779,7 @@ myt.Destructible = new JS.Module('Destructible', {
     const mathRound = Math.round,
         
         setupPercentOfParentWidthConstraint = stp => {
-            const p = stp.parent;
-            if (p && stp.percentOfParentWidth >= 0) stp.syncTo(p, '__doPOPW', 'width');
+            if (stp.parent && stp.percentOfParentWidth >= 0) stp.syncTo(stp.parent, '__doPOPW', 'width');
         },
         
         teardownPercentOfParentWidthConstraint = stp => {
@@ -8797,8 +8787,7 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         setupPercentOfParentHeightConstraint = stp => {
-            const p = stp.parent;
-            if (p && stp.percentOfParentHeight >= 0) stp.syncTo(p, '__doPOPH', 'height');
+            if (stp.parent && stp.percentOfParentHeight >= 0) stp.syncTo(stp.parent, '__doPOPH', 'height');
         },
         
         teardownPercentOfParentHeightConstraint = stp => {
@@ -9255,10 +9244,12 @@ myt.Destructible = new JS.Module('Destructible', {
     const JSModule = JS.Module,
         GlobalWindowResize = pkg.global.windowResize,
         
+        mathMax = Math.max,
+        
         handleResize = sizeToWindow => {
             const dim = sizeToWindow.resizeDimension;
-            if (dim === 'both' || dim === 'width') sizeToWindow.setWidth(Math.max(sizeToWindow.minWidth, GlobalWindowResize.getWidth()));
-            if (dim === 'both' || dim === 'height') sizeToWindow.setHeight(Math.max(sizeToWindow.minHeight, GlobalWindowResize.getHeight()));
+            if (dim === 'both' || dim === 'width') sizeToWindow.setWidth(mathMax(sizeToWindow.minWidth, GlobalWindowResize.getWidth()));
+            if (dim === 'both' || dim === 'height') sizeToWindow.setHeight(mathMax(sizeToWindow.minHeight, GlobalWindowResize.getHeight()));
         },
         
         /** A mixin that sizes a RootView to the window width, height or both.
@@ -11896,10 +11887,7 @@ new JS.Singleton('GlobalMouse', {
         __updateContent: function(v) {
             const self = this;
             if (!self.__updateContentLoopBlock && !self.destroyed) {
-                const inset = self.inset, 
-                    outset = self.outset, 
-                    textView = self.textView;
-                
+                const {inset, outset, textView} = self;
                 self.__updateContentLoopBlock = true;
                 textView.setX(inset);
                 if (self.shrinkToFit) {
@@ -13307,10 +13295,7 @@ new JS.Singleton('GlobalMouse', {
             /** Gets the currently selected items.
                 @returns {!Array} The selected items. */
             getSelected: function() {
-                const retval = [], 
-                    items = this.__selected;
-                for (const key in items) retval.push(items[key]);
-                return retval;
+                return Object.values(this.__selected);
             },
             
             /** Selects the provided item.
@@ -14637,8 +14622,7 @@ new JS.Singleton('GlobalMouse', {
         
         // Caret handling
         getCharacterCount: function() {
-            const elem = this.getIDE().firstChild;
-            return elem ? elem.length : 0;
+            return this.getIDE().firstChild?.length ?? 0;
         },
         
         isCaretAtEnd: function() {
@@ -14647,8 +14631,7 @@ new JS.Singleton('GlobalMouse', {
         
         /** @overrides myt.BaseInputText */
         getCaretPosition: function() {
-            const selection = this.getSelection();
-            return selection ? selection.end : 0;
+            return this.getSelection()?.end ?? 0;
         },
         
         /** @overrides myt.BaseInputText */
@@ -14734,7 +14717,7 @@ new JS.Singleton('GlobalMouse', {
             wrap:string
         
         Attributes:
-            resize:string Sets how the textarea can be resized. Defaults to 'none'. Allowed 
+            resize:string Sets how the textarea can be resized. Defaults to 'none'. Supported 
                 values: 'none', 'both', 'horizontal', 'vertical'.
             wrap:string Sets how text will wrap. Defaults to 'soft'. Allowed values: 'off', 
                 'hard', 'soft'.
@@ -17397,17 +17380,17 @@ new JS.Singleton('GlobalMouse', {
 
 
 (pkg => {
-    const updateMonitoringSubview = (stc, sv, func) => {
+    const updateMonitoringSubview = (stc, sv, func, targetFuncName) => {
             func = func.bind(stc);
             if (stc.axis !== 'y') {
-                func(sv, 'update', 'x');
-                func(sv, 'update', 'boundsWidth');
+                func(sv, targetFuncName, 'x');
+                func(sv, targetFuncName, 'boundsWidth');
             }
             if (stc.axis !== 'x') {
-                func(sv, 'update', 'y');
-                func(sv, 'update', 'boundsHeight');
+                func(sv, targetFuncName, 'y');
+                func(sv, targetFuncName, 'boundsHeight');
             }
-            func(sv, 'update', 'visible');
+            func(sv, targetFuncName, 'visible');
         };
     
     /** A special "layout" that resizes the parent to fit the children rather than laying out 
@@ -17485,7 +17468,8 @@ new JS.Singleton('GlobalMouse', {
                 if (!parent.isBeingDestroyed) {
                     const svs = this.subviews, 
                         len = svs.length,
-                        axis = this.axis;
+                        axis = this.axis,
+                        mathMax = Math.max;
                     let i,
                         max;
                     if (axis !== 'y') {
@@ -17493,7 +17477,7 @@ new JS.Singleton('GlobalMouse', {
                         max = 0;
                         while (i) {
                             const sv = svs[--i];
-                            if (sv.visible) max = Math.max(max, sv.x + (sv.boundsWidth > 0 ? sv.boundsWidth : 0));
+                            if (sv.visible) max = mathMax(max, sv.x + (sv.boundsWidth > 0 ? sv.boundsWidth : 0));
                         }
                         parent.setWidth(max + this.paddingX);
                     }
@@ -17502,7 +17486,7 @@ new JS.Singleton('GlobalMouse', {
                         max = 0;
                         while (i) {
                             const sv = svs[--i];
-                            if (sv.visible) max = Math.max(max, sv.y + (sv.boundsHeight > 0 ? sv.boundsHeight : 0));
+                            if (sv.visible) max = mathMax(max, sv.y + (sv.boundsHeight > 0 ? sv.boundsHeight : 0));
                         }
                         parent.setHeight(max + this.paddingY);
                     }
@@ -17516,14 +17500,14 @@ new JS.Singleton('GlobalMouse', {
             Provides a default implementation that calls update when the visibility or extent of a 
             subview changes. */
         startMonitoringSubview: function(sv) {
-            updateMonitoringSubview(this, sv, this.attachTo);
+            updateMonitoringSubview(this, sv, this.attachTo, 'update');
         },
         
         /** @overrides myt.Layout
             Provides a default implementation that calls update when the visibility or extent of a 
             subview changes. */
         stopMonitoringSubview: function(sv) {
-            updateMonitoringSubview(this, sv, this.detachFrom);
+            updateMonitoringSubview(this, sv, this.detachFrom, 'update');
         }
     });
 })(myt);
@@ -19250,9 +19234,6 @@ new JS.Singleton('GlobalMouse', {
         
         /** Tests if a value is "valid" or not.
             
-            Events:
-                None
-            
             Attributes:
                 id:string the ideally unique ID for this Validator so it can be stored and 
                     retreived from the myt.global.validators registry.
@@ -19475,8 +19456,7 @@ new JS.Singleton('GlobalMouse', {
         @class */
     pkg.CompoundValidator = new JSClass('CompoundValidator', Validator, {
         // Constructor /////////////////////////////////////////////////////////
-        /** Creates a new CompoundValidator for the ID and 0 or more Validators
-            provided.
+        /** Creates a new CompoundValidator for the ID and 0 or more Validators provided.
             @param {string} id
             @param arguments:args - Every argument after the first argument must be a myt.Validator 
                 or a myt.Validator ID from the myt.global.validators registry.*/
@@ -23106,29 +23086,28 @@ myt.Eventable = new JS.Class('Eventable', {
             
             const mathCos = math.cos,
                 mathSin = math.sin,
-                points = [
-                    [center + outerRadius * mathCos(startAngle), center + outerRadius * mathSin(startAngle)],
-                    [center + outerRadius * mathCos(endAngle),   center + outerRadius * mathSin(endAngle)],
-                    [center + innerRadius * mathCos(endAngle),   center + innerRadius * mathSin(endAngle)],
-                    [center + innerRadius * mathCos(startAngle), center + innerRadius * mathSin(startAngle)]
-                ],
-                commands = ['M' + points[0].join()];
+                outerStartPoint = [center + outerRadius * mathCos(startAngle), center + outerRadius * mathSin(startAngle)],
+                outerEndPoint =   [center + outerRadius * mathCos(endAngle),   center + outerRadius * mathSin(endAngle)],
+                innerEndPoint =   [center + innerRadius * mathCos(endAngle),   center + innerRadius * mathSin(endAngle)],
+                innerStartPoint = [center + innerRadius * mathCos(startAngle), center + innerRadius * mathSin(startAngle)],
+                
+                commands = ['M' + outerStartPoint.join()];
             if (isFull) {
                 commands.push(
-                    'A' + [outerRadius, outerRadius, 0, 1, 1, points[1]].join(),
-                    'A' + [outerRadius, outerRadius, 0, 1, 1, points[0]].join(),
-                    'L' + points[2].join(),
-                    'A' + [innerRadius, innerRadius, 0, 1, 0, points[3]].join(),
-                    'A' + [innerRadius, innerRadius, 0, 1, 0, points[2]].join()
+                    'A' + [outerRadius, outerRadius, 0, 1, 1, outerEndPoint].join(),
+                    'A' + [outerRadius, outerRadius, 0, 1, 1, outerStartPoint].join(),
+                    'L' + innerEndPoint.join(),
+                    'A' + [innerRadius, innerRadius, 0, 1, 0, innerStartPoint].join(),
+                    'A' + [innerRadius, innerRadius, 0, 1, 0, innerEndPoint].join()
                 );
             } else {
                 const largeArc = (angleDiff % (2 * PI)) > PI ? 1 : 0,
                     halfThickness = thickness / 2;
                 commands.push(
-                    'A' + [outerRadius, outerRadius, 0, largeArc, 1, points[1]].join(),
-                    annulus.endCapRounding ? 'A' + [halfThickness, halfThickness, 0, 0, 1, points[2]].join() : 'L' + points[2].join(),
-                    'A' + [innerRadius, innerRadius, 0, largeArc, 0, points[3]].join(),
-                    annulus.startCapRounding ? 'A' + [halfThickness, halfThickness, 0, 0, 1, points[0]].join() : ''
+                    'A' + [outerRadius, outerRadius, 0, largeArc, 1, outerEndPoint].join(),
+                    annulus.endCapRounding ? 'A' + [halfThickness, halfThickness, 0, 0, 1, innerEndPoint].join() : 'L' + innerEndPoint.join(),
+                    'A' + [innerRadius, innerRadius, 0, largeArc, 0, innerStartPoint].join(),
+                    annulus.startCapRounding ? 'A' + [halfThickness, halfThickness, 0, 0, 1, outerStartPoint].join() : ''
                 );
             }
             commands.push('z');
@@ -23360,13 +23339,15 @@ myt.Eventable = new JS.Class('Eventable', {
             hideTip: function(event) {
                 clearCheckTipTimer(this);
                 
-                const ttp = this.tooltip.parent;
-                this.detachFromDom(ttp, 'hideTip', 'mousedown', true);
-                this.detachFromDom(ttp, 'hideTip', 'mouseup', true);
-                this.detachFromDom(GlobalMouse, '__hndl_mousemove', 'mousemove', true);
-                
-                this.nextTipDelay = this.tipDelay;
-                this.setVisible(false);
+                const ttp = this.tooltip?.parent;
+                if (ttp) {
+                    this.detachFromDom(ttp, 'hideTip', 'mousedown', true);
+                    this.detachFromDom(ttp, 'hideTip', 'mouseup', true);
+                    this.detachFromDom(GlobalMouse, '__hndl_mousemove', 'mousemove', true);
+                    
+                    this.nextTipDelay = this.tipDelay;
+                    this.setVisible(false);
+                }
                 
                 // Don't consume mouse event since we just want to close the tip as a side effect 
                 // of the user action. The typical case for this is the user clicking on a button 

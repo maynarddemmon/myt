@@ -1,15 +1,15 @@
 (pkg => {
-    const updateMonitoringSubview = (stc, sv, func) => {
+    const updateMonitoringSubview = (stc, sv, func, targetFuncName) => {
             func = func.bind(stc);
             if (stc.axis !== 'y') {
-                func(sv, 'update', 'x');
-                func(sv, 'update', 'boundsWidth');
+                func(sv, targetFuncName, 'x');
+                func(sv, targetFuncName, 'boundsWidth');
             }
             if (stc.axis !== 'x') {
-                func(sv, 'update', 'y');
-                func(sv, 'update', 'boundsHeight');
+                func(sv, targetFuncName, 'y');
+                func(sv, targetFuncName, 'boundsHeight');
             }
-            func(sv, 'update', 'visible');
+            func(sv, targetFuncName, 'visible');
         };
     
     /** A special "layout" that resizes the parent to fit the children rather than laying out 
@@ -87,7 +87,8 @@
                 if (!parent.isBeingDestroyed) {
                     const svs = this.subviews, 
                         len = svs.length,
-                        axis = this.axis;
+                        axis = this.axis,
+                        mathMax = Math.max;
                     let i,
                         max;
                     if (axis !== 'y') {
@@ -95,7 +96,7 @@
                         max = 0;
                         while (i) {
                             const sv = svs[--i];
-                            if (sv.visible) max = Math.max(max, sv.x + (sv.boundsWidth > 0 ? sv.boundsWidth : 0));
+                            if (sv.visible) max = mathMax(max, sv.x + (sv.boundsWidth > 0 ? sv.boundsWidth : 0));
                         }
                         parent.setWidth(max + this.paddingX);
                     }
@@ -104,7 +105,7 @@
                         max = 0;
                         while (i) {
                             const sv = svs[--i];
-                            if (sv.visible) max = Math.max(max, sv.y + (sv.boundsHeight > 0 ? sv.boundsHeight : 0));
+                            if (sv.visible) max = mathMax(max, sv.y + (sv.boundsHeight > 0 ? sv.boundsHeight : 0));
                         }
                         parent.setHeight(max + this.paddingY);
                     }
@@ -118,14 +119,14 @@
             Provides a default implementation that calls update when the visibility or extent of a 
             subview changes. */
         startMonitoringSubview: function(sv) {
-            updateMonitoringSubview(this, sv, this.attachTo);
+            updateMonitoringSubview(this, sv, this.attachTo, 'update');
         },
         
         /** @overrides myt.Layout
             Provides a default implementation that calls update when the visibility or extent of a 
             subview changes. */
         stopMonitoringSubview: function(sv) {
-            updateMonitoringSubview(this, sv, this.detachFrom);
+            updateMonitoringSubview(this, sv, this.detachFrom, 'update');
         }
     });
 })(myt);

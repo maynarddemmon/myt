@@ -345,10 +345,7 @@
         __updateContent: function(v) {
             const self = this;
             if (!self.__updateContentLoopBlock && !self.destroyed) {
-                const inset = self.inset, 
-                    outset = self.outset, 
-                    textView = self.textView;
-                
+                const {inset, outset, textView} = self;
                 self.__updateContentLoopBlock = true;
                 textView.setX(inset);
                 if (self.shrinkToFit) {

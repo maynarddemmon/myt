@@ -143,7 +143,9 @@
             getTruePosition: elem => {
                 if (elem) {
                     const pos = elem.getBoundingClientRect();
-                    return {x:pos.left + GLOBAL.scrollX, y:pos.top + GLOBAL.scrollY};
+                    pos.left += GLOBAL.scrollX;
+                    pos.top += GLOBAL.scrollY;
+                    return pos;
                 }
             },
             

@@ -298,8 +298,10 @@
             self.opacity = 1;
             self.visible = true;
             
-            self.tagName = attrs.tagName;
-            delete attrs.tagName;
+            if (attrs.tagName) {
+                self.tagName = attrs.tagName;
+                delete attrs.tagName;
+            }
             self.setDomElement(self.createOurDomElement(parent));
             
             self.callSuper(parent, attrs);
@@ -366,7 +368,7 @@
                 len = children.length;
             for (let i = 0; i < len;) {
                 const sv = children[i++].model;
-                if (sv && sv.parent === self) retval.push(sv);
+                if (sv?.parent === self) retval.push(sv);
             }
             return retval;
         },
@@ -674,8 +676,7 @@
         },
         
         setOutlineWidth: function(v) {
-            this.outlineWidth = v || 0;
-            this.getODS().outlineWidth = this.outlineWidth + 'px';
+            this.getODS().outlineWidth = (this.outlineWidth = v || 0) + 'px';
         },
         
         setOutlineStyle: function(v) {
@@ -700,8 +701,7 @@
         },
         
         setBorderWidth: function(v) {
-            this.borderWidth = v || 0;
-            this.getODS().borderWidth = this.borderWidth + 'px';
+            this.getODS().borderWidth = (this.borderWidth = v || 0) + 'px';
         },
         
         setBorderStyle: function(v) {
@@ -1147,9 +1147,8 @@
         containsPoint: function(locX, locY, referenceFrameDomElem) {
             const outerElem = this.getODE();
             if (!outerElem) return false;
-            
-            const pos = DomElementProxy.getRelativePosition(outerElem, referenceFrameDomElem);
-            return rectContainsPoint(locX, locY, pos.x, pos.y, this.width, this.height);
+            const {x, y} = DomElementProxy.getRelativePosition(outerElem, referenceFrameDomElem);
+            return rectContainsPoint(locX, locY, x, y, this.width, this.height);
         },
         
         /** Checks if the provided location is visible on this view and is not masked by the 
@@ -1158,9 +1157,9 @@
             @param {number} locY
             @returns {boolean} true if visible, false otherwise. */
         isPointVisible: function(locX, locY) {
-            const pos = this.getPagePosition(true);
+            const {x, y} = this.getPagePosition(true);
             calculateEffectiveScale(this);
-            return isPointVisible(this, locX - pos.x, locY - pos.y);
+            return isPointVisible(this, locX - x, locY - y);
         },
         
         getEffectiveScale: function() {

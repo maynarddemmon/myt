@@ -481,8 +481,7 @@
         
         // Caret handling
         getCharacterCount: function() {
-            const elem = this.getIDE().firstChild;
-            return elem ? elem.length : 0;
+            return this.getIDE().firstChild?.length ?? 0;
         },
         
         isCaretAtEnd: function() {
@@ -491,8 +490,7 @@
         
         /** @overrides myt.BaseInputText */
         getCaretPosition: function() {
-            const selection = this.getSelection();
-            return selection ? selection.end : 0;
+            return this.getSelection()?.end ?? 0;
         },
         
         /** @overrides myt.BaseInputText */
@@ -578,7 +576,7 @@
             wrap:string
         
         Attributes:
-            resize:string Sets how the textarea can be resized. Defaults to 'none'. Allowed 
+            resize:string Sets how the textarea can be resized. Defaults to 'none'. Supported 
                 values: 'none', 'both', 'horizontal', 'vertical'.
             wrap:string Sets how text will wrap. Defaults to 'soft'. Allowed values: 'off', 
                 'hard', 'soft'.

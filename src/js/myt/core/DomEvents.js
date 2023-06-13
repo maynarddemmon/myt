@@ -75,9 +75,7 @@
                     @param {!Object} event Event value is a dom event.
                     @returns {!Object} An object with 'x' and 'y' keys containing the x and y 
                         mouse position. */
-                getMouseFromEvent: event => {
-                    return {x:event.value.pageX, y:event.value.pageY};
-                },
+                getMouseFromEvent: event => ({x:event.value.pageX, y:event.value.pageY}),
                 
                 getMouseFromEventRelativeToView: (event, view) => {
                     const viewPos = view.getPagePosition(),

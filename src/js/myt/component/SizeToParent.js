@@ -2,8 +2,7 @@
     const mathRound = Math.round,
         
         setupPercentOfParentWidthConstraint = stp => {
-            const p = stp.parent;
-            if (p && stp.percentOfParentWidth >= 0) stp.syncTo(p, '__doPOPW', 'width');
+            if (stp.parent && stp.percentOfParentWidth >= 0) stp.syncTo(stp.parent, '__doPOPW', 'width');
         },
         
         teardownPercentOfParentWidthConstraint = stp => {
@@ -11,8 +10,7 @@
         },
         
         setupPercentOfParentHeightConstraint = stp => {
-            const p = stp.parent;
-            if (p && stp.percentOfParentHeight >= 0) stp.syncTo(p, '__doPOPH', 'height');
+            if (stp.parent && stp.percentOfParentHeight >= 0) stp.syncTo(stp.parent, '__doPOPH', 'height');
         },
         
         teardownPercentOfParentHeightConstraint = stp => {

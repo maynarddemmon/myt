@@ -2,10 +2,12 @@
     const JSModule = JS.Module,
         GlobalWindowResize = pkg.global.windowResize,
         
+        mathMax = Math.max,
+        
         handleResize = sizeToWindow => {
             const dim = sizeToWindow.resizeDimension;
-            if (dim === 'both' || dim === 'width') sizeToWindow.setWidth(Math.max(sizeToWindow.minWidth, GlobalWindowResize.getWidth()));
-            if (dim === 'both' || dim === 'height') sizeToWindow.setHeight(Math.max(sizeToWindow.minHeight, GlobalWindowResize.getHeight()));
+            if (dim === 'both' || dim === 'width') sizeToWindow.setWidth(mathMax(sizeToWindow.minWidth, GlobalWindowResize.getWidth()));
+            if (dim === 'both' || dim === 'height') sizeToWindow.setHeight(mathMax(sizeToWindow.minHeight, GlobalWindowResize.getHeight()));
         },
         
         /** A mixin that sizes a RootView to the window width, height or both.

@@ -5,18 +5,15 @@
         
         adjustListOfViews = (svs, isX, adjAmount, compounded, i=0) => {
             const len = svs.length;
-            let compoundAdj = adjAmount;
-            for (; i < len; i++) {
-                const sv = svs[i];
-                adjustPositionAttrOnChild(sv, isX, compoundAdj);
+            for (let compoundAdj = adjAmount; i < len; i++) {
+                adjustPositionAttrOnChild(svs[i], isX, compoundAdj);
                 if (compounded) compoundAdj += adjAmount;
             }
         },
         
         adjustListOfFlows = (flows, adjAmount, compounded, i=0) => {
             const len = flows.length;
-            let compoundAdj = adjAmount;
-            for (; i < len;) {
+            for (let compoundAdj = adjAmount; i < len;) {
                 flows[i++].crossPos += compoundAdj;
                 if (compounded) compoundAdj += adjAmount;
             }
