@@ -52,17 +52,6 @@
                 RootView.setupCaptureDrop(this);
             },
             
-            /** @overrides myt.DomElementProxy */
-            setDomElement: function(v) {
-                this.callSuper(v);
-                
-                // Necessary since x and y of 0 won't update the dom element style so this gets 
-                // things initialized correctly. Without this RootViews will have an incorrect 
-                // initial position for x or y of 0.
-                const ods = this.getODS();
-                ods.left = ods.top = '0px';
-            },
-            
             /** @overrides myt.View */
             createOurDomElement: function(parent) {
                 // If no parent is provided create a new dom element

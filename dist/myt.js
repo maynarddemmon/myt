@@ -6853,6 +6853,13 @@ myt.Destructible = new JS.Module('Destructible', {
             }
             self.setDomElement(self.createOurDomElement(parent));
             
+            // Necessary since x and y of 0 won't update the dom element style so this gets things 
+            // initialized correctly. Without this RootViews will have an incorrect initial 
+            // position for x or y of 0. This is also necessary if the parent of this View uses CSS
+            // based padding.
+            const ods = self.getODS();
+            ods.left = ods.top = '0px';
+            
             self.callSuper(parent, attrs);
             
             // Must be done after the dom element is inserted so that calls to 
@@ -9001,17 +9008,6 @@ myt.Destructible = new JS.Module('Destructible', {
                 roots.addRoot(this);
                 
                 RootView.setupCaptureDrop(this);
-            },
-            
-            /** @overrides myt.DomElementProxy */
-            setDomElement: function(v) {
-                this.callSuper(v);
-                
-                // Necessary since x and y of 0 won't update the dom element style so this gets 
-                // things initialized correctly. Without this RootViews will have an incorrect 
-                // initial position for x or y of 0.
-                const ods = this.getODS();
-                ods.left = ods.top = '0px';
             },
             
             /** @overrides myt.View */
