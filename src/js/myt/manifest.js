@@ -1,6 +1,4 @@
-JS.Packages(function() {
-    const file = this.file;
-    
+JS.Packages(file => {
     // Package:myt
     const MYT_ROOT = (global.ROOT ?? '../src/js/') + 'myt/';
     

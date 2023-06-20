@@ -496,6 +496,22 @@
             }),
             
             // Misc
+            dataURIToBlob: dataURI => {
+                const idx = dataURI.indexOf(','),
+                    mimeStr = dataURI.slice(0, idx).split(':')[1].split(';')[0];
+                let data = dataURI.slice(idx + 1);
+                if (mimeStr.startsWith('text/')) {
+                    data = decodeURIComponent(data);
+                } else {
+                    const binStr = atob(data);
+                    let i = binStr.length;
+                    const intArr = new Uint8Array(i);
+                    while (i) intArr[--i] = binStr.charCodeAt(i);
+                    data = intArr;
+                }
+                return new Blob([data], {type:mimeStr});
+            },
+            
             /** Format a number between 0 and 1 as a percentage.
                 @param {number} num The number to convert.
                 @param {number} [fixed] The number of decimal places to use during formatting. If 

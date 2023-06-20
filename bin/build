@@ -2,13 +2,10 @@
 
 // Gather Arguments
 const fs = require('fs'),
-    arguments = process.argv.splice(2),
-    manifestFile = arguments[0],
-    targetFile = arguments[1],
-    rootPath = arguments[2],
-    outputSourceMap = arguments[3] === 'true',
-    doLintChecks = arguments[4] === 'true',
-    requiredFiles = arguments.splice(5);
+    [
+        manifestFile, targetFile, rootPath, outputSourceMap, doLintChecks, 
+        ...requiredFiles
+    ] = process.argv.slice(2);
 
 // Basic argument validation
 if (!manifestFile) return console.error('No manifest file provided.');
@@ -16,8 +13,8 @@ if (!targetFile) return console.error('No target file provided.');
 if (!rootPath) return console.error('No root path provided.');
 if (!requiredFiles.length > 0) return console.error('No required file provided.');
 
-// We now know we have a targetFile so generate the min filename too.
-let minifiedFilePath = targetFile.substring(0, targetFile.length - 2) + 'min.js';
+// We now know we have a targetFile so generate the minified filename.
+const minifiedFilePath = targetFile.substring(0, targetFile.length - 2) + 'min.js';
 
 // JS Build
 const jsBuild = (manifest, root, include, callback) => {
@@ -25,11 +22,6 @@ const jsBuild = (manifest, root, include, callback) => {
         https = require('https'),
         url = require('url'),
         path = require('path'),
-        HTTP_REGEX = /^https?:/i,
-        die = msg => {
-            if (msg) console.error(' [ERROR] ' + msg);
-            process.exit(1);
-        },
         P = require('./package');
     
     P.ROOT = path.resolve(root);
@@ -39,72 +31,51 @@ const jsBuild = (manifest, root, include, callback) => {
     // Pull in the manifest file
     require(path.resolve(manifest));
     
-    // Creates the list of packages needed for the include list. Resolves
-    // the depends and uses information so that the resulting packages list
-    // is in dependency order.
-    const packages = [];
-    include.forEach(inc => {
-        const expand = (Package, name, deps) => {
-            const pkg = Package._getByName(name);
-            pkg._deps.list.forEach(p => {expand(Package, p, deps)});
-            if (deps.indexOf(pkg) === -1) deps.push(pkg);
-            pkg._uses.list.forEach(p => {expand(Package, p, deps)});
-        }
-        expand(P.Package, inc, packages);
-    });
-    
-    // Extract the file paths out of the packages list. This is necessary
-    // because each file() declaration in the manifest file can declare more
-    // than one file.
-    const includedFiles = [];
-    packages.forEach(pkg => {
-        let paths = pkg._loader;
-        if (!(paths instanceof Array)) die('Cannot bundle ' + pkg + ': no path specified in your manifest');
-        paths = paths.filter(p => {return !HTTP_REGEX.test(p)});
-        paths.forEach(loader => {includedFiles.push(loader)});
-    });
-    
-    const read = (file, readCallback) => {
-        console.error(' [READ] ' + file);
-        if (HTTP_REGEX.test(file)) {
-            const uri     = url.parse(file),
-                client  = (uri.protocol === 'https:') ? https : http,
-                port    = uri.port || (client === https ? '443' : '80'),
-                options = {host:uri.hostname, port:port, path:uri.pathname},
-                chunks  = [];
-            let length  = 0;
-            
-            client.get(options, response => {
-                if (response.statusCode < 200 || response.statusCode >= 300) die('Request unsuccessful: ' + file);
+    const die = msg => {
+            if (msg) console.error(' [ERROR] ' + msg);
+            process.exit(1);
+        },
+        
+        read = (file, readCallback) => {
+            console.error(' [READ] ' + file);
+            if (/^https?:/i.test(file)) {
+                const uri   = url.parse(file),
+                    client  = (uri.protocol === 'https:') ? https : http,
+                    port    = uri.port || (client === https ? '443' : '80'),
+                    options = {host:uri.hostname, port:port, path:uri.pathname},
+                    chunks  = [];
+                let length  = 0;
                 
-                response.addListener('data', chunk => {
-                    chunks.push(chunk)
-                    length += chunk.length
-                });
-                response.addListener('end', () => {
-                    let offset = 0;
-                    const body = new Buffer(length);
-                    chunks.forEach(chunk => {
-                        chunk.copy(body, offset);
-                        offset += chunk.length;
+                client.get(options, response => {
+                    if (response.statusCode < 200 || response.statusCode >= 300) die('Request unsuccessful: ' + file);
+                    
+                    response.addListener('data', chunk => {
+                        chunks.push(chunk)
+                        length += chunk.length
                     });
-                    readCallback(body)
+                    response.addListener('end', () => {
+                        let offset = 0;
+                        const body = new Buffer(length);
+                        chunks.forEach(chunk => {
+                            chunk.copy(body, offset);
+                            offset += chunk.length;
+                        });
+                        readCallback(body)
+                    });
+                }).on('error', () => {
+                    die('Request unsuccessful: ' + file);
                 });
-            }).on('error', () => {
-                die('Request unsuccessful: ' + file);
-            });
-        } else {
-            fs.readFile(file, (error, content) => {
-                if (error) die('Cannot find file ' + file + ', please check your --root setting');
-                readCallback(content);
-            })
-        }
-    }
-    
-    // Iterate over the included files in order reading each one in and
-    // ultimately concatenating them all together and ultimately execute the
-    // callback function
-    const source = [],
+            } else {
+                fs.readFile(file, (error, content) => {
+                    if (error) die('Cannot find file ' + file + ', please check your --root setting');
+                    readCallback(content);
+                })
+            }
+        },
+        
+        // Iterate over the included files in order, reading each one in and then concatenating them 
+        // all together and ultimately execute the callback function.
+        source = [],
         bundle = (root, files, i) => {
             if (i >= files.length) {
                 callback(source.join('\n\n'));
@@ -115,7 +86,7 @@ const jsBuild = (manifest, root, include, callback) => {
                 })
             }
         };
-    bundle(P.ROOT, includedFiles, 0);
+    bundle(P.ROOT, P.Package.extractFilePaths(include), 0);
 };
 
 // Remove old files
@@ -143,8 +114,8 @@ jsBuild(manifestFile, rootPath, requiredFiles, concatenatedData => {
           js_output_file: minifiedFilePath,
           language_out: 'ECMASCRIPT_2021'
         };
-    if (doLintChecks) opts.jscomp_warning = 'lintChecks';
-    if (outputSourceMap) {
+    if (doLintChecks === 'true') opts.jscomp_warning = 'lintChecks';
+    if (outputSourceMap === 'true') {
         // Get just the filename without any leading directories
         const parts = minifiedFilePath.split('/');
         
@@ -172,7 +143,7 @@ jsBuild(manifestFile, rootPath, requiredFiles, concatenatedData => {
         if (stdErr) console.error('stderr: ' + stdErr);
         
         // Inject a sourceRoot into the source map file.
-        if (outputSourceMap) {
+        if (outputSourceMap === 'true') {
             const src = minifiedFilePath + '.map',
                 fileData = fs.readFileSync(src, 'utf8');
             fs.writeFileSync(src, '{\n"sourceRoot":"../",' + fileData.substring(1), {"encoding":'utf8'});
