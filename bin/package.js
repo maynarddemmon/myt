@@ -1,220 +1,168 @@
 ((global, exports) => {
-    // Ordered list of unique elements, for storing dependencies ///////////////
-    const OrderedSet = function(list) {
-        this.list = [];
-        this._index = {};
-        if (list) this.push(...list);
-    };
-    
-    OrderedSet.prototype.push = function(...items) {
-        items.forEach(item => {
-            const key = (item.id !== undefined) ? item.id : item,
-                index = this._index;
-            if (!index.hasOwnProperty(key)) {
-                index[key] = this.list.length;
-                this.list.push(item);
-            }
-        });
-    };
-    
     // Package /////////////////////////////////////////////////////////////////
     let autoIncrement = 1;
     
     const HTTP_REGEX = /^https?:/i,
         
-        indexByPath = {},
+        // Ordered list of unique elements, for storing dependencies
+        OrderedSet = function(initialList) {
+            const self = this,
+                index = {},
+                list = self.list = [],
+                push = self.push = (...items) => {
+                    items.forEach(item => {
+                        const key = item.id ?? item;
+                        if (!index.hasOwnProperty(key)) {
+                            index[key] = true;
+                            list.push(item);
+                        }
+                    });
+                };
+            
+            if (initialList) push(...initialList);
+        },
+        
         indexByName = {},
         
         getFromCache = name => indexByName[name] ??= {},
         
-        getObject = function(name, rootObject) {
+        getObject = name => {
             if (typeof name === 'string') {
-                const cached = rootObject ? {} : getFromCache(name);
+                const cached = getFromCache(name);
                 if (cached.obj !== undefined) return cached.obj;
                 
-                let object = rootObject ?? global,
-                    part;
                 const parts = name.split('.');
                 
+                let object = global,
+                    part;
                 while (part = parts.shift()) object = object && object[part];
-                
-                if (rootObject && object === undefined) return getObject(name);
                 
                 return cached.obj = object;
             }
         },
         
-        getByName = name => {
-            if (typeof name === 'string') {
-                const cached = getFromCache(name);
-                if (cached.pkg) {
-                    return cached.pkg;
-                } else {
-                    const pkg = new Package();
-                    pkg.provides(name);
-                    return pkg;
-                }
-            } else {
-                return name;
-            }
-        },
+        getByName = name => typeof name === 'string' ? getFromCache(name)?.pkg : name,
         
-        when = (eventTable, block, context) => {
+        when = (eventTable, block) => {
             const eventList = [],
                 objects = {};
-            let packages,
-                i;
             for (const event in eventTable) {
                 if (eventTable.hasOwnProperty(event)) {
                     objects[event] = [];
-                    packages = new OrderedSet(eventTable[event]);
-                    i = packages.list.length;
-                    while (i--) eventList.push([event, packages.list[i], i]);
+                    const packageList = (new OrderedSet(eventTable[event])).list;
+                    let i = packageList.length;
+                    while (i--) eventList.push([event, packageList[i], i]);
                 }
             }
             
-            let waiting = i = eventList.length;
-            if (waiting === 0) return block?.call(context, objects);
+            let waiting = eventList.length,
+                i = waiting;
+            if (waiting === 0) return block?.(objects);
             
             while (i--) {
-                (event => {
-                    const pkg = getByName(event[1]);
+                const [eventName, objName, idx] = eventList[i],
+                    pkg = getByName(objName);
+                
+                if (!pkg) throw new Error(objName + ' required to exist');
+                
+                // Event dispatch, for communication between packages
+                const eventCallback = () => {
+                    objects[eventType][idx] = getObject(objName);
+                    if (--waiting === 0) block?.(objects);
+                };
+                if (pkg._events[eventType]) {
+                    eventCallback();
+                } else {
+                    (pkg._observers[eventType] ??= []).push(eventCallback);
                     
-                    pkg._on(event[0], () => {
-                        objects[event[0]][event[2]] = getObject(event[1], pkg._exports);
-                        if (--waiting === 0) block?.call(context, objects);
-                    });
-                })(eventList[i]);
-            }
-        },
-        
-        Package = function(loader) {
-            this.id = autoIncrement;
-            autoIncrement++;
-            
-            this._loader    = loader;
-            this._names     = new OrderedSet();
-            this._deps      = new OrderedSet();
-            this._uses      = new OrderedSet();
-            this._observers = {};
-            this._events    = {};
-        },
-    
-    // Functions found in manifest files ///////////////////////////////////////
-        PackageProto = Package.prototype;
-    
-    PackageProto.provides = function(...args) {
-        args.forEach(item => {getFromCache(item).pkg = this;});
-        this._names.push(...args);
-        return this;
-    };
-    
-    PackageProto.requires = function(...args) {
-        this._deps.push(...args);
-        return this;
-    };
-    
-    PackageProto.uses = function(...args) {
-        this._uses.push(...args);
-        return this;
-    };
-    
-    // Event dispatchers, for communication between packages ///////////////////
-    PackageProto._on = function(eventType, block, context) {
-        const self = this;
-        
-        if (self._events[eventType]) return block.call(context);
-        const list = self._observers[eventType] ??= [];
-        list.push([block, context]);
-        
-        // Load
-        if (self._fire('request')) {
-            if (!self._isLoaded()) {
-                if (!self._source && (self._loader instanceof Array)) {
-                    self._source = [];
-                    for (let i = 0, len = self._loader.length; i < len; i++) {
-                        self._source[i] = fetchFile(self._loader[i]);
+                    // Load
+                    if (fire(pkg, 'request')) {
+                        const loader = pkg._loader,
+                            deps = pkg._deps.list,
+                            source = pkg._source ?? [];
+                        let n = loader.length;
+                        
+                        when({complete:deps}, () => {
+                            when({complete:deps, load:[pkg]}, () => {fire(pkg, 'complete');});
+                            
+                            if (isLoaded(pkg)) {
+                                fire(pkg, 'load');
+                            } else {
+                                const loadNext = () => {
+                                    if (n === 0) {
+                                        isLoaded(pkg);
+                                        fire(pkg, 'load');
+                                    } else {
+                                        const index = loader.length - n;
+                                        n--;
+                                        loadFile(loader[index], loadNext, source[index]);
+                                    }
+                                };
+                                loadNext();
+                            }
+                        });
                     }
                 }
             }
-            
-            const allDeps = self._deps.list.concat(self._uses.list),
-                source = self._source ?? [];
-            let n = (self._loader ?? {}).length;
-            
-            when({load: allDeps});
-            
-            when({complete:self._deps.list}, function() {
-                when({complete:allDeps, load:[this]}, function() {
-                    this._fire('complete');
-                }, this);
-                
-                const loadNext = exports => {
-                        if (n === 0) return fireOnLoad(exports);
-                        n--;
-                        const index = self._loader.length - n - 1;
-                        loadFile(self._loader[index], loadNext, source[index]);
-                    },
-                    fireOnLoad = exports => {
-                        self._exports = exports;
-                        self._onload?.();
-                        self._isLoaded(true);
-                        self._fire('load');
-                    };
-                
-                if (this._isLoaded()) {
-                    this._fire('download');
-                    return this._fire('load');
-                }
-                
-                if (this._loader === undefined) throw new Error('No load path found for ' + this._names.list[0]);
-                
-                if (typeof this._loader === 'function') {
-                    this._loader(fireOnLoad);
-                } else {
-                    loadNext();
-                }
-            }, self);
-        }
-    };
-    
-    PackageProto._fire = function(eventType) {
-        if (this._events[eventType]) return false;
-        this._events[eventType] = true;
+        },
         
-        const list = this._observers[eventType];
-        if (list) {
-            delete this._observers[eventType];
-            for (let i = 0, n = list.length; i < n; i++) list[i][0].call(list[i][1]);
-        }
-        return true;
-    };
-    
-    // Loading frontend and other miscellany ///////////////////////////////////
-    PackageProto._isLoaded = function(withExceptions) {
-        if (!withExceptions && this.__isLoaded !== undefined) return this.__isLoaded;
-        
-        const names = this._names.list;
-        let i = names.length;
-        while (i--) {
-            const name = names[i],
-                object = getObject(name, this._exports);
-            if (object === undefined) {
-                if (withExceptions) {
-                    throw new Error('Expected package at ' + this._loader + ' to define ' + name);
-                } else {
-                    return this.__isLoaded = false;
+        fire = (pkg, eventType) => {
+            const events = pkg._events,
+                observers = pkg._observers;
+            if (events[eventType]) {
+                return false;
+            } else {
+                events[eventType] = true;
+                const observersForEvent = observers[eventType];
+                if (observersForEvent) {
+                    delete observers[eventType];
+                    observersForEvent.forEach(callback => {callback();});
                 }
+                return true;
             }
-        }
-        return this.__isLoaded = true;
-    };
+        },
+        
+        isLoaded = pkg => {
+            if (pkg._isLoaded === undefined) {
+                const names = pkg._names.list;
+                let i = names.length;
+                while (i--) {
+                    if (getObject(names[i]) === undefined) return pkg._isLoaded = false;
+                }
+                return pkg._isLoaded = true;
+            } else {
+                return pkg._isLoaded;
+            }
+        },
+        
+        Package = exports.Package = function(loader) {
+            const self = this,
+                names = self._names = new OrderedSet(),
+                deps = self._deps = new OrderedSet();
+            
+            self.id = autoIncrement++;
+            self._loader = loader;
+            self._observers = {};
+            self._events = {};
+            
+            // Functions found in manifest files
+            self.provides = (...args) => {
+                args.forEach(item => {getFromCache(item).pkg = self;});
+                names.push(...args);
+                return self;
+            };
+            
+            self.requires = (...args) => {
+                deps.push(...args);
+                return self;
+            };
+        };
     
     // Class Functions for Package /////////////////////////////////////////////
     Package.ENV = exports.ENV = global;
     
     Package.extractFilePaths = include => {
-        // Creates the list of packages needed for the include list. Resolves the depends and uses 
+        // Creates the list of packages needed for the include list. Resolves the .requires() 
         // information so that the resulting packages list is in dependency order.
         const packages = [],
             includedFiles = [],
@@ -222,7 +170,6 @@
                 const pkg = getByName(name);
                 pkg._deps.list.forEach(p => {expand(p);});
                 if (!packages.includes(pkg)) packages.push(pkg);
-                pkg._uses.list.forEach(p => {expand(p);});
             };
         include.forEach(p => {expand(p);});
         
@@ -236,25 +183,6 @@
         });
         
         return includedFiles;
-    };
-    
-    // Deferred values used with fetchFile /////////////////////////////////////
-    const Deferred = function() {};
-    
-    Deferred.prototype.callback = function(callback, context) {
-        callback.bind(context);
-        if (this._status === 'succeeded') {
-            callback(this._value);
-        } else {
-            (this._callbacks ??= []).push(callback);
-        }
-    };
-    
-    Deferred.prototype.succeed = function(value) {
-        this._status = 'succeeded';
-        this._value  = value;
-        const callbacks = this._callbacks ?? [];
-        while (callbacks.length) callbacks.shift()(value);
     };
     
     // File Loader /////////////////////////////////////////////////////////////
@@ -280,20 +208,7 @@
     exports.Packages = manifestFunc => {
         manifestFunc(
             // The "file" function used inside the manifestFunc.
-            (...args) => {
-                const ROOT_PATH = exports.ROOT,
-                    resolved = args.map(
-                        filename => (!HTTP_REGEX.test(filename) && ROOT_PATH) ? ROOT_PATH + '/' + filename : filename
-                    );
-                let loader = resolved[0],
-                    path = loader.toString(),
-                    pkg = indexByPath[path];
-                if (pkg) {
-                    return pkg;
-                } else {
-                    return indexByPath[path] = new Package(typeof loader === 'string' ? resolved : loader);
-                }
-            }
+            (...args) => new Package(args.map(filename => !HTTP_REGEX.test(filename) && exports.ROOT ? exports.ROOT + '/' + filename : filename))
         );
     };
     
@@ -301,9 +216,6 @@
         const files = [];
         let i = 0;
         while (typeof args[i] === 'string') files.push(args[i++]);
-        const callback = args[i++].bind(args[i]);
-        when({complete:files}, objects => {callback(objects?.complete);});
+        when({complete:files}, args[i]);
     };
-    
-    exports.Package = Package;
 })(global, exports);
