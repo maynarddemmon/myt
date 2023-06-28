@@ -251,8 +251,7 @@
             textView:myt.Text A reference to the child text view.
         
         Private Attributes:
-            __updateContentLoopBlock:boolean Used in __updateContent
-                to prevent infinite loops.
+            __updateContentLoopBlock:boolean Used in __updateContent to prevent infinite loops.
         
         @class */
     pkg.SimpleTextButton = new JSClass('SimpleTextButton', SimpleButton, {
