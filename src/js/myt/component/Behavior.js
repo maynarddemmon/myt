@@ -137,7 +137,7 @@
         
         
         // Accessors ///////////////////////////////////////////////////////////
-        setActivationKeys: function(v) {this.activationKeys = v;},
+        setActivationKeys: function(v) {this.activationKeys = v ?? [];},
         setRepeatKeyDown: function(v) {this.repeatKeyDown = v;},
         
         
@@ -148,20 +148,15 @@
         __hndlKeyDown: function(event) {
             if (!this.disabled) {
                 if (this.activateKeyDown === NO_KEY_DOWN || this.repeatKeyDown) {
-                    const code = getCodeFromEvent(event),
-                        keys = this.activationKeys;
-                    let i = keys.length;
-                    while (i) {
-                        if (code === keys[--i]) {
-                            if (this.activateKeyDown === code) {
-                                this.doActivationKeyDown(code, true);
-                            } else {
-                                this.activateKeyDown = code;
-                                this.doActivationKeyDown(code, false);
-                            }
-                            event.value.preventDefault();
-                            return;
+                    const code = getCodeFromEvent(event);
+                    if (this.activationKeys.includes(code)) {
+                        if (this.activateKeyDown === code) {
+                            this.doActivationKeyDown(code, true);
+                        } else {
+                            this.activateKeyDown = code;
+                            this.doActivationKeyDown(code, false);
                         }
+                        event.value.preventDefault();
                     }
                 }
             }
@@ -173,15 +168,8 @@
         __hndlKeyPress: function(event) {
             if (!this.disabled) {
                 const code = getCodeFromEvent(event);
-                if (this.activateKeyDown === code) {
-                    const keys = this.activationKeys;
-                    let i = keys.length;
-                    while (i) {
-                        if (code === keys[--i]) {
-                            event.value.preventDefault();
-                            return;
-                        }
-                    }
+                if (this.activateKeyDown === code && this.activationKeys.includes(code)) {
+                    event.value.preventDefault();
                 }
             }
         },
@@ -192,17 +180,10 @@
         __hndlKeyUp: function(event) {
             if (!this.disabled) {
                 const code = getCodeFromEvent(event);
-                if (this.activateKeyDown === code) {
-                    const keys = this.activationKeys;
-                    let i = keys.length;
-                    while (i) {
-                        if (code === keys[--i]) {
-                            this.activateKeyDown = NO_KEY_DOWN;
-                            this.doActivationKeyUp(code);
-                            event.value.preventDefault();
-                            return;
-                        }
-                    }
+                if (this.activateKeyDown === code && this.activationKeys.includes(code)) {
+                    this.activateKeyDown = NO_KEY_DOWN;
+                    this.doActivationKeyUp(code);
+                    event.value.preventDefault();
                 }
             }
         },
