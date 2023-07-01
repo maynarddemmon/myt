@@ -6898,6 +6898,7 @@ myt.Destructible = new JS.Module('Destructible', {
         createOurDomElement: function(parent) {
             const elem = document.createElement(this.tagName ?? 'div');
             elem.style.position = 'absolute';
+            elem.style.pointerEvents = 'none';
             
             // Make dom elements easier to location via selectors
             elem.className = this.klass.__cssClassName ??= 'myt-' + this.klass.__displayName.split('.').join('-');
@@ -7179,17 +7180,26 @@ myt.Destructible = new JS.Module('Destructible', {
             if (existing !== v) {
                 this.overflow = v;
                 
+                let setPointerEventsToAuto;
                 const ids = this.getIDS();
                 if (v === 'autox') {
                     ids.overflowX = 'auto';
                     ids.overflowY = 'hidden';
+                    setPointerEventsToAuto = true;
                 } else if (v === 'autoy') {
                     ids.overflowY = 'auto';
                     ids.overflowX = 'hidden';
+                    setPointerEventsToAuto = true;
                 } else {
                     if (existing === 'autox' || existing === 'autoy') ids.overflowX = ids.overflowY = null;
-                    ids.overflow = v || 'visible';
+                    if (v === 'auto' || v === 'scroll') {
+                        ids.overflow = v;
+                        setPointerEventsToAuto = true;
+                    } else {
+                        ids.overflow = v || 'visible';
+                    }
                 }
+                if (setPointerEventsToAuto) this.setPointerEvents('auto');
                 
                 if (this.inited) this.fireEvent('overflow', v);
             }
@@ -9018,6 +9028,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
+                attrs.pointerEvents ??= 'auto';
                 this.callSuper(parent, attrs);
                 
                 // Establish a stacking context
@@ -11069,9 +11080,7 @@ new JS.Singleton('GlobalMouse', {
         doKeyArrowRightOrDown: (isRight, isRepeat) => {/* Subclasses to implement as needed. */}
     }),
     
-    /** Provides a 'mouseOver' attribute that tracks mouse over/out state. Also provides a 
-        mechanism to smoothe over/out events so only one call to 'doSmoothMouseOver' occurs per 
-        idle event.
+    /** Provides a 'mouseOver' attribute that tracks mouse over/out state.
         
         Requires myt.Disableable and myt.MouseObservable super mixins.
         
@@ -11079,10 +11088,6 @@ new JS.Singleton('GlobalMouse', {
             mouseOver:boolean Indicates if the mouse is over this view or not.
         
         Private Attributes:
-            __attachedToOverIdle:boolean Used by the code that smoothes out mouseover events. 
-                Indicates that we are registered with the idle event.
-            __lastOverIdleValue:boolean Used by the code that smoothes out mouseover events. 
-                Stores the last mouseOver value.
             __disabledOver:boolean Tracks mouse over/out state while a view is disabled. This 
                 allows correct restoration of mouseOver state if a view becomes enabled while the 
                 mouse is already over it.
@@ -11094,10 +11099,18 @@ new JS.Singleton('GlobalMouse', {
         initNode: function(parent, attrs) {
             attrs.mouseOver ??= false;
             
+            attrs.pointerEvents ??= 'auto';
             this.callSuper(parent, attrs);
             
             this.attachToDom(this, 'doMouseOver', 'mouseover');
             this.attachToDom(this, 'doMouseOut', 'mouseout');
+        },
+        
+        destroy: function() {
+            // Cleanup over state when destroyed.
+            if (this.mouseOver) this.setMouseOver(false);
+            
+            this.callSuper();
         },
         
         
@@ -11107,11 +11120,7 @@ new JS.Singleton('GlobalMouse', {
                 this.mouseOver = v;
                 // No event needed
                 
-                // Smooth out over/out events by delaying until the next idle event.
-                if (this.inited && !this.__attachedToOverIdle) {
-                    this.__attachedToOverIdle = true;
-                    this.attachTo(GlobalIdle, '__doMouseOverOnIdle', 'idle');
-                }
+                this.doMouseOverChanged(this.mouseOver);
             }
         },
         
@@ -11135,26 +11144,10 @@ new JS.Singleton('GlobalMouse', {
         
         
         // Methods /////////////////////////////////////////////////////////////
-        /** @private
-            @returns {undefined} */
-        __doMouseOverOnIdle: function() {
-            this.detachFrom(GlobalIdle, '__doMouseOverOnIdle', 'idle');
-            this.__attachedToOverIdle = false;
-            
-            // Only call doSmoothOver if the over/out state has changed since the last time it 
-            // was called.
-            const isOver = this.mouseOver;
-            if (this.__lastOverIdleValue !== isOver) {
-                this.__lastOverIdleValue = isOver;
-                this.doSmoothMouseOver(isOver);
-            }
-        },
-        
-        /** Called when mouseOver state changes. This method is called after an event filtering 
-            process has reduced frequent over/out events originating from the dom.
+        /** Called when mouseOver state changes.
             @param {boolean} isOver
             @returns {undefined} */
-        doSmoothMouseOver: function(isOver) {
+        doMouseOverChanged: function(isOver) {
             if (this.inited) this.updateUI?.();
         },
         
@@ -11327,6 +11320,7 @@ new JS.Singleton('GlobalMouse', {
                 delete attrs.isDraggable;
             }
             
+            attrs.pointerEvents ??= 'auto';
             self.callSuper(parent, attrs);
             
             self.setIsDraggable(isDraggable);
@@ -14184,6 +14178,7 @@ new JS.Singleton('GlobalMouse', {
             initNode: function(parent, attrs) {
                 attrs.tagName ??= 'input';
                 attrs.focusable ??= true;
+                attrs.pointerEvents ??= 'auto';
                 
                 this.callSuper(parent, attrs);
                 
@@ -17546,6 +17541,7 @@ new JS.Singleton('GlobalMouse', {
                 attrs.percentOfParentHeight ??= 100;
                 attrs.visible ??= false;
                 attrs.ignoreLayout ??= true;
+                attrs.pointerEvents ??= 'auto';
                 
                 self.callSuper(parent, attrs);
                 
@@ -23518,7 +23514,9 @@ myt.Eventable = new JS.Class('Eventable', {
             
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.MouseOver. */
-            doSmoothMouseOver: function(isOver) {
+            doMouseOverChanged: function(isOver) {
+                if (!this.inited) return;
+                
                 const self = this,
                     tooltip = self.getTooltip();
                 
@@ -24003,6 +24001,8 @@ myt.Eventable = new JS.Class('Eventable', {
         drawAnnulus: function(centerX, centerY, r, ir, startAngle, endAngle, colors, segments=60) {
             const self = this,
                 Color = pkg.Color;
+            
+            console.log(colors);
             
             // Convert string based hex colors to myt.Color objects.
             colors.forEach(config => {

@@ -52,6 +52,7 @@
             initNode: function(parent, attrs) {
                 attrs.tagName ??= 'input';
                 attrs.focusable ??= true;
+                attrs.pointerEvents ??= 'auto';
                 
                 this.callSuper(parent, attrs);
                 

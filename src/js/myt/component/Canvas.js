@@ -297,6 +297,8 @@
             const self = this,
                 Color = pkg.Color;
             
+            console.log(colors);
+            
             // Convert string based hex colors to myt.Color objects.
             colors.forEach(config => {
                 if (typeof config.color === 'string') config.color = Color.makeColorFromHexString(config.color);

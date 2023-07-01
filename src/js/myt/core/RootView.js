@@ -39,6 +39,7 @@
             
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
+                attrs.pointerEvents ??= 'auto';
                 this.callSuper(parent, attrs);
                 
                 // Establish a stacking context

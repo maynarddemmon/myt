@@ -305,7 +305,9 @@
             
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.MouseOver. */
-            doSmoothMouseOver: function(isOver) {
+            doMouseOverChanged: function(isOver) {
+                if (!this.inited) return;
+                
                 const self = this,
                     tooltip = self.getTooltip();
                 

@@ -40,6 +40,7 @@
                 attrs.percentOfParentHeight ??= 100;
                 attrs.visible ??= false;
                 attrs.ignoreLayout ??= true;
+                attrs.pointerEvents ??= 'auto';
                 
                 self.callSuper(parent, attrs);
                 

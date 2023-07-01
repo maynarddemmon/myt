@@ -328,6 +328,7 @@
         createOurDomElement: function(parent) {
             const elem = document.createElement(this.tagName ?? 'div');
             elem.style.position = 'absolute';
+            elem.style.pointerEvents = 'none';
             
             // Make dom elements easier to location via selectors
             elem.className = this.klass.__cssClassName ??= 'myt-' + this.klass.__displayName.split('.').join('-');
@@ -609,17 +610,26 @@
             if (existing !== v) {
                 this.overflow = v;
                 
+                let setPointerEventsToAuto;
                 const ids = this.getIDS();
                 if (v === 'autox') {
                     ids.overflowX = 'auto';
                     ids.overflowY = 'hidden';
+                    setPointerEventsToAuto = true;
                 } else if (v === 'autoy') {
                     ids.overflowY = 'auto';
                     ids.overflowX = 'hidden';
+                    setPointerEventsToAuto = true;
                 } else {
                     if (existing === 'autox' || existing === 'autoy') ids.overflowX = ids.overflowY = null;
-                    ids.overflow = v || 'visible';
+                    if (v === 'auto' || v === 'scroll') {
+                        ids.overflow = v;
+                        setPointerEventsToAuto = true;
+                    } else {
+                        ids.overflow = v || 'visible';
+                    }
                 }
+                if (setPointerEventsToAuto) this.setPointerEvents('auto');
                 
                 if (this.inited) this.fireEvent('overflow', v);
             }
