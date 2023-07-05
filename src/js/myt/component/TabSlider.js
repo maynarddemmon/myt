@@ -94,11 +94,11 @@
                     visible:false, maskFocus:true,
                     overflow:'hidden', percentOfParentWidth:100
                 }, [SizeToParent, {
-                    setHeight: function(v, suppressEvent) {
-                        this.callSuper(Math.round(v), suppressEvent);
+                    setHeight: function(v) {
+                        this.callSuper(Math.round(v));
                     },
-                    setWidth: function(v, suppressEvent) {
-                        this.callSuper(v, suppressEvent);
+                    setWidth: function(v) {
+                        this.callSuper(v);
                         if (this.inited) this.container.setWidth(v);
                     }
                 }]);

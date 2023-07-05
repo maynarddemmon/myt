@@ -85,16 +85,16 @@
             
             // Accessors ///////////////////////////////////////////////////////
             /** @overrides */
-            setWidth: function(v, suppressEvent) {
+            setWidth: function(v) {
                 const existing = this.width;
-                this.callSuper(v, suppressEvent);
+                this.callSuper(v);
                 if (existing !== this.width) this.updateFlexboxLayout();
             },
             
             /** @overrides */
-            setHeight: function(v, suppressEvent) {
+            setHeight: function(v) {
                 const existing = this.height;
-                this.callSuper(v, suppressEvent);
+                this.callSuper(v);
                 if (existing !== this.height) this.updateFlexboxLayout();
             },
             
@@ -531,19 +531,19 @@
         },
         
         /** @overrides */
-        setWidth: function(v, suppressEvent) {
+        setWidth: function(v) {
             const isChanging = this.width !== v;
             if (isChanging && !this.__isFlexUpdate) this.__basisWidth = null;
-            this.callSuper(v, suppressEvent);
+            this.callSuper(v);
             if (isChanging) this.updateFlexboxLayoutFromChild();
         },
         
-        setWidthViaFlex(v, suppressEvent) {
+        setWidthViaFlex(v) {
             if (this.width !== v) {
                 this.__basisWidth ??= this.width;
                 
                 this.__isFlexUpdate = true;
-                this.setWidth(v, suppressEvent);
+                this.setWidth(v);
                 this.__isFlexUpdate = false;
             }
         },
@@ -553,19 +553,19 @@
         },
         
         /** @overrides */
-        setHeight: function(v, suppressEvent) {
+        setHeight: function(v) {
             const isChanging = this.height !== v;
             if (isChanging && !this.__isFlexUpdate) this.__basisHeight = null;
-            this.callSuper(v, suppressEvent);
+            this.callSuper(v);
             if (isChanging) this.updateFlexboxLayoutFromChild();
         },
         
-        setHeightViaFlex(v, suppressEvent) {
+        setHeightViaFlex(v) {
             if (this.height !== v) {
                 this.__basisHeight ??= this.height;
                 
                 this.__isFlexUpdate = true;
-                this.setHeight(v, suppressEvent);
+                this.setHeight(v);
                 this.__isFlexUpdate = false;
             }
         },

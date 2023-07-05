@@ -187,9 +187,9 @@
         },
         
         /** @overrides myt.View */
-        setHeight: function(v, suppressEvent) {
+        setHeight: function(v) {
             // Limit height if necessary
-            this.callSuper(this.maxHeight >= 0 ? Math.min(this.maxHeight, v) : v, suppressEvent);
+            this.callSuper(this.maxHeight >= 0 ? Math.min(this.maxHeight, v) : v);
             if (this.inited && this.owner) this.updateLocationY(this.owner);
         },
         

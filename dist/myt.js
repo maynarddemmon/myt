@@ -4047,16 +4047,16 @@ new JS.Singleton('GlobalTouch', {
             
             // Accessors ///////////////////////////////////////////////////////
             /** @overrides */
-            setWidth: function(v, suppressEvent) {
+            setWidth: function(v) {
                 const existing = this.width;
-                this.callSuper(v, suppressEvent);
+                this.callSuper(v);
                 if (existing !== this.width) this.updateFlexboxLayout();
             },
             
             /** @overrides */
-            setHeight: function(v, suppressEvent) {
+            setHeight: function(v) {
                 const existing = this.height;
-                this.callSuper(v, suppressEvent);
+                this.callSuper(v);
                 if (existing !== this.height) this.updateFlexboxLayout();
             },
             
@@ -4493,19 +4493,19 @@ new JS.Singleton('GlobalTouch', {
         },
         
         /** @overrides */
-        setWidth: function(v, suppressEvent) {
+        setWidth: function(v) {
             const isChanging = this.width !== v;
             if (isChanging && !this.__isFlexUpdate) this.__basisWidth = null;
-            this.callSuper(v, suppressEvent);
+            this.callSuper(v);
             if (isChanging) this.updateFlexboxLayoutFromChild();
         },
         
-        setWidthViaFlex(v, suppressEvent) {
+        setWidthViaFlex(v) {
             if (this.width !== v) {
                 this.__basisWidth ??= this.width;
                 
                 this.__isFlexUpdate = true;
-                this.setWidth(v, suppressEvent);
+                this.setWidth(v);
                 this.__isFlexUpdate = false;
             }
         },
@@ -4515,19 +4515,19 @@ new JS.Singleton('GlobalTouch', {
         },
         
         /** @overrides */
-        setHeight: function(v, suppressEvent) {
+        setHeight: function(v) {
             const isChanging = this.height !== v;
             if (isChanging && !this.__isFlexUpdate) this.__basisHeight = null;
-            this.callSuper(v, suppressEvent);
+            this.callSuper(v);
             if (isChanging) this.updateFlexboxLayoutFromChild();
         },
         
-        setHeightViaFlex(v, suppressEvent) {
+        setHeightViaFlex(v) {
             if (this.height !== v) {
                 this.__basisHeight ??= this.height;
                 
                 this.__isFlexUpdate = true;
-                this.setHeight(v, suppressEvent);
+                this.setHeight(v);
                 this.__isFlexUpdate = false;
             }
         },
@@ -7101,7 +7101,7 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         },
         
-        setWidth: function(v, suppressEvent) {
+        setWidth: function(v) {
             // Dom elements don't support negative width
             if (0 > v) v = 0;
             
@@ -7110,12 +7110,12 @@ myt.Destructible = new JS.Module('Destructible', {
                 this.getODS().width = v + 'px';
                 if (this.inited) {
                     this.__updateBounds(v, this.height);
-                    if (!suppressEvent) this.fireEvent('width', v);
+                    this.fireEvent('width', v);
                 }
             }
         },
         
-        setHeight: function(v, suppressEvent) {
+        setHeight: function(v) {
             // Dom elements don't support negative height
             if (0 > v) v = 0;
             
@@ -7124,7 +7124,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 this.getODS().height = v + 'px';
                 if (this.inited) {
                     this.__updateBounds(this.width, v);
-                    if (!suppressEvent) this.fireEvent('height', v);
+                    this.fireEvent('height', v);
                 }
             }
         },
@@ -8017,13 +8017,13 @@ myt.Destructible = new JS.Module('Destructible', {
         
         // Accessors ///////////////////////////////////////////////////////////
         /** @overrides myt.View */
-        setWidth: function(v, suppressEvent) {
-            if (setWidth(this, v)) this.callSuper(v, suppressEvent);
+        setWidth: function(v) {
+            if (setWidth(this, v)) this.callSuper(v);
         },
         
         /** @overrides myt.View */
-        setHeight: function(v, suppressEvent) {
-            if (setHeight(this, v)) this.callSuper(v, suppressEvent);
+        setHeight: function(v) {
+            if (setHeight(this, v)) this.callSuper(v);
         },
         
         
@@ -8193,8 +8193,8 @@ myt.Destructible = new JS.Module('Destructible', {
     pkg.TextSupport = new JS.Module('TextSupport', {
         // Accessors ///////////////////////////////////////////////////////////
         /** @overrides myt.View */
-        setWidth: function(v, suppressEvent) {
-            this.callSuper(v, suppressEvent);
+        setWidth: function(v) {
+            this.callSuper(v);
             
             // Height can change with width change when wrapping occurs.
             if (v !== 'auto') {
@@ -8354,13 +8354,13 @@ myt.Destructible = new JS.Module('Destructible', {
         
         @class */
     pkg.PaddedTextSupport = new JS.Module('PaddedTextSupport', {
-        setWidth: function(v, suppressEvent) {
-            this.callSuper(v, suppressEvent);
+        setWidth: function(v) {
+            this.callSuper(v);
             updateDomWidthForPadding(this);
         },
         
-        setHeight: function(v, suppressEvent) {
-            this.callSuper(v, suppressEvent);
+        setHeight: function(v) {
+            this.callSuper(v);
             updateDomHeightForPadding(this);
         },
         
@@ -12492,9 +12492,9 @@ new JS.Singleton('GlobalMouse', {
         },
         
         /** @overrides myt.View */
-        setHeight: function(v, suppressEvent) {
+        setHeight: function(v) {
             // Limit height if necessary
-            this.callSuper(this.maxHeight >= 0 ? Math.min(this.maxHeight, v) : v, suppressEvent);
+            this.callSuper(this.maxHeight >= 0 ? Math.min(this.maxHeight, v) : v);
             if (this.inited && this.owner) this.updateLocationY(this.owner);
         },
         
@@ -13537,11 +13537,11 @@ new JS.Singleton('GlobalMouse', {
                     visible:false, maskFocus:true,
                     overflow:'hidden', percentOfParentWidth:100
                 }, [SizeToParent, {
-                    setHeight: function(v, suppressEvent) {
-                        this.callSuper(Math.round(v), suppressEvent);
+                    setHeight: function(v) {
+                        this.callSuper(Math.round(v));
                     },
-                    setWidth: function(v, suppressEvent) {
-                        this.callSuper(v, suppressEvent);
+                    setWidth: function(v) {
+                        this.callSuper(v);
                         if (this.inited) this.container.setWidth(v);
                     }
                 }]);
@@ -17257,13 +17257,13 @@ new JS.Singleton('GlobalMouse', {
             
             
             // Attributes //////////////////////////////////////////////////////
-            setWidth: function(v, suppressEvent) {
-                this.callSuper(v, suppressEvent);
+            setWidth: function(v) {
+                this.callSuper(v);
                 if (this.inited) this.updateImageSize();
             },
             
-            setHeight: function(v, suppressEvent) {
-                this.callSuper(v, suppressEvent);
+            setHeight: function(v) {
+                this.callSuper(v);
                 if (this.inited) this.updateImageSize();
             },
             
@@ -19828,9 +19828,9 @@ new JS.Singleton('GlobalMouse', {
         
         /** @overrides
             Update the thumb position if the width changes. */
-        setWidth: function(v, suppressEvent) {
+        setWidth: function(v) {
             const existing = this.width;
-            this.callSuper(v, suppressEvent);
+            this.callSuper(v);
             if (this.inited && this.axis === 'x' && this.width !== existing) {
                 const value = this.getValue();
                 this._syncThumbToValue(this.thumbLower, value);
@@ -19840,9 +19840,9 @@ new JS.Singleton('GlobalMouse', {
         
         /** @overrides
             Update the thumb position if the height changes. */
-        setHeight: function(v, suppressEvent) {
+        setHeight: function(v) {
             const existing = this.height;
-            this.callSuper(v, suppressEvent);
+            this.callSuper(v);
             if (this.inited && this.axis === 'y' && this.height !== existing) {
                 const value = this.getValue();
                 this._syncThumbToValue(this.thumbLower, value);
@@ -19941,17 +19941,17 @@ new JS.Singleton('GlobalMouse', {
         
         /** @overrides
             Update the thumb position if the width changes. */
-        setWidth: function(v, suppressEvent) {
+        setWidth: function(v) {
             const existing = this.width;
-            this.callSuper(v, suppressEvent);
+            this.callSuper(v);
             if (this.inited && this.axis === 'x' && this.width !== existing) this._syncThumbToValue(this.thumb, this.getValue());
         },
         
         /** @overrides
             Update the thumb position if the height changes. */
-        setHeight: function(v, suppressEvent) {
+        setHeight: function(v) {
             const existing = this.height;
-            this.callSuper(v, suppressEvent);
+            this.callSuper(v);
             if (this.inited && this.axis === 'y' && this.height !== existing) this._syncThumbToValue(this.thumb, this.getValue());
         },
         
@@ -20015,8 +20015,8 @@ new JS.Singleton('GlobalMouse', {
         
         // Accessors ///////////////////////////////////////////////////////////
         /** @overrides */
-        setWidth: function(v, suppressEvent) {
-            this.callSuper(v, suppressEvent);
+        setWidth: function(v) {
+            this.callSuper(v);
             this.labelTxt?.updateX(true);
         },
         
@@ -21044,10 +21044,10 @@ new JS.Singleton('GlobalMouse', {
             },
             
             /** @overrides myt.View */
-            setWidth: function(v, suppressEvent) {
+            setWidth: function(v) {
                 const self = this,
                     cur = self.width;
-                self.callSuper(v, suppressEvent);
+                self.callSuper(v);
                 if (self.inited && cur !== self.width) self.gridController?.notifyHdrWidthChange(self);
             },
             
@@ -21357,8 +21357,8 @@ new JS.Singleton('GlobalMouse', {
         },
         
         /** @overrides myt.View */
-        setWidth: function(v, suppressEvent) {
-            this.callSuper(v, suppressEvent);
+        setWidth: function(v) {
+            this.callSuper(v);
             if (this.inited) updateTextWidth(this);
         },
         
@@ -21534,9 +21534,9 @@ new JS.Singleton('GlobalMouse', {
             
             getListData: function() {return this._listData;},
             
-            setWidth: function(v, suppressEvent) {
+            setWidth: function(v) {
                 if (v > 0) {
-                    this.callSuper(v, suppressEvent);
+                    this.callSuper(v);
                     if (this.inited) {
                         const listView = this._listView,
                             w = this.width;
@@ -22090,8 +22090,8 @@ new JS.Singleton('GlobalMouse', {
         },
         
         /** @overrides myt.View */
-        setHeight: function(v, suppressEvent) {
-            this.callSuper(v, suppressEvent);
+        setHeight: function(v) {
+            this.callSuper(v);
             if (this.inited) {
                 v = this.height;
                 this.columnHeaders.forEach(hdr => {hdr.setHeight(v);});
@@ -22099,9 +22099,9 @@ new JS.Singleton('GlobalMouse', {
         },
         
         /** @overrides myt.View */
-        setWidth: function(v, suppressEvent) {
+        setWidth: function(v) {
             const self = this;
-            self.callSuper(mathMax(self.minWidth, v), suppressEvent);
+            self.callSuper(mathMax(self.minWidth, v));
             if (self.inited) {
                 const width = self.width;
                 self.setGridWidth(width);
@@ -23780,19 +23780,19 @@ myt.Eventable = new JS.Class('Eventable', {
         /** @overrides myt.View
             Needed because canvas must also set width/height attribute.
             See: http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#attr-canvas-width */
-        setWidth: function(v, suppressEvent) {
+        setWidth: function(v) {
             if (0 > v) v = 0;
             this.__cvs.setAttribute('width', v);
-            this.callSuper(v, suppressEvent);
+            this.callSuper(v);
         },
         
         /** @overrides myt.View
             Needed because canvas must also set width/height attribute.
             See: http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html#attr-canvas-width */
-        setHeight: function(v, suppressEvent) {
+        setHeight: function(v) {
             if (0 > v) v = 0;
             this.__cvs.setAttribute('height', v);
-            this.callSuper(v, suppressEvent);
+            this.callSuper(v);
         },
         
         

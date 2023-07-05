@@ -80,8 +80,8 @@
     pkg.TextSupport = new JS.Module('TextSupport', {
         // Accessors ///////////////////////////////////////////////////////////
         /** @overrides myt.View */
-        setWidth: function(v, suppressEvent) {
-            this.callSuper(v, suppressEvent);
+        setWidth: function(v) {
+            this.callSuper(v);
             
             // Height can change with width change when wrapping occurs.
             if (v !== 'auto') {
@@ -241,13 +241,13 @@
         
         @class */
     pkg.PaddedTextSupport = new JS.Module('PaddedTextSupport', {
-        setWidth: function(v, suppressEvent) {
-            this.callSuper(v, suppressEvent);
+        setWidth: function(v) {
+            this.callSuper(v);
             updateDomWidthForPadding(this);
         },
         
-        setHeight: function(v, suppressEvent) {
-            this.callSuper(v, suppressEvent);
+        setHeight: function(v) {
+            this.callSuper(v);
             updateDomHeightForPadding(this);
         },
         

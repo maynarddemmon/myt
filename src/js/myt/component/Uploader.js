@@ -359,13 +359,13 @@
             
             
             // Attributes //////////////////////////////////////////////////////
-            setWidth: function(v, suppressEvent) {
-                this.callSuper(v, suppressEvent);
+            setWidth: function(v) {
+                this.callSuper(v);
                 if (this.inited) this.updateImageSize();
             },
             
-            setHeight: function(v, suppressEvent) {
-                this.callSuper(v, suppressEvent);
+            setHeight: function(v) {
+                this.callSuper(v);
                 if (this.inited) this.updateImageSize();
             },
             

@@ -531,7 +531,7 @@
             }
         },
         
-        setWidth: function(v, suppressEvent) {
+        setWidth: function(v) {
             // Dom elements don't support negative width
             if (0 > v) v = 0;
             
@@ -540,12 +540,12 @@
                 this.getODS().width = v + 'px';
                 if (this.inited) {
                     this.__updateBounds(v, this.height);
-                    if (!suppressEvent) this.fireEvent('width', v);
+                    this.fireEvent('width', v);
                 }
             }
         },
         
-        setHeight: function(v, suppressEvent) {
+        setHeight: function(v) {
             // Dom elements don't support negative height
             if (0 > v) v = 0;
             
@@ -554,7 +554,7 @@
                 this.getODS().height = v + 'px';
                 if (this.inited) {
                     this.__updateBounds(this.width, v);
-                    if (!suppressEvent) this.fireEvent('height', v);
+                    this.fireEvent('height', v);
                 }
             }
         },

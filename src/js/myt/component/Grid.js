@@ -728,10 +728,10 @@
             },
             
             /** @overrides myt.View */
-            setWidth: function(v, suppressEvent) {
+            setWidth: function(v) {
                 const self = this,
                     cur = self.width;
-                self.callSuper(v, suppressEvent);
+                self.callSuper(v);
                 if (self.inited && cur !== self.width) self.gridController?.notifyHdrWidthChange(self);
             },
             
@@ -1041,8 +1041,8 @@
         },
         
         /** @overrides myt.View */
-        setWidth: function(v, suppressEvent) {
-            this.callSuper(v, suppressEvent);
+        setWidth: function(v) {
+            this.callSuper(v);
             if (this.inited) updateTextWidth(this);
         },
         

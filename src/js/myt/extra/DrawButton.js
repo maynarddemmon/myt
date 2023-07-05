@@ -55,14 +55,14 @@ myt.DrawButton = new JS.Class('DrawButton', myt.Canvas, {
     },
     
     /** @overrides myt.View */
-    setWidth: function(v, suppressEvent) {
-        this.callSuper(v, suppressEvent);
+    setWidth: function(v) {
+        this.callSuper(v);
         if (this.inited) this.redraw();
     },
     
     /** @overrides myt.View */
-    setHeight: function(v, suppressEvent) {
-        this.callSuper(v, suppressEvent);
+    setHeight: function(v) {
+        this.callSuper(v);
         if (this.inited) this.redraw();
     },
     

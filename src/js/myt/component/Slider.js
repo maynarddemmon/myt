@@ -295,9 +295,9 @@
         
         /** @overrides
             Update the thumb position if the width changes. */
-        setWidth: function(v, suppressEvent) {
+        setWidth: function(v) {
             const existing = this.width;
-            this.callSuper(v, suppressEvent);
+            this.callSuper(v);
             if (this.inited && this.axis === 'x' && this.width !== existing) {
                 const value = this.getValue();
                 this._syncThumbToValue(this.thumbLower, value);
@@ -307,9 +307,9 @@
         
         /** @overrides
             Update the thumb position if the height changes. */
-        setHeight: function(v, suppressEvent) {
+        setHeight: function(v) {
             const existing = this.height;
-            this.callSuper(v, suppressEvent);
+            this.callSuper(v);
             if (this.inited && this.axis === 'y' && this.height !== existing) {
                 const value = this.getValue();
                 this._syncThumbToValue(this.thumbLower, value);
@@ -408,17 +408,17 @@
         
         /** @overrides
             Update the thumb position if the width changes. */
-        setWidth: function(v, suppressEvent) {
+        setWidth: function(v) {
             const existing = this.width;
-            this.callSuper(v, suppressEvent);
+            this.callSuper(v);
             if (this.inited && this.axis === 'x' && this.width !== existing) this._syncThumbToValue(this.thumb, this.getValue());
         },
         
         /** @overrides
             Update the thumb position if the height changes. */
-        setHeight: function(v, suppressEvent) {
+        setHeight: function(v) {
             const existing = this.height;
-            this.callSuper(v, suppressEvent);
+            this.callSuper(v);
             if (this.inited && this.axis === 'y' && this.height !== existing) this._syncThumbToValue(this.thumb, this.getValue());
         },
         
@@ -482,8 +482,8 @@
         
         // Accessors ///////////////////////////////////////////////////////////
         /** @overrides */
-        setWidth: function(v, suppressEvent) {
-            this.callSuper(v, suppressEvent);
+        setWidth: function(v) {
+            this.callSuper(v);
             this.labelTxt?.updateX(true);
         },
         
