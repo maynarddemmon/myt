@@ -823,7 +823,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             /** @param {?Array} fontUrls
                 @returns {undefined} */
             loadCSSFonts: fontUrls => {
-                (fontUrls ?? []).forEach(myt.createStylesheetLink);
+                fontUrls?.forEach(myt.createStylesheetLink);
             },
             
             // CSS
@@ -1171,7 +1171,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         /*  Function to convert a stored cookie value into a value that can be returned. */
         converted = (s, useJson) => {
             // This is a quoted cookie as according to RFC2068, unescape
-            if (s.charAt(0) === '"') s = s.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+            if (s.startsWith('"')) s = s.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
             
             try {return useJson ? JSON.parse(s) : s;} catch(ex) {}
         },
@@ -2410,7 +2410,47 @@ new JS.Singleton('GlobalError', {
         getComputedStyle = GLOBAL.getComputedStyle,
         DOCUMENT_ELEMENT = document,
         
-        mathMax = Math.max;
+        mathMax = Math.max,
+        
+        /*  Gets the z-index of the dom element or, if it does not define a stacking context, 
+            the highest z-index of any of the dom element's descendants.
+            @param {!Object} elem - A dom element
+            @returns {number} - An int */
+        getHighestZIndex = elem => {
+            // See https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Understanding_z_index/The_stacking_context
+            const {zIndex, opacity} = getComputedStyle(elem);
+            if (zIndex === 'auto') {
+                if (parseInt(opacity, 10) === 1) {
+                    // No new stacking context.
+                    let zIdx = 0;
+                    const children = elem.childNodes;
+                    let i = children.length;
+                    while (i) {
+                        const child = children[--i];
+                        if (child.nodeType === 1) zIdx = mathMax(zIdx, getHighestZIndex(child));
+                    }
+                    return zIdx;
+                } else {
+                    return 0;
+                }
+            } else {
+                return parseInt(zIndex, 10);
+            }
+        },
+        
+        /*  Gets an array of ancestor dom elements including the element itself.
+            @param {!Object} elem - The dom element to start from.
+            @param {?Object} ancestor - The dom element to stop getting ancestors at.
+            @returns {!Array} - An array of ancestor dom elements. */
+        getAncestorArray = (elem, ancestor) => {
+            const ancestors = [];
+            while (elem) {
+                ancestors.push(elem);
+                if (elem === ancestor) break;
+                elem = elem.parentNode;
+            }
+            return ancestors;
+        };
     
     /** Provides dom elements for this instance. Typically only a single dom element will exist but 
         some components will make use of two nested elements: an inner dom element and an outer 
@@ -2429,8 +2469,8 @@ new JS.Singleton('GlobalError', {
                 @returns {!Object} the created element. */
             createElement: (tagname, styles, props) => {
                 const elem = DOCUMENT_ELEMENT.createElement(tagname);
-                if (props) for (const key in props) elem[key] = props[key];
-                if (styles) for (const key in styles) elem.style[key] = styles[key];
+                for (const key in props) elem[key] = props[key];
+                for (const key in styles) elem.style[key] = styles[key];
                 return elem;
             },
             
@@ -2439,15 +2479,17 @@ new JS.Singleton('GlobalError', {
                 @returns {boolean} - True if visible, false otherwise. */
             isDomElementVisible: elem => {
                 // Special Case: hidden input elements should be considered not visible.
-                if (elem.nodeName === 'INPUT' && elem.type === 'hidden') return false;
-                
-                while (elem) {
-                    if (elem === DOCUMENT_ELEMENT) return true;
-                    
-                    const style = getComputedStyle(elem);
-                    if (style.display === 'none' || style.visibility === 'hidden') break;
-                    
-                    elem = elem.parentNode;
+                if (elem.nodeName !== 'INPUT' || elem.type !== 'hidden') {
+                    // Walk upwards in the dom until a non-visible element is found or the
+                    // document element is reached.
+                    while (elem) {
+                        if (elem === DOCUMENT_ELEMENT) return true;
+                        
+                        const {display, visibility} = getComputedStyle(elem);
+                        if (display === 'none' || visibility === 'hidden') break;
+                        
+                        elem = elem.parentNode;
+                    }
                 }
                 return false;
             },
@@ -2458,7 +2500,7 @@ new JS.Singleton('GlobalError', {
                 @returns {number} */
             getZIndexRelativeToAncestor: (elem, ancestor) => {
                 if (elem && ancestor) {
-                    const ancestors = DomElementProxy.getAncestorArray(elem, ancestor);
+                    const ancestors = getAncestorArray(elem, ancestor);
                     let i = ancestors.length - 1;
                     while (i) {
                         const style = getComputedStyle(ancestors[--i]),
@@ -2474,44 +2516,8 @@ new JS.Singleton('GlobalError', {
                 return 0;
             },
             
-            /** Gets an array of ancestor dom elements including the element itself.
-                @param {!Object} elem - The dom element to start from.
-                @param {?Object} ancestor - The dom element to stop getting ancestors at.
-                @returns {!Array} - An array of ancestor dom elements. */
-            getAncestorArray: (elem, ancestor) => {
-                const ancestors = [];
-                while (elem) {
-                    ancestors.push(elem);
-                    if (elem === ancestor) break;
-                    elem = elem.parentNode;
-                }
-                return ancestors;
-            },
-            
-            /** Gets the z-index of the dom element or, if it does not define a stacking context, 
-                the highest z-index of any of the dom 
-                element's descendants.
-                @param {!Object} elem - A dom element
-                @returns {number} - An int */
-            getHighestZIndex: elem => {
-                // See https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Understanding_z_index/The_stacking_context
-                const style = getComputedStyle(elem);
-                let zIdx = style.zIndex;
-                const isAuto = zIdx === 'auto';
-                if (isAuto && parseInt(style.opacity, 10) === 1) {
-                    // No new stacking context.
-                    zIdx = 0;
-                    const children = elem.childNodes;
-                    let i = children.length;
-                    while (i) {
-                        const child = children[--i];
-                        if (child.nodeType === 1) zIdx = mathMax(zIdx, DomElementProxy.getHighestZIndex(child));
-                    }
-                } else {
-                    zIdx = isAuto ? 0 : parseInt(zIdx, 10);
-                }
-                return zIdx;
-            },
+            getAncestorArray: getAncestorArray,
+            getHighestZIndex: getHighestZIndex,
             
             /** Gets the x and y position of the dom element relative to the ancestor dom element 
                 or the page. Transforms are not supported. Use getTruePosition if you need support 
@@ -2533,9 +2539,9 @@ new JS.Singleton('GlobalError', {
                         y += elem.offsetTop;
                         elem = elem.offsetParent;
                         if (elem && elem.nodeName !== 'BODY') {
-                            const s = getComputedStyle(elem);
-                            x += parseInt(s.borderLeftWidth, 10) - elem.scrollLeft;
-                            y += parseInt(s.borderTopWidth, 10) - elem.scrollTop;
+                            const {borderLeftWidth, borderTopWidth} = getComputedStyle(elem);
+                            x += parseInt(borderLeftWidth, 10) - elem.scrollLeft;
+                            y += parseInt(borderTopWidth, 10) - elem.scrollTop;
                         }
                     }
                     return {x:x, y:y};
@@ -2774,7 +2780,7 @@ new JS.Singleton('GlobalError', {
         /** Gets the highest z-index of the inner dom element.
             @returns {number} - An int */
         getHighestZIndex: function() {
-            return DomElementProxy.getHighestZIndex(this.__iE);
+            return getHighestZIndex(this.__iE);
         },
         
         /** Gets the highest z-index of any of the descendant dom elements of the inner dom element 
@@ -2787,7 +2793,7 @@ new JS.Singleton('GlobalError', {
                 zIdx = 0;
             while (i) {
                 const child = children[--i];
-                if (child.nodeType === 1 && child !== skipChild) zIdx = mathMax(zIdx, DomElementProxy.getHighestZIndex(child));
+                if (child.nodeType === 1 && child !== skipChild) zIdx = mathMax(zIdx, getHighestZIndex(child));
             }
             return zIdx;
         },
@@ -2809,7 +2815,6 @@ new JS.Singleton('GlobalError', {
         }
     });
 })(myt);
-
 
 (pkg => {
     let globalFocus;
@@ -4698,7 +4703,7 @@ new JS.Singleton('GlobalTouch', {
             @param {?Object} attrs - The attrs Object to extract values from.
             @returns {undefined}. */
         quickSet: function(attrNames, attrs) {
-            (attrNames ?? []).forEach(attrName => {
+            attrNames?.forEach(attrName => {
                 this[attrName] = attrs[attrName];
                 delete attrs[attrName];
             });
@@ -7618,7 +7623,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @returns {undefined} */
         bringSubviewToFront: function(sv) {
             const self = this;
-            if (sv && sv.parent === self) {
+            if (sv?.parent === self) {
                 const innerElem = self.getIDE();
                 if (sv.getODE() !== innerElem.lastChild) {
                     retainFocusDuringDomUpdate(sv, () => {
@@ -7634,7 +7639,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @returns {undefined} */
         sendSubviewToBack: function(sv) {
             const self = this;
-            if (sv && sv.parent === self) {
+            if (sv?.parent === self) {
                 const innerElem = self.getIDE();
                 if (sv.getODE() !== innerElem.firstChild) {
                     retainFocusDuringDomUpdate(sv, () => {
@@ -7651,7 +7656,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @returns {undefined} */
         sendSubviewBehind: function(sv, existing) {
             const self = this;
-            if (sv && existing && sv.parent === self && existing.parent === self) {
+            if (sv?.parent === self && existing?.parent === self) {
                 const innerElem = self.getIDE();
                 retainFocusDuringDomUpdate(sv, () => {
                     innerElem.insertBefore(sv.getODE(), existing.getODE());
@@ -7666,7 +7671,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @returns {undefined} */
         sendSubviewInFrontOf: function(sv, existing) {
             const self = this;
-            if (sv && existing && sv.parent === self && existing.parent === self) {
+            if (sv?.parent === self && existing?.parent === self) {
                 const innerElem = self.getIDE();
                 retainFocusDuringDomUpdate(sv, () => {
                     innerElem.insertBefore(sv.getODE(), existing.getODE().nextSibling);
@@ -9360,10 +9365,7 @@ myt.Destructible = new JS.Module('Destructible', {
         mathMin = math.min,
         
         cleanChannelValue = value => mathMin(255, mathMax(0, math.round(value))),
-        toHex = value => {
-            value = cleanChannelValue(value).toString(16);
-            return value.length === 1 ? '0' + value : value;
-        },
+        toHex = value => cleanChannelValue(value).toString(16).padStart(2, '0'),
         rgbToHex = (red, green, blue, prependHash) => (prependHash ? '#' : '') + toHex(red) + toHex(green) + toHex(blue),
         getRedChannel = value => (0xff0000 & value) >> 16,
         getGreenChannel = value => (0x00ff00 & value) >> 8,
@@ -9489,7 +9491,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     @returns {!Object} a myt.Color or undefined if no color could be parsed. */
                 makeColorFromHexString: value => {
                     if (value) {
-                        if (value.charAt(0) === '#') value = value.slice(1);
+                        if (value.startsWith('#')) value = value.slice(1);
                         
                         switch (value.length) {
                             case 0: value += '0'; // Append "0" to missing channels.
@@ -9521,8 +9523,8 @@ myt.Destructible = new JS.Module('Destructible', {
                     @param {number} v - The value. A number from 0 to 100.
                     @returns {!Object} myt.Color */
                 makeColorFromHSV: (h, s, v) => {
-                    const rgb = hsvToRgb(h, s, v);
-                    return makeColorFromNumber(makeColorNumberFromChannels(rgb.red, rgb.green, rgb.blue));
+                    const {red, green, blue} = hsvToRgb(h, s, v);
+                    return new Color(red, green, blue);
                 },
                 
                 /** Returns the lighter of the two provided colors.
@@ -9544,13 +9546,11 @@ myt.Destructible = new JS.Module('Destructible', {
                     @param {number} percent - The blend percent between the two colors where 0 is 
                         the fromColor and 1.0 is the toColor.
                     @returns {!Object} myt.Color */
-                makeBlendedColor: (fromColor, toColor, percent) => {
-                    return new Color(
-                        fromColor.red + (percent * (toColor.red - fromColor.red)),
-                        fromColor.green + (percent * (toColor.green - fromColor.green)),
-                        fromColor.blue + (percent * (toColor.blue - fromColor.blue))
-                    );
-                }
+                makeBlendedColor: (fromColor, toColor, percent) => new Color(
+                    fromColor.red + (percent * (toColor.red - fromColor.red)),
+                    fromColor.green + (percent * (toColor.green - fromColor.green)),
+                    fromColor.blue + (percent * (toColor.blue - fromColor.blue))
+                )
             },
             
             
@@ -9689,8 +9689,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 @returns {boolean} True if this color has the same color values as this provided 
                     color, false otherwise. */
             equals: function(obj) {
-                return obj === this || (obj && obj.isA && 
-                    obj.isA(Color) && 
+                return obj === this || (obj?.isA?.(Color) && 
                     obj.red === this.red && 
                     obj.green === this.green && 
                     obj.blue === this.blue);
@@ -15526,7 +15525,7 @@ new JS.Singleton('GlobalMouse', {
             @returns boolean true if this form is valid, false otherwise. */
         applyValidation = (form, isValid) => {
             const errorMessages = [];
-            (form.__v ?? []).forEach(validator => {
+            form.__v?.forEach(validator => {
                 isValid = validator.isFormValid(form, null, errorMessages) && isValid;
             });
             form.setErrorMessages(errorMessages);
@@ -15540,7 +15539,7 @@ new JS.Singleton('GlobalMouse', {
                 see if that processor should be run or not.
             @returns * The processed value. */
         processValue = (formElement, value, checkAttr) => {
-            (formElement.__vp ?? []).forEach(processor => {
+            formElement.__vp?.forEach(processor => {
                 if (processor[checkAttr]) value = processor.process(value);
             });
             return value;
@@ -19174,7 +19173,7 @@ new JS.Singleton('GlobalMouse', {
                 self.makeButton(btnContainer, attrs);
                 
                 // Additional Buttons
-                (opts.buttons ?? []).forEach(buttonAttrs => {self.makeButton(btnContainer, buttonAttrs);});
+                opts.buttons?.forEach(buttonAttrs => {self.makeButton(btnContainer, buttonAttrs);});
                 
                 new SizeToChildren(btnContainer, {axis:'y'});
                 new SpacedLayout(btnContainer, {spacing:4, collapseParent:true});
@@ -23720,8 +23719,8 @@ myt.Eventable = new JS.Class('Eventable', {
         'quadraticCurveTo','bezierCurveTo','arcTo','rect','arc','fill','stroke','clip','isPointInPath',
         'fillText','strokeText','drawImage','createImageData','putImageData'
     ].forEach(funcName => {
-        mixin[funcName] = function() {
-            this.__ctx[funcName].apply(this.__ctx, arguments);
+        mixin[funcName] = function(...args) {
+            this.__ctx[funcName](...args);
         };
     });
     
@@ -23729,8 +23728,8 @@ myt.Eventable = new JS.Class('Eventable', {
         'createLinearGradient','createRadialGradient','createPattern',
         'measureText','getImageData'
     ].forEach(funcName => {
-        mixin[funcName] = function() {
-            return this.__ctx[funcName].apply(this.__ctx, arguments);
+        mixin[funcName] = function(...args) {
+            return this.__ctx[funcName](...args);
         };
     });
     
@@ -23996,6 +23995,8 @@ myt.Eventable = new JS.Class('Eventable', {
             @param {!Array} colors - An array of objects that contains the colors to blend between 
                 and the angle they occur at. The object has two properties, "angle" (in radians) 
                 and "color". The "color" may be either a hex color string or a myt.Color object.
+                A computed value "colorDelta" will be pushed onto it during the execution of
+                this function.
             @param {number} [segments] - The number of segments to draw for half a circle. 
                 Defaults to 60.
             @returns {!Object} The canvas for function chaining. */
@@ -24009,15 +24010,21 @@ myt.Eventable = new JS.Class('Eventable', {
             });
             
             // Calculate Colors
+            if (segments < 1) {
+                console.warn('Invalid segements', segments);
+                segments = 60;
+            }
+            
             let angleDelta = PI / segments,
                 i = 0;
             
             for (const limit = colors.length - 1; i < limit;) {
                 const config = colors[i++],
-                    nextConfig = colors[i],
-                    angleDiff = nextConfig.angle - config.angle,
+                    {angle:curAngle, color:curColor} = config,
+                    {angle:nextAngle, color:nextColor} = colors[i],
+                    angleDiff = nextAngle - curAngle,
                     slices = Math.round(angleDiff / angleDelta),
-                    diff = config.color.getDiffFrom(nextConfig.color);
+                    diff = curColor.getDiffFrom(nextColor);
                 config.colorDelta = {red:diff.red / slices, green:diff.green / slices, blue:diff.blue / slices};
             }
             
@@ -24063,12 +24070,11 @@ myt.Eventable = new JS.Class('Eventable', {
                 self.lineTo(x2, y2);
                 self.closePath();
                 
-                const c = colors[i].color,
-                    colorDelta = colors[i].colorDelta;
+                const {color, colorDelta} = colors[i];
                 self.setFillStyle(Color.rgbToHex(
-                    c.red + (diffCount * colorDelta.red),
-                    c.green + (diffCount * colorDelta.green),
-                    c.blue + (diffCount * colorDelta.blue),
+                    color.red + (diffCount * colorDelta.red),
+                    color.green + (diffCount * colorDelta.green),
+                    color.blue + (diffCount * colorDelta.blue),
                     true
                 ));
                 self.fill();
@@ -24089,7 +24095,6 @@ myt.Eventable = new JS.Class('Eventable', {
         }
     });
 })(myt);
-
 
 /** Provides a dependency target that pulls in all of the myt package. */
 myt.all = true;

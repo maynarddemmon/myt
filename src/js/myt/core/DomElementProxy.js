@@ -3,7 +3,47 @@
         getComputedStyle = GLOBAL.getComputedStyle,
         DOCUMENT_ELEMENT = document,
         
-        mathMax = Math.max;
+        mathMax = Math.max,
+        
+        /*  Gets the z-index of the dom element or, if it does not define a stacking context, 
+            the highest z-index of any of the dom element's descendants.
+            @param {!Object} elem - A dom element
+            @returns {number} - An int */
+        getHighestZIndex = elem => {
+            // See https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Understanding_z_index/The_stacking_context
+            const {zIndex, opacity} = getComputedStyle(elem);
+            if (zIndex === 'auto') {
+                if (parseInt(opacity, 10) === 1) {
+                    // No new stacking context.
+                    let zIdx = 0;
+                    const children = elem.childNodes;
+                    let i = children.length;
+                    while (i) {
+                        const child = children[--i];
+                        if (child.nodeType === 1) zIdx = mathMax(zIdx, getHighestZIndex(child));
+                    }
+                    return zIdx;
+                } else {
+                    return 0;
+                }
+            } else {
+                return parseInt(zIndex, 10);
+            }
+        },
+        
+        /*  Gets an array of ancestor dom elements including the element itself.
+            @param {!Object} elem - The dom element to start from.
+            @param {?Object} ancestor - The dom element to stop getting ancestors at.
+            @returns {!Array} - An array of ancestor dom elements. */
+        getAncestorArray = (elem, ancestor) => {
+            const ancestors = [];
+            while (elem) {
+                ancestors.push(elem);
+                if (elem === ancestor) break;
+                elem = elem.parentNode;
+            }
+            return ancestors;
+        };
     
     /** Provides dom elements for this instance. Typically only a single dom element will exist but 
         some components will make use of two nested elements: an inner dom element and an outer 
@@ -22,8 +62,8 @@
                 @returns {!Object} the created element. */
             createElement: (tagname, styles, props) => {
                 const elem = DOCUMENT_ELEMENT.createElement(tagname);
-                if (props) for (const key in props) elem[key] = props[key];
-                if (styles) for (const key in styles) elem.style[key] = styles[key];
+                for (const key in props) elem[key] = props[key];
+                for (const key in styles) elem.style[key] = styles[key];
                 return elem;
             },
             
@@ -32,15 +72,17 @@
                 @returns {boolean} - True if visible, false otherwise. */
             isDomElementVisible: elem => {
                 // Special Case: hidden input elements should be considered not visible.
-                if (elem.nodeName === 'INPUT' && elem.type === 'hidden') return false;
-                
-                while (elem) {
-                    if (elem === DOCUMENT_ELEMENT) return true;
-                    
-                    const style = getComputedStyle(elem);
-                    if (style.display === 'none' || style.visibility === 'hidden') break;
-                    
-                    elem = elem.parentNode;
+                if (elem.nodeName !== 'INPUT' || elem.type !== 'hidden') {
+                    // Walk upwards in the dom until a non-visible element is found or the
+                    // document element is reached.
+                    while (elem) {
+                        if (elem === DOCUMENT_ELEMENT) return true;
+                        
+                        const {display, visibility} = getComputedStyle(elem);
+                        if (display === 'none' || visibility === 'hidden') break;
+                        
+                        elem = elem.parentNode;
+                    }
                 }
                 return false;
             },
@@ -51,7 +93,7 @@
                 @returns {number} */
             getZIndexRelativeToAncestor: (elem, ancestor) => {
                 if (elem && ancestor) {
-                    const ancestors = DomElementProxy.getAncestorArray(elem, ancestor);
+                    const ancestors = getAncestorArray(elem, ancestor);
                     let i = ancestors.length - 1;
                     while (i) {
                         const style = getComputedStyle(ancestors[--i]),
@@ -67,44 +109,8 @@
                 return 0;
             },
             
-            /** Gets an array of ancestor dom elements including the element itself.
-                @param {!Object} elem - The dom element to start from.
-                @param {?Object} ancestor - The dom element to stop getting ancestors at.
-                @returns {!Array} - An array of ancestor dom elements. */
-            getAncestorArray: (elem, ancestor) => {
-                const ancestors = [];
-                while (elem) {
-                    ancestors.push(elem);
-                    if (elem === ancestor) break;
-                    elem = elem.parentNode;
-                }
-                return ancestors;
-            },
-            
-            /** Gets the z-index of the dom element or, if it does not define a stacking context, 
-                the highest z-index of any of the dom 
-                element's descendants.
-                @param {!Object} elem - A dom element
-                @returns {number} - An int */
-            getHighestZIndex: elem => {
-                // See https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Understanding_z_index/The_stacking_context
-                const style = getComputedStyle(elem);
-                let zIdx = style.zIndex;
-                const isAuto = zIdx === 'auto';
-                if (isAuto && parseInt(style.opacity, 10) === 1) {
-                    // No new stacking context.
-                    zIdx = 0;
-                    const children = elem.childNodes;
-                    let i = children.length;
-                    while (i) {
-                        const child = children[--i];
-                        if (child.nodeType === 1) zIdx = mathMax(zIdx, DomElementProxy.getHighestZIndex(child));
-                    }
-                } else {
-                    zIdx = isAuto ? 0 : parseInt(zIdx, 10);
-                }
-                return zIdx;
-            },
+            getAncestorArray: getAncestorArray,
+            getHighestZIndex: getHighestZIndex,
             
             /** Gets the x and y position of the dom element relative to the ancestor dom element 
                 or the page. Transforms are not supported. Use getTruePosition if you need support 
@@ -126,9 +132,9 @@
                         y += elem.offsetTop;
                         elem = elem.offsetParent;
                         if (elem && elem.nodeName !== 'BODY') {
-                            const s = getComputedStyle(elem);
-                            x += parseInt(s.borderLeftWidth, 10) - elem.scrollLeft;
-                            y += parseInt(s.borderTopWidth, 10) - elem.scrollTop;
+                            const {borderLeftWidth, borderTopWidth} = getComputedStyle(elem);
+                            x += parseInt(borderLeftWidth, 10) - elem.scrollLeft;
+                            y += parseInt(borderTopWidth, 10) - elem.scrollTop;
                         }
                     }
                     return {x:x, y:y};
@@ -367,7 +373,7 @@
         /** Gets the highest z-index of the inner dom element.
             @returns {number} - An int */
         getHighestZIndex: function() {
-            return DomElementProxy.getHighestZIndex(this.__iE);
+            return getHighestZIndex(this.__iE);
         },
         
         /** Gets the highest z-index of any of the descendant dom elements of the inner dom element 
@@ -380,7 +386,7 @@
                 zIdx = 0;
             while (i) {
                 const child = children[--i];
-                if (child.nodeType === 1 && child !== skipChild) zIdx = mathMax(zIdx, DomElementProxy.getHighestZIndex(child));
+                if (child.nodeType === 1 && child !== skipChild) zIdx = mathMax(zIdx, getHighestZIndex(child));
             }
             return zIdx;
         },

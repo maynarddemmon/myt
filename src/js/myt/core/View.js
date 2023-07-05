@@ -1053,7 +1053,7 @@
             @returns {undefined} */
         bringSubviewToFront: function(sv) {
             const self = this;
-            if (sv && sv.parent === self) {
+            if (sv?.parent === self) {
                 const innerElem = self.getIDE();
                 if (sv.getODE() !== innerElem.lastChild) {
                     retainFocusDuringDomUpdate(sv, () => {
@@ -1069,7 +1069,7 @@
             @returns {undefined} */
         sendSubviewToBack: function(sv) {
             const self = this;
-            if (sv && sv.parent === self) {
+            if (sv?.parent === self) {
                 const innerElem = self.getIDE();
                 if (sv.getODE() !== innerElem.firstChild) {
                     retainFocusDuringDomUpdate(sv, () => {
@@ -1086,7 +1086,7 @@
             @returns {undefined} */
         sendSubviewBehind: function(sv, existing) {
             const self = this;
-            if (sv && existing && sv.parent === self && existing.parent === self) {
+            if (sv?.parent === self && existing?.parent === self) {
                 const innerElem = self.getIDE();
                 retainFocusDuringDomUpdate(sv, () => {
                     innerElem.insertBefore(sv.getODE(), existing.getODE());
@@ -1101,7 +1101,7 @@
             @returns {undefined} */
         sendSubviewInFrontOf: function(sv, existing) {
             const self = this;
-            if (sv && existing && sv.parent === self && existing.parent === self) {
+            if (sv?.parent === self && existing?.parent === self) {
                 const innerElem = self.getIDE();
                 retainFocusDuringDomUpdate(sv, () => {
                     innerElem.insertBefore(sv.getODE(), existing.getODE().nextSibling);

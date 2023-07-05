@@ -376,7 +376,7 @@
             /** @param {?Array} fontUrls
                 @returns {undefined} */
             loadCSSFonts: fontUrls => {
-                (fontUrls ?? []).forEach(myt.createStylesheetLink);
+                fontUrls?.forEach(myt.createStylesheetLink);
             },
             
             // CSS

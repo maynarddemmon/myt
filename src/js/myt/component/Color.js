@@ -4,10 +4,7 @@
         mathMin = math.min,
         
         cleanChannelValue = value => mathMin(255, mathMax(0, math.round(value))),
-        toHex = value => {
-            value = cleanChannelValue(value).toString(16);
-            return value.length === 1 ? '0' + value : value;
-        },
+        toHex = value => cleanChannelValue(value).toString(16).padStart(2, '0'),
         rgbToHex = (red, green, blue, prependHash) => (prependHash ? '#' : '') + toHex(red) + toHex(green) + toHex(blue),
         getRedChannel = value => (0xff0000 & value) >> 16,
         getGreenChannel = value => (0x00ff00 & value) >> 8,
@@ -133,7 +130,7 @@
                     @returns {!Object} a myt.Color or undefined if no color could be parsed. */
                 makeColorFromHexString: value => {
                     if (value) {
-                        if (value.charAt(0) === '#') value = value.slice(1);
+                        if (value.startsWith('#')) value = value.slice(1);
                         
                         switch (value.length) {
                             case 0: value += '0'; // Append "0" to missing channels.
@@ -165,8 +162,8 @@
                     @param {number} v - The value. A number from 0 to 100.
                     @returns {!Object} myt.Color */
                 makeColorFromHSV: (h, s, v) => {
-                    const rgb = hsvToRgb(h, s, v);
-                    return makeColorFromNumber(makeColorNumberFromChannels(rgb.red, rgb.green, rgb.blue));
+                    const {red, green, blue} = hsvToRgb(h, s, v);
+                    return new Color(red, green, blue);
                 },
                 
                 /** Returns the lighter of the two provided colors.
@@ -188,13 +185,11 @@
                     @param {number} percent - The blend percent between the two colors where 0 is 
                         the fromColor and 1.0 is the toColor.
                     @returns {!Object} myt.Color */
-                makeBlendedColor: (fromColor, toColor, percent) => {
-                    return new Color(
-                        fromColor.red + (percent * (toColor.red - fromColor.red)),
-                        fromColor.green + (percent * (toColor.green - fromColor.green)),
-                        fromColor.blue + (percent * (toColor.blue - fromColor.blue))
-                    );
-                }
+                makeBlendedColor: (fromColor, toColor, percent) => new Color(
+                    fromColor.red + (percent * (toColor.red - fromColor.red)),
+                    fromColor.green + (percent * (toColor.green - fromColor.green)),
+                    fromColor.blue + (percent * (toColor.blue - fromColor.blue))
+                )
             },
             
             
@@ -333,8 +328,7 @@
                 @returns {boolean} True if this color has the same color values as this provided 
                     color, false otherwise. */
             equals: function(obj) {
-                return obj === this || (obj && obj.isA && 
-                    obj.isA(Color) && 
+                return obj === this || (obj?.isA?.(Color) && 
                     obj.red === this.red && 
                     obj.green === this.green && 
                     obj.blue === this.blue);

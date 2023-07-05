@@ -85,7 +85,7 @@
             @param {?Object} attrs - The attrs Object to extract values from.
             @returns {undefined}. */
         quickSet: function(attrNames, attrs) {
-            (attrNames ?? []).forEach(attrName => {
+            attrNames?.forEach(attrName => {
                 this[attrName] = attrs[attrName];
                 delete attrs[attrName];
             });

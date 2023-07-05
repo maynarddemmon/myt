@@ -12,8 +12,8 @@
         'quadraticCurveTo','bezierCurveTo','arcTo','rect','arc','fill','stroke','clip','isPointInPath',
         'fillText','strokeText','drawImage','createImageData','putImageData'
     ].forEach(funcName => {
-        mixin[funcName] = function() {
-            this.__ctx[funcName].apply(this.__ctx, arguments);
+        mixin[funcName] = function(...args) {
+            this.__ctx[funcName](...args);
         };
     });
     
@@ -21,8 +21,8 @@
         'createLinearGradient','createRadialGradient','createPattern',
         'measureText','getImageData'
     ].forEach(funcName => {
-        mixin[funcName] = function() {
-            return this.__ctx[funcName].apply(this.__ctx, arguments);
+        mixin[funcName] = function(...args) {
+            return this.__ctx[funcName](...args);
         };
     });
     
@@ -288,6 +288,8 @@
             @param {!Array} colors - An array of objects that contains the colors to blend between 
                 and the angle they occur at. The object has two properties, "angle" (in radians) 
                 and "color". The "color" may be either a hex color string or a myt.Color object.
+                A computed value "colorDelta" will be pushed onto it during the execution of
+                this function.
             @param {number} [segments] - The number of segments to draw for half a circle. 
                 Defaults to 60.
             @returns {!Object} The canvas for function chaining. */
@@ -301,15 +303,21 @@
             });
             
             // Calculate Colors
+            if (segments < 1) {
+                console.warn('Invalid segements', segments);
+                segments = 60;
+            }
+            
             let angleDelta = PI / segments,
                 i = 0;
             
             for (const limit = colors.length - 1; i < limit;) {
                 const config = colors[i++],
-                    nextConfig = colors[i],
-                    angleDiff = nextConfig.angle - config.angle,
+                    {angle:curAngle, color:curColor} = config,
+                    {angle:nextAngle, color:nextColor} = colors[i],
+                    angleDiff = nextAngle - curAngle,
                     slices = Math.round(angleDiff / angleDelta),
-                    diff = config.color.getDiffFrom(nextConfig.color);
+                    diff = curColor.getDiffFrom(nextColor);
                 config.colorDelta = {red:diff.red / slices, green:diff.green / slices, blue:diff.blue / slices};
             }
             
@@ -355,12 +363,11 @@
                 self.lineTo(x2, y2);
                 self.closePath();
                 
-                const c = colors[i].color,
-                    colorDelta = colors[i].colorDelta;
+                const {color, colorDelta} = colors[i];
                 self.setFillStyle(Color.rgbToHex(
-                    c.red + (diffCount * colorDelta.red),
-                    c.green + (diffCount * colorDelta.green),
-                    c.blue + (diffCount * colorDelta.blue),
+                    color.red + (diffCount * colorDelta.red),
+                    color.green + (diffCount * colorDelta.green),
+                    color.blue + (diffCount * colorDelta.blue),
                     true
                 ));
                 self.fill();

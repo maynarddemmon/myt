@@ -87,7 +87,7 @@
             @returns boolean true if this form is valid, false otherwise. */
         applyValidation = (form, isValid) => {
             const errorMessages = [];
-            (form.__v ?? []).forEach(validator => {
+            form.__v?.forEach(validator => {
                 isValid = validator.isFormValid(form, null, errorMessages) && isValid;
             });
             form.setErrorMessages(errorMessages);
@@ -101,7 +101,7 @@
                 see if that processor should be run or not.
             @returns * The processed value. */
         processValue = (formElement, value, checkAttr) => {
-            (formElement.__vp ?? []).forEach(processor => {
+            formElement.__vp?.forEach(processor => {
                 if (processor[checkAttr]) value = processor.process(value);
             });
             return value;

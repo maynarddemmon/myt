@@ -1240,7 +1240,7 @@
                 self.makeButton(btnContainer, attrs);
                 
                 // Additional Buttons
-                (opts.buttons ?? []).forEach(buttonAttrs => {self.makeButton(btnContainer, buttonAttrs);});
+                opts.buttons?.forEach(buttonAttrs => {self.makeButton(btnContainer, buttonAttrs);});
                 
                 new SizeToChildren(btnContainer, {axis:'y'});
                 new SpacedLayout(btnContainer, {spacing:4, collapseParent:true});

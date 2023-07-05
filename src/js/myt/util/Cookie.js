@@ -3,7 +3,7 @@
         /*  Function to convert a stored cookie value into a value that can be returned. */
         converted = (s, useJson) => {
             // This is a quoted cookie as according to RFC2068, unescape
-            if (s.charAt(0) === '"') s = s.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+            if (s.startsWith('"')) s = s.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
             
             try {return useJson ? JSON.parse(s) : s;} catch(ex) {}
         },
