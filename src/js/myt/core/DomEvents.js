@@ -8,6 +8,12 @@
         
         getCodeFromEvent = event => event.value.code,
         
+        getSourceViewFromEvent = event => {
+            // Assume a myt event but fallback to assuming the event was already a DOM event.
+            const domEvent = event.value ?? event;
+            return (domEvent.target ?? domEvent.srcElement).model;
+        },
+        
         /** Generates Key Events and passes them on to one or more event observers. Requires 
             myt.DomObservable as a super mixin.
             
@@ -115,9 +121,8 @@
                     @param {!Object} event Event value is a dom event.
                     @returns object with an x and y key each containing a number. */
                 getScrollFromEvent: event => {
-                    const value = event.value,
-                        target = value.target ?? value.srcElement;
-                    return {x:target.scrollLeft, y:target.scrollTop};
+                    const {scrollLeft, scrollTop} = getSourceViewFromEvent(event);
+                    return {x:scrollLeft, y:scrollTop};
                 }
             },
             
@@ -612,6 +617,12 @@
         
         @class */
     pkg.DomObserver = new JSModule('DomObserver', {
+        // Class Methods and Attributes ////////////////////////////////////////
+        extend: {
+            getSourceViewFromEvent:getSourceViewFromEvent
+        },
+        
+        
         // Methods /////////////////////////////////////////////////////////////
         /** Attaches this DomObserver to the provided DomObservable for the provided type.
             @param {!Object} observable
