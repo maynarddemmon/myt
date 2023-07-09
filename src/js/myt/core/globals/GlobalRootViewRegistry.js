@@ -1,6 +1,6 @@
 (pkg => {
     let globalRootViewRegistry;
-        
+    
     /* Holds an array of RootViews. */
     const roots = [];
     
@@ -8,10 +8,8 @@
         Registered in myt.global as 'roots'.
         
         Events:
-            rootAdded:RootView Fired when a RootView is added. The value is the 
-                RootView added.
-            rootRemoved:RootView Fired when a RootView is removed. The value 
-                is the RootView removed.
+            rootAdded:RootView Fired when a RootView is added. The value is the added RootView.
+            rootRemoved:RootView Fired when a RootView is removed. The value is the removed RootView.
         
         @class */
     new JS.Singleton('GlobalRootViewRegistry', {

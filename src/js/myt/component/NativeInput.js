@@ -5,9 +5,7 @@
         
         GlobalKeys = pkg.global.keys,
         
-        SizeToDom = pkg.SizeToDom,
-        View = pkg.View,
-        Disableable = pkg.Disableable,
+        {SizeToDom, View, Disableable, KeyObservable} = pkg,
         
         FOCUS_SHADOW = pkg.Button.FOCUS_SHADOW,
         
@@ -247,7 +245,7 @@
                 // Filter for allowed characters
                 const domEvent = event.value,
                     allowedChars = this.allowedChars;
-                if (allowedChars && !allowedChars.includes(pkg.KeyObservable.getKeyFromEvent(event))) domEvent.preventDefault();
+                if (allowedChars && !allowedChars.includes(KeyObservable.getKeyFromEvent(event))) domEvent.preventDefault();
                 
                 this.filterInputPress(domEvent);
             },
@@ -460,7 +458,7 @@
             @returns {undefined} */
         __cleanInput: function(event) {
             // Prevent enter key from inserting a div
-            if (pkg.KeyObservable.isEnterKeyEvent(event)) {
+            if (KeyObservable.isEnterKeyEvent(event)) {
                 event.value.preventDefault();
                 
                 // Instead, insert a linefeed if wrapping is allowed.
@@ -883,7 +881,7 @@
             @param option:myt.InputSelectOption The option to select.
             @returns {undefined} */
         select: function(option) {
-            if (option && option.canSelect(this)) {
+            if (option?.canSelect(this)) {
                 option.setSelected(true);
                 this.__syncToDom();
             }
@@ -900,7 +898,7 @@
             @param option:myt.InputSelectOption The option to deselect.
             @returns {undefined} */
         deselect: function(option) {
-            if (option && option.canDeselect(this)) {
+            if (option?.canDeselect(this)) {
                 option.setSelected(false);
                 this.__syncToDom();
             }

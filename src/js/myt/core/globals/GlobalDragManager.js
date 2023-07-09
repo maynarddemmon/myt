@@ -188,12 +188,9 @@
                 topDropTarget;
             
             if (i > 0) {
-                const domMouseEvent = event.value,
-                    mouseX = domMouseEvent.pageX,
-                    mouseY = domMouseEvent.pageY;
-                
+                const {pageX:mouseX, pageY:mouseY} = event.value;
                 while (i) {
-                    let dropTarget = filteredDropTargets[--i];
+                    const dropTarget = filteredDropTargets[--i];
                     if (dropTarget.willAcceptDrop(dropable) &&
                         dropable.willPermitDrop(dropTarget) &&
                         dropTarget.isPointVisible(mouseX, mouseY) && 

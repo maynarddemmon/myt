@@ -1,11 +1,6 @@
 (pkg => {
-    const math = Math,
-        mathMax = math.max,
-        mathSin = math.sin,
-        mathCos = math.cos,
-        mathPow = math.pow,
-        mathSqrt = math.sqrt,
-        PI = math.PI,
+    const {max:mathMax, sin:mathSin, cos:mathCos, pow:mathPow, sqrt:mathSqrt, PI} = Math,
+        
         TWO_PI = 2 * PI,
         HALF_PI = PI / 2,
         
@@ -104,16 +99,12 @@
         },
         
         advance = (animator, timeDiff) => {
-            if (animator.running && !animator.paused) {
-                const reverse = animator.reverse, 
-                    duration = animator.duration, 
-                    repeat = animator.repeat;
-                
+            const {running, paused, reverse, duration, repeat, __prog:oldProgress, easingFunction, callback} = animator;
+            if (running && !paused) {
                 // An animation in reverse is like time going backward.
                 if (reverse) timeDiff *= -1;
                 
                 // Determine how much time to move forward by.
-                const oldProgress = animator.__prog;
                 let progress = oldProgress + timeDiff;
                 
                 // Check for overage
@@ -136,33 +127,32 @@
                 const target = getTarget(animator);
                 if (target) {
                     // Update Target
-                    const relative = animator.relative,
-                        attr = animator.attribute,
+                    const {relative, attribute:attr, __isColorAnim, __loopCnt, to} = animator,
                         progressPercent = mathMax(0, progress / duration), 
                         oldProgressPercent = mathMax(0, oldProgress / duration);
                     
                     // Determine what "from" to use if none was provided.
                     if (animator.from == null) {
                         animator.__tmpFrom = true;
-                        animator.from = relative ? (animator.__isColorAnim ? '#000' : 0) : target.get(attr);
+                        animator.from = relative ? (__isColorAnim ? '#000' : 0) : target.get(attr);
                     }
                     
-                    const motionValue = animator.easingFunction(progressPercent) - (relative ? animator.easingFunction(oldProgressPercent) : 0),
-                        value = relative ? target.get(attr) : animator.from,
-                        to = animator.to;
-                    target.set(attr, animator.__isColorAnim ? getColorValue(animator.from, to, motionValue, relative, value) : value + ((to - animator.from) * motionValue));
+                    const motionValue = easingFunction(progressPercent) - (relative ? easingFunction(oldProgressPercent) : 0),
+                        from = animator.from,
+                        value = relative ? target.get(attr) : from;
+                    target.set(attr, __isColorAnim ? getColorValue(from, to, motionValue, relative, value) : value + ((to - from) * motionValue));
                     
                     if (
-                        (!reverse && animator.__loopCnt === repeat) || // Forward check
-                        (reverse && 0 > animator.__loopCnt && repeat > 0) // Reverse check
+                        (!reverse && __loopCnt === repeat) || // Forward check
+                        (reverse && 0 > __loopCnt && repeat > 0) // Reverse check
                     ) {
                         // Stop animation since loop count exceeded repeat count.
                         animator.setRunning(false);
-                        animator.callback?.call(animator, true);
+                        callback?.call(animator, true);
                     } else if (remainderTime > 0) {
                         // Advance again if time is remaining. This occurs when the timeDiff 
                         // provided was greater than the animation duration and the animation loops.
-                        animator.fireEvent('repeat', animator.__loopCnt);
+                        animator.fireEvent('repeat', __loopCnt);
                         animator.__prog = reverse ? duration : 0;
                         advance(animator, remainderTime);
                     } else {
@@ -171,7 +161,7 @@
                 } else {
                     console.log('No target for animator', animator);
                     animator.setRunning(false);
-                    animator.callback?.call(animator, false);
+                    callback?.call(animator, false);
                 }
             }
         };

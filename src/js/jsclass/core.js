@@ -12,8 +12,8 @@
                 cachedAncestors = module.__anc__;
             if (cachedAncestors) {
                 const len = cachedAncestors.length;
-                for (let i = 0; i < len; i++) {
-                    const fns = cachedAncestors[i].__fns__;
+                for (let i = 0; i < len;) {
+                    const fns = cachedAncestors[i++].__fns__;
                     if (fns.has(name)) methods.push(fns.get(name));
                 }
             } else {
@@ -21,7 +21,7 @@
                     walk = theModule => {
                         const includes = theModule.__inc__,
                             len = includes.length;
-                        for (let i = 0; i < len; i++) walk(includes[i]);
+                        for (let i = 0; i < len;) walk(includes[i++]);
                         if (!ancestors.includes(theModule)) {
                             ancestors.push(theModule);
                             const fns = theModule.__fns__;
@@ -45,7 +45,7 @@
                 } else {
                     const argsLen = args.length,
                         _super = this.callSuper = (...superArgs) => {
-                            for (let i = superArgs.length; i < argsLen; i++) superArgs[i] = args[i];
+                            for (let i = superArgs.length; i < argsLen;) superArgs[i] = args[i++];
                             if (--stackIndex === 0) delete this.callSuper;
                             const returnValue = methods[stackIndex].callable.call(this, ...superArgs);
                             this.callSuper = _super;
@@ -70,14 +70,13 @@
                 module.__anc__ = null;
                 module.__mct__ = new Map();
                 const dep = module.__dep__;
-                let i = dep.length;
-                while (i--) resolveModule(dep[i]);
+                for (let i = dep.length; i > 0;) resolveModule(dep[--i]);
             }
             
             const target = hostModule.__tgt__,
                 inc = module.__inc__,
                 len = inc.length;
-            for (let i = 0; i < len; i++) resolveModule(inc[i], hostModule);
+            for (let i = 0; i < len;) resolveModule(inc[i++], hostModule);
             
             for (const [key, method] of module.__fns__) {
                 const compiled = method instanceof Method ? compile(method, hostModule) : method;
@@ -93,7 +92,7 @@
             return constructor;
         },
         
-        createMethod = (module, name, callable) => (callable && callable.__fns__) || typeof callable !== 'function' ? callable : new Method(module, name, callable),
+        createMethod = (module, name, callable) => callable?.__fns__ || typeof callable !== 'function' ? callable : new Method(module, name, callable),
         
         Method = makeClass(Object),
         Module = exports.Module = makeClass(Object);
@@ -132,9 +131,9 @@
                 const extend = module.extend,
                     include = module.include;
                 if (extend && (extend.__fns__ || typeof extend !== 'function')) this.extend(extend);
-                if (include &&  (include.__fns__ || typeof include !== 'function')) {
+                if (include && (include.__fns__ || typeof include !== 'function')) {
                     const len = include.length;
-                    for (let i = 0; i < len; i++) this.include(include[i], true);
+                    for (let i = 0; i < len;) this.include(include[i++], true);
                 }
                 for (const field of Object.keys(module)) {
                     const value = module[field];
@@ -157,8 +156,8 @@
         if (module === this) return true;
         const inc = this.__inc__, 
             len = inc.length;
-        for (let i = 0; i < len; i++) {
-            if (inc[i].includes(module)) return true;
+        for (let i = 0; i < len;) {
+            if (inc[i++].includes(module)) return true;
         }
         return false;
     };

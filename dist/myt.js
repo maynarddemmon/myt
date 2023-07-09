@@ -216,8 +216,8 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 cachedAncestors = module.__anc__;
             if (cachedAncestors) {
                 const len = cachedAncestors.length;
-                for (let i = 0; i < len; i++) {
-                    const fns = cachedAncestors[i].__fns__;
+                for (let i = 0; i < len;) {
+                    const fns = cachedAncestors[i++].__fns__;
                     if (fns.has(name)) methods.push(fns.get(name));
                 }
             } else {
@@ -225,7 +225,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     walk = theModule => {
                         const includes = theModule.__inc__,
                             len = includes.length;
-                        for (let i = 0; i < len; i++) walk(includes[i]);
+                        for (let i = 0; i < len;) walk(includes[i++]);
                         if (!ancestors.includes(theModule)) {
                             ancestors.push(theModule);
                             const fns = theModule.__fns__;
@@ -249,7 +249,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 } else {
                     const argsLen = args.length,
                         _super = this.callSuper = (...superArgs) => {
-                            for (let i = superArgs.length; i < argsLen; i++) superArgs[i] = args[i];
+                            for (let i = superArgs.length; i < argsLen;) superArgs[i] = args[i++];
                             if (--stackIndex === 0) delete this.callSuper;
                             const returnValue = methods[stackIndex].callable.call(this, ...superArgs);
                             this.callSuper = _super;
@@ -274,14 +274,13 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 module.__anc__ = null;
                 module.__mct__ = new Map();
                 const dep = module.__dep__;
-                let i = dep.length;
-                while (i--) resolveModule(dep[i]);
+                for (let i = dep.length; i > 0;) resolveModule(dep[--i]);
             }
             
             const target = hostModule.__tgt__,
                 inc = module.__inc__,
                 len = inc.length;
-            for (let i = 0; i < len; i++) resolveModule(inc[i], hostModule);
+            for (let i = 0; i < len;) resolveModule(inc[i++], hostModule);
             
             for (const [key, method] of module.__fns__) {
                 const compiled = method instanceof Method ? compile(method, hostModule) : method;
@@ -297,7 +296,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             return constructor;
         },
         
-        createMethod = (module, name, callable) => (callable && callable.__fns__) || typeof callable !== 'function' ? callable : new Method(module, name, callable),
+        createMethod = (module, name, callable) => callable?.__fns__ || typeof callable !== 'function' ? callable : new Method(module, name, callable),
         
         Method = makeClass(Object),
         Module = exports.Module = makeClass(Object);
@@ -336,9 +335,9 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 const extend = module.extend,
                     include = module.include;
                 if (extend && (extend.__fns__ || typeof extend !== 'function')) this.extend(extend);
-                if (include &&  (include.__fns__ || typeof include !== 'function')) {
+                if (include && (include.__fns__ || typeof include !== 'function')) {
                     const len = include.length;
-                    for (let i = 0; i < len; i++) this.include(include[i], true);
+                    for (let i = 0; i < len;) this.include(include[i++], true);
                 }
                 for (const field of Object.keys(module)) {
                     const value = module[field];
@@ -361,8 +360,8 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         if (module === this) return true;
         const inc = this.__inc__, 
             len = inc.length;
-        for (let i = 0; i < len; i++) {
-            if (inc[i].includes(module)) return true;
+        for (let i = 0; i < len;) {
+            if (inc[i++].includes(module)) return true;
         }
         return false;
     };
@@ -2303,106 +2302,114 @@ Date.prototype.format = Date.prototype.format ?? (() => {
 })(myt);
 
 
-/** Holds references to "global" objects. Fires events when these globals
-    are registered and unregistered.
+(pkg => {
+    let globalRegistry;
     
-    Events:
-        register<key>:object Fired when an object is stored under the key.
-        unregister<key>:object Fired when an object is removed from the key.
-    
-    @class */
-myt.global = new JS.Singleton('Global', {
-    include: [myt.Observable],
-    
-    
-    // Constructor /////////////////////////////////////////////////////////////
-    initialize: () => {},
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Registers the provided global under the key. Fires a register<key>
-        event. If a global is already registered under the key the existing
-        global is unregistered first.
-        @param {string} key
-        @param {!Object} v
-        @returns {undefined} */
-    register: function(key, v) {
-        if (this.hasOwnProperty(key)) {
-            console.warn('Global key in use', key);
-            this.unregister(key);
+    /** Holds references to "global" objects. Fires events when these globals are registered 
+        and unregistered.
+        
+        Events:
+            register<key>:object Fired when an object is stored under the key.
+            unregister<key>:object Fired when an object is removed from the key.
+        
+        @class */
+    pkg.global = new JS.Singleton('Global', {
+        include: [pkg.Observable],
+        
+        
+        // Constructor /////////////////////////////////////////////////////////
+        initialize: function() {
+            globalRegistry = this;
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** Registers the provided global under the key. Fires a register<key> event. If a global 
+            is already registered under the key the existing global is unregistered first.
+            @param {string} key
+            @param {!Object} v
+            @returns {undefined} */
+        register: (key, v) => {
+            if (globalRegistry.hasOwnProperty(key)) {
+                console.warn('Global key in use', key);
+                globalRegistry.unregister(key);
+            }
+            globalRegistry[key] = v;
+            globalRegistry.fireEvent('register' + key, v);
+        },
+        
+        /** Unegisters the global for the provided key. Fires an unregister<key> event if the 
+            key exists.
+            @param {string} key
+            @returns {undefined} */
+        unregister: key => {
+            if (globalRegistry.hasOwnProperty(key)) {
+                const v = globalRegistry[key];
+                delete globalRegistry[key];
+                globalRegistry.fireEvent('unregister' + key, v);
+            } else {
+                console.warn('Global key not in use', key);
+            }
         }
-        this[key] = v;
-        this.fireEvent('register' + key, v);
-    },
-    
-    /** Unegisters the global for the provided key. Fires an unregister<key>
-        event if the key exists.
-        @param {string} key
-        @returns {undefined} */
-    unregister: function(key) {
-        if (this.hasOwnProperty(key)) {
-            const v = this[key];
-            delete this[key];
-            this.fireEvent('unregister' + key, v);
-        } else {
-            console.warn('Global key not in use', key);
-        }
-    }
-});
+    });
+})(myt);
 
 
-/** Provides global error events and console logging.
+(pkg => {
+    let globalError;
     
-    Events:
-        Error specific events are broadcast. Here is a list of known error types.
-            eventLoop: Fired by myt.Observable when an infinite event loop would occur.
-    
-    Attributes:
-        stackTraceLimit:int Sets the size for stack traces.
-        consoleLogging:boolean Turns logging to the console on and off.
-    
-    @class */
-new JS.Singleton('GlobalError', {
-    include: [myt.Observable],
-    
-    
-    // Constructor /////////////////////////////////////////////////////////////
-    initialize: function() {
-        this.setStackTraceLimit(50);
-        this.setConsoleLogging(true);
-        myt.global.register('error', this);
-    },
-    
-    
-    // Accessors ///////////////////////////////////////////////////////////////
-    setConsoleLogging: function(v) {this.consoleLogging = v;},
-    setStackTraceLimit: function(v) {Error.stackTraceLimit = this.stackTraceLimit = v;},
-    
-    
-    // Methods /////////////////////////////////////////////////////////////////
-    /** Broadcasts errors and also logs the error to the console if so configured.
-        @param {string} [consoleFuncName] - The name of the function to call on the console. 
-            Standard values are:'error', 'warn', 'log' and 'debug'. If not provided no console 
-            logging will occur regardless of the value of this.consoleLogging.
-        @param {string} [eventType] - The type of the event that will be broadcast. If not provided 
-            'error' will be used.
-        @param {*} [msg] - Usually a string, this is additional information that will be provided in 
-            the value object of the broadcast event.
-        @param {?Error} [err] - A javascript error object from which a stacktrace will be taken. 
-            If not provided a stacktrace will be automatically generated.
-        @param {?Object} [extraInfo] - An object that will be copied onto the Error object under
-            "extraInfo". This can be used to provide additional context for the Error.
-        @returns {undefined} */
-    notify: function(consoleFuncName, eventType, msg, err, extraInfo) {
-        // Generate Stacktrace
-        err ??= new Error(msg ?? eventType);
-        const stacktrace = err.stack ?? err.stacktrace,
-            eventValue = {msg:msg, stacktrace:stacktrace};
-        if (extraInfo) Object.assign(eventValue, extraInfo);
-        this.fireEvent(eventType ?? 'error', eventValue);
-        if (this.consoleLogging && consoleFuncName) console[consoleFuncName](stacktrace);
-    }
-});
+    /** Provides global error events and console logging.
+        
+        Events:
+            Error specific events are broadcast. Here is a list of known error types.
+                eventLoop: Fired by myt.Observable when an infinite event loop would occur.
+        
+        Attributes:
+            stackTraceLimit:int Sets the size for stack traces.
+            consoleLogging:boolean Turns logging to the console on and off.
+        
+        @class */
+    new JS.Singleton('GlobalError', {
+        include: [pkg.Observable],
+        
+        
+        // Constructor /////////////////////////////////////////////////////////////
+        initialize: function() {
+            globalError = this;
+            globalError.setStackTraceLimit(50);
+            globalError.setConsoleLogging(true);
+            pkg.global.register('error', globalError);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////////
+        setConsoleLogging: v => {globalError.consoleLogging = v;},
+        setStackTraceLimit: v => {Error.stackTraceLimit = globalError.stackTraceLimit = v;},
+        
+        
+        // Methods /////////////////////////////////////////////////////////////////
+        /** Broadcasts errors and also logs the error to the console if so configured.
+            @param {string} [consoleFuncName] - The name of the function to call on the console. 
+                Standard values are:'error', 'warn', 'log' and 'debug'. If not provided no console 
+                logging will occur regardless of the value of this.consoleLogging.
+            @param {string} [eventType] - The type of the event that will be broadcast. If not 
+                provided 'error' will be used.
+            @param {*} [msg] - Usually a string, this is additional information that will be 
+                provided in the value object of the broadcast event.
+            @param {?Error} [err] - A javascript error object from which a stacktrace will 
+                be taken. If not provided a stacktrace will be automatically generated.
+            @param {?Object} [extraInfo] - An object that will be copied onto the Error object 
+                under "extraInfo". This can be used to provide additional context for the Error.
+            @returns {undefined} */
+        notify: (consoleFuncName, eventType, msg, err, extraInfo) => {
+            // Generate Stacktrace
+            err ??= new Error(msg ?? eventType);
+            const stacktrace = err.stack ?? err.stacktrace;
+            globalError.fireEvent(eventType ?? 'error', {msg:msg, stacktrace:stacktrace, ...extraInfo});
+            if (globalError.consoleLogging && consoleFuncName) console[consoleFuncName](stacktrace);
+        }
+    });
+})(myt);
 
 
 (pkg => {
@@ -3739,13 +3746,13 @@ new JS.Singleton('GlobalError', {
 
 
 (pkg => {
-    let globalKeys,
-        
-        /*  A set of codes of the keys currently pressed down. */
-        keysDown = new Set();
+    let globalKeys;
     
     const G = pkg.global,
         globalFocus = G.focus,
+        
+        /*  A set of codes of the keys currently pressed down. */
+        keysDown = new Set(),
         
         isFirefox = BrowserDetect.browser === 'Firefox',
         
@@ -3952,23 +3959,6 @@ new JS.Singleton('GlobalError', {
         }
     });
 })(myt);
-
-
-/** Provides global touch events by listening to touch events on the the
-    document. Registered with myt.global as 'touch'.
-    
-    @class */
-new JS.Singleton('GlobalTouch', {
-    include: [myt.DomElementProxy, myt.DomObservable, myt.TouchObservable],
-    
-    
-    // Constructor /////////////////////////////////////////////////////////////
-    initialize: function() {
-        this.setDomElement(document);
-        
-        myt.global.register('touch', this);
-    }
-});
 
 
 (pkg => {
@@ -8935,7 +8925,7 @@ myt.Destructible = new JS.Module('Destructible', {
 
 (pkg => {
     let globalRootViewRegistry;
-        
+    
     /* Holds an array of RootViews. */
     const roots = [];
     
@@ -8943,10 +8933,8 @@ myt.Destructible = new JS.Module('Destructible', {
         Registered in myt.global as 'roots'.
         
         Events:
-            rootAdded:RootView Fired when a RootView is added. The value is the 
-                RootView added.
-            rootRemoved:RootView Fired when a RootView is removed. The value 
-                is the RootView removed.
+            rootAdded:RootView Fired when a RootView is added. The value is the added RootView.
+            rootRemoved:RootView Fired when a RootView is removed. The value is the removed RootView.
         
         @class */
     new JS.Singleton('GlobalRootViewRegistry', {
@@ -9123,11 +9111,11 @@ myt.Destructible = new JS.Module('Destructible', {
 
 (pkg => {
     let 
+        /* A reference to the GlobalIdle Singleton. */
+        globalIdle,
+        
         /*  The ID of the last idle event in the browser. */
         timerId,
-        
-        /*  The function that gets executed on idle. */
-        idleFunc,
         
         /*  The millis of the last idle event fired. */
         lastTime,
@@ -9135,16 +9123,28 @@ myt.Destructible = new JS.Module('Destructible', {
         /*  Indicates if idle events are currently being fired or not. */
         running = false;
     
-    const win = window,
+    const {requestAnimationFrame, cancelAnimationFrame} = window,
         
         /*  The idle event object that gets reused. */
-        EVENT = {};
+        EVENT = {},
+        
+        /*  The function that gets executed on idle. */
+        idleFunc = time => {
+            timerId = requestAnimationFrame(idleFunc);
+            time = Math.round(time);
+            if (lastTime !== -1) {
+                EVENT.delta = time - lastTime;
+                EVENT.time = time;
+                globalIdle.fireEvent('idle', EVENT);
+            }
+            lastTime = time;
+        };
     
     /** Provides idle events. Registered with myt.global as 'idle'.
         
         Events:
-            idle:object Fired when a browser idle event occurs. The event 
-                value is an object containing:
+            idle:object Fired when a browser idle event occurs. The event value is an 
+                object containing:
                     delta: The time in millis since the last idle evnet.
                     time: The time in millis of this idle event.
         
@@ -9155,52 +9155,32 @@ myt.Destructible = new JS.Module('Destructible', {
         
         // Constructor /////////////////////////////////////////////////////////
         initialize: function() {
-            const self = this,
-                vendors = ['webkit','moz','ms','o'];
-            for (let i = 0; i < vendors.length && !win.requestAnimationFrame;) {
-                const vendor = vendors[i++];
-                win.requestAnimationFrame = win[vendor + 'RequestAnimationFrame'];
-                win.cancelAnimationFrame = win[vendor + 'CancelAnimationFrame'] ?? win[vendor + 'CancelRequestAnimationFrame'];
-            }
-            
-            // Setup callback function
-            idleFunc = time => {
-                timerId = win.requestAnimationFrame(idleFunc);
-                if (lastTime !== -1) {
-                    time = Math.round(time);
-                    EVENT.delta = time - lastTime;
-                    EVENT.time = time;
-                    self.fireEvent('idle', EVENT);
-                }
-                lastTime = time;
-            };
-            
-            pkg.global.register('idle', self);
+            pkg.global.register('idle', globalIdle = this);
         },
         
         
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides myt.Observable */
-        attachObserver: function(observer, methodName, type) {
-            const retval = this.callSuper(observer, methodName, type);
+        attachObserver: (observer, methodName, type) => {
+            const retval = globalIdle.callSuper(observer, methodName, type);
             
             // Start firing idle events
-            if (!running && this.hasObservers('idle')) {
+            if (!running && globalIdle.hasObservers('idle')) {
                 running = true;
                 lastTime = -1;
-                timerId = win.requestAnimationFrame(idleFunc);
+                timerId = requestAnimationFrame(idleFunc);
             }
             
             return retval;
         },
         
         /** @overrides myt.Observable */
-        detachObserver: function(observer, methodName, type) {
-            const retval = this.callSuper(observer, methodName, type);
+        detachObserver: (observer, methodName, type) => {
+            const retval = globalIdle.callSuper(observer, methodName, type);
             
             // Stop firing idle events
-            if (running && !this.hasObservers('idle')) {
-                win.cancelAnimationFrame(timerId);
+            if (running && !globalIdle.hasObservers('idle')) {
+                cancelAnimationFrame(timerId);
                 running = false;
             }
             
@@ -9211,7 +9191,8 @@ myt.Destructible = new JS.Module('Destructible', {
 
 
 (pkg => {
-    let 
+    let globalWindowResize,
+        
         /*  The clientWidth of the window.document.body. */
         clientWidth,
         
@@ -9238,19 +9219,20 @@ myt.Destructible = new JS.Module('Destructible', {
         
         // Life Cycle //////////////////////////////////////////////////////////
         initialize: function() {
+            globalWindowResize = this;
+            
             // We need to wait for the body to exist.
-            this.attachTo(globalIdle, '__setup', 'idle');
-            G.register('windowResize', this);
+            globalWindowResize.attachTo(globalIdle, '__setup', 'idle');
+            G.register('windowResize', globalWindowResize);
         },
         
         /** @private */
-        __setup: function(ignoredEvent) {
-            const self = this,
-                body = doc.body;
+        __setup: ignoredEvent => {
+            const body = doc.body;
             if (body) {
-                self.detachFrom(globalIdle, '__setup', 'idle');
+                globalWindowResize.detachFrom(globalIdle, '__setup', 'idle');
                 new ResizeObserver(() => {
-                    self.fireEvent('resize', {w:clientWidth = body.clientWidth, h:clientHeight = body.clientHeight});
+                    globalWindowResize.fireEvent('resize', {w:clientWidth = body.clientWidth, h:clientHeight = body.clientHeight});
                 }).observe(body);
             }
         },
@@ -9710,13 +9692,8 @@ myt.Destructible = new JS.Module('Destructible', {
 
 
 (pkg => {
-    const math = Math,
-        mathMax = math.max,
-        mathSin = math.sin,
-        mathCos = math.cos,
-        mathPow = math.pow,
-        mathSqrt = math.sqrt,
-        PI = math.PI,
+    const {max:mathMax, sin:mathSin, cos:mathCos, pow:mathPow, sqrt:mathSqrt, PI} = Math,
+        
         TWO_PI = 2 * PI,
         HALF_PI = PI / 2,
         
@@ -9815,16 +9792,12 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         advance = (animator, timeDiff) => {
-            if (animator.running && !animator.paused) {
-                const reverse = animator.reverse, 
-                    duration = animator.duration, 
-                    repeat = animator.repeat;
-                
+            const {running, paused, reverse, duration, repeat, __prog:oldProgress, easingFunction, callback} = animator;
+            if (running && !paused) {
                 // An animation in reverse is like time going backward.
                 if (reverse) timeDiff *= -1;
                 
                 // Determine how much time to move forward by.
-                const oldProgress = animator.__prog;
                 let progress = oldProgress + timeDiff;
                 
                 // Check for overage
@@ -9847,33 +9820,32 @@ myt.Destructible = new JS.Module('Destructible', {
                 const target = getTarget(animator);
                 if (target) {
                     // Update Target
-                    const relative = animator.relative,
-                        attr = animator.attribute,
+                    const {relative, attribute:attr, __isColorAnim, __loopCnt, to} = animator,
                         progressPercent = mathMax(0, progress / duration), 
                         oldProgressPercent = mathMax(0, oldProgress / duration);
                     
                     // Determine what "from" to use if none was provided.
                     if (animator.from == null) {
                         animator.__tmpFrom = true;
-                        animator.from = relative ? (animator.__isColorAnim ? '#000' : 0) : target.get(attr);
+                        animator.from = relative ? (__isColorAnim ? '#000' : 0) : target.get(attr);
                     }
                     
-                    const motionValue = animator.easingFunction(progressPercent) - (relative ? animator.easingFunction(oldProgressPercent) : 0),
-                        value = relative ? target.get(attr) : animator.from,
-                        to = animator.to;
-                    target.set(attr, animator.__isColorAnim ? getColorValue(animator.from, to, motionValue, relative, value) : value + ((to - animator.from) * motionValue));
+                    const motionValue = easingFunction(progressPercent) - (relative ? easingFunction(oldProgressPercent) : 0),
+                        from = animator.from,
+                        value = relative ? target.get(attr) : from;
+                    target.set(attr, __isColorAnim ? getColorValue(from, to, motionValue, relative, value) : value + ((to - from) * motionValue));
                     
                     if (
-                        (!reverse && animator.__loopCnt === repeat) || // Forward check
-                        (reverse && 0 > animator.__loopCnt && repeat > 0) // Reverse check
+                        (!reverse && __loopCnt === repeat) || // Forward check
+                        (reverse && 0 > __loopCnt && repeat > 0) // Reverse check
                     ) {
                         // Stop animation since loop count exceeded repeat count.
                         animator.setRunning(false);
-                        animator.callback?.call(animator, true);
+                        callback?.call(animator, true);
                     } else if (remainderTime > 0) {
                         // Advance again if time is remaining. This occurs when the timeDiff 
                         // provided was greater than the animation duration and the animation loops.
-                        animator.fireEvent('repeat', animator.__loopCnt);
+                        animator.fireEvent('repeat', __loopCnt);
                         animator.__prog = reverse ? duration : 0;
                         advance(animator, remainderTime);
                     } else {
@@ -9882,7 +9854,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 } else {
                     console.log('No target for animator', animator);
                     animator.setRunning(false);
-                    animator.callback?.call(animator, false);
+                    callback?.call(animator, false);
                 }
             }
         };
@@ -10593,21 +10565,42 @@ myt.Destructible = new JS.Module('Destructible', {
 })(myt);
 
 
-/** Provides global mouse events by listening to mouse events on the 
-    document. Registered with myt.global as 'mouse'.
+(pkg => {
+    const JSSingleton = JS.Singleton,
+        doc = document,
+        register = pkg.global.register,
+        {DomElementProxy, DomObservable} = pkg;
     
-    @class */
-new JS.Singleton('GlobalMouse', {
-    include: [myt.DomElementProxy, myt.DomObservable, myt.MouseObservable],
-    
-    
-    // Constructor /////////////////////////////////////////////////////////////
-    initialize: function() {
-        this.setDomElement(document);
+    /** Provides global mouse events by listening to mouse events on the document. Registered with 
+        myt.global as 'mouse'.
         
-        myt.global.register('mouse', this);
-    }
-});
+        @class */
+    new JSSingleton('GlobalMouse', {
+        include: [DomElementProxy, DomObservable, pkg.MouseObservable],
+        
+        
+        // Constructor /////////////////////////////////////////////////////////
+        initialize: function() {
+            this.setDomElement(doc);
+            register('mouse', this);
+        }
+    });
+    
+    /** Provides global touch events by listening to touch events on the the document. 
+        Registered with myt.global as 'touch'.
+        
+        @class */
+    new JSSingleton('GlobalTouch', {
+        include: [DomElementProxy, DomObservable, pkg.TouchObservable],
+        
+        
+        // Constructor /////////////////////////////////////////////////////////
+        initialize: function() {
+            this.setDomElement(doc);
+            register('touch', this);
+        }
+    });
+})(myt);
 
 
 (pkg => {
@@ -10800,12 +10793,9 @@ new JS.Singleton('GlobalMouse', {
                 topDropTarget;
             
             if (i > 0) {
-                const domMouseEvent = event.value,
-                    mouseX = domMouseEvent.pageX,
-                    mouseY = domMouseEvent.pageY;
-                
+                const {pageX:mouseX, pageY:mouseY} = event.value;
                 while (i) {
-                    let dropTarget = filteredDropTargets[--i];
+                    const dropTarget = filteredDropTargets[--i];
                     if (dropTarget.willAcceptDrop(dropable) &&
                         dropable.willPermitDrop(dropTarget) &&
                         dropTarget.isPointVisible(mouseX, mouseY) && 
@@ -14148,9 +14138,7 @@ new JS.Singleton('GlobalMouse', {
         
         GlobalKeys = pkg.global.keys,
         
-        SizeToDom = pkg.SizeToDom,
-        View = pkg.View,
-        Disableable = pkg.Disableable,
+        {SizeToDom, View, Disableable, KeyObservable} = pkg,
         
         FOCUS_SHADOW = pkg.Button.FOCUS_SHADOW,
         
@@ -14390,7 +14378,7 @@ new JS.Singleton('GlobalMouse', {
                 // Filter for allowed characters
                 const domEvent = event.value,
                     allowedChars = this.allowedChars;
-                if (allowedChars && !allowedChars.includes(pkg.KeyObservable.getKeyFromEvent(event))) domEvent.preventDefault();
+                if (allowedChars && !allowedChars.includes(KeyObservable.getKeyFromEvent(event))) domEvent.preventDefault();
                 
                 this.filterInputPress(domEvent);
             },
@@ -14603,7 +14591,7 @@ new JS.Singleton('GlobalMouse', {
             @returns {undefined} */
         __cleanInput: function(event) {
             // Prevent enter key from inserting a div
-            if (pkg.KeyObservable.isEnterKeyEvent(event)) {
+            if (KeyObservable.isEnterKeyEvent(event)) {
                 event.value.preventDefault();
                 
                 // Instead, insert a linefeed if wrapping is allowed.
@@ -15026,7 +15014,7 @@ new JS.Singleton('GlobalMouse', {
             @param option:myt.InputSelectOption The option to select.
             @returns {undefined} */
         select: function(option) {
-            if (option && option.canSelect(this)) {
+            if (option?.canSelect(this)) {
                 option.setSelected(true);
                 this.__syncToDom();
             }
@@ -15043,7 +15031,7 @@ new JS.Singleton('GlobalMouse', {
             @param option:myt.InputSelectOption The option to deselect.
             @returns {undefined} */
         deselect: function(option) {
-            if (option && option.canDeselect(this)) {
+            if (option?.canDeselect(this)) {
                 option.setSelected(false);
                 this.__syncToDom();
             }

@@ -42,16 +42,15 @@ JS.Packages(file => {
     
     // Core : Globals
     const MYT_GLOBALS_ROOT = MYT_CORE_ROOT + 'globals/';
-    file(MYT_GLOBALS_ROOT + 'Global.js'                ).provides('myt.global'             ).requires('myt.Observable');
-    file(MYT_GLOBALS_ROOT + 'GlobalError.js'           ).provides('myt.global.error'       ).requires('myt.global');
-    file(MYT_GLOBALS_ROOT + 'GlobalIdle.js'            ).provides('myt.global.idle'        ).requires('myt.global');
-    file(MYT_GLOBALS_ROOT + 'GlobalMouse.js'           ).provides('myt.global.mouse'       ).requires('myt.global','myt.DomObservable','myt.MouseObservable');
-    file(MYT_GLOBALS_ROOT + 'GlobalTouch.js'           ).provides('myt.global.touch'       ).requires('myt.global','myt.DomObservable','myt.TouchObservable');
-    file(MYT_GLOBALS_ROOT + 'GlobalFocus.js'           ).provides('myt.global.focus'       ).requires('myt.global');
-    file(MYT_GLOBALS_ROOT + 'GlobalKeys.js'            ).provides('myt.global.keys'        ).requires('myt.global','myt.DomObserver','myt.KeyObservable','myt.global.focus','myt.Observer');
-    file(MYT_GLOBALS_ROOT + 'GlobalDragManager.js'     ).provides('myt.global.dragManager' ).requires('myt.global');
-    file(MYT_GLOBALS_ROOT + 'GlobalWindowResize.js'    ).provides('myt.global.windowResize').requires('myt.global.idle');
-    file(MYT_GLOBALS_ROOT + 'GlobalRootViewRegistry.js').provides('myt.global.roots'       ).requires('myt.global');
+    file(MYT_GLOBALS_ROOT + 'Global.js'                ).provides('myt.global'                         ).requires('myt.Observable');
+    file(MYT_GLOBALS_ROOT + 'GlobalError.js'           ).provides('myt.global.error'                   ).requires('myt.global');
+    file(MYT_GLOBALS_ROOT + 'GlobalIdle.js'            ).provides('myt.global.idle'                    ).requires('myt.global');
+    file(MYT_GLOBALS_ROOT + 'GlobalMouseAndTouch.js'   ).provides('myt.global.mouse','myt.global.touch').requires('myt.global','myt.DomObservable','myt.MouseObservable','myt.TouchObservable');
+    file(MYT_GLOBALS_ROOT + 'GlobalFocus.js'           ).provides('myt.global.focus'                   ).requires('myt.global');
+    file(MYT_GLOBALS_ROOT + 'GlobalKeys.js'            ).provides('myt.global.keys'                    ).requires('myt.global','myt.DomObserver','myt.KeyObservable','myt.global.focus','myt.Observer');
+    file(MYT_GLOBALS_ROOT + 'GlobalDragManager.js'     ).provides('myt.global.dragManager'             ).requires('myt.global');
+    file(MYT_GLOBALS_ROOT + 'GlobalWindowResize.js'    ).provides('myt.global.windowResize'            ).requires('myt.global.idle');
+    file(MYT_GLOBALS_ROOT + 'GlobalRootViewRegistry.js').provides('myt.global.roots'                   ).requires('myt.global');
     
     // Component
     const MYT_COMPONENT_ROOT = MYT_ROOT + 'component/';
@@ -129,7 +128,7 @@ JS.Packages(file => {
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
         'myt.Cookie','myt.LocalStorage',
-        'myt.global.error','myt.global.keys','myt.global.touch',
+        'myt.global.error','myt.global.keys',
         'myt.FlexboxChildSupport','myt.Flexbox','myt.Text','myt.Image','myt.Markup','myt.Frame',
         'myt.SizeToParent','myt.SizeToWindow',
         'myt.Animator','myt.StateMachine','myt.Replicator',

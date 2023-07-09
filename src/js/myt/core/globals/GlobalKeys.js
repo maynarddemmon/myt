@@ -1,11 +1,11 @@
 (pkg => {
-    let globalKeys,
-        
-        /*  A set of codes of the keys currently pressed down. */
-        keysDown = new Set();
+    let globalKeys;
     
     const G = pkg.global,
         globalFocus = G.focus,
+        
+        /*  A set of codes of the keys currently pressed down. */
+        keysDown = new Set(),
         
         isFirefox = BrowserDetect.browser === 'Firefox',
         

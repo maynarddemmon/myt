@@ -1,5 +1,6 @@
 (pkg => {
-    let 
+    let globalWindowResize,
+        
         /*  The clientWidth of the window.document.body. */
         clientWidth,
         
@@ -26,19 +27,20 @@
         
         // Life Cycle //////////////////////////////////////////////////////////
         initialize: function() {
+            globalWindowResize = this;
+            
             // We need to wait for the body to exist.
-            this.attachTo(globalIdle, '__setup', 'idle');
-            G.register('windowResize', this);
+            globalWindowResize.attachTo(globalIdle, '__setup', 'idle');
+            G.register('windowResize', globalWindowResize);
         },
         
         /** @private */
-        __setup: function(ignoredEvent) {
-            const self = this,
-                body = doc.body;
+        __setup: ignoredEvent => {
+            const body = doc.body;
             if (body) {
-                self.detachFrom(globalIdle, '__setup', 'idle');
+                globalWindowResize.detachFrom(globalIdle, '__setup', 'idle');
                 new ResizeObserver(() => {
-                    self.fireEvent('resize', {w:clientWidth = body.clientWidth, h:clientHeight = body.clientHeight});
+                    globalWindowResize.fireEvent('resize', {w:clientWidth = body.clientWidth, h:clientHeight = body.clientHeight});
                 }).observe(body);
             }
         },
