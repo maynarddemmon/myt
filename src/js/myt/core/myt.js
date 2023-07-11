@@ -37,10 +37,7 @@
         currentLocale;
     
     const math = Math,
-        mathAbs = math.abs,
-        mathMin = math.min,
-        mathMax = math.max,
-        mathPow = math.pow,
+        {abs:mathAbs, min:mathMin, max:mathMax, pow:mathPow} = math,
         
         documentElem = document,
         headElem = documentElem.head,
@@ -88,6 +85,10 @@
             };
         },
         
+        /*  Generates a globally unique id, (GUID).
+            @returns {number} */
+        generateGuid = () => ++GUID_COUNTER,
+        
         I18N_PLURAL_REGEX = /\{\{plural:\$(.*?)\|(.*?)\|(.*?)\}\}/g,
         I18N_NUMERIC_ARG_REGEX = /\$(\d+)/g, 
         
@@ -95,9 +96,7 @@
             /** A version number based on the time this distribution of myt was created. */
             version:20230602.1558,
             
-            /** Generates a globally unique id, (GUID).
-                @returns {number} */
-            generateGuid: () => ++GUID_COUNTER,
+            generateGuid: generateGuid,
             
             /** Creates a non-secure hash of a string.
                 @param {string} s - The string to hash.
@@ -400,30 +399,15 @@
             },
             
             addCSSRule: (sheet, selector, rules, index) => {
-                if ('insertRule' in sheet) {
-                    sheet.insertRule(selector + '{' + rules + '}', index);
-                } else if('addRule' in sheet) {
-                    sheet.addRule(selector, rules, index);
-                }
+                sheet.insertRule(selector + '{' + rules + '}', index);
             },
             
             removeCSSRules: sheet => {
                 let i = sheet.cssRules.length;
-                while (i) {
-                    i--;
-                    if ('deleteRule' in sheet) {
-                        sheet.deleteRule(i);
-                    } else if ('removeRule' in sheet) {
-                        sheet.removeRule(i);
-                    }
-                }
+                while (i) sheet.deleteRule(--i);
             },
             
             createInputPlaceholderCSSRule: (view, color, fontFamily, opacity=1) => {
-                // Make sure the view has a dom ID for rule targeting
-                const ode = view.getODE(),
-                    domId = ode.id || (ode.id = 'id' + myt.generateGuid());
-                
                 // Clear existing sheet if it exists or create a new sheet
                 let sheet = view.__sheet;
                 if (sheet) {
@@ -432,8 +416,9 @@
                     sheet = view.__sheet = myt.createStylesheet();
                 }
                 
-                // Write rules
-                const rules = [];
+                // Make sure the view has a dom ID for rule targeting and then write the CSS rules.
+                const domId = view.getODE().id ??= 'id' + generateGuid(),
+                    rules = [];
                 if (color) rules.push('color:' + color);
                 if (fontFamily) rules.push('font-family:' + fontFamily);
                 if (opacity) rules.push('opacity:' + opacity);
@@ -519,17 +504,18 @@
                     0.55781 -> 55.78% and 0.55 -> 55%
                 @returns {string} */
             formatAsPercentage: (num, fixed=2) => {
-                if (typeof num === 'number') {
-                    fixed = mathMin(16, mathMax(0, fixed));
-                    const percent = math.round(mathMax(0, mathMin(1, num)) * mathPow(10, 2+fixed)) / mathPow(10, fixed);
-                    return (percent % 1 === 0 ? percent : percent.toFixed(fixed)) + '%';
-                } else if (typeof num === 'string') {
-                    // Assume a string passed to this function is already correctly formatted so 
-                    // pass it through unchanged.
-                    return num;
-                } else {
-                    console.warn('formatAsPercentage: expects a number');
-                    return num;
+                switch (typeof num) {
+                    case 'number':
+                        fixed = mathMin(16, mathMax(0, fixed));
+                        const percent = math.round(mathMax(0, mathMin(1, num)) * mathPow(10, 2+fixed)) / mathPow(10, fixed);
+                        return (percent % 1 === 0 ? percent : percent.toFixed(fixed)) + '%';
+                    case 'string':
+                        // Assume a string passed to this function is already correctly formatted 
+                        // so pass it through unchanged.
+                        return num;
+                    default:
+                        console.warn('formatAsPercentage: expects a number');
+                        return num;
                 }
             },
             
@@ -549,8 +535,8 @@
                 @param {boolean} [immediate] - If true the function will be invoked immediately and 
                     then the wait time will be used to block subsequent calls.
                 @returns {!Function} - The debounced function. */
-            debounce: function(func, wait, immediate) {
-                const timeoutKey = '__DBTO' + '_' + this.generateGuid();
+            debounce: (func, wait, immediate) => {
+                const timeoutKey = '__DBTO' + '_' + generateGuid();
                 return function() {
                     const context = this,
                         timeout = context[timeoutKey],
