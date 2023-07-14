@@ -1,7 +1,7 @@
 (pkg => {
     const JSClass = JS.Class,
-        View = pkg.View,
-        SizeToParent = pkg.SizeToParent,
+        
+        {View, SizeToParent} = pkg,
         
         /** A tab slider component.
             

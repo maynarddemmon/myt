@@ -3,9 +3,8 @@
     let openModalPanelCount = 0;
     
     const JSClass = JS.Class,
-        SizeToParent = pkg.SizeToParent,
-        View = pkg.View,
-        RootView = pkg.RootView,
+        
+        {View, SizeToParent, RootView} = pkg,
         
         /** A dimmer that can be placed on another myt.View to obscure the subviews of that view.
             

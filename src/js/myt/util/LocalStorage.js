@@ -1,5 +1,6 @@
 (pkg => {
-    const localStorage = global.localStorage,
+    const consoleError = console.error,
+        localStorage = global.localStorage,
         
         getStoreId = storeId => storeId = storeId ?? 'myt',
         
@@ -37,7 +38,7 @@
                         try {
                             return JSON.parse(data)[key] != null;
                         } catch (e) {
-                            console.error(e);
+                            consoleError(e);
                             return false;
                         }
                     }
@@ -58,7 +59,7 @@
                             const jsonData = JSON.parse(data);
                             if (typeof jsonData === 'object') return jsonData[key];
                         } catch (e) {
-                            console.error(e);
+                            consoleError(e);
                         }
                     }
                 }
@@ -116,7 +117,7 @@
                     try {
                         return JSON.parse(data);
                     } catch (e) {
-                        console.error(e);
+                        consoleError(e);
                     }
                 }
                 return {};

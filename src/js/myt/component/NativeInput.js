@@ -548,8 +548,7 @@
         /** @overrides myt.BaseInputText */
         setSelection: function(selection) {
             if (selection) {
-                const startElem = selection.startElem,
-                    endElem = selection.endElem;
+                const {startElem, endElem} = selection;
                 if (startElem && startElem.parentNode && endElem && endElem.parentNode) {
                     const range = document.createRange();
                     range.setStart(startElem, mathMin(selection.start, startElem.length));

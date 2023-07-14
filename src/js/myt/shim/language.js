@@ -22,10 +22,7 @@
   * THE SOFTWARE
   */
 Date.prototype.format = Date.prototype.format ?? (() => {
-    const math = Math,
-        mathAbs = math.abs,
-        mathFloor = math.floor,
-        mathCeil = math.ceil,
+    const {abs:mathAbs, floor:mathFloor, ceil:mathCeil} = Math,
         
         shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
         longMonths = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],

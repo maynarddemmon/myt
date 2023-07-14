@@ -20,9 +20,9 @@ JS.Packages(file => {
     file(MYT_CORE_ROOT + 'Destructible.js'    ).provides('myt.Destructible').requires('myt');
     file(MYT_CORE_ROOT + 'Events.js'          ).provides('myt.Observable','myt.Observer').requires('myt');
     file(MYT_CORE_ROOT + 'Pool.js'            ).provides('myt.Reusable','myt.SimplePool','myt.TrackActivesPool','myt.TrackActivesMultiPool').requires('myt.Destructible');
-    file(MYT_CORE_ROOT + 'Eventable.js'       ).provides('myt.Eventable').requires('myt.AccessorSupport','myt.Destructible','myt.Observable','myt.Observer');
     file(MYT_CORE_ROOT + 'Animator.js'        ).provides('myt.Animator').requires('myt.Node','myt.global.idle','myt.Reusable','myt.Color');
-    file(MYT_CORE_ROOT + 'Node.js'            ).provides('myt.Node').requires('myt.AccessorSupport','myt.Destructible','myt.Observable','myt.Observer','myt.TrackActivesPool');
+    file(MYT_CORE_ROOT + 'Node.js'            ).provides('myt.Eventable','myt.Node').requires('myt.AccessorSupport','myt.Destructible','myt.Observable','myt.Observer','myt.TrackActivesPool');
+    
     file(MYT_CORE_ROOT + 'Layout.js'          )
         .provides('myt.Layout','myt.ConstantLayout','myt.VariableLayout','myt.SpacedLayout','myt.ResizeLayout','myt.WrappingLayout','myt.AlignedLayout')
         .requires('myt.Node');
@@ -80,7 +80,7 @@ JS.Packages(file => {
             'myt.FormComboBox','myt.FormEditableText','myt.FormInputTextArea','myt.ValueProcessor','myt.ToNumberValueProcessor',
             'myt.TrimValueProcessor','myt.UndefinedValueProcessor','myt.UseOtherFieldIfEmptyValueProcessor','myt.global.valueProcessors'
         )
-        .requires('myt.global.focus','myt.InputSelectOption','myt.Radio','myt.ValueComponent','myt.Checkbox','myt.InputText','myt.ComboBox','myt.EditableText','myt.InputTextArea');
+        .requires('myt.global.focus','myt.UpdateableUI','myt.InputSelectOption','myt.Radio','myt.ValueComponent','myt.Checkbox','myt.InputText','myt.ComboBox','myt.EditableText','myt.InputTextArea');
     file(MYT_COMPONENT_ROOT + 'Grid.js'            )
         .provides('myt.GridController','myt.GridColHdr','myt.SimpleGridColHdr','myt.Grid','myt.GridRow')
         .requires('myt.View','myt.BoundedValueComponent','myt.SimpleTextButton','myt.FontAwesome');

@@ -1,5 +1,7 @@
 (pkg => {
-    const PI = Math.PI,
+    const consoleWarn = console.warn,
+        
+        PI = Math.PI,
         HALF_PI = PI / 2,
         ONE_AND_A_HALF_PI = PI * 3 / 2,
         AccessorSupport = pkg.AccessorSupport,
@@ -125,7 +127,7 @@
                     opt ??= 0.5;
                     break;
                 default:
-                    console.warn('Unexpected image type', imageType);
+                    consoleWarn('Unexpected image type', imageType);
                     extension = imageType.toLowerCase();
             }
             const mimeType = 'image/' + extension,
@@ -304,7 +306,7 @@
             
             // Calculate Colors
             if (segments < 1) {
-                console.warn('Invalid segements', segments);
+                consoleWarn('Invalid segements', segments);
                 segments = 60;
             }
             

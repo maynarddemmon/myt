@@ -1,5 +1,9 @@
 (pkg => {
-    const JSModule = JS.Module;
+    const JSModule = JS.Module,
+        
+        consoleLog = console.log,
+        
+        dumpStack = pkg.dumpStack;
     
     /** Apply this mixin to any Object that needs to fire events.
         
@@ -163,8 +167,8 @@
                                     if (observer[methodName](event)) break;
                                 }
                             } catch (err) {
-                                pkg.dumpStack(err);
-                                console.log('Additional context', methodName, observer);
+                                dumpStack(err);
+                                consoleLog('Additional context', methodName, observer);
                             }
                         }
                     }
@@ -218,7 +222,7 @@
             try {
                 this[methodName](observable.createEvent(eventType, observable.get(attrName)));
             } catch (err) {
-                pkg.dumpStack(err);
+                dumpStack(err);
             }
             
             // Providing a true value for once means we will never actually attach.
@@ -363,7 +367,7 @@
                 // Make sure an even number of observable/type was provided
                 const len = observables.length;
                 if (len % 2 !== 0) {
-                    console.log('Observables uneven', this);
+                    consoleLog('Observables uneven', this);
                 } else {
                     // Lazy instantiate constraints array.
                     const constraints = this.__cbmn ??= {},
@@ -371,7 +375,7 @@
                     
                     // Don't allow a constraint to be clobbered.
                     if (constraint.length > 0) {
-                        console.log('Constraint exists for ' + methodName + ' on ' + this);
+                        consoleLog('Constraint exists for ' + methodName + ' on ' + this);
                     } else {
                         for (let i = 0; i < len; i += 2) {
                             const [observable, type] = observables.slice(i);
@@ -385,7 +389,7 @@
                         try {
                             this[methodName]();
                         } catch (err) {
-                            pkg.dumpStack(err);
+                            dumpStack(err);
                         }
                     }
                 }

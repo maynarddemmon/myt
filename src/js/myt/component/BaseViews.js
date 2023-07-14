@@ -1,7 +1,7 @@
 (pkg => {
     const JSClass = JS.Class,
-        View = pkg.View,
-        SizeToDom = pkg.SizeToDom;
+        
+        {View, SizeToDom} = pkg;
     
     /** A base class for flexbox views.
         

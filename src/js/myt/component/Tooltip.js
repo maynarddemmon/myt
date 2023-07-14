@@ -2,14 +2,10 @@
     let tooltipView;
     
     const JSClass = JS.Class,
-        G = pkg.global,
-        GlobalMouse = G.mouse,
-        GlobalWindowResize = G.windowResize,
         
-        math = Math,
-        mathMin = math.min,
-        mathMax = math.max,
-        mathRound = math.round,
+        {mouse:GlobalMouse, windowResize:GlobalWindowResize, dragManager} = pkg.global,
+        
+        {min:mathMin, max:mathMax, round:mathRound} = Math,
         
         tooltipDomId = 'tooltipDiv',
         
@@ -138,7 +134,7 @@
             showTip: function() {
                 // Don't show tooltips while doing drag and drop since tooltips are distracting 
                 // while this is going on.
-                if (!G.dragManager.getDragView()) {
+                if (!dragManager.getDragView()) {
                     this.nextTipDelay = this.tipHideDelay;
                     this.bringToFront();
                     this.setVisible(true);

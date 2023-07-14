@@ -24,6 +24,8 @@
         alphaChannelSlider,
         
         // DatePicker
+        datePicker,
+        
         localeData,
         dateOnly,
         timeOnly,
@@ -44,22 +46,14 @@
         timeListView;
     
     const JSClass = JS.Class,
-        View = pkg.View,
-        Text = pkg.Text,
-        ModalPanel = pkg.ModalPanel,
-        SizeToChildren = pkg.SizeToChildren,
-        SpacedLayout = pkg.SpacedLayout,
-        SelectionManager = pkg.SelectionManager,
-        Color = pkg.Color,
-        LocalStorage = pkg.LocalStorage,
-        Button = pkg.Button,
-        TextButton = pkg.TextButton,
-        Draggable = pkg.Draggable,
         
-        makeTag = pkg.FontAwesome.makeTag,
+        {
+            View, Text, ModalPanel, SizeToChildren, SpacedLayout, WrappingLayout, SelectionManager, Color, 
+            LocalStorage, Button, TextButton, Draggable,
+            FontAwesome:{makeTag}
+        } = pkg,
         
-        mathMin = Math.min,
-        mathMax = Math.max,
+        {min:mathMin, max:mathMax} = Math,
         
         BORDER_333 = [1, 'solid', '#333'],
         BORDER_999 = [1, 'solid', '#999'],
@@ -123,7 +117,7 @@
                 
                 if (bgColor === currentColorHex) {
                     const color = Color.makeColorFromHexString(currentColorHex);
-                    new pkg.Text(this, {
+                    new Text(this, {
                         x:2, y:2, text:CHECKMARK, fontSize:'12px', 
                         textColor:color.red + color.green + color.blue < 3*255/2 ? '#fff' : '#000'
                     });
@@ -163,9 +157,10 @@
                 
                 // Build UI
                 paletteContainer = new View(colorPicker, {width:160, height:170});
-                new pkg.WrappingLayout(paletteContainer, {spacing:4, lineSpacing:4});
+                new WrappingLayout(paletteContainer, {spacing:4, lineSpacing:4});
                 
-                colorView = new View(colorPicker, {x:170, width:139, height:139, border:BORDER_333}, [Draggable, {
+                const colorViewSize = 139;
+                colorView = new View(colorPicker, {x:170, width:colorViewSize, height:colorViewSize, border:BORDER_333}, [Draggable, {
                     requestDragPosition: function(x, y) {
                         colorView.callSuper(colorView.x, colorView.y);
                         const pos = this.getPagePosition();
@@ -175,8 +170,8 @@
                         colorPicker.updateUI();
                     }
                 }]);
-                const satView = new View(colorView, {width:139, height:139}),
-                    valView = new View(satView, {width:139, height:139});
+                const satView = new View(colorView, {width:colorViewSize, height:colorViewSize}),
+                    valView = new View(satView, {width:colorViewSize, height:colorViewSize});
                 satView.getIDS().backgroundImage = 'linear-gradient(to right, #fff, rgba(204, 154, 129, 0))';
                 valView.getIDS().backgroundImage = 'linear-gradient(to top, #000, rgba(204, 154, 129, 0))';
                 colorThumb = new View(valView, {width:6, height:6, bgColor:'#000', border:BORDER_FFF, roundedCorners:4});
@@ -201,7 +196,7 @@
                 // Alpha Channel Row
                 if (supportsAlphaChannel) {
                     alphaChannelSlider = new pkg.LabelSlider(colorPicker, {
-                        x:170, y:y, width:139 + 26 + 6,
+                        x:170, y:y, width:colorViewSize + 26 + 6,
                         minValue:0, maxValue:255, flipThreshold:55, labelColor:'#fff'
                     }, [{
                         setText: function(event, noAnim) {
@@ -623,6 +618,8 @@
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides */
             initNode: function(parent, attrs) {
+                datePicker = this;
+                
                 const opt = {
                     current:null,
                     dateOnly:false,
@@ -641,7 +638,7 @@
                 };
                 delete attrs.opt;
                 
-                this.callSuper(parent, attrs);
+                datePicker.callSuper(parent, attrs);
                 
                 localeData = opt.locales[opt.locale ?? 'en'];
                 dateOnly = opt.dateOnly;
@@ -661,7 +658,7 @@
                 maxTime = parseTime(opt.maxTime);
                 
                 // Build UI
-                const headerView = new View(this, {visible:!timeOnly});
+                const headerView = new View(datePicker, {visible:!timeOnly});
                 if (opt.showTodayButton) {
                     new TextButton(headerView, {width:24, text:makeTag(['home']), tooltip:localeData['today']}, [{
                         doActivated: () => {
@@ -695,15 +692,15 @@
                     }
                 }]);
                 
-                calendarView = new View(this, {
+                calendarView = new View(datePicker, {
                     y:25, width:175, height:175,
                     visible:!timeOnly,
                     maxSelected:1,
                     itemSelectionId:'data'
                 }, [SelectionManager]);
-                new pkg.WrappingLayout(calendarView, {spacing:2, lineInset:2, lineSpacing:3});
+                new WrappingLayout(calendarView, {spacing:2, lineInset:2, lineSpacing:3});
                 
-                timeListView = new View(this, {
+                timeListView = new View(datePicker, {
                     x:timeOnly ? 0 : 195,
                     y:timeOnly ? 0 : 25,
                     width:(timeOnly ? 175 : 49) + pkg.DomElementProxy.getScrollbarSize(),
@@ -715,7 +712,7 @@
                 }, [SelectionManager]);
                 new SpacedLayout(timeListView, {axis:'y', inset:1, spacing:3});
                 
-                this.setWidth(timeListView.visible ? timeListView.x + timeListView.width : calendarView.width);
+                datePicker.setWidth(timeListView.visible ? timeListView.x + timeListView.width : calendarView.width);
                 
                 drawForDate(opt.current ?? new Date());
             },
@@ -1127,16 +1124,16 @@
                             callbackFunction.call(self, action);
                             break;
                         case 'confirmBtn':
-                            const colorAsHex = colorPickerView.getColor();
-                            colorPickerView.addToPalette(colorAsHex);
+                            const colorAsHex = colorPicker.getColor();
+                            colorPicker.addToPalette(colorAsHex);
                             callbackFunction.call(self, action, colorAsHex);
                             break;
                     }
-                    colorPickerView.destroy();
+                    colorPicker.destroy();
                 });
                 
                 // Build Picker
-                const colorPickerView = new ColorPicker(content, {
+                colorPicker = new ColorPicker(content, {
                     x:ModalPanel.PADDING_X,
                     y:ModalPanel.PADDING_Y + 24,
                     width:337,
@@ -1148,7 +1145,7 @@
                 self.show();
                 closeBtn.setVisible(true);
                 closeBtn.focus();
-                self.setupFooterButtons(colorPickerView, opts);
+                self.setupFooterButtons(colorPicker, opts);
                 self.setupTitle(content, opts.titleText);
             },
             
@@ -1167,14 +1164,14 @@
                             callbackFunction.call(self, action);
                             break;
                         case 'confirmBtn':
-                            callbackFunction.call(self, action, datePickerView.getPickedDate());
+                            callbackFunction.call(self, action, datePicker.getPickedDate());
                             break;
                     }
-                    datePickerView.destroy();
+                    datePicker.destroy();
                 });
                 
                 // Build Picker
-                const datePickerView = new DatePicker(content, {
+                datePicker= new DatePicker(content, {
                     x:ModalPanel.PADDING_X,
                     y:ModalPanel.PADDING_Y + 24,
                     height:195,
@@ -1189,7 +1186,7 @@
                 self.show();
                 closeBtn.setVisible(true);
                 closeBtn.focus();
-                self.setupFooterButtons(datePickerView, opts);
+                self.setupFooterButtons(datePicker, opts);
                 self.setupTitle(content, opts.timeOnly ? opts.timeOnlyTitleText : opts.titleText);
             },
             
@@ -1247,16 +1244,13 @@
                 
                 content.sizeToChildren.setPaddingY(HALF_DPY);
                 
-                const radius = Dialog.RADIUS,
-                    bgY = btnContainer.y - HALF_DPY;
+                const bgY = btnContainer.y - HALF_DPY;
                 (new View(content, {
                     ignoreLayout:true,
                     y:bgY,
                     width:content.width,
                     height:content.height - bgY,
-                    bgColor:'#eee',
-                    roundedBottomLeftCorner:radius,
-                    roundedBottomRightCorner:radius
+                    bgColor:'#eee'
                 })).sendToBack();
                 
                 if (opts.showClose === false) cancelBtn.focus();

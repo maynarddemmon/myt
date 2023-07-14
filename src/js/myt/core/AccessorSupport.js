@@ -1,5 +1,7 @@
 (pkg => {
-    const GETTER_NAMES = new Map(), // Caches getter names.
+    const consoleLog = console.log,
+        
+        GETTER_NAMES = new Map(), // Caches getter names.
         SETTER_NAMES = new Map(), // Caches setter names.
         
         generateName = (attrName, prefix) => prefix + attrName.charAt(0).toUpperCase() + attrName.slice(1),
@@ -52,7 +54,7 @@
                 @returns {undefined} */
             createSetterFunction: (target, attrName) => {
                 const setterName = generateSetterName(attrName);
-                if (target[setterName]) console.log('Overwriting setter', setterName);
+                if (target[setterName]) consoleLog('Overwriting setter', setterName);
                 target[setterName] = function(v) {
                     if (this[attrName] !== v) {
                         this[attrName] = v;
@@ -67,7 +69,7 @@
                 @returns {undefined} */
             createGetterFunction: (target, attrName) => {
                 const getterName = generateGetterName(attrName);
-                if (target[getterName]) console.log('Overwriting getter', getterName);
+                if (target[getterName]) consoleLog('Overwriting getter', getterName);
                 target[getterName] = function() {return this[attrName];};
             }
         },

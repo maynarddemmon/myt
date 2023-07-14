@@ -2,6 +2,8 @@
     const JSClass = JS.Class,
         JSModule = JS.Module,
         
+        consoleWarn = console.warn,
+        
         /*  Get the object pool.
             @private
             @param {boolean} lazy - If true a pool will be lazily instantiated.
@@ -169,7 +171,7 @@
                 } else {
                     warningType = 'missing';
                 }
-                console.warn('Tried to put a ' + warningType + ' instance', obj, this);
+                consoleWarn('Tried to put a ' + warningType + ' instance', obj, this);
             },
             
             /** Gets an array of the active instances.
@@ -249,7 +251,7 @@
             if (pool) {
                 return pool.getInstance(arguments);
             } else {
-                console.warn('No pool for key', key);
+                consoleWarn('No pool for key', key);
             }
         },
         
@@ -258,7 +260,7 @@
             if (pool) {
                 pool.putInstance(obj);
             } else {
-                console.warn('No pool for obj', obj);
+                consoleWarn('No pool for obj', obj);
             }
         },
         

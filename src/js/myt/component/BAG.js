@@ -1,5 +1,6 @@
 (pkg => {
     const AccessorSupport = pkg.AccessorSupport,
+        generateSetterName = AccessorSupport.generateSetterName,
         
         /*  A data structure of groups stored as a map of maps. First level is attribute name 
             second level is group ID. */
@@ -121,7 +122,7 @@
             setTrue: function(node) {
                 if (node && this.trueNode !== node && this.isRegistered(node)) {
                     const attrName = this.attrName,
-                        setterName = AccessorSupport.generateSetterName(attrName),
+                        setterName = generateSetterName(attrName),
                         nodes = this.__nodes;
                     let i = nodes.length;
                     
@@ -144,7 +145,7 @@
                 @returns {undefined} */
             setFalse: function(node) {
                 if (node && this.trueNode === node) {
-                    node[AccessorSupport.generateSetterName(this.attrName)](false);
+                    node[generateSetterName(this.attrName)](false);
                     this.setTrueNode(null);
                 }
             },

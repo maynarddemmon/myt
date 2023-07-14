@@ -3,11 +3,16 @@
     
     const JSClass = JS.Class,
         JSModule = JS.Module,
-        G = pkg.global,
+        
+        consoleWarn = console.warn,
+        
+        {
+            KeyObservable, UpdateableUI,
+            dumpStack,
+            global:G
+        } = pkg,
         GlobalFocus = G.focus,
         GlobalKeys = G.keys,
-        
-        KeyObservable = pkg.KeyObservable,
         
         DEFAULT_ATTR = 'runForDefault',
         ROLLBACK_ATTR = 'runForRollback',
@@ -36,10 +41,10 @@
                 if (identifiable.id) {
                     func(id);
                 } else {
-                    pkg.dumpStack('No ID');
+                    dumpStack('No ID');
                 }
             } else {
-                pkg.dumpStack('No processor');
+                dumpStack('No processor');
             }
         },
         
@@ -400,7 +405,7 @@
                         if (subform) {
                             value[id] = subform.setValue(value[id]);
                         } else {
-                            console.warn('ID in setValue for missing subform', id);
+                            consoleWarn('ID in setValue for missing subform', id);
                         }
                     }
                 }
@@ -434,7 +439,7 @@
                         if (subform) {
                             value[id] = subform.setDefaultValue(value[id]);
                         } else {
-                            console.warn('ID in setDefaultValue for missing subform', id);
+                            consoleWarn('ID in setDefaultValue for missing subform', id);
                         }
                     }
                 }
@@ -464,7 +469,7 @@
                         if (subform) {
                             value[id] = subform.setRollbackValue(value[id]);
                         } else {
-                            console.warn('ID in setRollbackValue for missing subform', id);
+                            consoleWarn('ID in setRollbackValue for missing subform', id);
                         }
                     }
                 }
@@ -532,7 +537,7 @@
             addSubForm: function(subform) {
                 const id = subform.id;
                 if (this.getSubForm(id) != null) {
-                    console.warn('ID in use for subform, add aborted', id, subform);
+                    consoleWarn('ID in use for subform, add aborted', id, subform);
                 } else {
                     subform.setForm(this);
                     this.__sf[id] = subform;
@@ -844,17 +849,17 @@
             
             /** @overrides myt.Form */
             addSubForm: subform => {
-                pkg.dumpStack('addSubForm unsupported on FormElement');
+                dumpStack('addSubForm unsupported on FormElement');
             },
             
             /** @overrides myt.Form */
             getSubForm: id => {
-                pkg.dumpStack('getSubForm unsupported on FormElement');
+                dumpStack('getSubForm unsupported on FormElement');
             },
             
             /** @overrides myt.Form */
             removeSubForm: id => {
-                pkg.dumpStack('removeSubForm unsupported on FormElement');
+                dumpStack('removeSubForm unsupported on FormElement');
             },
             
             /** @overrides myt.Form */
@@ -952,7 +957,7 @@
             
             @class */
         FormInputTextMixin = pkg.FormInputTextMixin = new JSModule('FormInputTextMixin', {
-            include: [FormElement, pkg.UpdateableUI],
+            include: [FormElement, UpdateableUI],
             
             
             // Life Cycle //////////////////////////////////////////////////////
@@ -1144,7 +1149,7 @@
         
         @class */
     pkg.FormComboBox = new JSClass('FormComboBox', pkg.ComboBox, {
-        include: [FormElement, pkg.UpdateableUI],
+        include: [FormElement, UpdateableUI],
         
         
         // Life Cycle //////////////////////////////////////////////////////////

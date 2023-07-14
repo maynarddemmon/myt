@@ -92,10 +92,7 @@
   * THE SOFTWARE
   */
 Date.prototype.format = Date.prototype.format ?? (() => {
-    const math = Math,
-        mathAbs = math.abs,
-        mathFloor = math.floor,
-        mathCeil = math.ceil,
+    const {abs:mathAbs, floor:mathFloor, ceil:mathCeil} = Math,
         
         shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
         longMonths = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
@@ -482,7 +479,9 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         // The current locale for the user.
         currentLocale;
     
-    const math = Math,
+    const consoleWarn = console.warn,
+        
+        math = Math,
         {abs:mathAbs, min:mathMin, max:mathMax, pow:mathPow} = math,
         
         documentElem = document,
@@ -595,7 +594,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 for (let i = 0; i < len; i++) {
                     scope = scope[parts[i]];
                     if (scope == null) {
-                        console.warn('resolveName failed for', objName, 'at part', i, parts[i]);
+                        consoleWarn('resolveName failed for', objName, 'at part', i, parts[i]);
                         return undefined;
                     }
                 }
@@ -638,7 +637,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 // Prevent reloading the same script
                 const loadedScripts = this._loadedScripts ??= {};
                 if (loadedScripts[src]) {
-                    console.warn('script already loaded for src', src);
+                    consoleWarn('script already loaded for src', src);
                     return null;
                 } else {
                     loadedScripts[src] = true;
@@ -960,7 +959,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                         // so pass it through unchanged.
                         return num;
                     default:
-                        console.warn('formatAsPercentage: expects a number');
+                        consoleWarn('formatAsPercentage: expects a number');
                         return num;
                 }
             },
@@ -1021,11 +1020,11 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 
                 // Prevent clobbering
                 if ((isModuleOrClass ? scope.instanceMethod(incrName) : scope[incrName]) !== undefined) {
-                    console.warn('Increment: Abort clobber', incrName, scope);
+                    consoleWarn('Increment: Abort clobber', incrName, scope);
                     return false;
                 }
                 if ((isModuleOrClass ? scope.instanceMethod(decrName) : scope[decrName]) !== undefined) {
-                    console.warn('Decrement: Abort clobber', decrName, scope);
+                    consoleWarn('Decrement: Abort clobber', decrName, scope);
                     return false;
                 }
                 
@@ -1264,7 +1263,8 @@ Date.prototype.format = Date.prototype.format ?? (() => {
 
 
 (pkg => {
-    const localStorage = global.localStorage,
+    const consoleError = console.error,
+        localStorage = global.localStorage,
         
         getStoreId = storeId => storeId = storeId ?? 'myt',
         
@@ -1302,7 +1302,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                         try {
                             return JSON.parse(data)[key] != null;
                         } catch (e) {
-                            console.error(e);
+                            consoleError(e);
                             return false;
                         }
                     }
@@ -1323,7 +1323,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                             const jsonData = JSON.parse(data);
                             if (typeof jsonData === 'object') return jsonData[key];
                         } catch (e) {
-                            console.error(e);
+                            consoleError(e);
                         }
                     }
                 }
@@ -1381,7 +1381,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     try {
                         return JSON.parse(data);
                     } catch (e) {
-                        console.error(e);
+                        consoleError(e);
                     }
                 }
                 return {};
@@ -1863,7 +1863,11 @@ Date.prototype.format = Date.prototype.format ?? (() => {
 
 
 (pkg => {
-    const JSModule = JS.Module;
+    const JSModule = JS.Module,
+        
+        consoleLog = console.log,
+        
+        dumpStack = pkg.dumpStack;
     
     /** Apply this mixin to any Object that needs to fire events.
         
@@ -2027,8 +2031,8 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                                     if (observer[methodName](event)) break;
                                 }
                             } catch (err) {
-                                pkg.dumpStack(err);
-                                console.log('Additional context', methodName, observer);
+                                dumpStack(err);
+                                consoleLog('Additional context', methodName, observer);
                             }
                         }
                     }
@@ -2082,7 +2086,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             try {
                 this[methodName](observable.createEvent(eventType, observable.get(attrName)));
             } catch (err) {
-                pkg.dumpStack(err);
+                dumpStack(err);
             }
             
             // Providing a true value for once means we will never actually attach.
@@ -2227,7 +2231,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 // Make sure an even number of observable/type was provided
                 const len = observables.length;
                 if (len % 2 !== 0) {
-                    console.log('Observables uneven', this);
+                    consoleLog('Observables uneven', this);
                 } else {
                     // Lazy instantiate constraints array.
                     const constraints = this.__cbmn ??= {},
@@ -2235,7 +2239,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     
                     // Don't allow a constraint to be clobbered.
                     if (constraint.length > 0) {
-                        console.log('Constraint exists for ' + methodName + ' on ' + this);
+                        consoleLog('Constraint exists for ' + methodName + ' on ' + this);
                     } else {
                         for (let i = 0; i < len; i += 2) {
                             const [observable, type] = observables.slice(i);
@@ -2249,7 +2253,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                         try {
                             this[methodName]();
                         } catch (err) {
-                            pkg.dumpStack(err);
+                            dumpStack(err);
                         }
                     }
                 }
@@ -2289,55 +2293,54 @@ Date.prototype.format = Date.prototype.format ?? (() => {
 
 
 (pkg => {
-    let globalRegistry;
+    const consoleWarn = console.warn,
     
-    /** Holds references to "global" objects. Fires events when these globals are registered 
-        and unregistered.
-        
-        Events:
-            register<key>:object Fired when an object is stored under the key.
-            unregister<key>:object Fired when an object is removed from the key.
-        
-        @class */
-    pkg.global = new JS.Singleton('Global', {
-        include: [pkg.Observable],
-        
-        
-        // Constructor /////////////////////////////////////////////////////////
-        initialize: function() {
-            globalRegistry = this;
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** Registers the provided global under the key. Fires a register<key> event. If a global 
-            is already registered under the key the existing global is unregistered first.
-            @param {string} key
-            @param {!Object} v
-            @returns {undefined} */
-        register: (key, v) => {
-            if (globalRegistry.hasOwnProperty(key)) {
-                console.warn('Global key in use', key);
-                globalRegistry.unregister(key);
+        /** Holds references to "global" objects. Fires events when these globals are registered 
+            and unregistered.
+            
+            Events:
+                register<key>:object Fired when an object is stored under the key.
+                unregister<key>:object Fired when an object is removed from the key.
+            
+            @class */
+        globalRegistry = pkg.global = new JS.Singleton('Global', {
+            include: [pkg.Observable],
+            
+            
+            // Constructor /////////////////////////////////////////////////////
+            initialize: () => {},
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** Registers the provided global under the key. Fires a register<key> event. 
+                If a global is already registered under the key the existing global is 
+                unregistered first.
+                @param {string} key
+                @param {!Object} v
+                @returns {undefined} */
+            register: (key, v) => {
+                if (globalRegistry.hasOwnProperty(key)) {
+                    consoleWarn('Global key in use', key);
+                    globalRegistry.unregister(key);
+                }
+                globalRegistry[key] = v;
+                globalRegistry.fireEvent('register' + key, v);
+            },
+            
+            /** Unegisters the global for the provided key. Fires an unregister<key> event if the 
+                key exists.
+                @param {string} key
+                @returns {undefined} */
+            unregister: key => {
+                if (globalRegistry.hasOwnProperty(key)) {
+                    const v = globalRegistry[key];
+                    delete globalRegistry[key];
+                    globalRegistry.fireEvent('unregister' + key, v);
+                } else {
+                    consoleWarn('Global key not in use', key);
+                }
             }
-            globalRegistry[key] = v;
-            globalRegistry.fireEvent('register' + key, v);
-        },
-        
-        /** Unegisters the global for the provided key. Fires an unregister<key> event if the 
-            key exists.
-            @param {string} key
-            @returns {undefined} */
-        unregister: key => {
-            if (globalRegistry.hasOwnProperty(key)) {
-                const v = globalRegistry[key];
-                delete globalRegistry[key];
-                globalRegistry.fireEvent('unregister' + key, v);
-            } else {
-                console.warn('Global key not in use', key);
-            }
-        }
-    });
+        });
 })(myt);
 
 
@@ -2955,9 +2958,11 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         // Constructor /////////////////////////////////////////////////////////
         initialize: function() {
-            this.lastTraversalWasForward = true;
+            globalFocus = this;
             
-            pkg.global.register('focus', globalFocus = this);
+            globalFocus.lastTraversalWasForward = true;
+            
+            pkg.global.register('focus', globalFocus);
         },
         
         
@@ -4604,7 +4609,9 @@ Date.prototype.format = Date.prototype.format ?? (() => {
 
 
 (pkg => {
-    const GETTER_NAMES = new Map(), // Caches getter names.
+    const consoleLog = console.log,
+        
+        GETTER_NAMES = new Map(), // Caches getter names.
         SETTER_NAMES = new Map(), // Caches setter names.
         
         generateName = (attrName, prefix) => prefix + attrName.charAt(0).toUpperCase() + attrName.slice(1),
@@ -4657,7 +4664,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 @returns {undefined} */
             createSetterFunction: (target, attrName) => {
                 const setterName = generateSetterName(attrName);
-                if (target[setterName]) console.log('Overwriting setter', setterName);
+                if (target[setterName]) consoleLog('Overwriting setter', setterName);
                 target[setterName] = function(v) {
                     if (this[attrName] !== v) {
                         this[attrName] = v;
@@ -4672,7 +4679,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 @returns {undefined} */
             createGetterFunction: (target, attrName) => {
                 const getterName = generateGetterName(attrName);
-                if (target[getterName]) console.log('Overwriting getter', getterName);
+                if (target[getterName]) consoleLog('Overwriting getter', getterName);
                 target[getterName] = function() {return this[attrName];};
             }
         },
@@ -4826,6 +4833,8 @@ myt.Destructible = new JS.Module('Destructible', {
 (pkg => {
     const JSClass = JS.Class,
         JSModule = JS.Module,
+        
+        consoleWarn = console.warn,
         
         /*  Get the object pool.
             @private
@@ -4994,7 +5003,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 } else {
                     warningType = 'missing';
                 }
-                console.warn('Tried to put a ' + warningType + ' instance', obj, this);
+                consoleWarn('Tried to put a ' + warningType + ' instance', obj, this);
             },
             
             /** Gets an array of the active instances.
@@ -5074,7 +5083,7 @@ myt.Destructible = new JS.Module('Destructible', {
             if (pool) {
                 return pool.getInstance(arguments);
             } else {
-                console.warn('No pool for key', key);
+                consoleWarn('No pool for key', key);
             }
         },
         
@@ -5083,7 +5092,7 @@ myt.Destructible = new JS.Module('Destructible', {
             if (pool) {
                 pool.putInstance(obj);
             } else {
-                console.warn('No pool for obj', obj);
+                consoleWarn('No pool for obj', obj);
             }
         },
         
@@ -5119,7 +5128,32 @@ myt.Destructible = new JS.Module('Destructible', {
 
 
 (pkg => {
-    const 
+    const JSClass = JS.Class,
+        
+        consoleWarn = console.warn,
+        
+        /*  Common mixins for Eventable and Node. */
+        includedMixins = [pkg.AccessorSupport, pkg.Destructible, pkg.Observable, pkg.Observer],
+        
+        /*  Common initializer for Eventable and Node. */
+        initializer = (self, mixins) => {
+            // Apply the instance mixins if provided.
+            if (mixins) {
+                const len = mixins.length;
+                for (let i = 0, mixin; len > i;) {
+                    if (mixin = mixins[i++]) {
+                        self.extend(mixin);
+                    } else {
+                        consoleWarn('Missing mixin in', self.klass.__displayName);
+                    }
+                }
+            }
+            
+            // Mark the instance not initialized yet since the init or initNode function still
+            // needs to be called before initialization is complete.
+            self.inited = false;
+        },
+        
         /*  The value that indicates default placement should be used. */
         DEFAULT_PLACEMENT = '*',
         
@@ -5151,7 +5185,7 @@ myt.Destructible = new JS.Module('Destructible', {
             if (node[name] === undefined) {
                 node[name] = nodeToAdd;
             } else {
-                console.warn('Name in use', name);
+                consoleWarn('Name in use', name);
             }
         },
         
@@ -5163,7 +5197,7 @@ myt.Destructible = new JS.Module('Destructible', {
             if (node[name] === nodeToRemove) {
                 delete node[name];
             } else {
-                console.warn('Name not in use', name);
+                consoleWarn('Name not in use', name);
             }
         },
         
@@ -5171,6 +5205,48 @@ myt.Destructible = new JS.Module('Destructible', {
             first if necessary. Returns a myt.TrackActivesPool */
         getAnimPool = node => node.__animPool ??= new pkg.TrackActivesPool(pkg.Animator, node);
         
+    /** An object that provides accessors, events and simple lifecycle management. Useful as a 
+        light weight alternative to myt.Node when parent child relationships are not needed.
+        
+        Attributes:
+            inited:boolean Set to true after this Eventable has completed initialization.
+        
+        @class */
+    pkg.Eventable = new JSClass('Eventable', {
+        include: includedMixins,
+        
+        
+        // Constructor /////////////////////////////////////////////////////////
+        /** The standard JSClass initializer function.
+            @param {?Object} [attrs] - A map of attribute names and values.
+            @param {?Array} [mixins] - A list of mixins to be added onto the new instance.
+            @returns {undefined} */
+        initialize: function(attrs, mixins) {
+            initializer(this, mixins);
+            this.init(attrs ?? {});
+        },
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** Called during initialization. Calls setter methods and lastly, sets inited to true. 
+            Subclasses must callSuper.
+            @param {?Object} attrs - A map of attribute names and values.
+            @returns {undefined} */
+        init: function(attrs) {
+            this.callSetters(attrs);
+            this.inited = true;
+        },
+        
+        /** @overrides myt.Destructible. */
+        destroy: function() {
+            this.releaseAllConstraints();
+            this.detachFromAllObservables();
+            this.detachAllObservers();
+            
+            this.callSuper();
+        }
+    });
+    
     /** A single node within a tree data structure. A node has zero or one parent node and zero or 
         more child nodes. If a node has no parent it is a 'root' node. If a node has no child nodes 
         it is a 'leaf' node. Parent nodes and parent of parents, etc. are referred to as ancestors. 
@@ -5203,13 +5279,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 getSubnodes method.
         
         @class */
-    pkg.Node = new JS.Class('Node', {
-        include: [
-            pkg.AccessorSupport, 
-            pkg.Destructible, 
-            pkg.Observable, 
-            pkg.Observer
-        ],
+    pkg.Node = new JSClass('Node', {
+        include: includedMixins,
         
         
         // Class Methods and Attributes ////////////////////////////////////////
@@ -5228,20 +5299,8 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {?Array} [mixins] - A list of mixins to be added onto the new instance.
             @returns {undefined} */
         initialize: function(parent, attrs, mixins) {
-            const self = this;
-            if (mixins) {
-                const len = mixins.length;
-                for (let i = 0, mixin; len > i;) {
-                    if (mixin = mixins[i++]) {
-                        self.extend(mixin);
-                    } else {
-                        console.warn('Missing mixin in', self.klass.__displayName);
-                    }
-                }
-            }
-            
-            self.inited = false;
-            self.initNode(parent, attrs ?? {});
+            initializer(this, mixins);
+            this.initNode(parent, attrs ?? {});
         },
         
         
@@ -7726,6 +7785,20 @@ myt.Destructible = new JS.Module('Destructible', {
             return isPointVisible(this, locX - x, locY - y);
         },
         
+        /** Tests if this View intersects with the provided sibling view. Transformations are not
+            taken into account.
+            @param {?Object} sibling - The sibling View to test against.
+            @returns {boolean} indicating if the sibling View is indeed a sibling and that it
+                intersects with this View. */
+        intersectsWithSibling: function(sibling) {
+            return sibling.parent === this.parent && !(
+                sibling.x > this.x + this.width || 
+                sibling.x + sibling.width < this.x || 
+                sibling.y > this.y + this.height || 
+                sibling.y + sibling.height < this.y
+            );
+        },
+        
         getEffectiveScale: function() {
             return calculateEffectiveScale(this);
         },
@@ -8603,8 +8676,8 @@ myt.Destructible = new JS.Module('Destructible', {
 
 (pkg => {
     const JSClass = JS.Class,
-        View = pkg.View,
-        SizeToDom = pkg.SizeToDom;
+        
+        {View, SizeToDom} = pkg;
     
     /** A base class for flexbox views.
         
@@ -9097,9 +9170,6 @@ myt.Destructible = new JS.Module('Destructible', {
 
 (pkg => {
     let 
-        /* A reference to the GlobalIdle Singleton. */
-        globalIdle,
-        
         /*  The ID of the last idle event in the browser. */
         timerId,
         
@@ -9124,55 +9194,55 @@ myt.Destructible = new JS.Module('Destructible', {
                 globalIdle.fireEvent('idle', EVENT);
             }
             lastTime = time;
-        };
-    
-    /** Provides idle events. Registered with myt.global as 'idle'.
-        
-        Events:
-            idle:object Fired when a browser idle event occurs. The event value is an 
-                object containing:
-                    delta: The time in millis since the last idle evnet.
-                    time: The time in millis of this idle event.
-        
-        @class */
-    new JS.Singleton('GlobalIdle', {
-        include: [pkg.Observable],
-        
-        
-        // Constructor /////////////////////////////////////////////////////////
-        initialize: function() {
-            pkg.global.register('idle', globalIdle = this);
         },
         
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** @overrides myt.Observable */
-        attachObserver: (observer, methodName, type) => {
-            const retval = globalIdle.callSuper(observer, methodName, type);
+        /** Provides idle events. Registered with myt.global as 'idle'.
             
-            // Start firing idle events
-            if (!running && globalIdle.hasObservers('idle')) {
-                running = true;
-                lastTime = -1;
-                timerId = requestAnimationFrame(idleFunc);
+            Events:
+                idle:object Fired when a browser idle event occurs. The event value is an 
+                    object containing:
+                        delta: The time in millis since the last idle evnet.
+                        time: The time in millis of this idle event.
+            
+            @class */
+        globalIdle = new JS.Singleton('GlobalIdle', {
+            include: [pkg.Observable],
+            
+            
+            // Constructor /////////////////////////////////////////////////////
+            initialize: function() {
+                pkg.global.register('idle', this);
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @overrides myt.Observable */
+            attachObserver: (observer, methodName, type) => {
+                const retval = globalIdle.callSuper(observer, methodName, type);
+                
+                // Start firing idle events
+                if (!running && globalIdle.hasObservers('idle')) {
+                    running = true;
+                    lastTime = -1;
+                    timerId = requestAnimationFrame(idleFunc);
+                }
+                
+                return retval;
+            },
+            
+            /** @overrides myt.Observable */
+            detachObserver: (observer, methodName, type) => {
+                const retval = globalIdle.callSuper(observer, methodName, type);
+                
+                // Stop firing idle events
+                if (running && !globalIdle.hasObservers('idle')) {
+                    cancelAnimationFrame(timerId);
+                    running = false;
+                }
+                
+                return retval;
             }
-            
-            return retval;
-        },
-        
-        /** @overrides myt.Observable */
-        detachObserver: (observer, methodName, type) => {
-            const retval = globalIdle.callSuper(observer, methodName, type);
-            
-            // Stop firing idle events
-            if (running && !globalIdle.hasObservers('idle')) {
-                cancelAnimationFrame(timerId);
-                running = false;
-            }
-            
-            return retval;
-        }
-    });
+        });
 })(myt);
 
 
@@ -9340,8 +9410,7 @@ myt.Destructible = new JS.Module('Destructible', {
 
 (pkg => {
     const math = Math,
-        mathMax = math.max,
-        mathMin = math.min,
+        {min:mathMin, max:mathMax} = math,
         
         cleanChannelValue = value => mathMin(255, mathMax(0, math.round(value))),
         toHex = value => cleanChannelValue(value).toString(16).padStart(2, '0'),
@@ -10345,10 +10414,9 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {boolean} update
             @returns {undefined} */
         unlockLayouts = (layouts, update) => {
-            let i = layouts.length,
-                layout;
+            let i = layouts.length;
             while (i) {
-                layout = layouts[--i];
+                const layout = layouts[--i];
                 layout.decrementLockedCounter();
                 if (update) layout.update();
             }
@@ -10800,10 +10868,8 @@ myt.Destructible = new JS.Module('Destructible', {
 
 (pkg => {
     const JSModule = JS.Module,
-        G = pkg.global,
-        GlobalMouse = G.mouse,
-        GlobalKeys = G.keys,
-        GlobalIdle = G.idle,
+        
+        {mouse:GlobalMouse, keys:GlobalKeys, idle:GlobalIdle} = pkg.global,
         
         NO_KEY_DOWN = '',
         
@@ -10913,7 +10979,7 @@ myt.Destructible = new JS.Module('Destructible', {
         // Class Methods and Attributes ////////////////////////////////////////
         extend: {
             /** The default activation keys are enter and spacebar. */
-            ACTIVATION_KEYS: [GlobalKeys.CODE_ENTER,GlobalKeys.CODE_SPACE],
+            ACTIVATION_KEYS: [GlobalKeys.CODE_ENTER, GlobalKeys.CODE_SPACE],
             NO_KEY_DOWN: NO_KEY_DOWN
         },
         
@@ -11432,7 +11498,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 pos = getMouseFromEvent(event),
                 distance = pkg.Geometry.measureDistance(pos.x, pos.y, self.dragInitX + self.x, self.dragInitY + self.y);
             if (distance >= self.distanceBeforeDrag) {
-                self.detachFromDom(pkg.global.mouse, '__doDragCheck', 'mousemove', true);
+                self.detachFromDom(GlobalMouse, '__doDragCheck', 'mousemove', true);
                 self.startDrag(event);
             }
         },
@@ -11837,18 +11903,18 @@ myt.Destructible = new JS.Module('Destructible', {
             if (self.shrinkToFit !== v) {
                 self.shrinkToFit = v;
                 if (self.inited) {
-                    self.textView?.setWhiteSpace(v ? 'nowrap' : 'normal');
+                    self.textView.setWhiteSpace(v ? 'nowrap' : 'normal');
                     self.fireEvent('shrinkToFit', v);
                 }
             }
         },
         
         setTextY: function(v) {
-            const self = this,
-                textView = self.textView;
+            const self = this;
             if (self.textY !== v) {
                 self.textY = v;
                 if (self.inited) {
+                    const textView = self.textView;
                     self.fireEvent('textY', v);
                     if (typeof v === 'string') {
                         textView.setValign(v);
@@ -11902,9 +11968,9 @@ myt.Destructible = new JS.Module('Destructible', {
 
 
 (pkg => {
-    const G = pkg.global,
-        GlobalFocus = G.focus,
-        GlobalMouse = G.mouse,
+    const consoleWarn = console.warn,
+        
+        {focus:GlobalFocus, mouse:GlobalMouse} = pkg.global,
         
         panelsByPanelId = {}, // A map of FloatingPanel instances by panel ID.
         
@@ -12254,13 +12320,13 @@ myt.Destructible = new JS.Module('Destructible', {
                     case 'insideRight': x += panelAnchor.width - this.width; break;
                     case 'outsideLeft': x -= this.width; break;
                     case 'insideLeft': break;
-                    default: console.warn('Invalid align value', type, align);
+                    default: consoleWarn('Invalid align value', type, align);
                 }
             } else if (type === 'number') {
                 // Absolute position
                 x = align;
             } else {
-                console.warn('Invalid align type', type, align);
+                consoleWarn('Invalid align type', type, align);
             }
             this.setX(x);
         },
@@ -12276,13 +12342,13 @@ myt.Destructible = new JS.Module('Destructible', {
                     case 'insideBottom': y += panelAnchor.height - this.height; break;
                     case 'outsideTop': y -= this.height; break;
                     case 'insideTop': break;
-                    default: console.warn('Invalid valign value', type, valign);
+                    default: consoleWarn('Invalid valign value', type, valign);
                 }
             } else if (type === 'number') {
                 // Absolute position
                 y = valign;
             } else {
-                console.warn('Invalid valign type', type, valign);
+                consoleWarn('Invalid valign type', type, valign);
             }
             this.setY(y);
         }
@@ -12770,6 +12836,7 @@ myt.Destructible = new JS.Module('Destructible', {
 
 (pkg => {
     const AccessorSupport = pkg.AccessorSupport,
+        generateSetterName = AccessorSupport.generateSetterName,
         
         /*  A data structure of groups stored as a map of maps. First level is attribute name 
             second level is group ID. */
@@ -12891,7 +12958,7 @@ myt.Destructible = new JS.Module('Destructible', {
             setTrue: function(node) {
                 if (node && this.trueNode !== node && this.isRegistered(node)) {
                     const attrName = this.attrName,
-                        setterName = AccessorSupport.generateSetterName(attrName),
+                        setterName = generateSetterName(attrName),
                         nodes = this.__nodes;
                     let i = nodes.length;
                     
@@ -12914,7 +12981,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 @returns {undefined} */
             setFalse: function(node) {
                 if (node && this.trueNode === node) {
-                    node[AccessorSupport.generateSetterName(this.attrName)](false);
+                    node[generateSetterName(this.attrName)](false);
                     this.setTrueNode(null);
                 }
             },
@@ -13308,19 +13375,18 @@ myt.Destructible = new JS.Module('Destructible', {
                 @param {!Object} item - The item to test.
                 @returns {boolean} True if selection is allowed, false otherwise. */
             canSelectItem: function(item) {
-                const ms = this.maxSelected, 
-                    sc = this.selectedCount;
+                const {maxSelected, selectedCount} = this;
                 
-                if (ms === 0) {
+                if (maxSelected === 0) {
                     return false;
-                } else if (ms === 1) {
+                } else if (maxSelected === 1) {
                     // Deselect current selection if necessary
-                    if (sc > 0) {
+                    if (selectedCount > 0) {
                         this.deselectAll();
                         if (this.selectedCount > 0) return false;
                     }
-                } else if (ms > 1) {
-                    if (sc >= ms) return false;
+                } else if (maxSelected > 1) {
+                    if (selectedCount >= maxSelected) return false;
                 }
                 
                 return item.canSelect(this);
@@ -13430,8 +13496,8 @@ myt.Destructible = new JS.Module('Destructible', {
 
 (pkg => {
     const JSClass = JS.Class,
-        View = pkg.View,
-        SizeToParent = pkg.SizeToParent,
+        
+        {View, SizeToParent} = pkg,
         
         /** A tab slider component.
             
@@ -14667,8 +14733,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** @overrides myt.BaseInputText */
         setSelection: function(selection) {
             if (selection) {
-                const startElem = selection.startElem,
-                    endElem = selection.endElem;
+                const {startElem, endElem} = selection;
                 if (startElem && startElem.parentNode && endElem && endElem.parentNode) {
                     const range = document.createRange();
                     range.setStart(startElem, mathMin(selection.start, startElem.length));
@@ -15426,11 +15491,16 @@ myt.Destructible = new JS.Module('Destructible', {
     
     const JSClass = JS.Class,
         JSModule = JS.Module,
-        G = pkg.global,
+        
+        consoleWarn = console.warn,
+        
+        {
+            KeyObservable, UpdateableUI,
+            dumpStack,
+            global:G
+        } = pkg,
         GlobalFocus = G.focus,
         GlobalKeys = G.keys,
-        
-        KeyObservable = pkg.KeyObservable,
         
         DEFAULT_ATTR = 'runForDefault',
         ROLLBACK_ATTR = 'runForRollback',
@@ -15459,10 +15529,10 @@ myt.Destructible = new JS.Module('Destructible', {
                 if (identifiable.id) {
                     func(id);
                 } else {
-                    pkg.dumpStack('No ID');
+                    dumpStack('No ID');
                 }
             } else {
-                pkg.dumpStack('No processor');
+                dumpStack('No processor');
             }
         },
         
@@ -15823,7 +15893,7 @@ myt.Destructible = new JS.Module('Destructible', {
                         if (subform) {
                             value[id] = subform.setValue(value[id]);
                         } else {
-                            console.warn('ID in setValue for missing subform', id);
+                            consoleWarn('ID in setValue for missing subform', id);
                         }
                     }
                 }
@@ -15857,7 +15927,7 @@ myt.Destructible = new JS.Module('Destructible', {
                         if (subform) {
                             value[id] = subform.setDefaultValue(value[id]);
                         } else {
-                            console.warn('ID in setDefaultValue for missing subform', id);
+                            consoleWarn('ID in setDefaultValue for missing subform', id);
                         }
                     }
                 }
@@ -15887,7 +15957,7 @@ myt.Destructible = new JS.Module('Destructible', {
                         if (subform) {
                             value[id] = subform.setRollbackValue(value[id]);
                         } else {
-                            console.warn('ID in setRollbackValue for missing subform', id);
+                            consoleWarn('ID in setRollbackValue for missing subform', id);
                         }
                     }
                 }
@@ -15955,7 +16025,7 @@ myt.Destructible = new JS.Module('Destructible', {
             addSubForm: function(subform) {
                 const id = subform.id;
                 if (this.getSubForm(id) != null) {
-                    console.warn('ID in use for subform, add aborted', id, subform);
+                    consoleWarn('ID in use for subform, add aborted', id, subform);
                 } else {
                     subform.setForm(this);
                     this.__sf[id] = subform;
@@ -16267,17 +16337,17 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** @overrides myt.Form */
             addSubForm: subform => {
-                pkg.dumpStack('addSubForm unsupported on FormElement');
+                dumpStack('addSubForm unsupported on FormElement');
             },
             
             /** @overrides myt.Form */
             getSubForm: id => {
-                pkg.dumpStack('getSubForm unsupported on FormElement');
+                dumpStack('getSubForm unsupported on FormElement');
             },
             
             /** @overrides myt.Form */
             removeSubForm: id => {
-                pkg.dumpStack('removeSubForm unsupported on FormElement');
+                dumpStack('removeSubForm unsupported on FormElement');
             },
             
             /** @overrides myt.Form */
@@ -16375,7 +16445,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             @class */
         FormInputTextMixin = pkg.FormInputTextMixin = new JSModule('FormInputTextMixin', {
-            include: [FormElement, pkg.UpdateableUI],
+            include: [FormElement, UpdateableUI],
             
             
             // Life Cycle //////////////////////////////////////////////////////
@@ -16567,7 +16637,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         @class */
     pkg.FormComboBox = new JSClass('FormComboBox', pkg.ComboBox, {
-        include: [FormElement, pkg.UpdateableUI],
+        include: [FormElement, UpdateableUI],
         
         
         // Life Cycle //////////////////////////////////////////////////////////
@@ -16884,6 +16954,8 @@ myt.Destructible = new JS.Module('Destructible', {
 (pkg => {
     const JSClass = JS.Class,
         
+        dumpStack = pkg.dumpStack,
+        
         mathRound = Math.round,
         
         MIME_TYPES_BY_EXTENSION = {
@@ -16978,7 +17050,7 @@ myt.Destructible = new JS.Module('Destructible', {
                         if (file) this.handleDroppedFile(file, event);
                     }
                 } else {
-                    pkg.dumpStack('No File API');
+                    dumpStack('No File API');
                 }
             },
             
@@ -17162,7 +17234,7 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             handleUploadFailure: (file, error) => {
-                pkg.dumpStack('Upload failure:' + error.status + ':' + error.message);
+                dumpStack('Upload failure:' + error.status + ':' + error.message);
             },
             
             /** Subclasses must implement this to extract the uploaded file path from the response. 
@@ -17494,9 +17566,8 @@ myt.Destructible = new JS.Module('Destructible', {
     let openModalPanelCount = 0;
     
     const JSClass = JS.Class,
-        SizeToParent = pkg.SizeToParent,
-        View = pkg.View,
-        RootView = pkg.RootView,
+        
+        {View, SizeToParent, RootView} = pkg,
         
         /** A dimmer that can be placed on another myt.View to obscure the subviews of that view.
             
@@ -17942,6 +18013,8 @@ myt.Destructible = new JS.Module('Destructible', {
         alphaChannelSlider,
         
         // DatePicker
+        datePicker,
+        
         localeData,
         dateOnly,
         timeOnly,
@@ -17962,22 +18035,14 @@ myt.Destructible = new JS.Module('Destructible', {
         timeListView;
     
     const JSClass = JS.Class,
-        View = pkg.View,
-        Text = pkg.Text,
-        ModalPanel = pkg.ModalPanel,
-        SizeToChildren = pkg.SizeToChildren,
-        SpacedLayout = pkg.SpacedLayout,
-        SelectionManager = pkg.SelectionManager,
-        Color = pkg.Color,
-        LocalStorage = pkg.LocalStorage,
-        Button = pkg.Button,
-        TextButton = pkg.TextButton,
-        Draggable = pkg.Draggable,
         
-        makeTag = pkg.FontAwesome.makeTag,
+        {
+            View, Text, ModalPanel, SizeToChildren, SpacedLayout, WrappingLayout, SelectionManager, Color, 
+            LocalStorage, Button, TextButton, Draggable,
+            FontAwesome:{makeTag}
+        } = pkg,
         
-        mathMin = Math.min,
-        mathMax = Math.max,
+        {min:mathMin, max:mathMax} = Math,
         
         BORDER_333 = [1, 'solid', '#333'],
         BORDER_999 = [1, 'solid', '#999'],
@@ -18041,7 +18106,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 
                 if (bgColor === currentColorHex) {
                     const color = Color.makeColorFromHexString(currentColorHex);
-                    new pkg.Text(this, {
+                    new Text(this, {
                         x:2, y:2, text:CHECKMARK, fontSize:'12px', 
                         textColor:color.red + color.green + color.blue < 3*255/2 ? '#fff' : '#000'
                     });
@@ -18081,9 +18146,10 @@ myt.Destructible = new JS.Module('Destructible', {
                 
                 // Build UI
                 paletteContainer = new View(colorPicker, {width:160, height:170});
-                new pkg.WrappingLayout(paletteContainer, {spacing:4, lineSpacing:4});
+                new WrappingLayout(paletteContainer, {spacing:4, lineSpacing:4});
                 
-                colorView = new View(colorPicker, {x:170, width:139, height:139, border:BORDER_333}, [Draggable, {
+                const colorViewSize = 139;
+                colorView = new View(colorPicker, {x:170, width:colorViewSize, height:colorViewSize, border:BORDER_333}, [Draggable, {
                     requestDragPosition: function(x, y) {
                         colorView.callSuper(colorView.x, colorView.y);
                         const pos = this.getPagePosition();
@@ -18093,8 +18159,8 @@ myt.Destructible = new JS.Module('Destructible', {
                         colorPicker.updateUI();
                     }
                 }]);
-                const satView = new View(colorView, {width:139, height:139}),
-                    valView = new View(satView, {width:139, height:139});
+                const satView = new View(colorView, {width:colorViewSize, height:colorViewSize}),
+                    valView = new View(satView, {width:colorViewSize, height:colorViewSize});
                 satView.getIDS().backgroundImage = 'linear-gradient(to right, #fff, rgba(204, 154, 129, 0))';
                 valView.getIDS().backgroundImage = 'linear-gradient(to top, #000, rgba(204, 154, 129, 0))';
                 colorThumb = new View(valView, {width:6, height:6, bgColor:'#000', border:BORDER_FFF, roundedCorners:4});
@@ -18119,7 +18185,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 // Alpha Channel Row
                 if (supportsAlphaChannel) {
                     alphaChannelSlider = new pkg.LabelSlider(colorPicker, {
-                        x:170, y:y, width:139 + 26 + 6,
+                        x:170, y:y, width:colorViewSize + 26 + 6,
                         minValue:0, maxValue:255, flipThreshold:55, labelColor:'#fff'
                     }, [{
                         setText: function(event, noAnim) {
@@ -18541,6 +18607,8 @@ myt.Destructible = new JS.Module('Destructible', {
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides */
             initNode: function(parent, attrs) {
+                datePicker = this;
+                
                 const opt = {
                     current:null,
                     dateOnly:false,
@@ -18559,7 +18627,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 };
                 delete attrs.opt;
                 
-                this.callSuper(parent, attrs);
+                datePicker.callSuper(parent, attrs);
                 
                 localeData = opt.locales[opt.locale ?? 'en'];
                 dateOnly = opt.dateOnly;
@@ -18579,7 +18647,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 maxTime = parseTime(opt.maxTime);
                 
                 // Build UI
-                const headerView = new View(this, {visible:!timeOnly});
+                const headerView = new View(datePicker, {visible:!timeOnly});
                 if (opt.showTodayButton) {
                     new TextButton(headerView, {width:24, text:makeTag(['home']), tooltip:localeData['today']}, [{
                         doActivated: () => {
@@ -18613,15 +18681,15 @@ myt.Destructible = new JS.Module('Destructible', {
                     }
                 }]);
                 
-                calendarView = new View(this, {
+                calendarView = new View(datePicker, {
                     y:25, width:175, height:175,
                     visible:!timeOnly,
                     maxSelected:1,
                     itemSelectionId:'data'
                 }, [SelectionManager]);
-                new pkg.WrappingLayout(calendarView, {spacing:2, lineInset:2, lineSpacing:3});
+                new WrappingLayout(calendarView, {spacing:2, lineInset:2, lineSpacing:3});
                 
-                timeListView = new View(this, {
+                timeListView = new View(datePicker, {
                     x:timeOnly ? 0 : 195,
                     y:timeOnly ? 0 : 25,
                     width:(timeOnly ? 175 : 49) + pkg.DomElementProxy.getScrollbarSize(),
@@ -18633,7 +18701,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 }, [SelectionManager]);
                 new SpacedLayout(timeListView, {axis:'y', inset:1, spacing:3});
                 
-                this.setWidth(timeListView.visible ? timeListView.x + timeListView.width : calendarView.width);
+                datePicker.setWidth(timeListView.visible ? timeListView.x + timeListView.width : calendarView.width);
                 
                 drawForDate(opt.current ?? new Date());
             },
@@ -19045,16 +19113,16 @@ myt.Destructible = new JS.Module('Destructible', {
                             callbackFunction.call(self, action);
                             break;
                         case 'confirmBtn':
-                            const colorAsHex = colorPickerView.getColor();
-                            colorPickerView.addToPalette(colorAsHex);
+                            const colorAsHex = colorPicker.getColor();
+                            colorPicker.addToPalette(colorAsHex);
                             callbackFunction.call(self, action, colorAsHex);
                             break;
                     }
-                    colorPickerView.destroy();
+                    colorPicker.destroy();
                 });
                 
                 // Build Picker
-                const colorPickerView = new ColorPicker(content, {
+                colorPicker = new ColorPicker(content, {
                     x:ModalPanel.PADDING_X,
                     y:ModalPanel.PADDING_Y + 24,
                     width:337,
@@ -19066,7 +19134,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 self.show();
                 closeBtn.setVisible(true);
                 closeBtn.focus();
-                self.setupFooterButtons(colorPickerView, opts);
+                self.setupFooterButtons(colorPicker, opts);
                 self.setupTitle(content, opts.titleText);
             },
             
@@ -19085,14 +19153,14 @@ myt.Destructible = new JS.Module('Destructible', {
                             callbackFunction.call(self, action);
                             break;
                         case 'confirmBtn':
-                            callbackFunction.call(self, action, datePickerView.getPickedDate());
+                            callbackFunction.call(self, action, datePicker.getPickedDate());
                             break;
                     }
-                    datePickerView.destroy();
+                    datePicker.destroy();
                 });
                 
                 // Build Picker
-                const datePickerView = new DatePicker(content, {
+                datePicker= new DatePicker(content, {
                     x:ModalPanel.PADDING_X,
                     y:ModalPanel.PADDING_Y + 24,
                     height:195,
@@ -19107,7 +19175,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 self.show();
                 closeBtn.setVisible(true);
                 closeBtn.focus();
-                self.setupFooterButtons(datePickerView, opts);
+                self.setupFooterButtons(datePicker, opts);
                 self.setupTitle(content, opts.timeOnly ? opts.timeOnlyTitleText : opts.titleText);
             },
             
@@ -19165,16 +19233,13 @@ myt.Destructible = new JS.Module('Destructible', {
                 
                 content.sizeToChildren.setPaddingY(HALF_DPY);
                 
-                const radius = Dialog.RADIUS,
-                    bgY = btnContainer.y - HALF_DPY;
+                const bgY = btnContainer.y - HALF_DPY;
                 (new View(content, {
                     ignoreLayout:true,
                     y:bgY,
                     width:content.width,
                     height:content.height - bgY,
-                    bgColor:'#eee',
-                    roundedBottomLeftCorner:radius,
-                    roundedBottomRightCorner:radius
+                    bgColor:'#eee'
                 })).sendToBack();
                 
                 if (opts.showClose === false) cancelBtn.focus();
@@ -19185,6 +19250,8 @@ myt.Destructible = new JS.Module('Destructible', {
 
 (pkg => {
     const JSClass = JS.Class,
+        
+        dumpStack = pkg.dumpStack,
         
         // Safe as a closure variable because the registry is a singleton.,
         validators = {},
@@ -19197,10 +19264,10 @@ myt.Destructible = new JS.Module('Destructible', {
                 if (identifiable.id) {
                     func(id);
                 } else {
-                    pkg.dumpStack('No ID');
+                    dumpStack('No ID');
                 }
             } else {
-                pkg.dumpStack('No validator');
+                dumpStack('No validator');
             }
         },
         
@@ -19252,7 +19319,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @class */
         RequiredFieldValidator = pkg.RequiredFieldValidator = new JSClass('RequiredFieldValidator', Validator, {
             /** @overrides myt.Validator */
-            isValid: function(value, config, errorMessages) {
+            isValid: (value, config, errorMessages) => {
                 if (value == null || value === '' || (typeof value === 'string' && value.trim() === '')) {
                     errorMessages?.push('This value is required.');
                     return false;
@@ -19267,7 +19334,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @class */
         EqualsIgnoreCaseValidator = pkg.EqualsIgnoreCaseValidator = new JSClass('EqualsIgnoreCaseValidator', Validator, {
             /** @overrides myt.Validator */
-            isValid: function(value, config, errorMessages) {
+            isValid: (value, config, errorMessages) => {
                 const rbv = config.form.getRollbackValue();
                 if (value && rbv && value.toLowerCase() === rbv.toLowerCase()) {
                     errorMessages?.push('Value must differ by more than just case.');
@@ -19307,7 +19374,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @class */
         JSONValidator = pkg.JSONValidator = new JSClass('JSONValidator', Validator, {
             /** @overrides myt.Validator */
-            isValid: function(value, config, errorMessages) {
+            isValid: (value, config, errorMessages) => {
                 try {
                     JSON.parse(value);
                     return true;
@@ -20019,7 +20086,7 @@ myt.Destructible = new JS.Module('Destructible', {
 (pkg => {
     const JSClass = JS.Class,
         
-        GlobalKeys = pkg.global.keys,
+        {CODE_ENTER, CODE_SPACE, ARROW_KEYS} = pkg.global.keys,
         
         STATE_COLLAPSED = 0,
         STATE_RESTORED_JUST_COLLAPSED = 1,
@@ -20076,7 +20143,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 attrs.expansionState ??= STATE_RESTORED_JUST_EXPANDED;
                 attrs.focusIndicator ??= false;
                 attrs.repeatKeyDown ??= true;
-                attrs.activationKeys ??= [GlobalKeys.CODE_ENTER, GlobalKeys.CODE_SPACE, ...GlobalKeys.ARROW_KEYS];
+                attrs.activationKeys ??= [CODE_ENTER, CODE_SPACE, ...ARROW_KEYS];
                 
                 if (attrs.axis === 'y') {
                     attrs.height ??= 6;
@@ -20167,8 +20234,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 this.callSuper(key, isRepeat);
                 
                 switch (key) {
-                    case GlobalKeys.CODE_ENTER:
-                    case GlobalKeys.CODE_SPACE:
+                    case CODE_ENTER:
+                    case CODE_SPACE:
                         this.doPrimaryAction();
                 }
             },
@@ -20202,9 +20269,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             doPrimaryAction: function() {
                 const self = this,
-                    rv = self.restoreValue, 
-                    maxV = self.maxValue, 
-                    minV = self.minValue;
+                    {restoreValue:rv, maxValue:maxV, minValue:minV} = self;
                 let toValue;
                 switch (self.expansionState) {
                     case STATE_COLLAPSED:
@@ -22471,9 +22536,9 @@ myt.Destructible = new JS.Module('Destructible', {
 
 (pkg => {
     const JSModule = JS.Module,
-        G = pkg.global,
-        dragManager = G.dragManager,
-        globalMouse = G.mouse,
+    
+        {dragManager, mouse:globalMouse} = pkg.global,
+        
         Draggable = pkg.Draggable,
         
         ANY_GROUP = '*',
@@ -22917,11 +22982,9 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {!Object} event
             @returns {undefined} */
         __hndlMove: function(event) {
-            const self = this,
-                mousePos = event.value;
-            let mouseX = mousePos.pageX, 
-                mouseY = mousePos.pageY;
+            const self = this;
             
+            let {pageX:mouseX, pageY:mouseY} = event.value;
             if (self.containsPoint(mouseX, mouseY)) {
                 const pos = self.getPagePosition(), 
                     scrollBorder = self.scrollBorder,
@@ -22968,68 +23031,8 @@ myt.Destructible = new JS.Module('Destructible', {
 })(myt);
 
 
-/** An object that provides accessors, events and simple lifecycle management. Useful as a light 
-    weight alternative to myt.Node when parent child relationships are not needed.
-    
-    Attributes:
-        inited:boolean Set to true after this Eventable has completed initialization.
-    
-    @class */
-myt.Eventable = new JS.Class('Eventable', {
-    include: [
-        myt.AccessorSupport, 
-        myt.Destructible, 
-        myt.Observable, 
-        myt.Observer
-    ],
-    
-    
-    // Constructor /////////////////////////////////////////////////////////////
-    /** The standard JSClass initializer function.
-        @param {?Object} [attrs] - A map of attribute names and values.
-        @param {?Array} [mixins] - A list of mixins to be added onto the new instance.
-        @returns {undefined} */
-    initialize: function(attrs, mixins) {
-        const self = this;
-        if (mixins) {
-            const len = mixins.length;
-            for (let i = 0, mixin; len > i;) {
-                if (mixin = mixins[i++]) {
-                    self.extend(mixin);
-                } else {
-                    console.warn('Missing mixin in', self.klass.__displayName);
-                }
-            }
-        }
-        
-        self.inited = false;
-        self.init(attrs ?? {});
-    },
-    
-    
-    // Life Cycle //////////////////////////////////////////////////////////////
-    /** Called during initialization. Calls setter methods and lastly, sets inited to true. 
-        Subclasses must callSuper.
-        @param {?Object} attrs - A map of attribute names and values.
-        @returns {undefined} */
-    init: function(attrs) {
-        this.callSetters(attrs);
-        this.inited = true;
-    },
-    
-    /** @overrides myt.Destructible. */
-    destroy: function() {
-        this.releaseAllConstraints();
-        this.detachFromAllObservables();
-        this.detachAllObservers();
-        
-        this.callSuper();
-    }
-});
-
-
 (pkg => {
-    const math = Math,
+    const {max:mathMax, cos:mathCos, sin:mathSin, PI} = Math,
         degreesToRadians = pkg.Geometry.degreesToRadians,
         
         /*  Redraws the annulus
@@ -23050,7 +23053,6 @@ myt.Eventable = new JS.Class('Eventable', {
                 thickness = annulus.thickness,
                 innerRadius = annulus.radius,
                 outerRadius = innerRadius + thickness,
-                PI = math.PI,
                 angleDiff = endAngle - startAngle,
                 isFull = angleDiff + 0.0001 >= 2 * PI; // 0.0001 is to handle floating point errors
             
@@ -23060,8 +23062,7 @@ myt.Eventable = new JS.Class('Eventable', {
                 endAngle = PI;
             }
             
-            const mathCos = math.cos,
-                mathSin = math.sin,
+            const 
                 outerStartPoint = [center + outerRadius * mathCos(startAngle), center + outerRadius * mathSin(startAngle)],
                 outerEndPoint =   [center + outerRadius * mathCos(endAngle),   center + outerRadius * mathSin(endAngle)],
                 innerEndPoint =   [center + innerRadius * mathCos(endAngle),   center + innerRadius * mathSin(endAngle)],
@@ -23120,7 +23121,7 @@ myt.Eventable = new JS.Class('Eventable', {
         
         setAndUpdateSize = (annulus, attrName, value) => {
             if (annulus[attrName] !== value) {
-                annulus[attrName] = value = math.max(0, value);
+                annulus[attrName] = value = mathMax(0, value);
                 if (annulus.inited) {
                     updateSize(annulus);
                     annulus.fireEvent(attrName, value);
@@ -23200,14 +23201,10 @@ myt.Eventable = new JS.Class('Eventable', {
     let tooltipView;
     
     const JSClass = JS.Class,
-        G = pkg.global,
-        GlobalMouse = G.mouse,
-        GlobalWindowResize = G.windowResize,
         
-        math = Math,
-        mathMin = math.min,
-        mathMax = math.max,
-        mathRound = math.round,
+        {mouse:GlobalMouse, windowResize:GlobalWindowResize, dragManager} = pkg.global,
+        
+        {min:mathMin, max:mathMax, round:mathRound} = Math,
         
         tooltipDomId = 'tooltipDiv',
         
@@ -23336,7 +23333,7 @@ myt.Eventable = new JS.Class('Eventable', {
             showTip: function() {
                 // Don't show tooltips while doing drag and drop since tooltips are distracting 
                 // while this is going on.
-                if (!G.dragManager.getDragView()) {
+                if (!dragManager.getDragView()) {
                     this.nextTipDelay = this.tipHideDelay;
                     this.bringToFront();
                     this.setVisible(true);
@@ -23691,7 +23688,9 @@ myt.Eventable = new JS.Class('Eventable', {
 
 
 (pkg => {
-    const PI = Math.PI,
+    const consoleWarn = console.warn,
+        
+        PI = Math.PI,
         HALF_PI = PI / 2,
         ONE_AND_A_HALF_PI = PI * 3 / 2,
         AccessorSupport = pkg.AccessorSupport,
@@ -23817,7 +23816,7 @@ myt.Eventable = new JS.Class('Eventable', {
                     opt ??= 0.5;
                     break;
                 default:
-                    console.warn('Unexpected image type', imageType);
+                    consoleWarn('Unexpected image type', imageType);
                     extension = imageType.toLowerCase();
             }
             const mimeType = 'image/' + extension,
@@ -23996,7 +23995,7 @@ myt.Eventable = new JS.Class('Eventable', {
             
             // Calculate Colors
             if (segments < 1) {
-                console.warn('Invalid segements', segments);
+                consoleWarn('Invalid segements', segments);
                 segments = 60;
             }
             

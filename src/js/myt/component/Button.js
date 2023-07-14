@@ -316,18 +316,18 @@
             if (self.shrinkToFit !== v) {
                 self.shrinkToFit = v;
                 if (self.inited) {
-                    self.textView?.setWhiteSpace(v ? 'nowrap' : 'normal');
+                    self.textView.setWhiteSpace(v ? 'nowrap' : 'normal');
                     self.fireEvent('shrinkToFit', v);
                 }
             }
         },
         
         setTextY: function(v) {
-            const self = this,
-                textView = self.textView;
+            const self = this;
             if (self.textY !== v) {
                 self.textY = v;
                 if (self.inited) {
+                    const textView = self.textView;
                     self.fireEvent('textY', v);
                     if (typeof v === 'string') {
                         textView.setValign(v);

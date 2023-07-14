@@ -1,6 +1,8 @@
 (pkg => {
     const JSClass = JS.Class,
         
+        dumpStack = pkg.dumpStack,
+        
         mathRound = Math.round,
         
         MIME_TYPES_BY_EXTENSION = {
@@ -95,7 +97,7 @@
                         if (file) this.handleDroppedFile(file, event);
                     }
                 } else {
-                    pkg.dumpStack('No File API');
+                    dumpStack('No File API');
                 }
             },
             
@@ -279,7 +281,7 @@
             },
             
             handleUploadFailure: (file, error) => {
-                pkg.dumpStack('Upload failure:' + error.status + ':' + error.message);
+                dumpStack('Upload failure:' + error.status + ':' + error.message);
             },
             
             /** Subclasses must implement this to extract the uploaded file path from the response. 

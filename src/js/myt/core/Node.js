@@ -1,5 +1,30 @@
 (pkg => {
-    const 
+    const JSClass = JS.Class,
+        
+        consoleWarn = console.warn,
+        
+        /*  Common mixins for Eventable and Node. */
+        includedMixins = [pkg.AccessorSupport, pkg.Destructible, pkg.Observable, pkg.Observer],
+        
+        /*  Common initializer for Eventable and Node. */
+        initializer = (self, mixins) => {
+            // Apply the instance mixins if provided.
+            if (mixins) {
+                const len = mixins.length;
+                for (let i = 0, mixin; len > i;) {
+                    if (mixin = mixins[i++]) {
+                        self.extend(mixin);
+                    } else {
+                        consoleWarn('Missing mixin in', self.klass.__displayName);
+                    }
+                }
+            }
+            
+            // Mark the instance not initialized yet since the init or initNode function still
+            // needs to be called before initialization is complete.
+            self.inited = false;
+        },
+        
         /*  The value that indicates default placement should be used. */
         DEFAULT_PLACEMENT = '*',
         
@@ -31,7 +56,7 @@
             if (node[name] === undefined) {
                 node[name] = nodeToAdd;
             } else {
-                console.warn('Name in use', name);
+                consoleWarn('Name in use', name);
             }
         },
         
@@ -43,7 +68,7 @@
             if (node[name] === nodeToRemove) {
                 delete node[name];
             } else {
-                console.warn('Name not in use', name);
+                consoleWarn('Name not in use', name);
             }
         },
         
@@ -51,6 +76,48 @@
             first if necessary. Returns a myt.TrackActivesPool */
         getAnimPool = node => node.__animPool ??= new pkg.TrackActivesPool(pkg.Animator, node);
         
+    /** An object that provides accessors, events and simple lifecycle management. Useful as a 
+        light weight alternative to myt.Node when parent child relationships are not needed.
+        
+        Attributes:
+            inited:boolean Set to true after this Eventable has completed initialization.
+        
+        @class */
+    pkg.Eventable = new JSClass('Eventable', {
+        include: includedMixins,
+        
+        
+        // Constructor /////////////////////////////////////////////////////////
+        /** The standard JSClass initializer function.
+            @param {?Object} [attrs] - A map of attribute names and values.
+            @param {?Array} [mixins] - A list of mixins to be added onto the new instance.
+            @returns {undefined} */
+        initialize: function(attrs, mixins) {
+            initializer(this, mixins);
+            this.init(attrs ?? {});
+        },
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** Called during initialization. Calls setter methods and lastly, sets inited to true. 
+            Subclasses must callSuper.
+            @param {?Object} attrs - A map of attribute names and values.
+            @returns {undefined} */
+        init: function(attrs) {
+            this.callSetters(attrs);
+            this.inited = true;
+        },
+        
+        /** @overrides myt.Destructible. */
+        destroy: function() {
+            this.releaseAllConstraints();
+            this.detachFromAllObservables();
+            this.detachAllObservers();
+            
+            this.callSuper();
+        }
+    });
+    
     /** A single node within a tree data structure. A node has zero or one parent node and zero or 
         more child nodes. If a node has no parent it is a 'root' node. If a node has no child nodes 
         it is a 'leaf' node. Parent nodes and parent of parents, etc. are referred to as ancestors. 
@@ -83,13 +150,8 @@
                 getSubnodes method.
         
         @class */
-    pkg.Node = new JS.Class('Node', {
-        include: [
-            pkg.AccessorSupport, 
-            pkg.Destructible, 
-            pkg.Observable, 
-            pkg.Observer
-        ],
+    pkg.Node = new JSClass('Node', {
+        include: includedMixins,
         
         
         // Class Methods and Attributes ////////////////////////////////////////
@@ -108,20 +170,8 @@
             @param {?Array} [mixins] - A list of mixins to be added onto the new instance.
             @returns {undefined} */
         initialize: function(parent, attrs, mixins) {
-            const self = this;
-            if (mixins) {
-                const len = mixins.length;
-                for (let i = 0, mixin; len > i;) {
-                    if (mixin = mixins[i++]) {
-                        self.extend(mixin);
-                    } else {
-                        console.warn('Missing mixin in', self.klass.__displayName);
-                    }
-                }
-            }
-            
-            self.inited = false;
-            self.initNode(parent, attrs ?? {});
+            initializer(this, mixins);
+            this.initNode(parent, attrs ?? {});
         },
         
         

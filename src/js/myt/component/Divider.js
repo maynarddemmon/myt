@@ -1,7 +1,7 @@
 (pkg => {
     const JSClass = JS.Class,
         
-        GlobalKeys = pkg.global.keys,
+        {CODE_ENTER, CODE_SPACE, ARROW_KEYS} = pkg.global.keys,
         
         STATE_COLLAPSED = 0,
         STATE_RESTORED_JUST_COLLAPSED = 1,
@@ -58,7 +58,7 @@
                 attrs.expansionState ??= STATE_RESTORED_JUST_EXPANDED;
                 attrs.focusIndicator ??= false;
                 attrs.repeatKeyDown ??= true;
-                attrs.activationKeys ??= [GlobalKeys.CODE_ENTER, GlobalKeys.CODE_SPACE, ...GlobalKeys.ARROW_KEYS];
+                attrs.activationKeys ??= [CODE_ENTER, CODE_SPACE, ...ARROW_KEYS];
                 
                 if (attrs.axis === 'y') {
                     attrs.height ??= 6;
@@ -149,8 +149,8 @@
                 this.callSuper(key, isRepeat);
                 
                 switch (key) {
-                    case GlobalKeys.CODE_ENTER:
-                    case GlobalKeys.CODE_SPACE:
+                    case CODE_ENTER:
+                    case CODE_SPACE:
                         this.doPrimaryAction();
                 }
             },
@@ -184,9 +184,7 @@
             
             doPrimaryAction: function() {
                 const self = this,
-                    rv = self.restoreValue, 
-                    maxV = self.maxValue, 
-                    minV = self.minValue;
+                    {restoreValue:rv, maxValue:maxV, minValue:minV} = self;
                 let toValue;
                 switch (self.expansionState) {
                     case STATE_COLLAPSED:

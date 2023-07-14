@@ -1169,6 +1169,20 @@
             return isPointVisible(this, locX - x, locY - y);
         },
         
+        /** Tests if this View intersects with the provided sibling view. Transformations are not
+            taken into account.
+            @param {?Object} sibling - The sibling View to test against.
+            @returns {boolean} indicating if the sibling View is indeed a sibling and that it
+                intersects with this View. */
+        intersectsWithSibling: function(sibling) {
+            return sibling.parent === this.parent && !(
+                sibling.x > this.x + this.width || 
+                sibling.x + sibling.width < this.x || 
+                sibling.y > this.y + this.height || 
+                sibling.y + sibling.height < this.y
+            );
+        },
+        
         getEffectiveScale: function() {
             return calculateEffectiveScale(this);
         },

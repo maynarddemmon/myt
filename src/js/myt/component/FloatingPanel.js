@@ -1,7 +1,7 @@
 (pkg => {
-    const G = pkg.global,
-        GlobalFocus = G.focus,
-        GlobalMouse = G.mouse,
+    const consoleWarn = console.warn,
+        
+        {focus:GlobalFocus, mouse:GlobalMouse} = pkg.global,
         
         panelsByPanelId = {}, // A map of FloatingPanel instances by panel ID.
         
@@ -351,13 +351,13 @@
                     case 'insideRight': x += panelAnchor.width - this.width; break;
                     case 'outsideLeft': x -= this.width; break;
                     case 'insideLeft': break;
-                    default: console.warn('Invalid align value', type, align);
+                    default: consoleWarn('Invalid align value', type, align);
                 }
             } else if (type === 'number') {
                 // Absolute position
                 x = align;
             } else {
-                console.warn('Invalid align type', type, align);
+                consoleWarn('Invalid align type', type, align);
             }
             this.setX(x);
         },
@@ -373,13 +373,13 @@
                     case 'insideBottom': y += panelAnchor.height - this.height; break;
                     case 'outsideTop': y -= this.height; break;
                     case 'insideTop': break;
-                    default: console.warn('Invalid valign value', type, valign);
+                    default: consoleWarn('Invalid valign value', type, valign);
                 }
             } else if (type === 'number') {
                 // Absolute position
                 y = valign;
             } else {
-                console.warn('Invalid valign type', type, valign);
+                consoleWarn('Invalid valign type', type, valign);
             }
             this.setY(y);
         }

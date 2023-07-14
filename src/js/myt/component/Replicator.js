@@ -12,10 +12,9 @@
             @param {boolean} update
             @returns {undefined} */
         unlockLayouts = (layouts, update) => {
-            let i = layouts.length,
-                layout;
+            let i = layouts.length;
             while (i) {
-                layout = layouts[--i];
+                const layout = layouts[--i];
                 layout.decrementLockedCounter();
                 if (update) layout.update();
             }

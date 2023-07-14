@@ -1,6 +1,8 @@
 (pkg => {
     const JSClass = JS.Class,
         
+        dumpStack = pkg.dumpStack,
+        
         // Safe as a closure variable because the registry is a singleton.,
         validators = {},
         
@@ -12,10 +14,10 @@
                 if (identifiable.id) {
                     func(id);
                 } else {
-                    pkg.dumpStack('No ID');
+                    dumpStack('No ID');
                 }
             } else {
-                pkg.dumpStack('No validator');
+                dumpStack('No validator');
             }
         },
         
@@ -67,7 +69,7 @@
             @class */
         RequiredFieldValidator = pkg.RequiredFieldValidator = new JSClass('RequiredFieldValidator', Validator, {
             /** @overrides myt.Validator */
-            isValid: function(value, config, errorMessages) {
+            isValid: (value, config, errorMessages) => {
                 if (value == null || value === '' || (typeof value === 'string' && value.trim() === '')) {
                     errorMessages?.push('This value is required.');
                     return false;
@@ -82,7 +84,7 @@
             @class */
         EqualsIgnoreCaseValidator = pkg.EqualsIgnoreCaseValidator = new JSClass('EqualsIgnoreCaseValidator', Validator, {
             /** @overrides myt.Validator */
-            isValid: function(value, config, errorMessages) {
+            isValid: (value, config, errorMessages) => {
                 const rbv = config.form.getRollbackValue();
                 if (value && rbv && value.toLowerCase() === rbv.toLowerCase()) {
                     errorMessages?.push('Value must differ by more than just case.');
@@ -122,7 +124,7 @@
             @class */
         JSONValidator = pkg.JSONValidator = new JSClass('JSONValidator', Validator, {
             /** @overrides myt.Validator */
-            isValid: function(value, config, errorMessages) {
+            isValid: (value, config, errorMessages) => {
                 try {
                     JSON.parse(value);
                     return true;

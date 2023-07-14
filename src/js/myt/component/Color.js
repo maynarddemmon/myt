@@ -1,7 +1,6 @@
 (pkg => {
     const math = Math,
-        mathMax = math.max,
-        mathMin = math.min,
+        {min:mathMin, max:mathMax} = math,
         
         cleanChannelValue = value => mathMin(255, mathMax(0, math.round(value))),
         toHex = value => cleanChannelValue(value).toString(16).padStart(2, '0'),

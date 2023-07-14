@@ -144,9 +144,11 @@
         
         // Constructor /////////////////////////////////////////////////////////
         initialize: function() {
-            this.lastTraversalWasForward = true;
+            globalFocus = this;
             
-            pkg.global.register('focus', globalFocus = this);
+            globalFocus.lastTraversalWasForward = true;
+            
+            pkg.global.register('focus', globalFocus);
         },
         
         

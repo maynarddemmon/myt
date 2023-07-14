@@ -36,7 +36,9 @@
         // The current locale for the user.
         currentLocale;
     
-    const math = Math,
+    const consoleWarn = console.warn,
+        
+        math = Math,
         {abs:mathAbs, min:mathMin, max:mathMax, pow:mathPow} = math,
         
         documentElem = document,
@@ -149,7 +151,7 @@
                 for (let i = 0; i < len; i++) {
                     scope = scope[parts[i]];
                     if (scope == null) {
-                        console.warn('resolveName failed for', objName, 'at part', i, parts[i]);
+                        consoleWarn('resolveName failed for', objName, 'at part', i, parts[i]);
                         return undefined;
                     }
                 }
@@ -192,7 +194,7 @@
                 // Prevent reloading the same script
                 const loadedScripts = this._loadedScripts ??= {};
                 if (loadedScripts[src]) {
-                    console.warn('script already loaded for src', src);
+                    consoleWarn('script already loaded for src', src);
                     return null;
                 } else {
                     loadedScripts[src] = true;
@@ -514,7 +516,7 @@
                         // so pass it through unchanged.
                         return num;
                     default:
-                        console.warn('formatAsPercentage: expects a number');
+                        consoleWarn('formatAsPercentage: expects a number');
                         return num;
                 }
             },
@@ -575,11 +577,11 @@
                 
                 // Prevent clobbering
                 if ((isModuleOrClass ? scope.instanceMethod(incrName) : scope[incrName]) !== undefined) {
-                    console.warn('Increment: Abort clobber', incrName, scope);
+                    consoleWarn('Increment: Abort clobber', incrName, scope);
                     return false;
                 }
                 if ((isModuleOrClass ? scope.instanceMethod(decrName) : scope[decrName]) !== undefined) {
-                    console.warn('Decrement: Abort clobber', decrName, scope);
+                    consoleWarn('Decrement: Abort clobber', decrName, scope);
                     return false;
                 }
                 

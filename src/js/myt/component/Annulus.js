@@ -1,5 +1,5 @@
 (pkg => {
-    const math = Math,
+    const {max:mathMax, cos:mathCos, sin:mathSin, PI} = Math,
         degreesToRadians = pkg.Geometry.degreesToRadians,
         
         /*  Redraws the annulus
@@ -20,7 +20,6 @@
                 thickness = annulus.thickness,
                 innerRadius = annulus.radius,
                 outerRadius = innerRadius + thickness,
-                PI = math.PI,
                 angleDiff = endAngle - startAngle,
                 isFull = angleDiff + 0.0001 >= 2 * PI; // 0.0001 is to handle floating point errors
             
@@ -30,8 +29,7 @@
                 endAngle = PI;
             }
             
-            const mathCos = math.cos,
-                mathSin = math.sin,
+            const 
                 outerStartPoint = [center + outerRadius * mathCos(startAngle), center + outerRadius * mathSin(startAngle)],
                 outerEndPoint =   [center + outerRadius * mathCos(endAngle),   center + outerRadius * mathSin(endAngle)],
                 innerEndPoint =   [center + innerRadius * mathCos(endAngle),   center + innerRadius * mathSin(endAngle)],
@@ -90,7 +88,7 @@
         
         setAndUpdateSize = (annulus, attrName, value) => {
             if (annulus[attrName] !== value) {
-                annulus[attrName] = value = math.max(0, value);
+                annulus[attrName] = value = mathMax(0, value);
                 if (annulus.inited) {
                     updateSize(annulus);
                     annulus.fireEvent(attrName, value);

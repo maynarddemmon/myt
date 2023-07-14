@@ -155,19 +155,18 @@
                 @param {!Object} item - The item to test.
                 @returns {boolean} True if selection is allowed, false otherwise. */
             canSelectItem: function(item) {
-                const ms = this.maxSelected, 
-                    sc = this.selectedCount;
+                const {maxSelected, selectedCount} = this;
                 
-                if (ms === 0) {
+                if (maxSelected === 0) {
                     return false;
-                } else if (ms === 1) {
+                } else if (maxSelected === 1) {
                     // Deselect current selection if necessary
-                    if (sc > 0) {
+                    if (selectedCount > 0) {
                         this.deselectAll();
                         if (this.selectedCount > 0) return false;
                     }
-                } else if (ms > 1) {
-                    if (sc >= ms) return false;
+                } else if (maxSelected > 1) {
+                    if (selectedCount >= maxSelected) return false;
                 }
                 
                 return item.canSelect(this);

@@ -1,5 +1,8 @@
 (pkg => {
     const JSClass = JS.Class,
+        
+        consoleError = console.error,
+        
         CLOSE_NORMAL = 1000,
         
         /** Provides WebSocket functionality.
@@ -127,7 +130,7 @@
                 @param {!Object} event - The error event fired by the WebSocket.
                 @returns {undefined} */
             onError: function(event) {
-                console.error(event);
+                consoleError(event);
                 
                 if (this._ws && this._ws.readyState !== WebSocket.OPEN) this.close();
             },
@@ -294,7 +297,7 @@
             try {
                 jsonMsg = JSON.stringify(msg);
             } catch (ex) {
-                console.error(ex);
+                consoleError(ex);
                 return;
             }
             

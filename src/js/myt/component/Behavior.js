@@ -1,9 +1,7 @@
 (pkg => {
     const JSModule = JS.Module,
-        G = pkg.global,
-        GlobalMouse = G.mouse,
-        GlobalKeys = G.keys,
-        GlobalIdle = G.idle,
+        
+        {mouse:GlobalMouse, keys:GlobalKeys, idle:GlobalIdle} = pkg.global,
         
         NO_KEY_DOWN = '',
         
@@ -113,7 +111,7 @@
         // Class Methods and Attributes ////////////////////////////////////////
         extend: {
             /** The default activation keys are enter and spacebar. */
-            ACTIVATION_KEYS: [GlobalKeys.CODE_ENTER,GlobalKeys.CODE_SPACE],
+            ACTIVATION_KEYS: [GlobalKeys.CODE_ENTER, GlobalKeys.CODE_SPACE],
             NO_KEY_DOWN: NO_KEY_DOWN
         },
         
@@ -632,7 +630,7 @@
                 pos = getMouseFromEvent(event),
                 distance = pkg.Geometry.measureDistance(pos.x, pos.y, self.dragInitX + self.x, self.dragInitY + self.y);
             if (distance >= self.distanceBeforeDrag) {
-                self.detachFromDom(pkg.global.mouse, '__doDragCheck', 'mousemove', true);
+                self.detachFromDom(GlobalMouse, '__doDragCheck', 'mousemove', true);
                 self.startDrag(event);
             }
         },

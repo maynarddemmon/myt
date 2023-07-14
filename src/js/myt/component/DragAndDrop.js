@@ -1,8 +1,8 @@
 (pkg => {
     const JSModule = JS.Module,
-        G = pkg.global,
-        dragManager = G.dragManager,
-        globalMouse = G.mouse,
+    
+        {dragManager, mouse:globalMouse} = pkg.global,
+        
         Draggable = pkg.Draggable,
         
         ANY_GROUP = '*',
@@ -446,11 +446,9 @@
             @param {!Object} event
             @returns {undefined} */
         __hndlMove: function(event) {
-            const self = this,
-                mousePos = event.value;
-            let mouseX = mousePos.pageX, 
-                mouseY = mousePos.pageY;
+            const self = this;
             
+            let {pageX:mouseX, pageY:mouseY} = event.value;
             if (self.containsPoint(mouseX, mouseY)) {
                 const pos = self.getPagePosition(), 
                     scrollBorder = self.scrollBorder,
