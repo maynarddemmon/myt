@@ -419,7 +419,8 @@
                 }
                 
                 // Make sure the view has a dom ID for rule targeting and then write the CSS rules.
-                const domId = view.getODE().id ??= 'id' + generateGuid(),
+                const ode = view.getODE(),
+                    domId = ode.id || (ode.id = 'id' + generateGuid()),
                     rules = [];
                 if (color) rules.push('color:' + color);
                 if (fontFamily) rules.push('font-family:' + fontFamily);

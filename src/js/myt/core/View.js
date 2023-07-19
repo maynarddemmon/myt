@@ -4,7 +4,7 @@
         
         rectContainsPoint = pkg.Geometry.rectContainsPoint,
         
-        getDomStyle = (view, isInnerElem ) => isInnerElem ? view.getIDS() : view.getODS(),
+        getDomStyle = (view, isInnerElem) => isInnerElem ? view.getIDS() : view.getODS(),
         
         /*  Preserves focus and scroll position during dom updates. Focus can get lost in webkit 
             when an element is removed from the dom.
