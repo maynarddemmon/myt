@@ -1,32 +1,28 @@
 (pkg => {
-    const JSClass = JS.Class,
-        JSModule = JS.Module,
+    const {Class:JSClass, Module:JSModule} = JS,
+        
+        math = Math,
         
         G = pkg.global,
         GlobalFocus = G.focus,
         GlobalKeys = G.keys,
-        
-        LIST_KEYS = GlobalKeys.LIST_KEYS,
+        {LIST_KEYS, CODE_ESC} = GlobalKeys,
         
         updateItems = listView => {
             const cfg = listView.itemConfig ?? [],
                 cfgLen = cfg.length,
-                items = listView.items, 
+                {items, defaultItemClass, fixedWidth} = listView,
                 itemsLen = items.length,
-                defaultItemClass = listView.defaultItemClass,
+                isFixedWidth = fixedWidth > 0,
                 contentView = listView.getContentView(), 
-                layouts = contentView.getLayouts(),
-                fixedWidth = listView.fixedWidth,
-                isFixedWidth = fixedWidth > 0;
-            
+                layouts = contentView.getLayouts();
             // Lock layouts during reconfiguration
             layouts.forEach(layout => {layout.incrementLockedCounter();});
             
             // Performance: Remove from dom while doing inserts
             const ode = contentView.getODE(),
-                nextDe = ode.nextSibling,
-                parentElem = ode.parentNode;
-            parentElem.removeChild(ode);
+                {parentNode, nextSibling} = ode;
+            parentNode.removeChild(ode);
             
             // Reconfigure list
             let i = 0;
@@ -62,7 +58,7 @@
             }
             
             // Performance: Put back in dom.
-            parentElem.insertBefore(ode, nextDe);
+            parentNode.insertBefore(ode, nextSibling);
             
             
             let minWidth;
@@ -74,7 +70,7 @@
                 for (i = 0; cfgLen > i;) {
                     const item = items[i++];
                     item.syncToDom();
-                    minWidth = Math.max(minWidth, item.getMinimumWidth());
+                    minWidth = math.max(minWidth, item.getMinimumWidth());
                 }
             }
             
@@ -156,9 +152,7 @@
         /** Allows subclasses to specify their own layout. For example a multi-column layout using 
             a WrappingLayout is possible. */
         buildLayout: contentView => {
-            new pkg.SpacedLayout(contentView, {
-                axis:'y', spacing:1, collapseParent:true
-            });
+            new pkg.SpacedLayout(contentView, {axis:'y', spacing:1, collapseParent:true});
         },
         
         
@@ -189,7 +183,7 @@
         /** @overrides myt.View */
         setHeight: function(v) {
             // Limit height if necessary
-            this.callSuper(this.maxHeight >= 0 ? Math.min(this.maxHeight, v) : v);
+            this.callSuper(this.maxHeight >= 0 ? math.min(this.maxHeight, v) : v);
             if (this.inited && this.owner) this.updateLocationY(this.owner);
         },
         
@@ -318,7 +312,7 @@
         /** @overrides myt.KeyActivation. */
         doActivationKeyDown: function(code, isRepeat) {
             // Close for escape key.
-            if (code === GlobalKeys.CODE_ESC) {
+            if (code === CODE_ESC) {
                 this.hideFloatingPanel();
             } else {
                 // Select first/last if the list view is already open
@@ -339,7 +333,7 @@
         /** @overrides myt.KeyActivation. */
         doActivationKeyUp: function(code) {
             // Abort for escape key.
-            if (code !== GlobalKeys.CODE_ESC) {
+            if (code !== CODE_ESC) {
                 this.callSuper(code);
                 
                 // Select first/last after list view is open.
@@ -430,7 +424,7 @@
         
         /** @overrides myt.ListViewItemMixin */
         getMinimumWidth: function() {
-            return Math.ceil(this.measureNoWrapWidth());
+            return math.ceil(this.measureNoWrapWidth());
         },
         
         /** @overrides myt.Button */
@@ -440,7 +434,7 @@
         
         /** @overrides myt.KeyActivation. */
         doActivationKeyDown: function(code, isRepeat) {
-            if (code === GlobalKeys.CODE_ESC) {
+            if (code === CODE_ESC) {
                 this.listView.owner.hideFloatingPanel();
             } else {
                 this.callSuper(code, isRepeat);

@@ -1,5 +1,6 @@
 (pkg => {
-    const
+    const JSModule = JS.Module,
+        
         /*  A private setter function that provides a common implementation for most of this 
             setters in the TextSupport mixin.
             @param {string|number} v
@@ -77,7 +78,7 @@
                 the default so it no longer appears as an i-beam.
         
         @class */
-    pkg.TextSupport = new JS.Module('TextSupport', {
+    pkg.TextSupport = new JSModule('TextSupport', {
         // Accessors ///////////////////////////////////////////////////////////
         /** @overrides myt.View */
         setWidth: function(v) {
@@ -240,7 +241,7 @@
             paddingLeft:number The padding below the text.
         
         @class */
-    pkg.PaddedTextSupport = new JS.Module('PaddedTextSupport', {
+    pkg.PaddedTextSupport = new JSModule('PaddedTextSupport', {
         setWidth: function(v) {
             this.callSuper(v);
             updateDomWidthForPadding(this);

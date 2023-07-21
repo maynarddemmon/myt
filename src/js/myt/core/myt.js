@@ -429,10 +429,29 @@
             },
             
             // Sort Util
-            chainSortFunc: (funcPrimary, funcSecondary) => {
+            /** Tests if the provided array is already sorted according to the provided comparator
+                function.
+                @param {!Array} arr - The array to check.
+                @param {!Function} comparatorFunc - The comparator function to check with.
+                @returns {boolean} - True if the array is not sorted, false if it is. */
+            isNotSorted: (arr, comparatorFunc) => {
+                const len = arr.length;
+                for (let i = 1; i < len; i++) {
+                    if (comparatorFunc(arr[i - 1], arr[i]) > 0) return true;
+                }
+            },
+            
+            /** Chains together N comparator functions into a new comparator function such that 
+                calls each in order of descending priority.
+                @param {...!Function} comparatorFunctions - The comparator functions to call.
+                @returns {!Function} - The new composite comparator function. */
+            chainSortFunc: (...comparatorFunctions) => {
                 return (a, b) => {
-                    const retval = funcPrimary(a, b);
-                    return retval === 0 ? funcSecondary(a, b) : retval;
+                    for (const comparatorFunc of comparatorFunctions) {
+                        const retval = comparatorFunc(a, b);
+                        if (retval !== 0) return retval;
+                    }
+                    return 0;
                 };
             },
             

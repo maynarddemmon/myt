@@ -1,13 +1,14 @@
 (pkg => {
     const JSClass = JS.Class,
+        
         mathMin = Math.min,
         isArray = Array.isArray,
         
-        GlobalKeys = pkg.global.keys,
-        
-        {SizeToDom, View, Disableable, KeyObservable} = pkg,
-        
-        FOCUS_SHADOW = pkg.Button.FOCUS_SHADOW,
+        {
+            SizeToDom, View, Disableable, KeyObservable,
+            Button:{FOCUS_SHADOW}, 
+            global:{keys:GlobalKeys}
+        } = pkg,
         
         setEditableTextAttr = (editableText, v, propName) => {
             if (editableText[propName] !== v) {

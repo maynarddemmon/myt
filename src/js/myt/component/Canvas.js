@@ -20,8 +20,7 @@
     });
     
     [
-        'createLinearGradient','createRadialGradient','createPattern',
-        'measureText','getImageData'
+        'createLinearGradient','createRadialGradient','createPattern','measureText','getImageData'
     ].forEach(funcName => {
         mixin[funcName] = function(...args) {
             return this.__ctx[funcName](...args);

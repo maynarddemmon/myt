@@ -1,5 +1,6 @@
 (pkg => {
-    const roots = pkg.global.roots,
+    const 
+        {addEventListener, removeEventListener, global:{roots}} = pkg,
         
         /** Allows a view to act as a "root" for a view hierarchy. A "root" view is backed by a 
             dom element from the page rather than a dom element created by the view.
@@ -18,10 +19,10 @@
                         drop on.
                     @returns {undefined} */
                 setupCaptureDrop: view => {
-                    const cdf = view.__captureDrop = event => {event.preventDefault();},
-                        ide = view.getIDE();
-                    pkg.addEventListener(ide, 'drop', cdf);
-                    pkg.addEventListener(ide, 'dragover', cdf);
+                    const ide = view.getIDE(),
+                        cdf = view.__captureDrop = event => {event.preventDefault();};
+                    addEventListener(ide, 'drop', cdf);
+                    addEventListener(ide, 'dragover', cdf);
                 },
                 
                 /** Cleanup dom listeners for drag/drop.
@@ -31,8 +32,8 @@
                 teardownCaptureDrop: view => {
                     const ide = view.getIDE(), 
                         cdf = view.__captureDrop;
-                    pkg.removeEventListener(ide, 'drop', cdf);
-                    pkg.removeEventListener(ide, 'dragover', cdf);
+                    removeEventListener(ide, 'drop', cdf);
+                    removeEventListener(ide, 'dragover', cdf);
                 }
             },
             

@@ -1,9 +1,7 @@
 (pkg => {
     const JSModule = JS.Module,
     
-        {dragManager, mouse:globalMouse} = pkg.global,
-        
-        Draggable = pkg.Draggable,
+        {Draggable, global:{dragManager, mouse:globalMouse}} = pkg,
         
         ANY_GROUP = '*',
         

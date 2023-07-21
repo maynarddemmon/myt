@@ -1,8 +1,10 @@
 (pkg => {
     const JSSingleton = JS.Singleton,
         doc = document,
-        register = pkg.global.register,
-        {DomElementProxy, DomObservable} = pkg;
+        {
+            DomElementProxy, DomObservable, 
+            global:{register}
+        } = pkg;
     
     /** Provides global mouse events by listening to mouse events on the document. Registered with 
         myt.global as 'mouse'.

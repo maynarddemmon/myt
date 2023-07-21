@@ -872,10 +872,29 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             },
             
             // Sort Util
-            chainSortFunc: (funcPrimary, funcSecondary) => {
+            /** Tests if the provided array is already sorted according to the provided comparator
+                function.
+                @param {!Array} arr - The array to check.
+                @param {!Function} comparatorFunc - The comparator function to check with.
+                @returns {boolean} - True if the array is not sorted, false if it is. */
+            isNotSorted: (arr, comparatorFunc) => {
+                const len = arr.length;
+                for (let i = 1; i < len; i++) {
+                    if (comparatorFunc(arr[i - 1], arr[i]) > 0) return true;
+                }
+            },
+            
+            /** Chains together N comparator functions into a new comparator function such that 
+                calls each in order of descending priority.
+                @param {...!Function} comparatorFunctions - The comparator functions to call.
+                @returns {!Function} - The new composite comparator function. */
+            chainSortFunc: (...comparatorFunctions) => {
                 return (a, b) => {
-                    const retval = funcPrimary(a, b);
-                    return retval === 0 ? funcSecondary(a, b) : retval;
+                    for (const comparatorFunc of comparatorFunctions) {
+                        const retval = comparatorFunc(a, b);
+                        if (retval !== 0) return retval;
+                    }
+                    return 0;
                 };
             },
             
@@ -1235,14 +1254,15 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 
                 value = options.json ? JSON.stringify(value) : String(value);
                 
+                const {raw, expires, path, domain, samesite} = options;
                 return (document.cookie = [
-                    options.raw ? key : encodeURIComponent(key),
+                    raw ? key : encodeURIComponent(key),
                     '=',
-                    options.raw ? value : encodeURIComponent(value),
-                    options.expires ? '; expires=' + options.expires.toUTCString() : '', // use expires attribute, max-age is not supported by IE
-                    options.path    ? '; path=' + options.path : '',
-                    options.domain  ? '; domain=' + options.domain : '',
-                    options.samesite ? '; samesite=' + options.samesite : '',
+                    raw ? value : encodeURIComponent(value),
+                    expires ? '; expires=' + expires.toUTCString() : '', // use expires attribute, max-age is not supported by IE
+                    path    ? '; path=' + path : '',
+                    domain  ? '; domain=' + domain : '',
+                    samesite ? '; samesite=' + samesite : '',
                     options.secure  ? '; secure' : ''
                 ].join(''));
             },
@@ -1265,11 +1285,36 @@ Date.prototype.format = Date.prototype.format ?? (() => {
 
 (pkg => {
     const consoleError = console.error,
+        
+        JSONParse = JSON.parse,
+        
         localStorage = global.localStorage,
         
-        getStoreId = storeId => storeId = storeId ?? 'myt',
+        /*  @param {string} key - The name of the storage entry to return.
+            @returns {*} - The value of the storage entry or null if not found. */
+        getItem = localStorage.getItem.bind(localStorage),
         
-        doFunc = (func, delay, timerKey) => {
+        /*  Stores the value under the key. If a value already exists for the key the value will be 
+            replaced with the new value.
+            @param {string} key - The key to store the value under.
+            @param {*} value - The value to store.
+            @returns {undefined} */
+        setItem = localStorage.setItem.bind(localStorage),
+        
+        /*  Removes the storage entry for the key.
+            @param {string} key - The key to remove.
+            @returns {undefined} */
+        removeItem = localStorage.removeItem.bind(localStorage),
+        
+        /*  Removes all storage entries.
+            @returns {undefined} */
+        clear = localStorage.clear.bind(localStorage),
+        
+        getStoreId = storeId => storeId = storeId ?? 'myt',
+        getItemByStoreId = storeId => getItem(getStoreId(storeId)),
+        setItemForStoreId = (storeId, data) => {setItem(storeId, JSON.stringify(data));},
+        
+        doFuncWithOptionalDelay = (func, delay, timerKey) => {
             if (delay > 0) {
                 const timerIdKey = '__timerId_' + timerKey,
                     timerId = LocalStorage[timerIdKey];
@@ -1298,10 +1343,10 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 @returns {boolean} - false if an undefined or null value is found, otherwise true. */
             hasDatum: (key, storeId) => {
                 if (key) {
-                    const data = LocalStorage.getItem(getStoreId(storeId));
+                    const data = getItemByStoreId(storeId);
                     if (data) {
                         try {
-                            return JSON.parse(data)[key] != null;
+                            return JSONParse(data)[key] != null;
                         } catch (e) {
                             consoleError(e);
                             return false;
@@ -1318,10 +1363,10 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 @returns {*} the value of the data or undefined if the datum was not found. */
             getDatum: (key, storeId) => {
                 if (key) {
-                    const data = LocalStorage.getItem(getStoreId(storeId));
+                    const data = getItemByStoreId(storeId);
                     if (data) {
                         try {
-                            const jsonData = JSON.parse(data);
+                            const jsonData = JSONParse(data);
                             if (typeof jsonData === 'object') return jsonData[key];
                         } catch (e) {
                             consoleError(e);
@@ -1343,10 +1388,10 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 @returns {undefined} */
             setDatum: (key, value, storeId, delay) => {
                 storeId = getStoreId(storeId);
-                doFunc(() => {
+                doFuncWithOptionalDelay(() => {
                     const data = LocalStorage.getData(storeId);
                     data[key] = value;
-                    LocalStorage.setItem(storeId, JSON.stringify(data));
+                    setItemForStoreId(storeId, data);
                 }, delay, storeId + '___' + key);
             },
             
@@ -1359,10 +1404,10 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 @returns {undefined} */
             removeDatum: (key, storeId, delay) => {
                 storeId = getStoreId(storeId);
-                doFunc(() => {
+                doFuncWithOptionalDelay(() => {
                     const data = LocalStorage.getData(storeId);
                     delete data[key];
-                    LocalStorage.setItem(storeId, JSON.stringify(data));
+                    setItemForStoreId(storeId, data);
                 }, delay, storeId + '___' + key);
             },
             
@@ -1370,17 +1415,17 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 @param {string} [storeId] - THe id of the data store to look in. If not provided 
                     the default "myt" storeId will be used.
                 @returns {boolean} - false if an undefined or null value is found, otherwise true. */
-            hasData: storeId => LocalStorage.getItem(getStoreId(storeId)) != null,
+            hasData: storeId => getItemByStoreId(storeId) != null,
             
             /** Get the data store stored under storage id.
                 @param {string} [storeId] - The id of the data store to get data for. If not 
                     provided the default "myt" storeId will be used.
                 @returns {!Object} - The store object. */
             getData: storeId => {
-                const data = LocalStorage.getItem(getStoreId(storeId));
+                const data = getItemByStoreId(storeId);
                 if (data) {
                     try {
-                        return JSON.parse(data);
+                        return JSONParse(data);
                     } catch (e) {
                         consoleError(e);
                     }
@@ -1405,7 +1450,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 data ??= {};
                 
                 if (typeof data === 'object') {
-                    doFunc(() => {LocalStorage.setItem(storeId, JSON.stringify(data));}, delay, storeId);
+                    doFuncWithOptionalDelay(() => {setItemForStoreId(storeId, data);}, delay, storeId);
                     return true;
                 }
                 
@@ -1420,69 +1465,27 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 @returns {undefined} */
             removeData: (storeId, delay) => {
                 storeId = getStoreId(storeId);
-                doFunc(() => {LocalStorage.removeItem(storeId);}, delay, storeId);
+                doFuncWithOptionalDelay(() => {removeItem(storeId);}, delay, storeId);
             },
             
-            // wrapper functions on localStorage
+            // Wrapper functions on localStorage
             /** @returns {number} - The number of data items stored in the Storage object. */
             getLength: () => localStorage.length,
             
             /** @param {number} n - The index of the key name to retrieve.
                 @returns {string} The name of the nth key in the storage. */
-            getKey: n => localStorage.key(n),
+            getKey: localStorage.key.bind(localStorage),
             
-            /** @param {string} key - The name of the storage entry to return.
-                @returns {*} - The value of the storage entry or null if not found. */
-            getItem: key => localStorage.getItem(key),
-            
-            /** Stores the value under the key. If a value already exists for the key the value 
-                will be replaced with the new value.
-                @param {string} key - The key to store the value under.
-                @param {*} value - The value to store.
-                @returns {undefined} */
-            setItem: (key, value) => {
-                localStorage.setItem(key, value);
-            },
-            
-            /** Removes the storage entry for the key.
-                @param {string} key - The key to remove.
-                @returns {undefined} */
-            removeItem: key => {
-                localStorage.removeItem(key);
-            },
-            
-            /** Removes all storage entries.
-                @returns {undefined} */
-            clear: () => {
-                localStorage.clear();
-            },
+            getItem: getItem,
+            setItem: setItem,
+            removeItem: removeItem,
+            clear: clear,
             
             // Aliases for better API compatibility with some libraries.
-            /** An alias for getItem.
-                @param {string} key - The name of the storage entry to return.
-                @returns {*} - The value of the storage entry or null if not found. */
-            get: key => LocalStorage.getItem(key),
-            
-            /** An alias for setItem.
-                @param {string} key - The key to store the value under.
-                @param {*} value - The value to store.
-                @returns {undefined} */
-            set: (key, value) => {
-                LocalStorage.setItem(key, value);
-            },
-            
-            /** An alias for removeItem.
-                @param {string} key - The key to remove.
-                @returns {undefined} */
-            remove: key => {
-                LocalStorage.removeItem(key);
-            },
-            
-            /** An alias for clear.
-                @returns {undefined} */
-            clearAll: () => {
-                LocalStorage.clear();
-            }
+            get: getItem,
+            set: setItem,
+            remove: removeItem,
+            clearAll: clear
         };
 })(myt);
 
@@ -1637,229 +1640,230 @@ Date.prototype.format = Date.prototype.format ?? (() => {
 
 
 (pkg => {
-    /** Provides common geometry related functions. */
     const math = Math,
-        PI = math.PI,
-        mathCos = math.cos,
-        mathSin = math.sin,
-        mathSqrt = math.sqrt,
+        {PI, cos:mathCos, sin:mathSin, sqrt:mathSqrt} = math,
         
-        Geometry = pkg.Geometry = {
-            // Methods /////////////////////////////////////////////////////////
-            /** Get the closest point on a line, or segment, to a given point.
-                @param {number} Ax - The x-coordinate of the first endpoint that defines the segment.
-                @param {number} Ay - The y-coordinate of the first endpoint that defines  the segment.
-                @param {number} Bx - The x-coordinate of the second endpoint that defines the segment.
-                @param {number} By - The y-coordinate of the second endpoint that defines the segment.
-                @param {number} Px - The x-coordinate of the point.
-                @param {number} Py - The y-coordinate of the point.
-                @param {boolean} [isSegment] - If true the endpoints will be treated as a segment 
-                    rather than an infinitely long line.
-                @returns {!Object} - A position object with x and y properties. */
-            getClosestPointOnALineToAPoint: (Ax, Ay, Bx, By, Px, Py, isSegment) => {
-                const APx = Px - Ax,
-                    APy = Py - Ay,
-                    ABx = Bx - Ax,
-                    ABy = By - Ay,
-                    magAB2 = ABx * ABx + ABy * ABy,
-                    ABdotAP = ABx * APx + ABy * APy;
-                let t = ABdotAP / magAB2;
-                if (isSegment) t = math.min(1, math.max(0, t));
-                return {x:Ax + ABx * t, y:Ay + ABy * t};
-            },
-            
-            /** Tests if the provided point is inside this path.
-                @param {number|!Object} x - The x coordinate to test or alternately a point object 
-                    with x and y properties.
-                @param {number} y - The y coordinate to test.
-                @param {!Object} boundingBox - A bounding box object that bounds the path.
-                @param {!Araay} path - An array of points where the index 0,2,4,... are the x 
-                    values and index 1,3,5,... are the y values.
-                @return {boolean} - True if inside, false otherwise. */
-            isPointInPath: (x, y, boundingBox, path) => {
-                if (typeof x === 'object') {
-                    path = boundingBox;
-                    boundingBox = y;
-                    y = x.y;
-                    x = x.x;
-                }
-                
-                // First test bounding box
-                if (Geometry.rectContainsPoint(x, y, boundingBox)) {
-                    // Test using Jordan Curve Theorem
-                    let len = path.length;
-                    
-                    // Must at least be a triangle to have an inside.
-                    if (len >= 6) {
-                        let c = false, 
-                            x1 = path[0], 
-                            y1 = path[1], 
-                            x2, 
-                            y2;
-                        while (len) {
-                            y2 = path[--len];
-                            x2 = path[--len];
-                            if (((y2 > y) !== (y1 > y)) && (x < (x1 - x2) * (y - y2) / (y1 - y2) + x2)) c = !c;
-                            x1 = x2;
-                            y1 = y2;
-                        }
-                        return c;
-                    }
-                }
-                return false;
-            },
-            
-            /** Checks if the provided point is inside or on the edge of the provided rectangle.
-                @param {number|!Object} pX - The x coordinate of the point to test or alternately a 
-                    point object with properties x and y.
-                @param {number} pY - The y coordinate of the point to test.
-                @param {number|!Object} rX - The x coordinate of the rectangle or alternately a 
-                    rect object with properties x, y, width and height.
-                @param {number} rY - The y coordinate of the rectangle.
-                @param {number} rW - The width of the rectangle.
-                @param {number} rH - The height of the rectangle.
-                @returns {boolean} - True if the point is inside or on the rectangle. */
-            rectContainsPoint: (pX, pY, rX, rY, rW, rH) => {
-                if (typeof pX === 'object') {
-                    rH = rW;
-                    rW = rY;
-                    rY = rX;
-                    rX = pY;
-                    pY = pX.y;
-                    pX = pX.x;
-                }
-                
-                if (typeof rX === 'object') {
-                    rH = rX.height;
-                    rW = rX.width;
-                    rY = rX.y;
-                    rX = rX.x;
-                }
-                
-                return pX >= rX && pY >= rY && pX <= rX + rW && pY <= rY + rH;
-            },
-            
-            /** Checks if the provided point lies inside or on the edge of the provided circle.
-                @param {number} pX - The x coordinate of the point to test.
-                @param {number} pY - The y coordinate of the point to test.
-                @param {number} cX - The x coordinate of the center of the circle.
-                @param {number} cY - The y coordinate of the center of the circle.
-                @param {number} cR - The radius of the circle.
-                @return {boolean} - True if the point is inside or on the circle. */
-            circleContainsPoint: (pX, pY, cX, cY, cR) => Geometry.measureDistance(pX, pY, cX, cY, true) <= cR * cR,
-            
-            /** Measure the distance between two points.
-                @param {number} x1 - The x position of the first point.
-                @param {number} y1 - The y position of the first point.
-                @param {number} x2 - The x position of the second point.
-                @param {number} y2 - The y position of the second point.
-                @param {boolean} [squared] - If true, the squared distance will be returned.
-                @returns {number} - The distance between the two points. */
-            measureDistance: (x1, y1, x2, y2, squared) => {
-                const diffX = x2 - x1, 
-                    diffY = y2 - y1, 
-                    diffSquared = diffX * diffX + diffY * diffY;
-                return squared ? diffSquared : mathSqrt(diffSquared);
-            },
-            
-            /** Convert radians to degrees.
-                @param {number} deg - The degrees to convert.
-                @returns {number} - The converted radians. */
-            degreesToRadians: deg => deg * PI / 180,
-            
-            /** Convert degrees to radians.
-                @param {number} rad - The radians to convert.
-                @returns {number} The converted degrees. */
-            radiansToDegrees: rad => rad * 180 / PI,
-            
-            // Geometry on a sphere
-            /** Checks if the provided lat/lng point lies inside or on the edge of the provided circle.
-                @param {number} pLat - The latitude of the point to test.
-                @param {number} pLng - The longitude of the point to test.
-                @param {number} cLat - The latitude of the center of the circle.
-                @param {number} cLng - The longitude of the center of the circle.
-                @param {number} cR - The radius of the circle in kilometers.
-                @param {number} [sphereRadius] - The radius of the sphere the measurement is being 
-                    taken on in kilometers. If not provided the radius of the earth is used.
-                @return {boolean} - True if the point is inside or on the circle. */
-            circleContainsLatLng: (pLat, pLng, cLat, cLng, cR, sphereRadius) => Geometry.measureLatLngDistance(pLat, pLng, cLat, cLng, sphereRadius) <= cR,
-            
-            /** Measures the distance between two points on a sphere using latitude and longitude.
-                @param {number} lat1 - the latitude of the first point.
-                @param {number} lng1 - the longitude of the first point.
-                @param {number} lat2 - the latitude of the second point.
-                @param {number} lng2 - the longitude of the second point.
-                @param {number} [sphereRadius] - The radius of the sphere the measurement is being 
-                    taken on in kilometers. If not provided the radius of the earth is used.
-                @returns {number} - The distance between the points in kilometers. */
-            measureLatLngDistance: (lat1, lng1, lat2, lng2, sphereRadius) => {
-                // Taken from: http://www.movable-type.co.uk/scripts/latlong.html
-                if (sphereRadius === undefined) sphereRadius = 6371; // kilometers for earth
-                lat1 = Geometry.degreesToRadians(lat1);
-                lng1 = Geometry.degreesToRadians(lng1);
-                lat2 = Geometry.degreesToRadians(lat2);
-                lng2 = Geometry.degreesToRadians(lng2);
-                return sphereRadius * math.acos(
-                    mathSin(lat1) * mathSin(lat2) + 
-                    mathCos(lat1) * mathCos(lat2) * mathCos(lng2 - lng1)
-                );
-            },
-            
-            /** Convert from polar to cartesian coordinates.
-                @param {number} radius - The radius of the point to convert relative to the circle.
-                @param {number} degrees - The angle coordinate of the point to convert.
-                @param {number} [cx] - The x coordinate of the center of the circle.
-                @param {number} [cy] - The y coordinate of the center of the circle.
-                @returns {!Array} - Where index 0 is the x coordinate and index 1 is the y coordinate. */
-            polarToCartesian: (radius, degrees, cx, cy) => {
-                cx ??= 0;
-                cy ??= 0;
-                degrees = degrees % 360;
-                
-                let x, 
-                    y;
-                if (degrees === 0) {
-                    x = radius;
-                    y = 0;
-                } else if (degrees === 90) {
-                    x = 0;
-                    y = radius;
-                } else if (degrees === 180) {
-                    x = -radius;
-                    y = 0;
-                } else if (degrees === 270) {
-                    x = 0;
-                    y = -radius;
-                } else {
-                    const radians = Geometry.degreesToRadians(degrees);
-                    x = radius * mathCos(radians);
-                    y = radius * mathSin(radians);
-                }
-                
-                return [cx + x, cy + y];
-            },
-            
-            /** Convert from cartesian to polar coordinates.
-                @param {number} x - The x coordinate to transform.
-                @param {number} y - The y coordinate to transform.
-                @param {number} [cx] - The x coordinate of the center of the circle.
-                @param {number} [cy] - The y coordinate of the center of the circle.
-                @param {boolean} [useRadians] - If true the angle returned will be in radians 
-                    otherwise it will be degrees.
-                @return {!Array} An array where index 0 is the radius and index 1 is angle in 
-                    degrees (or radians if userRadians is true). */
-            cartesianToPolar: (x, y, cx, cy, useRadians) => {
-                cx ??= 0;
-                cy ??= 0;
-                
-                const diffX = x - cx,
-                    diffY = y - cy,
-                    radius = mathSqrt(diffX*diffX + diffY*diffY);
-                let radians = math.atan2(diffY, diffX);
-                if (radians < 0) radians += 2 * PI;
-                return [radius, useRadians ? radians : Geometry.radiansToDegrees(radians)];
+        /*  Convert radians to degrees.
+            @param {number} deg - The degrees to convert.
+            @returns {number} - The converted radians. */
+        degreesToRadians = deg => deg * PI / 180,
+        
+        /*  Convert degrees to radians.
+            @param {number} rad - The radians to convert.
+            @returns {number} The converted degrees. */
+        radiansToDegrees = rad => rad * 180 / PI,
+        
+        /*  Checks if the provided point is inside or on the edge of the provided rectangle.
+            @param {number|!Object} pX - The x coordinate of the point to test or alternately a 
+                point object with properties x and y.
+            @param {number} pY - The y coordinate of the point to test.
+            @param {number|!Object} rX - The x coordinate of the rectangle or alternately a rect 
+                object with properties x, y, width and height.
+            @param {number} rY - The y coordinate of the rectangle.
+            @param {number} rW - The width of the rectangle.
+            @param {number} rH - The height of the rectangle.
+            @returns {boolean} - True if the point is inside or on the rectangle. */
+        rectContainsPoint = (pX, pY, rX, rY, rW, rH) => {
+            if (typeof pX === 'object') {
+                rH = rW;
+                rW = rY;
+                rY = rX;
+                rX = pY;
+                pY = pX.y;
+                pX = pX.x;
             }
+            
+            if (typeof rX === 'object') {
+                rH = rX.height;
+                rW = rX.width;
+                rY = rX.y;
+                rX = rX.x;
+            }
+            
+            return pX >= rX && pY >= rY && pX <= rX + rW && pY <= rY + rH;
+        },
+        
+        /*  Measure the distance between two points.
+            @param {number} x1 - The x position of the first point.
+            @param {number} y1 - The y position of the first point.
+            @param {number} x2 - The x position of the second point.
+            @param {number} y2 - The y position of the second point.
+            @param {boolean} [squared] - If true, the squared distance will be returned.
+            @returns {number} - The distance between the two points. */
+        measureDistance = (x1, y1, x2, y2, squared) => {
+            const diffX = x2 - x1, 
+                diffY = y2 - y1, 
+                diffSquared = diffX * diffX + diffY * diffY;
+            return squared ? diffSquared : mathSqrt(diffSquared);
+        },
+        
+        /*  Measures the distance between two points on a sphere using latitude and longitude.
+            @param {number} lat1 - the latitude of the first point.
+            @param {number} lng1 - the longitude of the first point.
+            @param {number} lat2 - the latitude of the second point.
+            @param {number} lng2 - the longitude of the second point.
+            @param {number} [sphereRadius] - The radius of the sphere the measurement is being 
+                taken on in kilometers. If not provided the radius of the earth is used.
+            @returns {number} - The distance between the points in kilometers. */
+        measureLatLngDistance = (lat1, lng1, lat2, lng2, sphereRadius) => {
+            // Taken from: http://www.movable-type.co.uk/scripts/latlong.html
+            if (sphereRadius == null) sphereRadius = 6371; // kilometers for earth
+            lat1 = degreesToRadians(lat1);
+            lat2 = degreesToRadians(lat2);
+            return sphereRadius * math.acos(
+                mathSin(lat1) * mathSin(lat2) + 
+                mathCos(lat1) * mathCos(lat2) * mathCos(degreesToRadians(lng2) - degreesToRadians(lng1))
+            );
         };
+    
+    /** Provides common geometry related functions. */
+    pkg.Geometry = {
+        // Methods /////////////////////////////////////////////////////////
+        /** Get the closest point on a line, or segment, to a given point.
+            @param {number} Ax - The x-coordinate of the first endpoint that defines the segment.
+            @param {number} Ay - The y-coordinate of the first endpoint that defines  the segment.
+            @param {number} Bx - The x-coordinate of the second endpoint that defines the segment.
+            @param {number} By - The y-coordinate of the second endpoint that defines the segment.
+            @param {number} Px - The x-coordinate of the point.
+            @param {number} Py - The y-coordinate of the point.
+            @param {boolean} [isSegment] - If true the endpoints will be treated as a segment 
+                rather than an infinitely long line.
+            @returns {!Object} - A position object with x and y properties. */
+        getClosestPointOnALineToAPoint: (Ax, Ay, Bx, By, Px, Py, isSegment) => {
+            const APx = Px - Ax,
+                APy = Py - Ay,
+                ABx = Bx - Ax,
+                ABy = By - Ay,
+                magAB2 = ABx * ABx + ABy * ABy,
+                ABdotAP = ABx * APx + ABy * APy;
+            let t = ABdotAP / magAB2;
+            if (isSegment) t = math.min(1, math.max(0, t));
+            return {x:Ax + ABx * t, y:Ay + ABy * t};
+        },
+        
+        /** Tests if the provided point is inside this path.
+            @param {number|!Object} x - The x coordinate to test or alternately a point object 
+                with x and y properties.
+            @param {number} y - The y coordinate to test.
+            @param {!Object} boundingBox - A bounding box object that bounds the path.
+            @param {!Araay} path - An array of points where the index 0,2,4,... are the x 
+                values and index 1,3,5,... are the y values.
+            @return {boolean} - True if inside, false otherwise. */
+        isPointInPath: (x, y, boundingBox, path) => {
+            if (typeof x === 'object') {
+                path = boundingBox;
+                boundingBox = y;
+                y = x.y;
+                x = x.x;
+            }
+            
+            // First test bounding box
+            if (rectContainsPoint(x, y, boundingBox)) {
+                // Test using Jordan Curve Theorem
+                let len = path.length;
+                
+                // Must at least be a triangle to have an inside.
+                if (len >= 6) {
+                    let c = false, 
+                        x1 = path[0], 
+                        y1 = path[1], 
+                        x2, 
+                        y2;
+                    while (len) {
+                        y2 = path[--len];
+                        x2 = path[--len];
+                        if (((y2 > y) !== (y1 > y)) && (x < (x1 - x2) * (y - y2) / (y1 - y2) + x2)) c = !c;
+                        x1 = x2;
+                        y1 = y2;
+                    }
+                    return c;
+                }
+            }
+            return false;
+        },
+        
+        measureDistance: measureDistance,
+        measureLatLngDistance: measureLatLngDistance,
+        degreesToRadians: degreesToRadians,
+        radiansToDegrees: radiansToDegrees,
+        rectContainsPoint: rectContainsPoint,
+        
+        /** Checks if the provided point lies inside or on the edge of the provided circle.
+            @param {number} pX - The x coordinate of the point to test.
+            @param {number} pY - The y coordinate of the point to test.
+            @param {number} cX - The x coordinate of the center of the circle.
+            @param {number} cY - The y coordinate of the center of the circle.
+            @param {number} cR - The radius of the circle.
+            @return {boolean} - True if the point is inside or on the circle. */
+        circleContainsPoint: (pX, pY, cX, cY, cR) => measureDistance(pX, pY, cX, cY, true) <= cR * cR,
+        
+        // Geometry on a sphere
+        /** Checks if the provided lat/lng point lies inside or on the edge of the provided circle.
+            @param {number} pLat - The latitude of the point to test.
+            @param {number} pLng - The longitude of the point to test.
+            @param {number} cLat - The latitude of the center of the circle.
+            @param {number} cLng - The longitude of the center of the circle.
+            @param {number} cR - The radius of the circle in kilometers.
+            @param {number} [sphereRadius] - The radius of the sphere the measurement is being 
+                taken on in kilometers. If not provided the radius of the earth is used.
+            @return {boolean} - True if the point is inside or on the circle. */
+        circleContainsLatLng: (pLat, pLng, cLat, cLng, cR, sphereRadius) => measureLatLngDistance(pLat, pLng, cLat, cLng, sphereRadius) <= cR,
+        
+        /** Convert from polar to cartesian coordinates.
+            @param {number} radius - The radius of the point to convert relative to the circle.
+            @param {number} degrees - The angle coordinate of the point to convert.
+            @param {number} [cx] - The x coordinate of the center of the circle.
+            @param {number} [cy] - The y coordinate of the center of the circle.
+            @returns {!Array} - Where index 0 is the x coordinate and index 1 is the y coordinate. */
+        polarToCartesian: (radius, degrees, cx, cy) => {
+            cx ??= 0;
+            cy ??= 0;
+            degrees = degrees % 360;
+            
+            let x, 
+                y;
+            if (degrees === 0) {
+                x = radius;
+                y = 0;
+            } else if (degrees === 90) {
+                x = 0;
+                y = radius;
+            } else if (degrees === 180) {
+                x = -radius;
+                y = 0;
+            } else if (degrees === 270) {
+                x = 0;
+                y = -radius;
+            } else {
+                const radians = degreesToRadians(degrees);
+                x = radius * mathCos(radians);
+                y = radius * mathSin(radians);
+            }
+            
+            return [cx + x, cy + y];
+        },
+        
+        /** Convert from cartesian to polar coordinates.
+            @param {number} x - The x coordinate to transform.
+            @param {number} y - The y coordinate to transform.
+            @param {number} [cx] - The x coordinate of the center of the circle.
+            @param {number} [cy] - The y coordinate of the center of the circle.
+            @param {boolean} [useRadians] - If true the angle returned will be in radians 
+                otherwise it will be degrees.
+            @return {!Array} An array where index 0 is the radius and index 1 is angle in 
+                degrees (or radians if userRadians is true). */
+        cartesianToPolar: (x, y, cx, cy, useRadians) => {
+            cx ??= 0;
+            cy ??= 0;
+            
+            const diffX = x - cx,
+                diffY = y - cy,
+                radius = mathSqrt(diffX*diffX + diffY*diffY);
+            let radians = math.atan2(diffY, diffX);
+            if (radians < 0) radians += 2 * PI;
+            return [radius, useRadians ? radians : radiansToDegrees(radians)];
+        }
+    };
 })(myt);
 
 
@@ -3740,8 +3744,10 @@ Date.prototype.format = Date.prototype.format ?? (() => {
 (pkg => {
     let globalKeys;
     
-    const G = pkg.global,
+    const 
+        {KeyObservable, global:G} = pkg,
         globalFocus = G.focus,
+        getCodeFromEvent = KeyObservable.getCodeFromEvent,
         
         /*  A set of codes of the keys currently pressed down. */
         keysDown = new Set(),
@@ -3759,7 +3765,6 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         CODE_META_RIGHT = isFirefox ? 'OSRight' : 'MetaRight',
         CODE_BACKSPACE = 'Backspace',
         
-        getCodeFromEvent = pkg.KeyObservable.getCodeFromEvent,
         
         isShiftCode = code => code === CODE_SHIFT_LEFT || code === CODE_SHIFT_RIGHT,
         isControlCode = code => code === CODE_CONTROL_LEFT || code === CODE_CONTROL_RIGHT,
@@ -3828,7 +3833,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             pkg.DomElementProxy,
             pkg.DomObservable,
             pkg.DomObserver,
-            pkg.KeyObservable,
+            KeyObservable,
             pkg.Observable,
             pkg.Observer
         ],
@@ -4832,8 +4837,7 @@ myt.Destructible = new JS.Module('Destructible', {
 
 
 (pkg => {
-    const JSClass = JS.Class,
-        JSModule = JS.Module,
+    const {Class:JSClass, Module:JSModule} = JS,
         
         consoleWarn = console.warn,
         
@@ -6631,16 +6635,15 @@ myt.Destructible = new JS.Module('Destructible', {
         retainFocusDuringDomUpdate = (viewBeingRemoved, wrappedFunc) => {
             const restoreFocus = pkg.global.focus.focusedView, 
                 elem = viewBeingRemoved.getIDE();
-            if (restoreFocus === viewBeingRemoved || (restoreFocus && restoreFocus.isDescendantOf(viewBeingRemoved))) {
+            if (restoreFocus === viewBeingRemoved || restoreFocus?.isDescendantOf(viewBeingRemoved)) {
                 restoreFocus._ignoreFocus = true;
             }
             
             // Also maintain scrollTop/scrollLeft since those also get reset when a dom element is 
             // removed. Note: descendant elements with scroll positions won't get maintained.
-            const restoreScrollTop = elem.scrollTop,
-                restoreScrollLeft = elem.scrollLeft;
+            const {scrollTop, scrollLeft} = elem;
             
-            wrappedFunc.call();
+            wrappedFunc();
             
             if (restoreFocus) {
                 restoreFocus._ignoreFocus = false;
@@ -6648,8 +6651,8 @@ myt.Destructible = new JS.Module('Destructible', {
             }
             
             // Restore scrollTop/scrollLeft
-            elem.scrollTop = restoreScrollTop;
-            elem.scrollLeft = restoreScrollLeft;
+            elem.scrollTop = scrollTop;
+            elem.scrollLeft = scrollLeft;
         },
         
         /*  Implements isBehind and isInFrontOf methods. Returns a boolean indicating front or 
@@ -6662,18 +6665,12 @@ myt.Destructible = new JS.Module('Destructible', {
         comparePosition = (firstView, secondView, front, checkZIndex) => {
             if (secondView && typeof secondView === 'object') {
                 if (checkZIndex) {
-                    const commonAncestor = firstView.getLeastCommonAncestor(secondView);
-                    if (commonAncestor) {
-                        const commonAncestorElem = commonAncestor.getIDE();
-                        let zIdx = DomElementProxy.getZIndexRelativeToAncestor(firstView.getODE(), commonAncestorElem),
-                            otherZIdx = DomElementProxy.getZIndexRelativeToAncestor(secondView.getODE(), commonAncestorElem);
-                        
-                        // Reverse comparison order
-                        if (front) {
-                            zIdx *= -1;
-                            otherZIdx *= -1;
-                        }
-                        
+                    const commonAncestorElem = firstView.getLeastCommonAncestor(secondView)?.getIDE();
+                    if (commonAncestorElem) {
+                        const getZIndexRelativeToAncestor = DomElementProxy.getZIndexRelativeToAncestor,
+                            inverter = front ? -1 : 1, // Reverse comparison order if so directed.
+                            zIdx = inverter * getZIndexRelativeToAncestor(firstView.getODE(), commonAncestorElem),
+                            otherZIdx = inverter * getZIndexRelativeToAncestor(secondView.getODE(), commonAncestorElem);
                         if (zIdx < otherZIdx) {
                             return true;
                         } else if (otherZIdx < zIdx) {
@@ -7671,10 +7668,11 @@ myt.Destructible = new JS.Module('Destructible', {
         bringSubviewToFront: function(sv) {
             const self = this;
             if (sv?.parent === self) {
-                const innerElem = self.getIDE();
-                if (sv.getODE() !== innerElem.lastChild) {
+                const innerElem = self.getIDE(),
+                    svOde = sv.getODE();
+                if (svOde !== innerElem.lastElementChild) {
                     retainFocusDuringDomUpdate(sv, () => {
-                        innerElem.appendChild(sv.getODE());
+                        innerElem.appendChild(svOde);
                         self.doSubviewsReorderedInDom(sv);
                     });
                 }
@@ -7687,10 +7685,12 @@ myt.Destructible = new JS.Module('Destructible', {
         sendSubviewToBack: function(sv) {
             const self = this;
             if (sv?.parent === self) {
-                const innerElem = self.getIDE();
-                if (sv.getODE() !== innerElem.firstChild) {
+                const innerElem = self.getIDE(),
+                    firstElementChild = innerElem.firstElementChild,
+                    svOde = sv.getODE();
+                if (svOde !== firstElementChild) {
                     retainFocusDuringDomUpdate(sv, () => {
-                        innerElem.insertBefore(sv.getODE(), innerElem.firstChild);
+                        innerElem.insertBefore(svOde, firstElementChild);
                         self.doSubviewsReorderedInDom(sv);
                     });
                 }
@@ -7704,11 +7704,15 @@ myt.Destructible = new JS.Module('Destructible', {
         sendSubviewBehind: function(sv, existing) {
             const self = this;
             if (sv?.parent === self && existing?.parent === self) {
-                const innerElem = self.getIDE();
-                retainFocusDuringDomUpdate(sv, () => {
-                    innerElem.insertBefore(sv.getODE(), existing.getODE());
-                    self.doSubviewsReorderedInDom(sv);
-                });
+                const svOde = sv.getODE(),
+                    existingOde = existing.getODE();
+                if (svOde !== existingOde.previousElementSibling) {
+                    const innerElem = self.getIDE();
+                    retainFocusDuringDomUpdate(sv, () => {
+                        innerElem.insertBefore(svOde, existingOde);
+                        self.doSubviewsReorderedInDom(sv);
+                    });
+                }
             }
         },
         
@@ -7719,11 +7723,17 @@ myt.Destructible = new JS.Module('Destructible', {
         sendSubviewInFrontOf: function(sv, existing) {
             const self = this;
             if (sv?.parent === self && existing?.parent === self) {
-                const innerElem = self.getIDE();
-                retainFocusDuringDomUpdate(sv, () => {
-                    innerElem.insertBefore(sv.getODE(), existing.getODE().nextSibling);
-                    self.doSubviewsReorderedInDom(sv);
-                });
+                const svOde = sv.getODE(),
+                    existingOdeNextElementSibling = existing.getODE().nextElementSibling;
+                if (svOde !== existingOdeNextElementSibling) {
+                    const innerElem = self.getIDE();
+                    retainFocusDuringDomUpdate(sv, () => {
+                        // Relies on insertBefore behavior: If existingOdeNextElementSibling is 
+                        // nullish, then svOde is inserted at the end of innerElem's child nodes.
+                        innerElem.insertBefore(svOde, existingOdeNextElementSibling);
+                        self.doSubviewsReorderedInDom(sv);
+                    });
+                }
             }
         },
         
@@ -7734,31 +7744,37 @@ myt.Destructible = new JS.Module('Destructible', {
         sortSubviews: function(sortFunc) {
             // Sort subviews
             const self = this,
-                svs = self.getSubviews().sort(sortFunc);
+                svs = self.getSubviews();
             
-            // Rearrange dom to match new sort order.
-            retainFocusDuringDomUpdate(self, () => {
-                const outerElem = self.getODE(),
-                    parentElem = outerElem.parentNode;
-                // Remove this dom element from the dom
-                let nextDe;
-                if (parentElem) {
-                    nextDe = outerElem.nextSibling;
-                    parentElem.removeChild(outerElem);
-                }
+            // OPTIMIZATION: Check if the svs are already sorted. If they're not then we will
+            // resort and reorder the DOM. This occurs frequently enough that it is worth doing.
+            if (pkg.isNotSorted(svs, sortFunc)) {
+                svs.sort(sortFunc);
                 
-                // Copy the dom elements in the correct order to a document fragment and then add 
-                // that fragment back to the dom.
-                const fragment = document.createDocumentFragment(),
-                    len = svs.length;
-                for (let i = 0; len > i;) fragment.appendChild(svs[i++].getODE());
-                self.getIDE().appendChild(fragment);
-                
-                // Put this dom element back in the dom
-                parentElem?.insertBefore(outerElem, nextDe);
-                
-                self.doSubviewsReorderedInDom(null);
-            });
+                // Rearrange the DOM to match the new sort order.
+                retainFocusDuringDomUpdate(self, () => {
+                    const outerElem = self.getODE(),
+                        parentElem = outerElem.parentNode;
+                    // Remove this dom element from the dom
+                    let nextDe;
+                    if (parentElem) {
+                        nextDe = outerElem.nextElementSibling;
+                        parentElem.removeChild(outerElem);
+                    }
+                    
+                    // Copy the dom elements in the correct order to a document fragment and 
+                    // then add that fragment back to the dom.
+                    const fragment = document.createDocumentFragment(),
+                        len = svs.length;
+                    for (let i = 0; len > i;) fragment.appendChild(svs[i++].getODE());
+                    self.getIDE().appendChild(fragment);
+                    
+                    // Put this dom element back in the dom
+                    parentElem?.insertBefore(outerElem, nextDe);
+                    
+                    self.doSubviewsReorderedInDom(null);
+                });
+            }
         },
         
         // Hit Testing //
@@ -8173,7 +8189,8 @@ myt.Destructible = new JS.Module('Destructible', {
 
 
 (pkg => {
-    const
+    const JSModule = JS.Module,
+        
         /*  A private setter function that provides a common implementation for most of this 
             setters in the TextSupport mixin.
             @param {string|number} v
@@ -8251,7 +8268,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 the default so it no longer appears as an i-beam.
         
         @class */
-    pkg.TextSupport = new JS.Module('TextSupport', {
+    pkg.TextSupport = new JSModule('TextSupport', {
         // Accessors ///////////////////////////////////////////////////////////
         /** @overrides myt.View */
         setWidth: function(v) {
@@ -8414,7 +8431,7 @@ myt.Destructible = new JS.Module('Destructible', {
             paddingLeft:number The padding below the text.
         
         @class */
-    pkg.PaddedTextSupport = new JS.Module('PaddedTextSupport', {
+    pkg.PaddedTextSupport = new JSModule('PaddedTextSupport', {
         setWidth: function(v) {
             this.callSuper(v);
             updateDomWidthForPadding(this);
@@ -9037,7 +9054,8 @@ myt.Destructible = new JS.Module('Destructible', {
 
 
 (pkg => {
-    const roots = pkg.global.roots,
+    const 
+        {addEventListener, removeEventListener, global:{roots}} = pkg,
         
         /** Allows a view to act as a "root" for a view hierarchy. A "root" view is backed by a 
             dom element from the page rather than a dom element created by the view.
@@ -9056,10 +9074,10 @@ myt.Destructible = new JS.Module('Destructible', {
                         drop on.
                     @returns {undefined} */
                 setupCaptureDrop: view => {
-                    const cdf = view.__captureDrop = event => {event.preventDefault();},
-                        ide = view.getIDE();
-                    pkg.addEventListener(ide, 'drop', cdf);
-                    pkg.addEventListener(ide, 'dragover', cdf);
+                    const ide = view.getIDE(),
+                        cdf = view.__captureDrop = event => {event.preventDefault();};
+                    addEventListener(ide, 'drop', cdf);
+                    addEventListener(ide, 'dragover', cdf);
                 },
                 
                 /** Cleanup dom listeners for drag/drop.
@@ -9069,8 +9087,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 teardownCaptureDrop: view => {
                     const ide = view.getIDE(), 
                         cdf = view.__captureDrop;
-                    pkg.removeEventListener(ide, 'drop', cdf);
-                    pkg.removeEventListener(ide, 'dragover', cdf);
+                    removeEventListener(ide, 'drop', cdf);
+                    removeEventListener(ide, 'dragover', cdf);
                 }
             },
             
@@ -10623,8 +10641,10 @@ myt.Destructible = new JS.Module('Destructible', {
 (pkg => {
     const JSSingleton = JS.Singleton,
         doc = document,
-        register = pkg.global.register,
-        {DomElementProxy, DomObservable} = pkg;
+        {
+            DomElementProxy, DomObservable, 
+            global:{register}
+        } = pkg;
     
     /** Provides global mouse events by listening to mouse events on the document. Registered with 
         myt.global as 'mouse'.
@@ -11587,11 +11607,9 @@ myt.Destructible = new JS.Module('Destructible', {
 
 
 (pkg => {
-    const JSClass = JS.Class,
-        JSModule = JS.Module,
+    const {Class:JSClass, Module:JSModule} = JS,
         
-        View = pkg.View,
-        KeyActivation = pkg.KeyActivation,
+        {View, KeyActivation} = pkg,
         
         defaultDisabledOpacity = 0.5,
         defaultFocusShadowPropertyValue = [0, 0, 7, '#666'],
@@ -12358,34 +12376,30 @@ myt.Destructible = new JS.Module('Destructible', {
 
 
 (pkg => {
-    const JSClass = JS.Class,
-        JSModule = JS.Module,
+    const {Class:JSClass, Module:JSModule} = JS,
+        
+        math = Math,
         
         G = pkg.global,
         GlobalFocus = G.focus,
         GlobalKeys = G.keys,
-        
-        LIST_KEYS = GlobalKeys.LIST_KEYS,
+        {LIST_KEYS, CODE_ESC} = GlobalKeys,
         
         updateItems = listView => {
             const cfg = listView.itemConfig ?? [],
                 cfgLen = cfg.length,
-                items = listView.items, 
+                {items, defaultItemClass, fixedWidth} = listView,
                 itemsLen = items.length,
-                defaultItemClass = listView.defaultItemClass,
+                isFixedWidth = fixedWidth > 0,
                 contentView = listView.getContentView(), 
-                layouts = contentView.getLayouts(),
-                fixedWidth = listView.fixedWidth,
-                isFixedWidth = fixedWidth > 0;
-            
+                layouts = contentView.getLayouts();
             // Lock layouts during reconfiguration
             layouts.forEach(layout => {layout.incrementLockedCounter();});
             
             // Performance: Remove from dom while doing inserts
             const ode = contentView.getODE(),
-                nextDe = ode.nextSibling,
-                parentElem = ode.parentNode;
-            parentElem.removeChild(ode);
+                {parentNode, nextSibling} = ode;
+            parentNode.removeChild(ode);
             
             // Reconfigure list
             let i = 0;
@@ -12421,7 +12435,7 @@ myt.Destructible = new JS.Module('Destructible', {
             }
             
             // Performance: Put back in dom.
-            parentElem.insertBefore(ode, nextDe);
+            parentNode.insertBefore(ode, nextSibling);
             
             
             let minWidth;
@@ -12433,7 +12447,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 for (i = 0; cfgLen > i;) {
                     const item = items[i++];
                     item.syncToDom();
-                    minWidth = Math.max(minWidth, item.getMinimumWidth());
+                    minWidth = math.max(minWidth, item.getMinimumWidth());
                 }
             }
             
@@ -12515,9 +12529,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Allows subclasses to specify their own layout. For example a multi-column layout using 
             a WrappingLayout is possible. */
         buildLayout: contentView => {
-            new pkg.SpacedLayout(contentView, {
-                axis:'y', spacing:1, collapseParent:true
-            });
+            new pkg.SpacedLayout(contentView, {axis:'y', spacing:1, collapseParent:true});
         },
         
         
@@ -12548,7 +12560,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** @overrides myt.View */
         setHeight: function(v) {
             // Limit height if necessary
-            this.callSuper(this.maxHeight >= 0 ? Math.min(this.maxHeight, v) : v);
+            this.callSuper(this.maxHeight >= 0 ? math.min(this.maxHeight, v) : v);
             if (this.inited && this.owner) this.updateLocationY(this.owner);
         },
         
@@ -12677,7 +12689,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** @overrides myt.KeyActivation. */
         doActivationKeyDown: function(code, isRepeat) {
             // Close for escape key.
-            if (code === GlobalKeys.CODE_ESC) {
+            if (code === CODE_ESC) {
                 this.hideFloatingPanel();
             } else {
                 // Select first/last if the list view is already open
@@ -12698,7 +12710,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** @overrides myt.KeyActivation. */
         doActivationKeyUp: function(code) {
             // Abort for escape key.
-            if (code !== GlobalKeys.CODE_ESC) {
+            if (code !== CODE_ESC) {
                 this.callSuper(code);
                 
                 // Select first/last after list view is open.
@@ -12789,7 +12801,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** @overrides myt.ListViewItemMixin */
         getMinimumWidth: function() {
-            return Math.ceil(this.measureNoWrapWidth());
+            return math.ceil(this.measureNoWrapWidth());
         },
         
         /** @overrides myt.Button */
@@ -12799,7 +12811,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** @overrides myt.KeyActivation. */
         doActivationKeyDown: function(code, isRepeat) {
-            if (code === GlobalKeys.CODE_ESC) {
+            if (code === CODE_ESC) {
                 this.listView.owner.hideFloatingPanel();
             } else {
                 this.callSuper(code, isRepeat);
@@ -14186,14 +14198,15 @@ myt.Destructible = new JS.Module('Destructible', {
 
 (pkg => {
     const JSClass = JS.Class,
+        
         mathMin = Math.min,
         isArray = Array.isArray,
         
-        GlobalKeys = pkg.global.keys,
-        
-        {SizeToDom, View, Disableable, KeyObservable} = pkg,
-        
-        FOCUS_SHADOW = pkg.Button.FOCUS_SHADOW,
+        {
+            SizeToDom, View, Disableable, KeyObservable,
+            Button:{FOCUS_SHADOW}, 
+            global:{keys:GlobalKeys}
+        } = pkg,
         
         setEditableTextAttr = (editableText, v, propName) => {
             if (editableText[propName] !== v) {
@@ -15490,8 +15503,7 @@ myt.Destructible = new JS.Module('Destructible', {
 (pkg => {
     let undefToEmptyValueProcessor;
     
-    const JSClass = JS.Class,
-        JSModule = JS.Module,
+    const {Class:JSClass, Module:JSModule} = JS,
         
         consoleWarn = console.warn,
         
@@ -19587,9 +19599,7 @@ myt.Destructible = new JS.Module('Destructible', {
 (pkg => {
     const JSClass = JS.Class,
         
-        math = Math,
-        mathMin = math.min,
-        mathMax = math.max,
+        {min:mathMin, max:mathMax, round:mathRound} = Math,
         
         View = pkg.View,
         
@@ -20034,7 +20044,7 @@ myt.Destructible = new JS.Module('Destructible', {
             attrs.labelY ??= 2;
             attrs.labelFontSize ??= '12px';
             attrs.labelColor ??= '#000';
-            attrs.flipThreshold ??= math.round((attrs.maxValue - attrs.minValue) / 2) || 0;
+            attrs.flipThreshold ??= mathRound((attrs.maxValue - attrs.minValue) / 2) || 0;
             
             self.quickSet(['labelX','labelY','labelFontSize','labelColor','flipThreshold'], attrs);
             
@@ -20370,15 +20380,11 @@ myt.Destructible = new JS.Module('Destructible', {
         such as what occurs when slowly resizing a grid. */
     let resizeIdx = 0;
     
-    const JSClass = JS.Class,
-        JSModule = JS.Module,
+    const {Class:JSClass, Module:JSModule} = JS,
         
-        mathMin = Math.min,
-        mathMax = Math.max,
+        {min:mathMin, max:mathMax} = Math,
         
-        View = pkg.View,
-        
-        DEFAULT_PLACEMENT = pkg.Node.DEFAULT_PLACEMENT,
+        {View, SpacedLayout, Node:{DEFAULT_PLACEMENT}} = pkg,
         
         // GridController
         findLastVisibleColumn = controller => {
@@ -21184,8 +21190,7 @@ myt.Destructible = new JS.Module('Destructible', {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.View */
         initNode: function(parent, attrs) {
-            const self = this,
-                SpacedLayout = pkg.SpacedLayout;
+            const self = this;
             
             // Allows horizontal scrolling if the grid columns are too wide.
             attrs.overflow ??= 'autox';
@@ -21429,17 +21434,16 @@ myt.Destructible = new JS.Module('Destructible', {
 
 
 (pkg => {
-    const JSClass = JS.Class,
-        JSModule = JS.Module,
+    const {Class:JSClass, Module:JSModule} = JS,
         
         math = Math,
         mathMax = math.max,
         
-        View = pkg.View,
-        
-        G = pkg.global,
-        GlobalFocus = G.focus,
-        GlobalKeys = G.keys,
+        {
+            View, 
+            global:{focus:GlobalFocus, keys:GlobalKeys},
+            getAlphaObjSortFunc
+        } = pkg,
         
         DEFAULT_CLASS_KEY = 'default',
         
@@ -21627,7 +21631,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 if (self.numericSort) {
                     return pkg.getNumericObjSortFunc(modelIDName, ascendingSort);
                 } else {
-                    return pkg.getAlphaObjSortFunc(modelIDName, ascendingSort, false);
+                    return getAlphaObjSortFunc(modelIDName, ascendingSort, false);
                 }
             },
             
@@ -22064,7 +22068,7 @@ myt.Destructible = new JS.Module('Destructible', {
             /** @overrides myt.InfiniteList */
             getSortFunction: function() {
                 const [sortColumnId, sortOrder] = this.gridHeader.sort ?? ['',''];
-                return sortColumnId ? pkg.getAlphaObjSortFunc(sortColumnId, sortOrder === 'ascending', false) : this.callSuper();
+                return sortColumnId ? getAlphaObjSortFunc(sortColumnId, sortOrder === 'ascending', false) : this.callSuper();
             },
             
             /** @overrides myt.InfiniteList */
@@ -22538,9 +22542,7 @@ myt.Destructible = new JS.Module('Destructible', {
 (pkg => {
     const JSModule = JS.Module,
     
-        {dragManager, mouse:globalMouse} = pkg.global,
-        
-        Draggable = pkg.Draggable,
+        {Draggable, global:{dragManager, mouse:globalMouse}} = pkg,
         
         ANY_GROUP = '*',
         
@@ -23545,7 +23547,8 @@ myt.Destructible = new JS.Module('Destructible', {
 
 
 (pkg => {
-    const math = Math;
+    const math = Math,
+        {min:mathMin, max:mathMax} = math;
     
     /** An ordered collection of points that can be applied to a canvas.
         
@@ -23650,10 +23653,10 @@ myt.Destructible = new JS.Module('Destructible', {
                 while (i) {
                     const y = vecs[--i],
                         x = vecs[--i];
-                    minY = math.min(y, minY);
-                    maxY = math.max(y, maxY);
-                    minX = math.min(x, minX);
-                    maxX = math.max(x, maxX);
+                    minY = mathMin(y, minY);
+                    maxY = mathMax(y, maxY);
+                    minX = mathMin(x, minX);
+                    maxX = mathMax(x, maxX);
                 }
                 return this._boundingBox = {x:minX, y:minY, width:maxX - minX, height:maxY - minY};
             }
@@ -23710,8 +23713,7 @@ myt.Destructible = new JS.Module('Destructible', {
     });
     
     [
-        'createLinearGradient','createRadialGradient','createPattern',
-        'measureText','getImageData'
+        'createLinearGradient','createRadialGradient','createPattern','measureText','getImageData'
     ].forEach(funcName => {
         mixin[funcName] = function(...args) {
             return this.__ctx[funcName](...args);

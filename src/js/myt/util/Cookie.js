@@ -82,14 +82,15 @@
                 
                 value = options.json ? JSON.stringify(value) : String(value);
                 
+                const {raw, expires, path, domain, samesite} = options;
                 return (document.cookie = [
-                    options.raw ? key : encodeURIComponent(key),
+                    raw ? key : encodeURIComponent(key),
                     '=',
-                    options.raw ? value : encodeURIComponent(value),
-                    options.expires ? '; expires=' + options.expires.toUTCString() : '', // use expires attribute, max-age is not supported by IE
-                    options.path    ? '; path=' + options.path : '',
-                    options.domain  ? '; domain=' + options.domain : '',
-                    options.samesite ? '; samesite=' + options.samesite : '',
+                    raw ? value : encodeURIComponent(value),
+                    expires ? '; expires=' + expires.toUTCString() : '', // use expires attribute, max-age is not supported by IE
+                    path    ? '; path=' + path : '',
+                    domain  ? '; domain=' + domain : '',
+                    samesite ? '; samesite=' + samesite : '',
                     options.secure  ? '; secure' : ''
                 ].join(''));
             },

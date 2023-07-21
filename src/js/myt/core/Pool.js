@@ -1,6 +1,5 @@
 (pkg => {
-    const JSClass = JS.Class,
-        JSModule = JS.Module,
+    const {Class:JSClass, Module:JSModule} = JS,
         
         consoleWarn = console.warn,
         

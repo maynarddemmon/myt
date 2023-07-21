@@ -14,16 +14,15 @@
         retainFocusDuringDomUpdate = (viewBeingRemoved, wrappedFunc) => {
             const restoreFocus = pkg.global.focus.focusedView, 
                 elem = viewBeingRemoved.getIDE();
-            if (restoreFocus === viewBeingRemoved || (restoreFocus && restoreFocus.isDescendantOf(viewBeingRemoved))) {
+            if (restoreFocus === viewBeingRemoved || restoreFocus?.isDescendantOf(viewBeingRemoved)) {
                 restoreFocus._ignoreFocus = true;
             }
             
             // Also maintain scrollTop/scrollLeft since those also get reset when a dom element is 
             // removed. Note: descendant elements with scroll positions won't get maintained.
-            const restoreScrollTop = elem.scrollTop,
-                restoreScrollLeft = elem.scrollLeft;
+            const {scrollTop, scrollLeft} = elem;
             
-            wrappedFunc.call();
+            wrappedFunc();
             
             if (restoreFocus) {
                 restoreFocus._ignoreFocus = false;
@@ -31,8 +30,8 @@
             }
             
             // Restore scrollTop/scrollLeft
-            elem.scrollTop = restoreScrollTop;
-            elem.scrollLeft = restoreScrollLeft;
+            elem.scrollTop = scrollTop;
+            elem.scrollLeft = scrollLeft;
         },
         
         /*  Implements isBehind and isInFrontOf methods. Returns a boolean indicating front or 
@@ -45,18 +44,12 @@
         comparePosition = (firstView, secondView, front, checkZIndex) => {
             if (secondView && typeof secondView === 'object') {
                 if (checkZIndex) {
-                    const commonAncestor = firstView.getLeastCommonAncestor(secondView);
-                    if (commonAncestor) {
-                        const commonAncestorElem = commonAncestor.getIDE();
-                        let zIdx = DomElementProxy.getZIndexRelativeToAncestor(firstView.getODE(), commonAncestorElem),
-                            otherZIdx = DomElementProxy.getZIndexRelativeToAncestor(secondView.getODE(), commonAncestorElem);
-                        
-                        // Reverse comparison order
-                        if (front) {
-                            zIdx *= -1;
-                            otherZIdx *= -1;
-                        }
-                        
+                    const commonAncestorElem = firstView.getLeastCommonAncestor(secondView)?.getIDE();
+                    if (commonAncestorElem) {
+                        const getZIndexRelativeToAncestor = DomElementProxy.getZIndexRelativeToAncestor,
+                            inverter = front ? -1 : 1, // Reverse comparison order if so directed.
+                            zIdx = inverter * getZIndexRelativeToAncestor(firstView.getODE(), commonAncestorElem),
+                            otherZIdx = inverter * getZIndexRelativeToAncestor(secondView.getODE(), commonAncestorElem);
                         if (zIdx < otherZIdx) {
                             return true;
                         } else if (otherZIdx < zIdx) {
@@ -1054,10 +1047,11 @@
         bringSubviewToFront: function(sv) {
             const self = this;
             if (sv?.parent === self) {
-                const innerElem = self.getIDE();
-                if (sv.getODE() !== innerElem.lastChild) {
+                const innerElem = self.getIDE(),
+                    svOde = sv.getODE();
+                if (svOde !== innerElem.lastElementChild) {
                     retainFocusDuringDomUpdate(sv, () => {
-                        innerElem.appendChild(sv.getODE());
+                        innerElem.appendChild(svOde);
                         self.doSubviewsReorderedInDom(sv);
                     });
                 }
@@ -1070,10 +1064,12 @@
         sendSubviewToBack: function(sv) {
             const self = this;
             if (sv?.parent === self) {
-                const innerElem = self.getIDE();
-                if (sv.getODE() !== innerElem.firstChild) {
+                const innerElem = self.getIDE(),
+                    firstElementChild = innerElem.firstElementChild,
+                    svOde = sv.getODE();
+                if (svOde !== firstElementChild) {
                     retainFocusDuringDomUpdate(sv, () => {
-                        innerElem.insertBefore(sv.getODE(), innerElem.firstChild);
+                        innerElem.insertBefore(svOde, firstElementChild);
                         self.doSubviewsReorderedInDom(sv);
                     });
                 }
@@ -1087,11 +1083,15 @@
         sendSubviewBehind: function(sv, existing) {
             const self = this;
             if (sv?.parent === self && existing?.parent === self) {
-                const innerElem = self.getIDE();
-                retainFocusDuringDomUpdate(sv, () => {
-                    innerElem.insertBefore(sv.getODE(), existing.getODE());
-                    self.doSubviewsReorderedInDom(sv);
-                });
+                const svOde = sv.getODE(),
+                    existingOde = existing.getODE();
+                if (svOde !== existingOde.previousElementSibling) {
+                    const innerElem = self.getIDE();
+                    retainFocusDuringDomUpdate(sv, () => {
+                        innerElem.insertBefore(svOde, existingOde);
+                        self.doSubviewsReorderedInDom(sv);
+                    });
+                }
             }
         },
         
@@ -1102,11 +1102,17 @@
         sendSubviewInFrontOf: function(sv, existing) {
             const self = this;
             if (sv?.parent === self && existing?.parent === self) {
-                const innerElem = self.getIDE();
-                retainFocusDuringDomUpdate(sv, () => {
-                    innerElem.insertBefore(sv.getODE(), existing.getODE().nextSibling);
-                    self.doSubviewsReorderedInDom(sv);
-                });
+                const svOde = sv.getODE(),
+                    existingOdeNextElementSibling = existing.getODE().nextElementSibling;
+                if (svOde !== existingOdeNextElementSibling) {
+                    const innerElem = self.getIDE();
+                    retainFocusDuringDomUpdate(sv, () => {
+                        // Relies on insertBefore behavior: If existingOdeNextElementSibling is 
+                        // nullish, then svOde is inserted at the end of innerElem's child nodes.
+                        innerElem.insertBefore(svOde, existingOdeNextElementSibling);
+                        self.doSubviewsReorderedInDom(sv);
+                    });
+                }
             }
         },
         
@@ -1117,31 +1123,37 @@
         sortSubviews: function(sortFunc) {
             // Sort subviews
             const self = this,
-                svs = self.getSubviews().sort(sortFunc);
+                svs = self.getSubviews();
             
-            // Rearrange dom to match new sort order.
-            retainFocusDuringDomUpdate(self, () => {
-                const outerElem = self.getODE(),
-                    parentElem = outerElem.parentNode;
-                // Remove this dom element from the dom
-                let nextDe;
-                if (parentElem) {
-                    nextDe = outerElem.nextSibling;
-                    parentElem.removeChild(outerElem);
-                }
+            // OPTIMIZATION: Check if the svs are already sorted. If they're not then we will
+            // resort and reorder the DOM. This occurs frequently enough that it is worth doing.
+            if (pkg.isNotSorted(svs, sortFunc)) {
+                svs.sort(sortFunc);
                 
-                // Copy the dom elements in the correct order to a document fragment and then add 
-                // that fragment back to the dom.
-                const fragment = document.createDocumentFragment(),
-                    len = svs.length;
-                for (let i = 0; len > i;) fragment.appendChild(svs[i++].getODE());
-                self.getIDE().appendChild(fragment);
-                
-                // Put this dom element back in the dom
-                parentElem?.insertBefore(outerElem, nextDe);
-                
-                self.doSubviewsReorderedInDom(null);
-            });
+                // Rearrange the DOM to match the new sort order.
+                retainFocusDuringDomUpdate(self, () => {
+                    const outerElem = self.getODE(),
+                        parentElem = outerElem.parentNode;
+                    // Remove this dom element from the dom
+                    let nextDe;
+                    if (parentElem) {
+                        nextDe = outerElem.nextElementSibling;
+                        parentElem.removeChild(outerElem);
+                    }
+                    
+                    // Copy the dom elements in the correct order to a document fragment and 
+                    // then add that fragment back to the dom.
+                    const fragment = document.createDocumentFragment(),
+                        len = svs.length;
+                    for (let i = 0; len > i;) fragment.appendChild(svs[i++].getODE());
+                    self.getIDE().appendChild(fragment);
+                    
+                    // Put this dom element back in the dom
+                    parentElem?.insertBefore(outerElem, nextDe);
+                    
+                    self.doSubviewsReorderedInDom(null);
+                });
+            }
         },
         
         // Hit Testing //

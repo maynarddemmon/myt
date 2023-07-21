@@ -1,9 +1,7 @@
 (pkg => {
     const JSClass = JS.Class,
         
-        math = Math,
-        mathMin = math.min,
-        mathMax = math.max,
+        {min:mathMin, max:mathMax, round:mathRound} = Math,
         
         View = pkg.View,
         
@@ -448,7 +446,7 @@
             attrs.labelY ??= 2;
             attrs.labelFontSize ??= '12px';
             attrs.labelColor ??= '#000';
-            attrs.flipThreshold ??= math.round((attrs.maxValue - attrs.minValue) / 2) || 0;
+            attrs.flipThreshold ??= mathRound((attrs.maxValue - attrs.minValue) / 2) || 0;
             
             self.quickSet(['labelX','labelY','labelFontSize','labelColor','flipThreshold'], attrs);
             

@@ -1,10 +1,35 @@
 (pkg => {
     const consoleError = console.error,
+        
+        JSONParse = JSON.parse,
+        
         localStorage = global.localStorage,
         
-        getStoreId = storeId => storeId = storeId ?? 'myt',
+        /*  @param {string} key - The name of the storage entry to return.
+            @returns {*} - The value of the storage entry or null if not found. */
+        getItem = localStorage.getItem.bind(localStorage),
         
-        doFunc = (func, delay, timerKey) => {
+        /*  Stores the value under the key. If a value already exists for the key the value will be 
+            replaced with the new value.
+            @param {string} key - The key to store the value under.
+            @param {*} value - The value to store.
+            @returns {undefined} */
+        setItem = localStorage.setItem.bind(localStorage),
+        
+        /*  Removes the storage entry for the key.
+            @param {string} key - The key to remove.
+            @returns {undefined} */
+        removeItem = localStorage.removeItem.bind(localStorage),
+        
+        /*  Removes all storage entries.
+            @returns {undefined} */
+        clear = localStorage.clear.bind(localStorage),
+        
+        getStoreId = storeId => storeId = storeId ?? 'myt',
+        getItemByStoreId = storeId => getItem(getStoreId(storeId)),
+        setItemForStoreId = (storeId, data) => {setItem(storeId, JSON.stringify(data));},
+        
+        doFuncWithOptionalDelay = (func, delay, timerKey) => {
             if (delay > 0) {
                 const timerIdKey = '__timerId_' + timerKey,
                     timerId = LocalStorage[timerIdKey];
@@ -33,10 +58,10 @@
                 @returns {boolean} - false if an undefined or null value is found, otherwise true. */
             hasDatum: (key, storeId) => {
                 if (key) {
-                    const data = LocalStorage.getItem(getStoreId(storeId));
+                    const data = getItemByStoreId(storeId);
                     if (data) {
                         try {
-                            return JSON.parse(data)[key] != null;
+                            return JSONParse(data)[key] != null;
                         } catch (e) {
                             consoleError(e);
                             return false;
@@ -53,10 +78,10 @@
                 @returns {*} the value of the data or undefined if the datum was not found. */
             getDatum: (key, storeId) => {
                 if (key) {
-                    const data = LocalStorage.getItem(getStoreId(storeId));
+                    const data = getItemByStoreId(storeId);
                     if (data) {
                         try {
-                            const jsonData = JSON.parse(data);
+                            const jsonData = JSONParse(data);
                             if (typeof jsonData === 'object') return jsonData[key];
                         } catch (e) {
                             consoleError(e);
@@ -78,10 +103,10 @@
                 @returns {undefined} */
             setDatum: (key, value, storeId, delay) => {
                 storeId = getStoreId(storeId);
-                doFunc(() => {
+                doFuncWithOptionalDelay(() => {
                     const data = LocalStorage.getData(storeId);
                     data[key] = value;
-                    LocalStorage.setItem(storeId, JSON.stringify(data));
+                    setItemForStoreId(storeId, data);
                 }, delay, storeId + '___' + key);
             },
             
@@ -94,10 +119,10 @@
                 @returns {undefined} */
             removeDatum: (key, storeId, delay) => {
                 storeId = getStoreId(storeId);
-                doFunc(() => {
+                doFuncWithOptionalDelay(() => {
                     const data = LocalStorage.getData(storeId);
                     delete data[key];
-                    LocalStorage.setItem(storeId, JSON.stringify(data));
+                    setItemForStoreId(storeId, data);
                 }, delay, storeId + '___' + key);
             },
             
@@ -105,17 +130,17 @@
                 @param {string} [storeId] - THe id of the data store to look in. If not provided 
                     the default "myt" storeId will be used.
                 @returns {boolean} - false if an undefined or null value is found, otherwise true. */
-            hasData: storeId => LocalStorage.getItem(getStoreId(storeId)) != null,
+            hasData: storeId => getItemByStoreId(storeId) != null,
             
             /** Get the data store stored under storage id.
                 @param {string} [storeId] - The id of the data store to get data for. If not 
                     provided the default "myt" storeId will be used.
                 @returns {!Object} - The store object. */
             getData: storeId => {
-                const data = LocalStorage.getItem(getStoreId(storeId));
+                const data = getItemByStoreId(storeId);
                 if (data) {
                     try {
-                        return JSON.parse(data);
+                        return JSONParse(data);
                     } catch (e) {
                         consoleError(e);
                     }
@@ -140,7 +165,7 @@
                 data ??= {};
                 
                 if (typeof data === 'object') {
-                    doFunc(() => {LocalStorage.setItem(storeId, JSON.stringify(data));}, delay, storeId);
+                    doFuncWithOptionalDelay(() => {setItemForStoreId(storeId, data);}, delay, storeId);
                     return true;
                 }
                 
@@ -155,68 +180,26 @@
                 @returns {undefined} */
             removeData: (storeId, delay) => {
                 storeId = getStoreId(storeId);
-                doFunc(() => {LocalStorage.removeItem(storeId);}, delay, storeId);
+                doFuncWithOptionalDelay(() => {removeItem(storeId);}, delay, storeId);
             },
             
-            // wrapper functions on localStorage
+            // Wrapper functions on localStorage
             /** @returns {number} - The number of data items stored in the Storage object. */
             getLength: () => localStorage.length,
             
             /** @param {number} n - The index of the key name to retrieve.
                 @returns {string} The name of the nth key in the storage. */
-            getKey: n => localStorage.key(n),
+            getKey: localStorage.key.bind(localStorage),
             
-            /** @param {string} key - The name of the storage entry to return.
-                @returns {*} - The value of the storage entry or null if not found. */
-            getItem: key => localStorage.getItem(key),
-            
-            /** Stores the value under the key. If a value already exists for the key the value 
-                will be replaced with the new value.
-                @param {string} key - The key to store the value under.
-                @param {*} value - The value to store.
-                @returns {undefined} */
-            setItem: (key, value) => {
-                localStorage.setItem(key, value);
-            },
-            
-            /** Removes the storage entry for the key.
-                @param {string} key - The key to remove.
-                @returns {undefined} */
-            removeItem: key => {
-                localStorage.removeItem(key);
-            },
-            
-            /** Removes all storage entries.
-                @returns {undefined} */
-            clear: () => {
-                localStorage.clear();
-            },
+            getItem: getItem,
+            setItem: setItem,
+            removeItem: removeItem,
+            clear: clear,
             
             // Aliases for better API compatibility with some libraries.
-            /** An alias for getItem.
-                @param {string} key - The name of the storage entry to return.
-                @returns {*} - The value of the storage entry or null if not found. */
-            get: key => LocalStorage.getItem(key),
-            
-            /** An alias for setItem.
-                @param {string} key - The key to store the value under.
-                @param {*} value - The value to store.
-                @returns {undefined} */
-            set: (key, value) => {
-                LocalStorage.setItem(key, value);
-            },
-            
-            /** An alias for removeItem.
-                @param {string} key - The key to remove.
-                @returns {undefined} */
-            remove: key => {
-                LocalStorage.removeItem(key);
-            },
-            
-            /** An alias for clear.
-                @returns {undefined} */
-            clearAll: () => {
-                LocalStorage.clear();
-            }
+            get: getItem,
+            set: setItem,
+            remove: removeItem,
+            clearAll: clear
         };
 })(myt);

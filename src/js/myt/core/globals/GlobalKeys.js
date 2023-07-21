@@ -1,8 +1,10 @@
 (pkg => {
     let globalKeys;
     
-    const G = pkg.global,
+    const 
+        {KeyObservable, global:G} = pkg,
         globalFocus = G.focus,
+        getCodeFromEvent = KeyObservable.getCodeFromEvent,
         
         /*  A set of codes of the keys currently pressed down. */
         keysDown = new Set(),
@@ -20,7 +22,6 @@
         CODE_META_RIGHT = isFirefox ? 'OSRight' : 'MetaRight',
         CODE_BACKSPACE = 'Backspace',
         
-        getCodeFromEvent = pkg.KeyObservable.getCodeFromEvent,
         
         isShiftCode = code => code === CODE_SHIFT_LEFT || code === CODE_SHIFT_RIGHT,
         isControlCode = code => code === CODE_CONTROL_LEFT || code === CODE_CONTROL_RIGHT,
@@ -89,7 +90,7 @@
             pkg.DomElementProxy,
             pkg.DomObservable,
             pkg.DomObserver,
-            pkg.KeyObservable,
+            KeyObservable,
             pkg.Observable,
             pkg.Observer
         ],

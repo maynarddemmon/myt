@@ -1,5 +1,6 @@
 (pkg => {
-    const math = Math;
+    const math = Math,
+        {min:mathMin, max:mathMax} = math;
     
     /** An ordered collection of points that can be applied to a canvas.
         
@@ -104,10 +105,10 @@
                 while (i) {
                     const y = vecs[--i],
                         x = vecs[--i];
-                    minY = math.min(y, minY);
-                    maxY = math.max(y, maxY);
-                    minX = math.min(x, minX);
-                    maxX = math.max(x, maxX);
+                    minY = mathMin(y, minY);
+                    maxY = mathMax(y, maxY);
+                    minX = mathMin(x, minX);
+                    maxX = mathMax(x, maxX);
                 }
                 return this._boundingBox = {x:minX, y:minY, width:maxX - minX, height:maxY - minY};
             }

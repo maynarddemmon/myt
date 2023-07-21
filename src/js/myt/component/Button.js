@@ -1,9 +1,7 @@
 (pkg => {
-    const JSClass = JS.Class,
-        JSModule = JS.Module,
+    const {Class:JSClass, Module:JSModule} = JS,
         
-        View = pkg.View,
-        KeyActivation = pkg.KeyActivation,
+        {View, KeyActivation} = pkg,
         
         defaultDisabledOpacity = 0.5,
         defaultFocusShadowPropertyValue = [0, 0, 7, '#666'],

@@ -1,15 +1,14 @@
 (pkg => {
-    const JSClass = JS.Class,
-        JSModule = JS.Module,
+    const {Class:JSClass, Module:JSModule} = JS,
         
         math = Math,
         mathMax = math.max,
         
-        View = pkg.View,
-        
-        G = pkg.global,
-        GlobalFocus = G.focus,
-        GlobalKeys = G.keys,
+        {
+            View, 
+            global:{focus:GlobalFocus, keys:GlobalKeys},
+            getAlphaObjSortFunc
+        } = pkg,
         
         DEFAULT_CLASS_KEY = 'default',
         
@@ -197,7 +196,7 @@
                 if (self.numericSort) {
                     return pkg.getNumericObjSortFunc(modelIDName, ascendingSort);
                 } else {
-                    return pkg.getAlphaObjSortFunc(modelIDName, ascendingSort, false);
+                    return getAlphaObjSortFunc(modelIDName, ascendingSort, false);
                 }
             },
             
@@ -634,7 +633,7 @@
             /** @overrides myt.InfiniteList */
             getSortFunction: function() {
                 const [sortColumnId, sortOrder] = this.gridHeader.sort ?? ['',''];
-                return sortColumnId ? pkg.getAlphaObjSortFunc(sortColumnId, sortOrder === 'ascending', false) : this.callSuper();
+                return sortColumnId ? getAlphaObjSortFunc(sortColumnId, sortOrder === 'ascending', false) : this.callSuper();
             },
             
             /** @overrides myt.InfiniteList */

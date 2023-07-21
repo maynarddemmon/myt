@@ -3,15 +3,11 @@
         such as what occurs when slowly resizing a grid. */
     let resizeIdx = 0;
     
-    const JSClass = JS.Class,
-        JSModule = JS.Module,
+    const {Class:JSClass, Module:JSModule} = JS,
         
-        mathMin = Math.min,
-        mathMax = Math.max,
+        {min:mathMin, max:mathMax} = Math,
         
-        View = pkg.View,
-        
-        DEFAULT_PLACEMENT = pkg.Node.DEFAULT_PLACEMENT,
+        {View, SpacedLayout, Node:{DEFAULT_PLACEMENT}} = pkg,
         
         // GridController
         findLastVisibleColumn = controller => {
@@ -817,8 +813,7 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.View */
         initNode: function(parent, attrs) {
-            const self = this,
-                SpacedLayout = pkg.SpacedLayout;
+            const self = this;
             
             // Allows horizontal scrolling if the grid columns are too wide.
             attrs.overflow ??= 'autox';
