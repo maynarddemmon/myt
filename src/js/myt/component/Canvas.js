@@ -8,37 +8,37 @@
         
         mixin = {};
     
-    [
+    for (const funcName of [
         'save','restore','scale','rotate','translate','transform','setTransform',
         'clearRect','fillRect','strokeRect','beginPath','closePath','moveTo','lineTo',
-        'quadraticCurveTo','bezierCurveTo','arcTo','rect','arc','fill','stroke','clip','isPointInPath',
-        'fillText','strokeText','drawImage','createImageData','putImageData'
-    ].forEach(funcName => {
+        'quadraticCurveTo','bezierCurveTo','arcTo','rect','arc','fill','stroke','clip',
+        'isPointInPath','fillText','strokeText','drawImage','createImageData','putImageData'
+    ]) {
         mixin[funcName] = function(...args) {
             this.__ctx[funcName](...args);
         };
-    });
+    }
     
-    [
+    for (const funcName of [
         'createLinearGradient','createRadialGradient','createPattern','measureText','getImageData'
-    ].forEach(funcName => {
+    ]) {
         mixin[funcName] = function(...args) {
             return this.__ctx[funcName](...args);
         };
-    });
+    }
     
-    [
+    for (const propName of [
         'fillStyle','strokeStyle','shadowColor','shadowBlur','shadowOffsetX','shadowOffsetY',
         'lineWidth','lineCap','lineJoin','miterLimit','font','textAlign','textBaseline',
         'globalAlpha','globalCompositeOperation'
-    ].forEach(propName => {
+    ]) {
         mixin[AccessorSupport.generateSetterName(propName)] = function(v) {
             this.__ctx[propName] = v;
         };
         mixin[AccessorSupport.generateGetterName(propName)] = function() {
             return this.__ctx[propName];
         };
-    });
+    }
     
     /** A view for programatic drawing. This view is backed by an html canvas element.
         
@@ -299,9 +299,9 @@
                 Color = pkg.Color;
             
             // Convert string based hex colors to myt.Color objects.
-            colors.forEach(config => {
+            for (const config of colors) {
                 if (typeof config.color === 'string') config.color = Color.makeColorFromHexString(config.color);
-            });
+            }
             
             // Calculate Colors
             if (segments < 1) {

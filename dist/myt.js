@@ -503,13 +503,13 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             // name. Seems OK to just do it for all fonts since double quotes in a font name is 
             // most likely going to be confusing anyhow.
             const familyName = fontFace.family.split('"').join('');
-            [familyName, familyName + ' ' + fontFace.weight].forEach(fontName => {
+            for (const fontName of [familyName, familyName + ' ' + fontFace.weight]) {
                 if (!fontLoaded[fontName]) {
                     fontLoaded[fontName] = true;
                     const targets = fontTargets[fontName] ?? [];
                     while (targets.length) notifyInstanceThatFontLoaded(targets.pop());
                 }
-            });
+            }
         },
         
         notifyInstanceThatFontLoaded = instance => {
@@ -778,16 +778,16 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             // Fonts
             loadFontFaces: (fontList, callback) => {
                 const fonts = [];
-                fontList.forEach(fontInfo => {
+                for (const fontInfo of fontList) {
                     const fontFace = new FontFace(fontInfo.family, 'url(' + fontInfo.url + ')', fontInfo.options);
                     fonts.push(fontFace.load());
-                });
+                }
                 
                 Promise.all(fonts).then(loadedFonts => {
-                    loadedFonts.forEach(font => {
+                    for (const font of loadedFonts) {
                         docFonts.add(font);
                         notifyFontLoaded(font);
-                    });
+                    }
                     callback?.(loadedFonts);
                 });
             },
@@ -1165,7 +1165,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         };
     
     docFonts.onloadingdone = fontFaceSetEvent => {
-        fontFaceSetEvent.fontfaces.forEach(fontFace => {notifyFontLoaded(fontFace);});
+        for (const fontFace of fontFaceSetEvent.fontfaces) notifyFontLoaded(fontFace);
     };
 })(global);
 
@@ -3808,9 +3808,9 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         },
         
         registerEventHandler = (target, action) => {
-            ['keydown','keypress','keyup'].forEach(eventName => {
+            for (const eventName of ['keydown','keypress','keyup']) {
                 globalKeys[action](target, '__hndl_' + eventName, eventName);
-            });
+            }
         },
         attach = target => {registerEventHandler(target, 'attachToDom');},
         detach = target => {registerEventHandler(target, 'detachFromDom');};
@@ -3853,12 +3853,12 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             globalKeys.CODE_ARROW_DOWN = 'ArrowDown'; // Was Keycode 40
             globalKeys.CODE_DELETE = 'Delete'; // Was Keycode 46
             globalKeys.CODE_BACKSPACE = CODE_BACKSPACE; // Was Keycode 8
-            ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'].forEach(key => {
+            for (const key of ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']) {
                 globalKeys['CODE_' + key] = 'Key' + key;
-            });
-            ['1','2','3','4','5','6','7','8','9','0'].forEach(key => {
+            }
+            for (const key of ['1','2','3','4','5','6','7','8','9','0']) {
                 globalKeys['CODE_' + key] = 'Digit' + key;
-            });
+            }
             
             globalKeys.ARROW_KEYS = [globalKeys.CODE_ARROW_LEFT, globalKeys.CODE_ARROW_UP, globalKeys.CODE_ARROW_RIGHT, globalKeys.CODE_ARROW_DOWN];
             globalKeys.LIST_KEYS = [globalKeys.CODE_ENTER, globalKeys.CODE_SPACE, globalKeys.CODE_ESC, ...globalKeys.ARROW_KEYS];
@@ -4232,7 +4232,9 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                                 },
                                 null
                             );
-                            if (minExtraSize !== 0) flows.forEach(flow => {flow.extraSize -= minExtraSize;});
+                            if (minExtraSize !== 0) {
+                                for (const flow of flows) flow.extraSize -= minExtraSize;
+                            }
                         }
                         
                         // Total Basis Sizes
@@ -4243,7 +4245,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                         // offset from the bottom/right
                         const flowLen = flows.length;
                         if (flowLen > 1 && flexbox.wrap === 'wrapReverse') {
-                            flows.forEach(flow => {flow.crossPos = crossPos - (flow.crossPos + flow.crossSize);});
+                            for (const flow of flows) flow.crossPos = crossPos - (flow.crossPos + flow.crossSize);
                             flows.reverse();
                         }
                         
@@ -4295,16 +4297,16 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                                     // Stretch each row to fill the space.
                                     const flowGrowAmount = extraCrossSize / flowLen;
                                     let flowGrowAmountTotal = 0;
-                                    flows.forEach(flow => {
+                                    for (const flow of flows) {
                                         flow.crossSize += flowGrowAmount;
                                         flow.crossPos += flowGrowAmountTotal;
                                         flowGrowAmountTotal += flowGrowAmount;
-                                    });
+                                    }
                                     break;
                             }
                         }
                         
-                        flows.forEach(flow => {
+                        for (const flow of flows) {
                             const items = flow.items;
                             let extraSize = flow.extraSize;
                             if (extraSize > 0) {
@@ -4312,7 +4314,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                                     // Distribute extraSize using grow.
                                     const amountPerGrow = extraSize / flow.growCount;
                                     let growAmountTotal = 0;
-                                    items.forEach(item => {
+                                    for (const item of items) {
                                         // Shift items as we go so we don't have to loop over the 
                                         // items again.
                                         if (growAmountTotal > 0) adjustPositionAttrOnChild(item, isRowDirection, growAmountTotal);
@@ -4322,7 +4324,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                                             updateSizeAttrOnChild(item, isRowDirection, growAmount, true);
                                             growAmountTotal += growAmount;
                                         }
-                                    });
+                                    }
                                 } else {
                                     // Distribute extraSize using justifyContent
                                     const itemLen = items.length;
@@ -4375,7 +4377,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                                 const shrinkBasis = flow.shrinkBasis;
                                 let shrinkAmountTotal = 0;
                                 // See: https://www.madebymike.com.au/writing/understanding-flexbox/ for math
-                                items.forEach(item => {
+                                for (const item of items) {
                                     // Shift items as we go so we don't have to loop over the 
                                     // items again.
                                     if (shrinkAmountTotal < 0) adjustPositionAttrOnChild(item, isRowDirection, shrinkAmountTotal);
@@ -4385,14 +4387,13 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                                         updateSizeAttrOnChild(item, isRowDirection, shrinkAmount, true);
                                         shrinkAmountTotal += shrinkAmount;
                                     }
-                                });
+                                }
                             }
                             
                             // Align Items along cross-axis. */
                             let baselineOccurred = false;
-                            const crossSize = flow.crossSize,
-                                crossPositionOffset = flow.crossPos;
-                            items.forEach(item => {
+                            const {crossSize, crossPos:crossPositionOffset} = flow;
+                            for (const item of items) {
                                 switch (item.getAlignSelf() || alignItems) {
                                     case 'start':
                                         updatePositionAttrOnChild(item, isNotRowDirection, crossPositionOffset);
@@ -4417,10 +4418,10 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                                         updateSizeAttrOnChild(item, isNotRowDirection, crossSize, false);
                                         break;
                                 }
-                            });
+                            }
                             
                             if (baselineOccurred) flexbox.updateFlexboxLayoutBaselineAdjustment(items, isRowDirection, crossPositionOffset);
-                        });
+                        }
                         
                         flexbox.__isUpdatingFlexboxLayout = false;
                         
@@ -4703,10 +4704,12 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             @param {?Object} attrs - The attrs Object to extract values from.
             @returns {undefined}. */
         quickSet: function(attrNames, attrs) {
-            attrNames?.forEach(attrName => {
-                this[attrName] = attrs[attrName];
-                delete attrs[attrName];
-            });
+            if (attrNames) {
+                for (const attrName of attrNames) {
+                    this[attrName] = attrs[attrName];
+                    delete attrs[attrName];
+                }
+            }
         },
         
         /** Calls a setter function for each attribute in the provided map.
@@ -4813,9 +4816,6 @@ myt.Destructible = new JS.Module('Destructible', {
     /** Destroys this Object. Subclasses must call super.
         @returns {undefined} */
     destroy: function() {
-        // See http://perfectionkills.com/understanding-delete/ for details on how delete works. 
-        // This is why we use Object.keys below since it avoids iterating over many of the 
-        // properties that are not deletable.
         const self = this;
         if (self.destroyed) {
             console.warn('Already destroyed');
@@ -4824,11 +4824,11 @@ myt.Destructible = new JS.Module('Destructible', {
             const meta = self.__meta__;
             if (meta) {
                 const metaKeys = Object.keys(meta);
-                for (let i = metaKeys.length; i > 0;) delete meta[metaKeys[--i]];
+                for (let i = metaKeys.length; i > 0;) meta[metaKeys[--i]] = null;
             }
             
             const keys = Object.keys(self);
-            for (let i = keys.length; i > 0;) delete self[keys[--i]];
+            for (let i = keys.length; i > 0;) self[keys[--i]] = null;
             
             self.destroyed = true;
         }
@@ -6655,6 +6655,34 @@ myt.Destructible = new JS.Module('Destructible', {
             elem.scrollLeft = scrollLeft;
         },
         
+        /*  Removes the outer dom element for a view from the dom while a function is executed.
+            This is used for performance gains when deemed worthwhile.
+                param viewBeingRemoved:myt.View
+                param wrapperFunc:function
+                param retainFocus:boolean */
+        doWhileRemovedFromDom = (viewBeingRemoved, wrappedFunc, retainFocus) => {
+            const outerElem = viewBeingRemoved.getODE(),
+                parentElem = outerElem.parentNode;
+            if (parentElem) {
+                const doubleWrapped = () => {
+                    const nextDe = outerElem.nextElementSibling;
+                    // Remove this dom element from the dom
+                    parentElem.removeChild(outerElem);
+                    wrappedFunc();
+                    // Put this dom element back in the dom
+                    parentElem.insertBefore(outerElem, nextDe);
+                };
+                if (retainFocus) {
+                    retainFocusDuringDomUpdate(viewBeingRemoved, doubleWrapped);
+                } else {
+                    doubleWrapped();
+                }
+            } else {
+                // No parent element so just execute the function.
+                wrappedFunc();
+            }
+        },
+        
         /*  Implements isBehind and isInFrontOf methods. Returns a boolean indicating front or 
             behind respective to the "front" param.
                 param firstView:View The view to check position for
@@ -6899,7 +6927,8 @@ myt.Destructible = new JS.Module('Destructible', {
         
         // Class Methods and Attributes ////////////////////////////////////////
         extend: {
-            retainFocusDuringDomUpdate: retainFocusDuringDomUpdate
+            retainFocusDuringDomUpdate: retainFocusDuringDomUpdate,
+            doWhileRemovedFromDom: doWhileRemovedFromDom
         },
         
         
@@ -7752,28 +7781,16 @@ myt.Destructible = new JS.Module('Destructible', {
                 svs.sort(sortFunc);
                 
                 // Rearrange the DOM to match the new sort order.
-                retainFocusDuringDomUpdate(self, () => {
-                    const outerElem = self.getODE(),
-                        parentElem = outerElem.parentNode;
-                    // Remove this dom element from the dom
-                    let nextDe;
-                    if (parentElem) {
-                        nextDe = outerElem.nextElementSibling;
-                        parentElem.removeChild(outerElem);
-                    }
-                    
+                doWhileRemovedFromDom(self, () => {
                     // Copy the dom elements in the correct order to a document fragment and 
                     // then add that fragment back to the dom.
                     const fragment = document.createDocumentFragment(),
                         len = svs.length;
                     for (let i = 0; len > i;) fragment.appendChild(svs[i++].getODE());
                     self.getIDE().appendChild(fragment);
-                    
-                    // Put this dom element back in the dom
-                    parentElem?.insertBefore(outerElem, nextDe);
-                    
-                    self.doSubviewsReorderedInDom(null);
-                });
+                }, true);
+                
+                self.doSubviewsReorderedInDom(null);
             }
         },
         
@@ -10314,7 +10331,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         // Methods /////////////////////////////////////////////////////////////
         addTransitions: function(transitions) {
-            transitions.forEach(transition => this.addTransition(...transition));
+            for (const transition of transitions) this.addTransition(...transition);
         },
         
         addTransition: function(transitionName, from, to) {
@@ -10723,20 +10740,20 @@ myt.Destructible = new JS.Module('Destructible', {
                 if (v) {
                     existingDragView = v;
                     
-                    filterList(existingDragView, dropTargets).forEach(target => {
+                    for (const target of filterList(existingDragView, dropTargets)) {
                         target.notifyDragStart(existingDragView);
-                    });
-                    filterList(existingDragView, autoScrollers).forEach(target => {
+                    }
+                    for (const target of filterList(existingDragView, autoScrollers)) {
                         target.notifyAutoScrollerDragStart(existingDragView);
-                    });
+                    }
                     fireGlobalDragManagerEvent('startDrag', v);
                 } else {
-                    filterList(existingDragView, dropTargets).forEach(target => {
+                    for (const target of filterList(existingDragView, dropTargets)) {
                         target.notifyDragStop(existingDragView);
-                    });
-                    filterList(existingDragView, autoScrollers).forEach(target => {
+                    }
+                    for (const target of filterList(existingDragView, autoScrollers)) {
                         target.notifyAutoScrollerDragStop(existingDragView);
-                    });
+                    }
                     fireGlobalDragManagerEvent('stopDrag', v);
                 }
             }
@@ -12380,7 +12397,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         math = Math,
         
-        G = pkg.global,
+        {View, global:G} = pkg,
         GlobalFocus = G.focus,
         GlobalKeys = G.keys,
         {LIST_KEYS, CODE_ESC} = GlobalKeys,
@@ -12393,50 +12410,45 @@ myt.Destructible = new JS.Module('Destructible', {
                 isFixedWidth = fixedWidth > 0,
                 contentView = listView.getContentView(), 
                 layouts = contentView.getLayouts();
+            let i = 0;
+            
             // Lock layouts during reconfiguration
-            layouts.forEach(layout => {layout.incrementLockedCounter();});
+            for (const layout of layouts) layout.incrementLockedCounter();
             
             // Performance: Remove from dom while doing inserts
-            const ode = contentView.getODE(),
-                {parentNode, nextSibling} = ode;
-            parentNode.removeChild(ode);
-            
-            // Reconfigure list
-            let i = 0;
-            const itemAttrs = {listView:listView};
-            if (isFixedWidth) {
-                itemAttrs.width = fixedWidth;
-                itemAttrs.enableEllipsis = true;
-            }
-            for (; cfgLen > i; ++i) {
-                const cfgItem = cfg[i],
-                    cfgClass = cfgItem.klass ?? defaultItemClass,
-                    cfgAttrs = cfgItem.attrs ?? {};
-                let item = items[i];
-                
-                // Destroy existing item if it's the wrong class
-                if (item && !item.isA(cfgClass)) {
-                    item.destroy();
-                    item = null;
+            View.doWhileRemovedFromDom(contentView, () => {
+                // Reconfigure list
+                const itemAttrs = {listView:listView};
+                if (isFixedWidth) {
+                    itemAttrs.width = fixedWidth;
+                    itemAttrs.enableEllipsis = true;
                 }
-                
-                // Create a new item if no item exists
-                item ??= items[i] = new cfgClass(contentView, {...itemAttrs});
-                
-                // Apply config to item
-                if (item) {
-                    item.callSetters(cfgAttrs);
+                for (; cfgLen > i; ++i) {
+                    const cfgItem = cfg[i],
+                        cfgClass = cfgItem.klass ?? defaultItemClass,
+                        cfgAttrs = cfgItem.attrs ?? {};
+                    let item = items[i];
                     
-                    // Create an item index to sort the layout subviews on. This is necessary when 
-                    // the class of list items change so that the newly created items don't end up 
-                    // out of order.
-                    item.__LAYOUT_IDX = i;
+                    // Destroy existing item if it's the wrong class
+                    if (item && !item.isA(cfgClass)) {
+                        item.destroy();
+                        item = null;
+                    }
+                    
+                    // Create a new item if no item exists
+                    item ??= items[i] = new cfgClass(contentView, {...itemAttrs});
+                    
+                    // Apply config to item
+                    if (item) {
+                        item.callSetters(cfgAttrs);
+                        
+                        // Create an item index to sort the layout subviews on. This is necessary when 
+                        // the class of list items change so that the newly created items don't end up 
+                        // out of order.
+                        item.__LAYOUT_IDX = i;
+                    }
                 }
-            }
-            
-            // Performance: Put back in dom.
-            parentNode.insertBefore(ode, nextSibling);
-            
+            });
             
             let minWidth;
             if (isFixedWidth) {
@@ -12462,11 +12474,11 @@ myt.Destructible = new JS.Module('Destructible', {
             listView.updateContentWidth(contentView, minWidth);
             
             // Unlock layouts and update
-            layouts.forEach(layout => {
+            for (const layout of layouts) {
                 layout.sortSubviews((a, b) => a.__LAYOUT_IDX - b.__LAYOUT_IDX);
                 layout.decrementLockedCounter();
                 layout.update();
-            });
+            }
         },
         
         /** Defines the interface list view items must support.
@@ -12832,7 +12844,7 @@ myt.Destructible = new JS.Module('Destructible', {
     /** A separator item in an myt.ListView
         
         @class */
-    pkg.ListViewSeparator = new JSClass('ListViewSeparator', pkg.View, {
+    pkg.ListViewSeparator = new JSClass('ListViewSeparator', View, {
         include: [ListViewItemMixin],
         
         
@@ -13089,9 +13101,9 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {!Object} event
             @returns {undefined} */
         __updateForBAG: function(event) {
-            this.__bags.forEach(bag => {
+            for (const bag of this.__bags) {
                 if (bag.attrName === event.type) bag[event.value ? 'setTrue' : 'setFalse'](this);
-            });
+            }
         }
     });
 })(myt);
@@ -13982,7 +13994,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 case 'left': cornerKeys.push('TopLeft','BottomLeft'); break;
                 case 'right': cornerKeys.push('TopRight','BottomRight'); break;
             }
-            cornerKeys.forEach(cornerKey => {tab['setRounded' + cornerKey + 'Corner'](tab.cornerRadius || 0);});
+            for (const cornerKey of cornerKeys) tab['setRounded' + cornerKey + 'Corner'](tab.cornerRadius || 0);
         },
         
         /** A simple tab component.
@@ -14962,7 +14974,9 @@ myt.Destructible = new JS.Module('Destructible', {
         
         setOptions: function(v) {
             this.destroyAllOptions();
-            if (isArray(v)) v.forEach(option => {this.addOption(option);});
+            if (isArray(v)) {
+                for (const option of v) this.addOption(option);
+            }
         },
         
         /** The options are just the subviews.
@@ -15035,7 +15049,7 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         destroyAllOptions: function() {
-            this.getOptions().forEach(option => {option.destroy();});
+            for (const option of this.getOptions()) option.destroy();
         },
         
         /** Destroys an option that has the provided value.
@@ -15055,17 +15069,18 @@ myt.Destructible = new JS.Module('Destructible', {
             @returns {undefined} */
         deselectAll: function() {
             let changed = false;
-            this.getOptions().forEach(option => {
+            for (const option of this.getOptions()) {
                 if (option.isSelected()) {
                     option.setSelected(false);
                     changed = true;
                 }
-            });
+            }
             if (changed) this.__doChanged();
         },
         
         selectValues: function(values) {
-            (isArray(values) ? values : [values]).forEach(value => {this.selectValue(value);});
+            if (!isArray(values)) values = [values];
+            for (const value of values) this.selectValue(value);
         },
         
         /** Selects the option that has the provided value.
@@ -15592,10 +15607,13 @@ myt.Destructible = new JS.Module('Destructible', {
             @param isValid:boolean The currently determined validity.
             @returns boolean true if this form is valid, false otherwise. */
         applyValidation = (form, isValid) => {
-            const errorMessages = [];
-            form.__v?.forEach(validator => {
-                isValid = validator.isFormValid(form, null, errorMessages) && isValid;
-            });
+            const errorMessages = [],
+                __v = form.__v;
+            if (__v) {
+                for (const validator of __v) {
+                    isValid = validator.isFormValid(form, null, errorMessages) && isValid;
+                }
+            }
             form.setErrorMessages(errorMessages);
             form.setIsValid(isValid);
             return isValid;
@@ -15607,9 +15625,12 @@ myt.Destructible = new JS.Module('Destructible', {
                 see if that processor should be run or not.
             @returns * The processed value. */
         processValue = (formElement, value, checkAttr) => {
-            formElement.__vp?.forEach(processor => {
-                if (processor[checkAttr]) value = processor.process(value);
-            });
+            const __vp = formElement.__vp;
+            if (__vp) {
+                for (const processor of __vp) {
+                    if (processor[checkAttr]) value = processor.process(value);
+                }
+            }
             return value;
         },
         
@@ -17157,7 +17178,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 
                 if (v) {
                     if (!Array.isArray(v)) v = [v];
-                    v.forEach(urlStr => {this.addFile(Uploader.createFile(urlStr));});
+                    for (const urlStr of v) this.addFile(Uploader.createFile(urlStr));
                 }
                 
                 return this.callSuper ? this.callSuper(v) : v;
@@ -17627,9 +17648,9 @@ myt.Destructible = new JS.Module('Destructible', {
                 }, [SizeToParent]);
                 
                 // Eat mouse events
-                ['mouseover','mouseout','mousedown','mouseup','click','dblclick','mousemove'].forEach(eventName => {
+                for (const eventName of ['mouseover','mouseout','mousedown','mouseup','click','dblclick','mousemove']) {
                     self.attachDomObserver(self, 'eatMouseEvent', eventName);
-                });
+                }
                 
                 RootView.setupCaptureDrop(self);
             },
@@ -17942,9 +17963,9 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         registerForNotification = instance => {
-            ['Free 400', 'Free 900', 'Brands 400'].forEach(fontName => {
+            for (const fontName of ['Free 400', 'Free 900', 'Brands 400']) {
                 pkg.registerForFontNotification(instance, 'Font Awesome 5 ' + fontName);
-            });
+            }
         };
     
     /** An adapter for FontAwesome.
@@ -18094,10 +18115,10 @@ myt.Destructible = new JS.Module('Destructible', {
         CHECKMARK = makeTag(['check']),
         
         initializePaletteLookup = palette => {
-            palette.forEach(color => {
+            for (let color of palette) {
                 if (color?.length === 7) color += 'ff';
                 paletteLookup[color] = true;
-            });
+            }
         },
         paletteLookup = {},
         
@@ -18339,7 +18360,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 while (i) subs[--i].destroy();
                 const alreadyAdded = new Set();
                 defaultPalette.push(...selectionPalette);
-                defaultPalette.forEach(color => {
+                for (let color of defaultPalette) {
                     if (supportsAlphaChannel || color.length === 7) {
                         if (color.length === 7) color += 'ff';
                         if (!alreadyAdded.has(color)) {
@@ -18347,7 +18368,7 @@ myt.Destructible = new JS.Module('Destructible', {
                             alreadyAdded.add(color);
                         }
                     }
-                });
+                }
             }, 50)
         }),
         
@@ -19221,25 +19242,30 @@ myt.Destructible = new JS.Module('Destructible', {
                 let attrs = opts.cancelAttrs ?? {};
                 attrs.name ??= 'cancelBtn';
                 attrs.text ??= opts.cancelTxt;
-                btnConfigKeys.forEach(key => {
+                for (let key of btnConfigKeys) {
                     key += 'Color';
                     if (opts[key] != null) attrs[key] = opts[key];
-                });
+                }
                 const cancelBtn = self.makeButton(btnContainer, attrs);
                 
                 // Confirm Button
                 attrs = opts.confirmAttrs ?? {};
                 attrs.name ??= 'confirmBtn';
                 attrs.text ??= opts.confirmTxt;
-                btnConfigKeys.forEach(key => {
+                for (let key of btnConfigKeys) {
                     key += 'Color';
                     const optsKey = key + 'Confirm';
                     if (opts[optsKey] != null) attrs[key] = opts[optsKey];
-                });
+                }
                 self.makeButton(btnContainer, attrs);
                 
                 // Additional Buttons
-                opts.buttons?.forEach(buttonAttrs => {self.makeButton(btnContainer, buttonAttrs);});
+                const buttons = opts.button;
+                if (buttons) {
+                    for (const buttonAttrs of buttons) {
+                        self.makeButton(btnContainer, buttonAttrs);
+                    }
+                }
                 
                 new SizeToChildren(btnContainer, {axis:'y'});
                 new SpacedLayout(btnContainer, {spacing:4, collapseParent:true});
@@ -20470,7 +20496,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     }
                     
                     // Distribute
-                    resizeInfo.forEach(info => {info.hdr.setValue(info.hdr.value + info.amt);});
+                    for (const info of resizeInfo) info.hdr.setValue(info.hdr.value + info.amt);
                     
                     nextFunc?.(extra);
                 }
@@ -20672,11 +20698,11 @@ myt.Destructible = new JS.Module('Destructible', {
                     this.setMaxWidth(0);
                     this.setMinWidth(0);
                     this.__skipInvisibleHeaders = true;
-                    this.columnHeaders.forEach(hdr => {
+                    for (const hdr of this.columnHeaders) {
                         this.notifyHdrXChange(hdr);
                         this.notifyHdrWidthChange(hdr);
                         this.notifyHdrVisibilityChange(hdr);
-                    });
+                    }
                     this.__skipInvisibleHeaders = false;
                     
                     this.doSort();
@@ -20771,11 +20797,15 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             notifyHdrXChange: function(columnHeader) {
-                if (!this.isLocked()) this.rows.forEach(row => {row.notifyHdrXChange(columnHeader);});
+                if (!this.isLocked()) {
+                    for (const row of this.rows) row.notifyHdrXChange(columnHeader);
+                }
             },
             
             notifyHdrWidthChange: function(columnHeader) {
-                if (!this.isLocked()) this.rows.forEach(row => {row.notifyHdrWidthChange(columnHeader);});
+                if (!this.isLocked()) {
+                    for (const row of this.rows) row.notifyHdrWidthChange(columnHeader);
+                }
             },
             
             notifyHdrVisibilityChange: function(columnHeader) {
@@ -20796,7 +20826,7 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             updateRowsForVisibilityChange: function(columnHeader) {
-                this.rows.forEach(row => {row.notifyHdrVisibilityChange(columnHeader);});
+                for (const row of this.rows) row.notifyHdrVisibilityChange(columnHeader);
             },
             
             // Rows
@@ -20836,12 +20866,12 @@ myt.Destructible = new JS.Module('Destructible', {
                     // Update cell positions
                     if (!this.locked) {
                         const w = this.width;
-                        this.columnHeaders.forEach(hdr => {
+                        for (const hdr of this.columnHeaders) {
                             row.setWidth(w);
                             row.notifyHdrXChange(hdr);
                             row.notifyHdrWidthChange(hdr);
                             row.notifyHdrVisibilityChange(hdr);
-                        });
+                        }
                         
                         if (!doNotSort) this.doSort();
                     }
@@ -20858,7 +20888,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     // Determine extra width to distribute/consume
                     const hdrs = this.getVisibleHdrs();
                     let maxExtent = 0;
-                    hdrs.forEach(hdr => {maxExtent = mathMax(maxExtent, hdr.x + hdr.width);});
+                    for (const hdr of hdrs) maxExtent = mathMax(maxExtent, hdr.x + hdr.width);
                     
                     // Distribute extra width to resizable flex columns and then to 
                     // non-flex columns.
@@ -21241,14 +21271,14 @@ myt.Destructible = new JS.Module('Destructible', {
         setLocked: function(v) {
             // Performance: don't update layouts until the grid is unlocked.
             if (this.inited) {
-                [this.header.xLayout, this.header.yLayout, this.content.yLayout].forEach(layout => {
+                for (const layout of [this.header.xLayout, this.header.yLayout, this.content.yLayout]) {
                     if (v) {
                         layout.incrementLockedCounter();
                     } else {
                         layout.decrementLockedCounter();
                         layout.update();
                     }
-                });
+                }
             }
             this.callSuper(v);
         },
@@ -21262,7 +21292,7 @@ myt.Destructible = new JS.Module('Destructible', {
             const content = this.content,
                 w = event.value;
             content.setWidth(w);
-            content.getSubviews().forEach(sv => {sv.setWidth(w);});
+            for (const sv of content.getSubviews()) sv.setWidth(w);
         },
         
         /** @private
@@ -21596,7 +21626,7 @@ myt.Destructible = new JS.Module('Destructible', {
                         const listView = this._listView,
                             w = this.width;
                         listView.setWidth(w);
-                        listView.getSubviews().forEach(sv => {sv.setWidth(w);});
+                        for (const sv of listView.getSubviews()) sv.setWidth(w);
                     }
                 }
             },
@@ -22073,23 +22103,26 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** @overrides myt.InfiniteList */
             updateRow: function(row) {
-                this.gridHeader?.columnHeaders.forEach(hdr => {
-                    row.notifyXChange(hdr);
-                    row.notifyWidthChange(hdr);
-                    row.notifyVisibilityChange(hdr);
-                });
+                const gridHeader = this.gridHeader;
+                if (gridHeader) {
+                    for (const hdr of gridHeader.columnHeaders) {
+                        row.notifyXChange(hdr);
+                        row.notifyWidthChange(hdr);
+                        row.notifyVisibilityChange(hdr);
+                    }
+                }
             },
             
             notifyXChange: function(columnHeader) {
-                this.getVisibleRows().forEach(row => {row.notifyXChange(columnHeader);});
+                for (const row of this.getVisibleRows()) row.notifyXChange(columnHeader);
             },
             
             notifyWidthChange: function(columnHeader) {
-                this.getVisibleRows().forEach(row => {row.notifyWidthChange(columnHeader);});
+                for (const row of this.getVisibleRows()) row.notifyWidthChange(columnHeader);
             },
             
             notifyVisibilityChange: function(columnHeader) {
-                this.getVisibleRows().forEach(row => {row.notifyVisibilityChange(columnHeader);});
+                for (const row of this.getVisibleRows()) row.notifyVisibilityChange(columnHeader);
             }
         });
     
@@ -22149,7 +22182,7 @@ myt.Destructible = new JS.Module('Destructible', {
             this.callSuper(v);
             if (this.inited) {
                 v = this.height;
-                this.columnHeaders.forEach(hdr => {hdr.setHeight(v);});
+                for (const hdr of this.columnHeaders) hdr.setHeight(v);
             }
         },
         
@@ -22551,10 +22584,10 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {!string} moreDir
             @returns {undefined} */
         resetScroll = (autoScroller, lessDir, moreDir) => {
-            [lessDir, moreDir].forEach(dir => {
+            for (const dir of [lessDir, moreDir]) {
                 autoScroller['__is' + dir] = false;
                 autoScroller['__tmrId' + dir] = null;
-            });
+            }
         },
         
         /*  @param {!Object} autoScroller
@@ -23701,37 +23734,37 @@ myt.Destructible = new JS.Module('Destructible', {
         
         mixin = {};
     
-    [
+    for (const funcName of [
         'save','restore','scale','rotate','translate','transform','setTransform',
         'clearRect','fillRect','strokeRect','beginPath','closePath','moveTo','lineTo',
-        'quadraticCurveTo','bezierCurveTo','arcTo','rect','arc','fill','stroke','clip','isPointInPath',
-        'fillText','strokeText','drawImage','createImageData','putImageData'
-    ].forEach(funcName => {
+        'quadraticCurveTo','bezierCurveTo','arcTo','rect','arc','fill','stroke','clip',
+        'isPointInPath','fillText','strokeText','drawImage','createImageData','putImageData'
+    ]) {
         mixin[funcName] = function(...args) {
             this.__ctx[funcName](...args);
         };
-    });
+    }
     
-    [
+    for (const funcName of [
         'createLinearGradient','createRadialGradient','createPattern','measureText','getImageData'
-    ].forEach(funcName => {
+    ]) {
         mixin[funcName] = function(...args) {
             return this.__ctx[funcName](...args);
         };
-    });
+    }
     
-    [
+    for (const propName of [
         'fillStyle','strokeStyle','shadowColor','shadowBlur','shadowOffsetX','shadowOffsetY',
         'lineWidth','lineCap','lineJoin','miterLimit','font','textAlign','textBaseline',
         'globalAlpha','globalCompositeOperation'
-    ].forEach(propName => {
+    ]) {
         mixin[AccessorSupport.generateSetterName(propName)] = function(v) {
             this.__ctx[propName] = v;
         };
         mixin[AccessorSupport.generateGetterName(propName)] = function() {
             return this.__ctx[propName];
         };
-    });
+    }
     
     /** A view for programatic drawing. This view is backed by an html canvas element.
         
@@ -23992,9 +24025,9 @@ myt.Destructible = new JS.Module('Destructible', {
                 Color = pkg.Color;
             
             // Convert string based hex colors to myt.Color objects.
-            colors.forEach(config => {
+            for (const config of colors) {
                 if (typeof config.color === 'string') config.color = Color.makeColorFromHexString(config.color);
-            });
+            }
             
             // Calculate Colors
             if (segments < 1) {

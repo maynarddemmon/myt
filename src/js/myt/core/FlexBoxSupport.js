@@ -272,7 +272,9 @@
                                 },
                                 null
                             );
-                            if (minExtraSize !== 0) flows.forEach(flow => {flow.extraSize -= minExtraSize;});
+                            if (minExtraSize !== 0) {
+                                for (const flow of flows) flow.extraSize -= minExtraSize;
+                            }
                         }
                         
                         // Total Basis Sizes
@@ -283,7 +285,7 @@
                         // offset from the bottom/right
                         const flowLen = flows.length;
                         if (flowLen > 1 && flexbox.wrap === 'wrapReverse') {
-                            flows.forEach(flow => {flow.crossPos = crossPos - (flow.crossPos + flow.crossSize);});
+                            for (const flow of flows) flow.crossPos = crossPos - (flow.crossPos + flow.crossSize);
                             flows.reverse();
                         }
                         
@@ -335,16 +337,16 @@
                                     // Stretch each row to fill the space.
                                     const flowGrowAmount = extraCrossSize / flowLen;
                                     let flowGrowAmountTotal = 0;
-                                    flows.forEach(flow => {
+                                    for (const flow of flows) {
                                         flow.crossSize += flowGrowAmount;
                                         flow.crossPos += flowGrowAmountTotal;
                                         flowGrowAmountTotal += flowGrowAmount;
-                                    });
+                                    }
                                     break;
                             }
                         }
                         
-                        flows.forEach(flow => {
+                        for (const flow of flows) {
                             const items = flow.items;
                             let extraSize = flow.extraSize;
                             if (extraSize > 0) {
@@ -352,7 +354,7 @@
                                     // Distribute extraSize using grow.
                                     const amountPerGrow = extraSize / flow.growCount;
                                     let growAmountTotal = 0;
-                                    items.forEach(item => {
+                                    for (const item of items) {
                                         // Shift items as we go so we don't have to loop over the 
                                         // items again.
                                         if (growAmountTotal > 0) adjustPositionAttrOnChild(item, isRowDirection, growAmountTotal);
@@ -362,7 +364,7 @@
                                             updateSizeAttrOnChild(item, isRowDirection, growAmount, true);
                                             growAmountTotal += growAmount;
                                         }
-                                    });
+                                    }
                                 } else {
                                     // Distribute extraSize using justifyContent
                                     const itemLen = items.length;
@@ -415,7 +417,7 @@
                                 const shrinkBasis = flow.shrinkBasis;
                                 let shrinkAmountTotal = 0;
                                 // See: https://www.madebymike.com.au/writing/understanding-flexbox/ for math
-                                items.forEach(item => {
+                                for (const item of items) {
                                     // Shift items as we go so we don't have to loop over the 
                                     // items again.
                                     if (shrinkAmountTotal < 0) adjustPositionAttrOnChild(item, isRowDirection, shrinkAmountTotal);
@@ -425,14 +427,13 @@
                                         updateSizeAttrOnChild(item, isRowDirection, shrinkAmount, true);
                                         shrinkAmountTotal += shrinkAmount;
                                     }
-                                });
+                                }
                             }
                             
                             // Align Items along cross-axis. */
                             let baselineOccurred = false;
-                            const crossSize = flow.crossSize,
-                                crossPositionOffset = flow.crossPos;
-                            items.forEach(item => {
+                            const {crossSize, crossPos:crossPositionOffset} = flow;
+                            for (const item of items) {
                                 switch (item.getAlignSelf() || alignItems) {
                                     case 'start':
                                         updatePositionAttrOnChild(item, isNotRowDirection, crossPositionOffset);
@@ -457,10 +458,10 @@
                                         updateSizeAttrOnChild(item, isNotRowDirection, crossSize, false);
                                         break;
                                 }
-                            });
+                            }
                             
                             if (baselineOccurred) flexbox.updateFlexboxLayoutBaselineAdjustment(items, isRowDirection, crossPositionOffset);
-                        });
+                        }
                         
                         flexbox.__isUpdatingFlexboxLayout = false;
                         

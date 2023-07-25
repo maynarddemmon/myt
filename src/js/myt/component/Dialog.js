@@ -92,10 +92,10 @@
         CHECKMARK = makeTag(['check']),
         
         initializePaletteLookup = palette => {
-            palette.forEach(color => {
+            for (let color of palette) {
                 if (color?.length === 7) color += 'ff';
                 paletteLookup[color] = true;
-            });
+            }
         },
         paletteLookup = {},
         
@@ -337,7 +337,7 @@
                 while (i) subs[--i].destroy();
                 const alreadyAdded = new Set();
                 defaultPalette.push(...selectionPalette);
-                defaultPalette.forEach(color => {
+                for (let color of defaultPalette) {
                     if (supportsAlphaChannel || color.length === 7) {
                         if (color.length === 7) color += 'ff';
                         if (!alreadyAdded.has(color)) {
@@ -345,7 +345,7 @@
                             alreadyAdded.add(color);
                         }
                     }
-                });
+                }
             }, 50)
         }),
         
@@ -1219,25 +1219,30 @@
                 let attrs = opts.cancelAttrs ?? {};
                 attrs.name ??= 'cancelBtn';
                 attrs.text ??= opts.cancelTxt;
-                btnConfigKeys.forEach(key => {
+                for (let key of btnConfigKeys) {
                     key += 'Color';
                     if (opts[key] != null) attrs[key] = opts[key];
-                });
+                }
                 const cancelBtn = self.makeButton(btnContainer, attrs);
                 
                 // Confirm Button
                 attrs = opts.confirmAttrs ?? {};
                 attrs.name ??= 'confirmBtn';
                 attrs.text ??= opts.confirmTxt;
-                btnConfigKeys.forEach(key => {
+                for (let key of btnConfigKeys) {
                     key += 'Color';
                     const optsKey = key + 'Confirm';
                     if (opts[optsKey] != null) attrs[key] = opts[optsKey];
-                });
+                }
                 self.makeButton(btnContainer, attrs);
                 
                 // Additional Buttons
-                opts.buttons?.forEach(buttonAttrs => {self.makeButton(btnContainer, buttonAttrs);});
+                const buttons = opts.button;
+                if (buttons) {
+                    for (const buttonAttrs of buttons) {
+                        self.makeButton(btnContainer, buttonAttrs);
+                    }
+                }
                 
                 new SizeToChildren(btnContainer, {axis:'y'});
                 new SpacedLayout(btnContainer, {spacing:4, collapseParent:true});

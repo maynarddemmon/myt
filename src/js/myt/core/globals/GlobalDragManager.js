@@ -43,20 +43,20 @@
                 if (v) {
                     existingDragView = v;
                     
-                    filterList(existingDragView, dropTargets).forEach(target => {
+                    for (const target of filterList(existingDragView, dropTargets)) {
                         target.notifyDragStart(existingDragView);
-                    });
-                    filterList(existingDragView, autoScrollers).forEach(target => {
+                    }
+                    for (const target of filterList(existingDragView, autoScrollers)) {
                         target.notifyAutoScrollerDragStart(existingDragView);
-                    });
+                    }
                     fireGlobalDragManagerEvent('startDrag', v);
                 } else {
-                    filterList(existingDragView, dropTargets).forEach(target => {
+                    for (const target of filterList(existingDragView, dropTargets)) {
                         target.notifyDragStop(existingDragView);
-                    });
-                    filterList(existingDragView, autoScrollers).forEach(target => {
+                    }
+                    for (const target of filterList(existingDragView, autoScrollers)) {
                         target.notifyAutoScrollerDragStop(existingDragView);
-                    });
+                    }
                     fireGlobalDragManagerEvent('stopDrag', v);
                 }
             }

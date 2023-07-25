@@ -60,13 +60,13 @@
             // name. Seems OK to just do it for all fonts since double quotes in a font name is 
             // most likely going to be confusing anyhow.
             const familyName = fontFace.family.split('"').join('');
-            [familyName, familyName + ' ' + fontFace.weight].forEach(fontName => {
+            for (const fontName of [familyName, familyName + ' ' + fontFace.weight]) {
                 if (!fontLoaded[fontName]) {
                     fontLoaded[fontName] = true;
                     const targets = fontTargets[fontName] ?? [];
                     while (targets.length) notifyInstanceThatFontLoaded(targets.pop());
                 }
-            });
+            }
         },
         
         notifyInstanceThatFontLoaded = instance => {
@@ -335,16 +335,16 @@
             // Fonts
             loadFontFaces: (fontList, callback) => {
                 const fonts = [];
-                fontList.forEach(fontInfo => {
+                for (const fontInfo of fontList) {
                     const fontFace = new FontFace(fontInfo.family, 'url(' + fontInfo.url + ')', fontInfo.options);
                     fonts.push(fontFace.load());
-                });
+                }
                 
                 Promise.all(fonts).then(loadedFonts => {
-                    loadedFonts.forEach(font => {
+                    for (const font of loadedFonts) {
                         docFonts.add(font);
                         notifyFontLoaded(font);
-                    });
+                    }
                     callback?.(loadedFonts);
                 });
             },
@@ -722,6 +722,6 @@
         };
     
     docFonts.onloadingdone = fontFaceSetEvent => {
-        fontFaceSetEvent.fontfaces.forEach(fontFace => {notifyFontLoaded(fontFace);});
+        for (const fontFace of fontFaceSetEvent.fontfaces) notifyFontLoaded(fontFace);
     };
 })(global);

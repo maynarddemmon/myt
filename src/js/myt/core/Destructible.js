@@ -12,9 +12,6 @@ myt.Destructible = new JS.Module('Destructible', {
     /** Destroys this Object. Subclasses must call super.
         @returns {undefined} */
     destroy: function() {
-        // See http://perfectionkills.com/understanding-delete/ for details on how delete works. 
-        // This is why we use Object.keys below since it avoids iterating over many of the 
-        // properties that are not deletable.
         const self = this;
         if (self.destroyed) {
             console.warn('Already destroyed');
@@ -23,11 +20,11 @@ myt.Destructible = new JS.Module('Destructible', {
             const meta = self.__meta__;
             if (meta) {
                 const metaKeys = Object.keys(meta);
-                for (let i = metaKeys.length; i > 0;) delete meta[metaKeys[--i]];
+                for (let i = metaKeys.length; i > 0;) meta[metaKeys[--i]] = null;
             }
             
             const keys = Object.keys(self);
-            for (let i = keys.length; i > 0;) delete self[keys[--i]];
+            for (let i = keys.length; i > 0;) self[keys[--i]] = null;
             
             self.destroyed = true;
         }

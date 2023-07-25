@@ -172,7 +172,7 @@
         
         // Methods /////////////////////////////////////////////////////////////
         addTransitions: function(transitions) {
-            transitions.forEach(transition => this.addTransition(...transition));
+            for (const transition of transitions) this.addTransition(...transition);
         },
         
         addTransition: function(transitionName, from, to) {

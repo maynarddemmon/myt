@@ -12,7 +12,7 @@
                 case 'left': cornerKeys.push('TopLeft','BottomLeft'); break;
                 case 'right': cornerKeys.push('TopRight','BottomRight'); break;
             }
-            cornerKeys.forEach(cornerKey => {tab['setRounded' + cornerKey + 'Corner'](tab.cornerRadius || 0);});
+            for (const cornerKey of cornerKeys) tab['setRounded' + cornerKey + 'Corner'](tab.cornerRadius || 0);
         },
         
         /** A simple tab component.

@@ -3,7 +3,7 @@
         
         math = Math,
         
-        G = pkg.global,
+        {View, global:G} = pkg,
         GlobalFocus = G.focus,
         GlobalKeys = G.keys,
         {LIST_KEYS, CODE_ESC} = GlobalKeys,
@@ -16,50 +16,45 @@
                 isFixedWidth = fixedWidth > 0,
                 contentView = listView.getContentView(), 
                 layouts = contentView.getLayouts();
+            let i = 0;
+            
             // Lock layouts during reconfiguration
-            layouts.forEach(layout => {layout.incrementLockedCounter();});
+            for (const layout of layouts) layout.incrementLockedCounter();
             
             // Performance: Remove from dom while doing inserts
-            const ode = contentView.getODE(),
-                {parentNode, nextSibling} = ode;
-            parentNode.removeChild(ode);
-            
-            // Reconfigure list
-            let i = 0;
-            const itemAttrs = {listView:listView};
-            if (isFixedWidth) {
-                itemAttrs.width = fixedWidth;
-                itemAttrs.enableEllipsis = true;
-            }
-            for (; cfgLen > i; ++i) {
-                const cfgItem = cfg[i],
-                    cfgClass = cfgItem.klass ?? defaultItemClass,
-                    cfgAttrs = cfgItem.attrs ?? {};
-                let item = items[i];
-                
-                // Destroy existing item if it's the wrong class
-                if (item && !item.isA(cfgClass)) {
-                    item.destroy();
-                    item = null;
+            View.doWhileRemovedFromDom(contentView, () => {
+                // Reconfigure list
+                const itemAttrs = {listView:listView};
+                if (isFixedWidth) {
+                    itemAttrs.width = fixedWidth;
+                    itemAttrs.enableEllipsis = true;
                 }
-                
-                // Create a new item if no item exists
-                item ??= items[i] = new cfgClass(contentView, {...itemAttrs});
-                
-                // Apply config to item
-                if (item) {
-                    item.callSetters(cfgAttrs);
+                for (; cfgLen > i; ++i) {
+                    const cfgItem = cfg[i],
+                        cfgClass = cfgItem.klass ?? defaultItemClass,
+                        cfgAttrs = cfgItem.attrs ?? {};
+                    let item = items[i];
                     
-                    // Create an item index to sort the layout subviews on. This is necessary when 
-                    // the class of list items change so that the newly created items don't end up 
-                    // out of order.
-                    item.__LAYOUT_IDX = i;
+                    // Destroy existing item if it's the wrong class
+                    if (item && !item.isA(cfgClass)) {
+                        item.destroy();
+                        item = null;
+                    }
+                    
+                    // Create a new item if no item exists
+                    item ??= items[i] = new cfgClass(contentView, {...itemAttrs});
+                    
+                    // Apply config to item
+                    if (item) {
+                        item.callSetters(cfgAttrs);
+                        
+                        // Create an item index to sort the layout subviews on. This is necessary when 
+                        // the class of list items change so that the newly created items don't end up 
+                        // out of order.
+                        item.__LAYOUT_IDX = i;
+                    }
                 }
-            }
-            
-            // Performance: Put back in dom.
-            parentNode.insertBefore(ode, nextSibling);
-            
+            });
             
             let minWidth;
             if (isFixedWidth) {
@@ -85,11 +80,11 @@
             listView.updateContentWidth(contentView, minWidth);
             
             // Unlock layouts and update
-            layouts.forEach(layout => {
+            for (const layout of layouts) {
                 layout.sortSubviews((a, b) => a.__LAYOUT_IDX - b.__LAYOUT_IDX);
                 layout.decrementLockedCounter();
                 layout.update();
-            });
+            }
         },
         
         /** Defines the interface list view items must support.
@@ -455,7 +450,7 @@
     /** A separator item in an myt.ListView
         
         @class */
-    pkg.ListViewSeparator = new JSClass('ListViewSeparator', pkg.View, {
+    pkg.ListViewSeparator = new JSClass('ListViewSeparator', View, {
         include: [ListViewItemMixin],
         
         

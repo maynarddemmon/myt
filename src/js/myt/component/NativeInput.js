@@ -764,7 +764,9 @@
         
         setOptions: function(v) {
             this.destroyAllOptions();
-            if (isArray(v)) v.forEach(option => {this.addOption(option);});
+            if (isArray(v)) {
+                for (const option of v) this.addOption(option);
+            }
         },
         
         /** The options are just the subviews.
@@ -837,7 +839,7 @@
         },
         
         destroyAllOptions: function() {
-            this.getOptions().forEach(option => {option.destroy();});
+            for (const option of this.getOptions()) option.destroy();
         },
         
         /** Destroys an option that has the provided value.
@@ -857,17 +859,18 @@
             @returns {undefined} */
         deselectAll: function() {
             let changed = false;
-            this.getOptions().forEach(option => {
+            for (const option of this.getOptions()) {
                 if (option.isSelected()) {
                     option.setSelected(false);
                     changed = true;
                 }
-            });
+            }
             if (changed) this.__doChanged();
         },
         
         selectValues: function(values) {
-            (isArray(values) ? values : [values]).forEach(value => {this.selectValue(value);});
+            if (!isArray(values)) values = [values];
+            for (const value of values) this.selectValue(value);
         },
         
         /** Selects the option that has the provided value.

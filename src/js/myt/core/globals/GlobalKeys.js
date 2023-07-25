@@ -65,9 +65,9 @@
         },
         
         registerEventHandler = (target, action) => {
-            ['keydown','keypress','keyup'].forEach(eventName => {
+            for (const eventName of ['keydown','keypress','keyup']) {
                 globalKeys[action](target, '__hndl_' + eventName, eventName);
-            });
+            }
         },
         attach = target => {registerEventHandler(target, 'attachToDom');},
         detach = target => {registerEventHandler(target, 'detachFromDom');};
@@ -110,12 +110,12 @@
             globalKeys.CODE_ARROW_DOWN = 'ArrowDown'; // Was Keycode 40
             globalKeys.CODE_DELETE = 'Delete'; // Was Keycode 46
             globalKeys.CODE_BACKSPACE = CODE_BACKSPACE; // Was Keycode 8
-            ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'].forEach(key => {
+            for (const key of ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']) {
                 globalKeys['CODE_' + key] = 'Key' + key;
-            });
-            ['1','2','3','4','5','6','7','8','9','0'].forEach(key => {
+            }
+            for (const key of ['1','2','3','4','5','6','7','8','9','0']) {
                 globalKeys['CODE_' + key] = 'Digit' + key;
-            });
+            }
             
             globalKeys.ARROW_KEYS = [globalKeys.CODE_ARROW_LEFT, globalKeys.CODE_ARROW_UP, globalKeys.CODE_ARROW_RIGHT, globalKeys.CODE_ARROW_DOWN];
             globalKeys.LIST_KEYS = [globalKeys.CODE_ENTER, globalKeys.CODE_SPACE, globalKeys.CODE_ESC, ...globalKeys.ARROW_KEYS];

@@ -161,7 +161,7 @@
                         const listView = this._listView,
                             w = this.width;
                         listView.setWidth(w);
-                        listView.getSubviews().forEach(sv => {sv.setWidth(w);});
+                        for (const sv of listView.getSubviews()) sv.setWidth(w);
                     }
                 }
             },
@@ -638,23 +638,26 @@
             
             /** @overrides myt.InfiniteList */
             updateRow: function(row) {
-                this.gridHeader?.columnHeaders.forEach(hdr => {
-                    row.notifyXChange(hdr);
-                    row.notifyWidthChange(hdr);
-                    row.notifyVisibilityChange(hdr);
-                });
+                const gridHeader = this.gridHeader;
+                if (gridHeader) {
+                    for (const hdr of gridHeader.columnHeaders) {
+                        row.notifyXChange(hdr);
+                        row.notifyWidthChange(hdr);
+                        row.notifyVisibilityChange(hdr);
+                    }
+                }
             },
             
             notifyXChange: function(columnHeader) {
-                this.getVisibleRows().forEach(row => {row.notifyXChange(columnHeader);});
+                for (const row of this.getVisibleRows()) row.notifyXChange(columnHeader);
             },
             
             notifyWidthChange: function(columnHeader) {
-                this.getVisibleRows().forEach(row => {row.notifyWidthChange(columnHeader);});
+                for (const row of this.getVisibleRows()) row.notifyWidthChange(columnHeader);
             },
             
             notifyVisibilityChange: function(columnHeader) {
-                this.getVisibleRows().forEach(row => {row.notifyVisibilityChange(columnHeader);});
+                for (const row of this.getVisibleRows()) row.notifyVisibilityChange(columnHeader);
             }
         });
     
@@ -714,7 +717,7 @@
             this.callSuper(v);
             if (this.inited) {
                 v = this.height;
-                this.columnHeaders.forEach(hdr => {hdr.setHeight(v);});
+                for (const hdr of this.columnHeaders) hdr.setHeight(v);
             }
         },
         

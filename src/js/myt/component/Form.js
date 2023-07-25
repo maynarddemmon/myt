@@ -90,10 +90,13 @@
             @param isValid:boolean The currently determined validity.
             @returns boolean true if this form is valid, false otherwise. */
         applyValidation = (form, isValid) => {
-            const errorMessages = [];
-            form.__v?.forEach(validator => {
-                isValid = validator.isFormValid(form, null, errorMessages) && isValid;
-            });
+            const errorMessages = [],
+                __v = form.__v;
+            if (__v) {
+                for (const validator of __v) {
+                    isValid = validator.isFormValid(form, null, errorMessages) && isValid;
+                }
+            }
             form.setErrorMessages(errorMessages);
             form.setIsValid(isValid);
             return isValid;
@@ -105,9 +108,12 @@
                 see if that processor should be run or not.
             @returns * The processed value. */
         processValue = (formElement, value, checkAttr) => {
-            formElement.__vp?.forEach(processor => {
-                if (processor[checkAttr]) value = processor.process(value);
-            });
+            const __vp = formElement.__vp;
+            if (__vp) {
+                for (const processor of __vp) {
+                    if (processor[checkAttr]) value = processor.process(value);
+                }
+            }
             return value;
         },
         

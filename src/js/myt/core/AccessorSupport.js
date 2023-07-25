@@ -87,10 +87,12 @@
             @param {?Object} attrs - The attrs Object to extract values from.
             @returns {undefined}. */
         quickSet: function(attrNames, attrs) {
-            attrNames?.forEach(attrName => {
-                this[attrName] = attrs[attrName];
-                delete attrs[attrName];
-            });
+            if (attrNames) {
+                for (const attrName of attrNames) {
+                    this[attrName] = attrs[attrName];
+                    delete attrs[attrName];
+                }
+            }
         },
         
         /** Calls a setter function for each attribute in the provided map.

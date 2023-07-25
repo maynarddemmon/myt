@@ -34,6 +34,34 @@
             elem.scrollLeft = scrollLeft;
         },
         
+        /*  Removes the outer dom element for a view from the dom while a function is executed.
+            This is used for performance gains when deemed worthwhile.
+                param viewBeingRemoved:myt.View
+                param wrapperFunc:function
+                param retainFocus:boolean */
+        doWhileRemovedFromDom = (viewBeingRemoved, wrappedFunc, retainFocus) => {
+            const outerElem = viewBeingRemoved.getODE(),
+                parentElem = outerElem.parentNode;
+            if (parentElem) {
+                const doubleWrapped = () => {
+                    const nextDe = outerElem.nextElementSibling;
+                    // Remove this dom element from the dom
+                    parentElem.removeChild(outerElem);
+                    wrappedFunc();
+                    // Put this dom element back in the dom
+                    parentElem.insertBefore(outerElem, nextDe);
+                };
+                if (retainFocus) {
+                    retainFocusDuringDomUpdate(viewBeingRemoved, doubleWrapped);
+                } else {
+                    doubleWrapped();
+                }
+            } else {
+                // No parent element so just execute the function.
+                wrappedFunc();
+            }
+        },
+        
         /*  Implements isBehind and isInFrontOf methods. Returns a boolean indicating front or 
             behind respective to the "front" param.
                 param firstView:View The view to check position for
@@ -278,7 +306,8 @@
         
         // Class Methods and Attributes ////////////////////////////////////////
         extend: {
-            retainFocusDuringDomUpdate: retainFocusDuringDomUpdate
+            retainFocusDuringDomUpdate: retainFocusDuringDomUpdate,
+            doWhileRemovedFromDom: doWhileRemovedFromDom
         },
         
         
@@ -1131,28 +1160,16 @@
                 svs.sort(sortFunc);
                 
                 // Rearrange the DOM to match the new sort order.
-                retainFocusDuringDomUpdate(self, () => {
-                    const outerElem = self.getODE(),
-                        parentElem = outerElem.parentNode;
-                    // Remove this dom element from the dom
-                    let nextDe;
-                    if (parentElem) {
-                        nextDe = outerElem.nextElementSibling;
-                        parentElem.removeChild(outerElem);
-                    }
-                    
+                doWhileRemovedFromDom(self, () => {
                     // Copy the dom elements in the correct order to a document fragment and 
                     // then add that fragment back to the dom.
                     const fragment = document.createDocumentFragment(),
                         len = svs.length;
                     for (let i = 0; len > i;) fragment.appendChild(svs[i++].getODE());
                     self.getIDE().appendChild(fragment);
-                    
-                    // Put this dom element back in the dom
-                    parentElem?.insertBefore(outerElem, nextDe);
-                    
-                    self.doSubviewsReorderedInDom(null);
-                });
+                }, true);
+                
+                self.doSubviewsReorderedInDom(null);
             }
         },
         

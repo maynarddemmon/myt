@@ -10,10 +10,10 @@
             @param {!string} moreDir
             @returns {undefined} */
         resetScroll = (autoScroller, lessDir, moreDir) => {
-            [lessDir, moreDir].forEach(dir => {
+            for (const dir of [lessDir, moreDir]) {
                 autoScroller['__is' + dir] = false;
                 autoScroller['__tmrId' + dir] = null;
-            });
+            }
         },
         
         /*  @param {!Object} autoScroller

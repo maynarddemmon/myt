@@ -240,9 +240,9 @@
             @param {!Object} event
             @returns {undefined} */
         __updateForBAG: function(event) {
-            this.__bags.forEach(bag => {
+            for (const bag of this.__bags) {
                 if (bag.attrName === event.type) bag[event.value ? 'setTrue' : 'setFalse'](this);
-            });
+            }
         }
     });
 })(myt);

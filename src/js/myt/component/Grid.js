@@ -93,7 +93,7 @@
                     }
                     
                     // Distribute
-                    resizeInfo.forEach(info => {info.hdr.setValue(info.hdr.value + info.amt);});
+                    for (const info of resizeInfo) info.hdr.setValue(info.hdr.value + info.amt);
                     
                     nextFunc?.(extra);
                 }
@@ -295,11 +295,11 @@
                     this.setMaxWidth(0);
                     this.setMinWidth(0);
                     this.__skipInvisibleHeaders = true;
-                    this.columnHeaders.forEach(hdr => {
+                    for (const hdr of this.columnHeaders) {
                         this.notifyHdrXChange(hdr);
                         this.notifyHdrWidthChange(hdr);
                         this.notifyHdrVisibilityChange(hdr);
-                    });
+                    }
                     this.__skipInvisibleHeaders = false;
                     
                     this.doSort();
@@ -394,11 +394,15 @@
             },
             
             notifyHdrXChange: function(columnHeader) {
-                if (!this.isLocked()) this.rows.forEach(row => {row.notifyHdrXChange(columnHeader);});
+                if (!this.isLocked()) {
+                    for (const row of this.rows) row.notifyHdrXChange(columnHeader);
+                }
             },
             
             notifyHdrWidthChange: function(columnHeader) {
-                if (!this.isLocked()) this.rows.forEach(row => {row.notifyHdrWidthChange(columnHeader);});
+                if (!this.isLocked()) {
+                    for (const row of this.rows) row.notifyHdrWidthChange(columnHeader);
+                }
             },
             
             notifyHdrVisibilityChange: function(columnHeader) {
@@ -419,7 +423,7 @@
             },
             
             updateRowsForVisibilityChange: function(columnHeader) {
-                this.rows.forEach(row => {row.notifyHdrVisibilityChange(columnHeader);});
+                for (const row of this.rows) row.notifyHdrVisibilityChange(columnHeader);
             },
             
             // Rows
@@ -459,12 +463,12 @@
                     // Update cell positions
                     if (!this.locked) {
                         const w = this.width;
-                        this.columnHeaders.forEach(hdr => {
+                        for (const hdr of this.columnHeaders) {
                             row.setWidth(w);
                             row.notifyHdrXChange(hdr);
                             row.notifyHdrWidthChange(hdr);
                             row.notifyHdrVisibilityChange(hdr);
-                        });
+                        }
                         
                         if (!doNotSort) this.doSort();
                     }
@@ -481,7 +485,7 @@
                     // Determine extra width to distribute/consume
                     const hdrs = this.getVisibleHdrs();
                     let maxExtent = 0;
-                    hdrs.forEach(hdr => {maxExtent = mathMax(maxExtent, hdr.x + hdr.width);});
+                    for (const hdr of hdrs) maxExtent = mathMax(maxExtent, hdr.x + hdr.width);
                     
                     // Distribute extra width to resizable flex columns and then to 
                     // non-flex columns.
@@ -864,14 +868,14 @@
         setLocked: function(v) {
             // Performance: don't update layouts until the grid is unlocked.
             if (this.inited) {
-                [this.header.xLayout, this.header.yLayout, this.content.yLayout].forEach(layout => {
+                for (const layout of [this.header.xLayout, this.header.yLayout, this.content.yLayout]) {
                     if (v) {
                         layout.incrementLockedCounter();
                     } else {
                         layout.decrementLockedCounter();
                         layout.update();
                     }
-                });
+                }
             }
             this.callSuper(v);
         },
@@ -885,7 +889,7 @@
             const content = this.content,
                 w = event.value;
             content.setWidth(w);
-            content.getSubviews().forEach(sv => {sv.setWidth(w);});
+            for (const sv of content.getSubviews()) sv.setWidth(w);
         },
         
         /** @private

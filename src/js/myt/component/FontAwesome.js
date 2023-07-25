@@ -44,9 +44,9 @@
         },
         
         registerForNotification = instance => {
-            ['Free 400', 'Free 900', 'Brands 400'].forEach(fontName => {
+            for (const fontName of ['Free 400', 'Free 900', 'Brands 400']) {
                 pkg.registerForFontNotification(instance, 'Font Awesome 5 ' + fontName);
-            });
+            }
         };
     
     /** An adapter for FontAwesome.

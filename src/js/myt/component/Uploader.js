@@ -191,7 +191,7 @@
                 
                 if (v) {
                     if (!Array.isArray(v)) v = [v];
-                    v.forEach(urlStr => {this.addFile(Uploader.createFile(urlStr));});
+                    for (const urlStr of v) this.addFile(Uploader.createFile(urlStr));
                 }
                 
                 return this.callSuper ? this.callSuper(v) : v;

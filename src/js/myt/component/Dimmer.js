@@ -51,9 +51,9 @@
                 }, [SizeToParent]);
                 
                 // Eat mouse events
-                ['mouseover','mouseout','mousedown','mouseup','click','dblclick','mousemove'].forEach(eventName => {
+                for (const eventName of ['mouseover','mouseout','mousedown','mouseup','click','dblclick','mousemove']) {
                     self.attachDomObserver(self, 'eatMouseEvent', eventName);
-                });
+                }
                 
                 RootView.setupCaptureDrop(self);
             },
