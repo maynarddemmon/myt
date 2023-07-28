@@ -41,6 +41,8 @@
         math = Math,
         {abs:mathAbs, min:mathMin, max:mathMax, pow:mathPow} = math,
         
+        isArray = Array.isArray,
+        
         documentElem = document,
         headElem = documentElem.head,
         createElement = documentElem.createElement.bind(documentElem),
@@ -92,7 +94,10 @@
         generateGuid = () => ++GUID_COUNTER,
         
         I18N_PLURAL_REGEX = /\{\{plural:\$(.*?)\|(.*?)\|(.*?)\}\}/g,
-        I18N_NUMERIC_ARG_REGEX = /\$(\d+)/g, 
+        I18N_NUMERIC_ARG_REGEX = /\$(\d+)/g,
+        
+        CSV_OBJECT_REGEX = /(\,|\r?\n|\r|^)(?:"((?:\\.|""|[^\\"])*)"|([^\,"\r\n]*))/gi,
+        CSV_UNESCAPE_REGEX = /[\\"](.)/g,
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
@@ -146,7 +151,7 @@
                 
                 scope = scope ?? global;
                 
-                const parts = Array.isArray(objName) ? objName : objName.split('.'), 
+                const parts = isArray(objName) ? objName : objName.split('.'), 
                     len = parts.length;
                 for (let i = 0; i < len; i++) {
                     scope = scope[parts[i]];
@@ -501,6 +506,94 @@
                     return (a - b) * order;
                 };
             }),
+            
+            // CSV
+            /** Converts a CSV string to an array of arrays or an array of objects.
+                Code from: https://gist.github.com/plbowers/7560ae793613ee839151624182133159
+                @param {string} [strData]
+                @param {boolean} [header] - If true each row will be converted to an object with 
+                    keys based on the first row being treated as an array of header strings.
+                @returns {!Array} An array of arrays or an array of objects if the header param 
+                    is true. */
+            csvStringToArray: (strData, header) => {
+                if (!strData) return [];
+                
+                const arrData = [[]];
+                let arrMatches;
+                while (arrMatches = CSV_OBJECT_REGEX.exec(strData)) {
+                    if (arrMatches[1].length && arrMatches[1] !== ',') arrData.push([]);
+                    arrData[arrData.length - 1].push(arrMatches[2] ? arrMatches[2].replace(CSV_UNESCAPE_REGEX, '$1') : arrMatches[3]);
+                }
+                
+                if (header) {
+                    const headerData = arrData.shift();
+                    return arrData.map(row => {
+                        let i = 0;
+                        return headerData.reduce((acc, key) => {acc[key] = row[i++]; return acc;}, {});
+                    });
+                } else {
+                    return arrData;
+                }
+            },
+            
+            /** Prepare a CSV data URI according to RFC 4180.
+                @param {?Array} rows
+                @param {?Array} [headerNames]
+                @returns {string} */
+            prepareCSVDataURI: (rows, headerNames) => {
+                const prepareRow = row => {
+                        if (row && isArray(row)) {
+                            const colAccum = [],
+                                len = row.length;
+                            for (let i = 0, col; len > i; i++) {
+                                col = row[i];
+                                
+                                // All columns must have a value.
+                                col = col == null ? '' : col.toString();
+                                
+                                // " are escaped as ""
+                                col = col.replace(/"/g, '""');
+                                
+                                // If the column contains reserved characters it must be wrapped in 
+                                // double quotes.
+                                if (col.search(/("|,|\n)/g) >= 0) col = '"' + col + '"';
+                                
+                                colAccum.push(col);
+                            }
+                            return colAccum.join(',');
+                        } else {
+                            consoleWarn('Unexpected row', row);
+                            return null;
+                        }
+                    },
+                    rowAccum = [];
+                
+                if (headerNames) {
+                    const row = prepareRow(headerNames);
+                    if (row) rowAccum.push(row);
+                }
+                
+                if (rows) {
+                    if (isArray(rows)) {
+                        const len = rows.length;
+                        for (let i = 0; len > i; i++) {
+                            const row = prepareRow(rows[i]);
+                            if (row) rowAccum.push(row);
+                        }
+                    } else {
+                        consoleWarn('Rows were not an array');
+                    }
+                }
+                
+                return myt.encodeCSVDataURI(rowAccum.join('\r\n'), headerNames);
+            },
+            
+            encodeCSVDataURI: (csvData, headerNames) => {
+                const header = headerNames == null ? '' : ';header=' + (headerNames ? 'present' : 'absent');
+                return 'data:text/csv;charset=utf-8' + 
+                    header + ',' + 
+                    encodeURIComponent(csvData);
+            },
             
             // Misc
             dataURIToBlob: dataURI => {
