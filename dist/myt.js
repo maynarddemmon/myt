@@ -4864,7 +4864,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             @returns {*} - The attribute value. */
         get: function(attrName) {
             const getterName = generateGetterName(attrName);
-            return getterName in self ? this[getterName]() : this[attrName];
+            return (typeof this[getterName] === 'function') ? this[getterName]() : this[attrName];
         },
         
         /** A generic setter function that can be called to set a value on this object. Will defer 
@@ -4882,7 +4882,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             if (!skipSetter) {
                 // Try to call a defined setter function.
                 const setterName = generateSetterName(attrName);
-                if (setterName in self) return self[setterName](v);
+                if (typeof self[setterName] === 'function') return self[setterName](v);
             }
             
             // Generic Setter
