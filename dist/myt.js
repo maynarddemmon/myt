@@ -17207,11 +17207,15 @@ myt.Destructible = new JS.Module('Destructible', {
                     the server. */
                 FILE_ATTR_SERVER_PATH: 'serverPath',
                 
-                readFile: (file, handlerFunc) => {
+                readFile: (file, handlerFunc, asText) => {
                     if (FileReader !== undefined) {
                         const reader = new FileReader();
-                        reader.onload = handlerFunc;
-                        reader.readAsDataURL(file);
+                        reader.onload = event => {handlerFunc(event.target.result);};
+                        if (asText) {
+                            reader.readAsText(file);
+                        } else {
+                            reader.readAsDataURL(file);
+                        }
                     }
                 },
                 
@@ -17484,14 +17488,14 @@ myt.Destructible = new JS.Module('Destructible', {
                 if (isImageFile) {
                     if (file.size === -1) {
                         readImageFunc(file.serverPath);
-                    } else if (FileReader !== undefined && ImageUploader.isImageFile(file)) {
-                        Uploader.readFile(file, event => {readImageFunc(event.target.result);});
+                    } else if (ImageUploader.isImageFile(file)) {
+                        Uploader.readFile(file, readImageFunc);
                     }
                 } else {
                     if (file.size === -1) {
                         self.updateImage(file, image, file.serverPath);
-                    } else if (FileReader !== undefined) {
-                        Uploader.readFile(file, event => {self.updateImage(file, image, event.target.result);});
+                    } else {
+                        Uploader.readFile(file, result => {self.updateImage(file, image, result);});
                     }
                 }
             },
