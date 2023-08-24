@@ -1,6 +1,8 @@
 (pkg => {
     const JSClass = JS.Class,
         
+        {abs:mathAbs, min:mathMin} = Math,
+        
         {CODE_ENTER, CODE_SPACE, ARROW_KEYS} = pkg.global.keys,
         
         STATE_COLLAPSED = 0,
@@ -15,6 +17,47 @@
             const dim = divider.axis === 'y' ? 'height' : 'width';
             divider.constrain('__limitToParent', [divider, 'limitToParent', divider, dim, divider.parent, dim]);
         },
+        
+        NudgeMixin = pkg.NudgeMixin = new JS.Module('NudgeMixin', {
+            // Life Cycle //////////////////////////////////////////////////////
+            /** @overrides */
+            initNode: function(parent, attrs) {
+                attrs.nudgeTargetValue ??= 'value';
+                attrs.nudgeIncrement ??= 1;
+                attrs.nudgeMin ??= 1;
+                attrs.nudgeMax ??= 64;
+                this.__nudgeAcc = attrs.nudgeMin;
+                
+                this.callSuper(parent, attrs);
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setNudgeIncrement: function(v) {this.set('nudgeIncrement', mathAbs(v), true);},
+            setNudgeMin: function(v) {this.set('nudgeMin', mathAbs(v), true);},
+            setNudgeMax: function(v) {this.set('nudgeMax', mathAbs(v), true);},
+            setNudgeTargetValue: function(v) {this.set('nudgeTargetValue', v, true);},
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** Nudge the value of the nudgeTargetValue repeatedly.
+                @param {boolean} direction - When true indicates positive.
+                @param {boolean} isRepeat - Indicates if this is the result of a repeated user 
+                    action and should thus accelerate.
+                @returns {boolean}  */
+            nudge: function(direction, isRepeat) {
+                const self = this,
+                    nudgeTargetValue = self.nudgeTargetValue,
+                    nudgeAcc = self.__nudgeAcc = isRepeat ? mathMin(self.__nudgeAcc + self.nudgeIncrement, self.nudgeMax) : self.nudgeMin;
+                
+                self.set(
+                    nudgeTargetValue, 
+                    (self.get(nudgeTargetValue) || 0) + (direction ? 1 : -1) * nudgeAcc
+                );
+                
+                return true;
+            }
+        }),
         
         /** A divider is a UI control that allows the user to resize two area by dragging the 
             divider left/right or up/down.
@@ -42,7 +85,7 @@
             
             @class */
         BaseDivider = new JSClass('BaseDivider', pkg.SimpleButton, {
-            include: [pkg.BoundedValueComponent, pkg.Draggable, pkg.ArrowKeyActivation],
+            include: [pkg.BoundedValueComponent, pkg.Draggable, pkg.ArrowKeyActivation, NudgeMixin],
             
             
             // Life Cycle //////////////////////////////////////////////////////
@@ -68,9 +111,6 @@
                     attrs.cursor ??= 'col-resize';
                 }
                 self.quickSet(['axis'], attrs);
-                
-                // Controls acceleration of the nudge amount
-                self.__nudgeAcc = 1;
                 
                 self.callSuper(parent, attrs);
                 
@@ -116,10 +156,8 @@
             /** Update the x or y position of the divider as the value changes.
                 @overrides myt.ValueComponent
                 @param {number} v - The x or y position to set.
-                @param {boolean} [restoreValueAlso] - If true, the restoreValue will also 
-                    be updated.
                 @returns {undefined} */
-            setValue: function(v, restoreValueAlso) {
+            setValue: function(v) {
                 this.callSuper(v);
                 
                 v = this.value;
@@ -128,8 +166,6 @@
                 } else {
                     this.setX(v);
                 }
-                
-                if (restoreValueAlso) this.setRestoreValue(v);
             },
             
             
@@ -171,15 +207,11 @@
                 @param {boolean} isRepeat - Indicates if this is the result of a repeated key event.
                 @returns {boolean}  */
             nudge: function(direction, isRepeat) {
-                const self = this;
-                
-                // Update nudge amount, but never nudge more than 64.
-                self.__nudgeAcc = isRepeat ? Math.min(self.__nudgeAcc + 1, 64) : 1;
-                
-                self.setValue(self.value + (direction ? 1 : -1) * self.__nudgeAcc, true);
+                const self = this,
+                    retval = self.callSuper(direction, isRepeat);
                 self.setExpansionState(STATE_RESTORED_JUST_EXPANDED);
-                
-                return true;
+                self.setRestoreValue(self.value);
+                return retval;
             },
             
             doPrimaryAction: function() {
@@ -250,7 +282,8 @@
                     const value = this.axis === 'y' ? y : x,
                         curValue = this.value;
                     if (value !== curValue) {
-                        this.setValue(value, true);
+                        this.setValue(value);
+                        this.setRestoreValue(value);
                         this.setExpansionState(curValue > value ? STATE_RESTORED_JUST_EXPANDED : STATE_RESTORED_JUST_COLLAPSED);
                     }
                 }
