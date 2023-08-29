@@ -19722,7 +19722,7 @@ myt.Destructible = new JS.Module('Destructible', {
 (pkg => {
     const JSClass = JS.Class,
         
-        {min:mathMin, max:mathMax, round:mathRound} = Math,
+        {min:mathMin, max:mathMax, round:mathRound, abs:mathAbs} = Math,
         
         View = pkg.View,
         
@@ -19791,7 +19791,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 if (!this.disabled) {
                     const parent = this.parent,
                         minPx = parent.getMinPixelValueForThumb(this),
-                        maxPx = parent.getMaxPixelValueForThumb(this);
+                        maxPx = parent.getMaxPixelValueForThumb(this),
+                        snapThreshold = parent.snapThreshold;
                     let halfSize,
                         pos,
                         funcName;
@@ -19804,6 +19805,17 @@ myt.Destructible = new JS.Module('Destructible', {
                         pos = y;
                         funcName = 'setY';
                     }
+                    
+                    if (parent.allowSnap(this)) {
+                        for (let snapPx of parent.getSnapValuesAsPx()) {
+                            snapPx -= halfSize;
+                            if (mathAbs(pos - snapPx) <= snapThreshold) {
+                                pos = snapPx;
+                                break;
+                            }
+                        }
+                    }
+                    
                     this[funcName](mathMin(mathMax(pos, minPx - halfSize), maxPx - halfSize));
                 }
             },
@@ -19873,6 +19885,9 @@ myt.Destructible = new JS.Module('Destructible', {
                 attrs.thumbOffset ??= 1;
                 attrs.nudgeAmount ??= 1;
                 
+                attrs.snapThreshold ??= 8;
+                attrs.snapValues ??= [];
+                
                 this.callSuper(parent, attrs);
             },
             
@@ -19886,8 +19901,25 @@ myt.Destructible = new JS.Module('Destructible', {
             setThumbOffset: function(v) {this.thumbOffset = v;},
             setNudgeAmount: function(v) {this.nudgeAmount = v;},
             
+            setSnapThreshold: function(v) {this.snapThreshold = v;},
+            setSnapValues: function(v) {this.snapValues = v;},
+            getSnapValuesAsPx: function() {
+                const retval = [];
+                for (const v of this.snapValues) retval.push(this.convertValueToPixels(v));
+                return retval;
+            },
             
             // Methods /////////////////////////////////////////////////////////
+            allowSnap: function(thumb) {
+                const lastMousePosition = thumb.__lastMousePosition,
+                    elemPos = pkg.DomElementProxy.getRelativePosition(thumb.getODE()),
+                    isXAxis = this.axis === 'x',
+                    crossSize = isXAxis ? thumb.height : thumb.width,
+                    diff = isXAxis ? lastMousePosition.y - elemPos.y : lastMousePosition.x - elemPos.x;
+                // We only do snapping if the mouse is within the cross axis bounds of the thumb.
+                return diff > 0 && diff < crossSize;
+            },
+            
             convertValueToPixels: function(v) {
                 const self = this,
                     minV = self.minValue,
