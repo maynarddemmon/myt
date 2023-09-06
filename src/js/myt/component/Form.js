@@ -267,6 +267,14 @@
             
             @class */
         Form = pkg.Form = new JSModule('Form', {
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                ACCELERATOR_SCOPE_ROOT:ACCELERATOR_SCOPE_ROOT,
+                ACCELERATOR_SCOPE_ELEMENT:ACCELERATOR_SCOPE_ELEMENT,
+                ACCELERATOR_SCOPE_NONE:ACCELERATOR_SCOPE_NONE
+            },
+            
+            
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
                 const self = this;
