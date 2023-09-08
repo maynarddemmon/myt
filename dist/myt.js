@@ -12099,7 +12099,7 @@ myt.Destructible = new JS.Module('Destructible', {
 (pkg => {
     const consoleWarn = console.warn,
         
-        {focus:GlobalFocus, mouse:GlobalMouse} = pkg.global,
+        {focus:GlobalFocus, mouse:GlobalMouse, windowResize} = pkg.global,
         
         panelsByPanelId = {}, // A map of FloatingPanel instances by panel ID.
         
@@ -12130,6 +12130,10 @@ myt.Destructible = new JS.Module('Destructible', {
                     by vertically.
                 lastFloatingPanelShown:myt.FloatingPanel A reference to the last floating panel 
                     shown by this anchor.
+                keepInWindow:boolean - Indicates if the floating panel must be kept within the
+                    bounds of the HTML document. Defaults to false.
+                keepInWindowBorder:number - Extra space to take into account when checking if the
+                    FloatingPanel would not be kept within the window.
             
             @class */
         FloatingPanelAnchor = pkg.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
@@ -12143,7 +12147,8 @@ myt.Destructible = new JS.Module('Destructible', {
             initNode: function(parent, attrs) {
                 this.floatingAlign = 'insideLeft';
                 this.floatingValign = 'outsideBottom';
-                this.floatingAlignOffset = this.floatingValignOffset = 0;
+                this.keepInWindow = false;
+                this.floatingAlignOffset = this.floatingValignOffset = this.keepInWindowBorder = 0;
                 
                 this.callSuper(parent, attrs);
             },
@@ -12157,6 +12162,9 @@ myt.Destructible = new JS.Module('Destructible', {
             setFloatingValign: function(v) {this.set('floatingValign', v, true);},
             setFloatingAlignOffset: function(v) {this.set('floatingAlignOffset', v, true);},
             setFloatingValignOffset: function(v) {this.set('floatingValignOffset', v, true);},
+            
+            setKeepInWindow: function(v) {this.set('keepInWindow', v, true);},
+            setKeepInWindowBorder: function(v) {this.set('keepInWindowBorder', v, true);},
             
             
             // Methods /////////////////////////////////////////////////////////
@@ -12313,6 +12321,21 @@ myt.Destructible = new JS.Module('Destructible', {
         setHideOnBlur: function(v) {this.hideOnBlur = v;},
         setHideOnMouseDown: function(v) {this.hideOnMouseDown = v;},
         
+        setWidth: function(v) {
+            const oldValue = this.width;
+            this.callSuper(v);
+            if (this.isShown() && (oldValue !== this.width) && this.owner?.keepInWindow) {
+                this.updateLocationX(this.owner);
+            }
+        },
+        
+        setHeight: function(v) {
+            const oldValue = this.height;
+            this.callSuper(v);
+            if (this.isShown() && (oldValue !== this.height) && this.owner?.keepInWindow) {
+                this.updateLocationY(this.owner);
+            }
+        },
         
         // Methods /////////////////////////////////////////////////////////////
         /** @private
@@ -12451,6 +12474,11 @@ myt.Destructible = new JS.Module('Destructible', {
                     case 'insideLeft': break;
                     default: consoleWarn('Invalid align value', type, align);
                 }
+                
+                if (panelAnchor.keepInWindow) {
+                    const diff = x + this.width + (panelAnchor.keepInWindowBorder || 0) - windowResize.getWidth();
+                    if (diff > 0) x -= diff;
+                }
             } else if (type === 'number') {
                 // Absolute position
                 x = align;
@@ -12472,6 +12500,11 @@ myt.Destructible = new JS.Module('Destructible', {
                     case 'outsideTop': y -= this.height; break;
                     case 'insideTop': break;
                     default: consoleWarn('Invalid valign value', type, valign);
+                }
+                
+                if (panelAnchor.keepInWindow) {
+                    const diff = y + this.height + (panelAnchor.keepInWindowBorder || 0) - windowResize.getHeight();
+                    if (diff > 0) y -= diff;
                 }
             } else if (type === 'number') {
                 // Absolute position
