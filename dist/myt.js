@@ -14258,13 +14258,16 @@ myt.Destructible = new JS.Module('Destructible', {
                 attrs.itemSelectionId ??= 'tabId';
                 attrs.maxSelected ??= 1;
                 
+                const collapse = attrs.collapse ?? true;
+                delete attrs.collapse;
+                
                 this.callSuper(parent, attrs);
                 
                 this.layout = new pkg.SpacedLayout(this, {
                     axis:this.location === 'left' || this.location === 'right' ? 'y' : 'x',
                     spacing:this.spacing,
                     inset:this.inset,
-                    collapseParent:true
+                    collapseParent:collapse
                 });
             },
             
