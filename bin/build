@@ -128,13 +128,27 @@ jsBuild(manifestFile, rootPath, requiredFiles, concatenatedData => {
         compilerInstance = new ClosureCompiler(opts);
     
     // Force native compilation. Assume linux unless we can determine otherwise.
-    let compilerPlatform = 'linux';
+    let compilerPlatform;
     switch (process.platform) {
-        case 'win32': compilerPlatform = 'windows'; break;
-        case 'darwin': compilerPlatform = 'osx'; break;
+        case 'win32': 
+            compilerPlatform = 'windows';
+            compilerInstance.javaPath = require('google-closure-compiler-windows');
+            break;
+        case 'darwin':
+            compilerPlatform = 'osx:' + process.arch;
+            if (process.arch === 'arm64') {
+                // Use the homebrew closure-compiler since it is actually an arm64 executable.
+                compilerInstance.javaPath = '/opt/homebrew/bin/closure-compiler';
+            } else {
+                compilerInstance.javaPath = require('google-closure-compiler-osx');
+            }
+            break;
+        default:
+            compilerPlatform = 'linux';
+            compilerInstance.javaPath = require('google-closure-compiler-linux');
+            break;
     }
     compilerInstance.JAR_PATH = null;
-    compilerInstance.javaPath = require('google-closure-compiler-' + compilerPlatform);
     
     console.info("Executing native compilation for platform: " + compilerPlatform + " with opts:", opts);
     compilerInstance.run((exitCode, stdOut, stdErr) => {
