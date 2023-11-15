@@ -190,7 +190,9 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             // Full Date/Time
             c: date => date.format('Y-m-d\\TH:i:sP'),
             r: date => date.toString(),
-            U: date => date.getTime() / 1000
+            U: date => date.getTime() / 1000,
+            x: date => date.toLocaleDateString(),
+            X: date => date.toLocaleTimeString()
         };
     
     return function(format) {
