@@ -751,17 +751,26 @@
         
         /** @overrides myt.GridController */
         notifyHdrXChange: function(columnHeader) {
-            if (!this.isLocked()) this.grid.notifyXChange(columnHeader);
+            if (!this.isLocked()) {
+                this.grid.notifyXChange(columnHeader);
+                this._notifyHdrChange('X', columnHeader);
+            }
         },
         
         /** @overrides myt.GridController */
         notifyHdrWidthChange: function(columnHeader) {
-            if (!this.isLocked()) this.grid.notifyWidthChange(columnHeader);
+            if (!this.isLocked()) {
+                this.grid.notifyWidthChange(columnHeader);
+                this._notifyHdrChange('Width', columnHeader);
+            }
         },
         
         /** @overrides myt.GridController */
         updateRowsForVisibilityChange: function(columnHeader) {
             this.grid.notifyVisibilityChange(columnHeader);
+            if (!this.isLocked()) {
+                this._notifyHdrChange('Visibility', columnHeader);
+            }
         }
     });
 })(myt);

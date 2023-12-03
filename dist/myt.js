@@ -20929,6 +20929,10 @@ myt.Destructible = new JS.Module('Destructible', {
                 }
             },
             
+            setHdrChangeListener: function(value) {
+                this.hdrChangeListener = value;
+            },
+            
             
             // Methods /////////////////////////////////////////////////////////
             /** Sorts the rows according to the current sort criteria. Subclasses and instances 
@@ -21007,12 +21011,14 @@ myt.Destructible = new JS.Module('Destructible', {
             notifyHdrXChange: function(columnHeader) {
                 if (!this.isLocked()) {
                     for (const row of this.rows) row.notifyHdrXChange(columnHeader);
+                    this._notifyHdrChange('X', columnHeader);
                 }
             },
             
             notifyHdrWidthChange: function(columnHeader) {
                 if (!this.isLocked()) {
                     for (const row of this.rows) row.notifyHdrWidthChange(columnHeader);
+                    this._notifyHdrChange('Width', columnHeader);
                 }
             },
             
@@ -21030,7 +21036,15 @@ myt.Destructible = new JS.Module('Destructible', {
                     
                     this.fitHeadersToWidth();
                     this.fixupResizerCursors();
+                    
+                    this._notifyHdrChange('Visibility', columnHeader);
                 }
+            },
+            
+            /** @private */
+            _notifyHdrChange: function(propFuncname, columnHeader) {
+                const hdrChangeListener = this.hdrChangeListener;
+                if (hdrChangeListener) hdrChangeListener['notifyHdr' + propFuncname + 'Change'](columnHeader);
             },
             
             updateRowsForVisibilityChange: function(columnHeader) {
@@ -22424,17 +22438,26 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** @overrides myt.GridController */
         notifyHdrXChange: function(columnHeader) {
-            if (!this.isLocked()) this.grid.notifyXChange(columnHeader);
+            if (!this.isLocked()) {
+                this.grid.notifyXChange(columnHeader);
+                this._notifyHdrChange('X', columnHeader);
+            }
         },
         
         /** @overrides myt.GridController */
         notifyHdrWidthChange: function(columnHeader) {
-            if (!this.isLocked()) this.grid.notifyWidthChange(columnHeader);
+            if (!this.isLocked()) {
+                this.grid.notifyWidthChange(columnHeader);
+                this._notifyHdrChange('Width', columnHeader);
+            }
         },
         
         /** @overrides myt.GridController */
         updateRowsForVisibilityChange: function(columnHeader) {
             this.grid.notifyVisibilityChange(columnHeader);
+            if (!this.isLocked()) {
+                this._notifyHdrChange('Visibility', columnHeader);
+            }
         }
     });
 })(myt);

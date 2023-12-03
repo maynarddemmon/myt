@@ -318,6 +318,10 @@
                 }
             },
             
+            setHdrChangeListener: function(value) {
+                this.hdrChangeListener = value;
+            },
+            
             
             // Methods /////////////////////////////////////////////////////////
             /** Sorts the rows according to the current sort criteria. Subclasses and instances 
@@ -396,12 +400,14 @@
             notifyHdrXChange: function(columnHeader) {
                 if (!this.isLocked()) {
                     for (const row of this.rows) row.notifyHdrXChange(columnHeader);
+                    this._notifyHdrChange('X', columnHeader);
                 }
             },
             
             notifyHdrWidthChange: function(columnHeader) {
                 if (!this.isLocked()) {
                     for (const row of this.rows) row.notifyHdrWidthChange(columnHeader);
+                    this._notifyHdrChange('Width', columnHeader);
                 }
             },
             
@@ -419,7 +425,15 @@
                     
                     this.fitHeadersToWidth();
                     this.fixupResizerCursors();
+                    
+                    this._notifyHdrChange('Visibility', columnHeader);
                 }
+            },
+            
+            /** @private */
+            _notifyHdrChange: function(propFuncname, columnHeader) {
+                const hdrChangeListener = this.hdrChangeListener;
+                if (hdrChangeListener) hdrChangeListener['notifyHdr' + propFuncname + 'Change'](columnHeader);
             },
             
             updateRowsForVisibilityChange: function(columnHeader) {
