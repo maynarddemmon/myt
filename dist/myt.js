@@ -23875,6 +23875,19 @@ myt.Destructible = new JS.Module('Destructible', {
             this._boundingBox = null;
         },
         
+        /** Scales the path by the provided amount.
+            @param {number} magnitude
+            @returns {undefined} */
+        scale: function(magnitude) {
+            const vecs = this.vectors;
+            let i = vecs.length;
+            while (i) {
+                vecs[--i] *= magnitude;
+                vecs[--i] *= magnitude;
+            }
+            this._boundingBox = null;
+        },
+        
         /** Rotates this path around 0,0 by the provided angle in radians.
             @param {number} a
             @returns {undefined} */
