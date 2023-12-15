@@ -141,7 +141,16 @@
                         // Adds a single named method to a JS.Class/JS.Module. If you’re modifying a 
                         // class, the method instantly becomes available in instances of the class, 
                         // and in its subclasses.
-                        this.__fns__.set(field, createMethod(this, field, value));
+                        if (this.__fns__.has(field)) {
+                            // Handles the case where the new function would clobber an existing one.
+                            // This can occur by using Module.extend twice with the same named
+                            // function. By turning it into a formal Module it gets put into the
+                            // ancestor chain and thus callSuper will work as expected.
+                            console.warn('JS.Module already has field: "' + field + '" auto generating a JS.Module from the field for inclusion.');
+                            this.include(new Module('Auto_' + field, {[field]:value}), false);
+                        } else {
+                            this.__fns__.set(field, createMethod(this, field, value));
+                        }
                     }
                 }
             }
