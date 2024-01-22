@@ -121,7 +121,7 @@
                     @param {!Object} event Event value is a dom event.
                     @returns object with an x and y key each containing a number. */
                 getScrollFromEvent: event => {
-                    const {scrollLeft, scrollTop} = getSourceViewFromEvent(event);
+                    const {scrollLeft, scrollTop} = getSourceViewFromEvent(event)?.getIDE();
                     return {x:scrollLeft, y:scrollTop};
                 }
             },
