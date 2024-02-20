@@ -7127,7 +7127,7 @@ myt.Destructible = new JS.Module('Destructible', {
             return retval;
         },
         
-        /** Gets the views that are our siblings.
+        /** Gets the views that are this view's siblings.
             @returns {!Array} of myt.View or undefined if this view is orphaned. */
         getSiblingViews: function() {
             if (this.parent) {
@@ -7150,6 +7150,10 @@ myt.Destructible = new JS.Module('Destructible', {
             @returns {!Array} */
         getLayouts: function() {
             return this.layouts ??= [];
+        },
+        
+        getFirstLayout: function() {
+            return this.getLayouts()[0];
         },
         
         setIgnoreLayout: function(v) {
