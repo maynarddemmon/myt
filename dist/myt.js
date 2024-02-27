@@ -17150,7 +17150,8 @@ myt.Destructible = new JS.Module('Destructible', {
             jpg:'image/jpeg',
             jpeg:'image/jpeg',
             svg:'image/svg+xml',
-            webp:'image/webp'
+            webp:'image/webp',
+            ico:'image/vnd.microsoft.icon'
         },
         
         doDragListeners = (target, funcName) => {
