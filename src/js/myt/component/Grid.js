@@ -615,10 +615,10 @@
                         if (gc.fitToWidth) {
                             if (diff > 0) {
                                 // Get amount that this header can grow
-                                diff = mathMin(diff, mathMin(-getTakeRight(self), self.maxValue - self.value + getGiveLeft(self)));
+                                diff = mathMin(diff, -getTakeRight(self), self.maxValue - self.value + getGiveLeft(self));
                             } else if (diff < 0) {
                                 // Get amount that this header can shrink
-                                diff = mathMax(diff, mathMax(-getGiveRight(self), self.minValue - self.value + getTakeLeft(self)));
+                                diff = mathMax(diff, -getGiveRight(self), self.minValue - self.value + getTakeLeft(self));
                             }
                             
                             if (diff === 0) return;
