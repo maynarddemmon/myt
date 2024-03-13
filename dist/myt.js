@@ -20728,9 +20728,9 @@ myt.Destructible = new JS.Module('Destructible', {
         // GridColHdr
         defaultMaxValue = 1000,
         
-        getPrevHdr = gridHeader => gridHeader.gridController ? gridHeader.gridController.getPrevHdr(gridHeader) : null,
+        getPrevHdr = gridHeader => gridHeader.gridController?.getPrevHdr(gridHeader),
         
-        getNextHdr = gridHeader => gridHeader.gridController ? gridHeader.gridController.getNextHdr(gridHeader) : null,
+        getNextHdr = gridHeader => gridHeader.gridController?.getNextHdr(gridHeader),
         
         getGiveLeft = gridHeader => {
             const hdr = getPrevHdr(gridHeader);
@@ -20993,10 +20993,7 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             getHdrById: function(columnId) {
-                const hdrs = this.columnHeaders;
-                let i = hdrs.length;
-                while (i) {
-                    const hdr = hdrs[--i];
+                for (const hdr of this.columnHeaders) {
                     if (hdr.columnId === columnId) return hdr;
                 }
             },
@@ -21536,8 +21533,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @returns {undefined} */
         _updateContentHeight: function(event) {
             const self = this,
-                header = self.header, 
-                content = self.content,
+                {header, content} = self,
                 y = header.y + header.height;
             content.setY(y);
             
