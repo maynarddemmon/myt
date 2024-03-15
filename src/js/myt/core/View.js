@@ -1055,16 +1055,18 @@
         
         /** Sends this view behind the provided sibling view.
             @param {!Object} sv
+            @param {?Object} [layout] - An optional layout that will also get updated.
             @returns {undefined} */
-        sendBehind: function(sv) {
-            this.parent.sendSubviewBehind(this, sv);
+        sendBehind: function(sv, layout) {
+            this.parent.sendSubviewBehind(this, sv, layout);
         },
         
         /** Sends this view in front of the provided sibling view.
             @param {!Object} sv
+            @param {?Object} [layout] - An optional layout that will also get updated.
             @returns {undefined} */
-        sendInFrontOf: function(sv) {
-            this.parent.sendSubviewInFrontOf(this, sv);
+        sendInFrontOf: function(sv, layout) {
+            this.parent.sendSubviewInFrontOf(this, sv, layout);
         },
         
         /** Called whenever the subviews are reordered in the DOM using one of the reordering 
@@ -1112,8 +1114,10 @@
         /** Sends the subview behind the existing subview.
             @param {!Object} sv - The sub myt.View to send behind the existing myt.View.
             @param {?Object} existing - The sub myt.View to send the other sub myt.View behind.
+            @param {?Object} [layout] - An optional layout that will also get updated.
             @returns {undefined} */
-        sendSubviewBehind: function(sv, existing) {
+        sendSubviewBehind: function(sv, existing, layout) {
+            layout?.moveSubviewBefore(sv, existing);
             const self = this;
             if (sv?.parent === self && existing?.parent === self) {
                 const svOde = sv.getODE(),
@@ -1126,13 +1130,16 @@
                     });
                 }
             }
+            layout?.update();
         },
         
         /** Sends the subview in front of the existing subview.
             @param {!Object} sv - the subview to send in front of the existing view.
             @param {!Object} existing - the subview to send the other subview in front of.
+            @param {?Object} [layout] - An optional layout that will also get updated.
             @returns {undefined} */
-        sendSubviewInFrontOf: function(sv, existing) {
+        sendSubviewInFrontOf: function(sv, existing, layout) {
+            layout?.moveSubviewAfter(sv, existing);
             const self = this;
             if (sv?.parent === self && existing?.parent === self) {
                 const svOde = sv.getODE(),
@@ -1147,6 +1154,7 @@
                     });
                 }
             }
+            layout?.update();
         },
         
         /** Sorts the subviews array according to the provided sort function. Also rearranges the 

@@ -109,7 +109,7 @@
             },
             
             /** @overrides myt.View */
-            sendBehind: function(otherRootView) {
+            sendBehind: function(otherRootView, ignoredLayout) {
                 // Attempt to manipulate dom above root node.
                 const ide = this.getIDE(),
                     otherIde = otherRootView.getIDE(),
@@ -121,11 +121,11 @@
             },
             
             /** @overrides myt.View */
-            sendInFrontOf: function(otherRootView) {
+            sendInFrontOf: function(otherRootView, ignoredLayout) {
                 // Attempt to manipulate dom above root node.
                 if (otherRootView.getIDE().parentNode === this.getIDE().parentNode) {
-                    this.sendBehind(otherRootView);
-                    otherRootView.sendBehind(this);
+                    this.sendBehind(otherRootView, ignoredLayout);
+                    otherRootView.sendBehind(this, ignoredLayout);
                 }
             }
         });
