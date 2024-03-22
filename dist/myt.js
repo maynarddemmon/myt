@@ -8270,8 +8270,8 @@ myt.Destructible = new JS.Module('Destructible', {
         
         // Accessors ///////////////////////////////////////////////////////////
         /** @overrides myt.View */
-        setWidth: function(v, suppressEvent) {
-            if (setWidth(this, v)) this.callSuper(v, suppressEvent);
+        setWidth: function(v) {
+            if (setWidth(this, v)) this.callSuper(v);
         },
         
         
@@ -8306,8 +8306,8 @@ myt.Destructible = new JS.Module('Destructible', {
         
         // Accessors ///////////////////////////////////////////////////////////
         /** @overrides myt.View */
-        setHeight: function(v, suppressEvent) {
-            if (setHeight(this, v)) this.callSuper(v, suppressEvent);
+        setHeight: function(v) {
+            if (setHeight(this, v)) this.callSuper(v);
         },
         
         
