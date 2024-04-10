@@ -332,9 +332,8 @@
             },
             
             redrawPalette: pkg.debounce(() => {
-                const subs = paletteContainer.getSubviews();
-                let i = subs.length;
-                while (i) subs[--i].destroy();
+                paletteContainer.destroyAllSubviews();
+                
                 const alreadyAdded = new Set();
                 defaultPalette.push(...selectionPalette);
                 for (let color of defaultPalette) {
@@ -359,9 +358,7 @@
         
         resetSelectionManager = view => {
             view.deselectAll();
-            const subs = view.getSubviews();
-            let i = subs.length;
-            while (i) subs[--i].destroy();
+            view.destroyAllSubviews();
         },
         
         SelectableBtn = new JSClass('SelectableBtn', TextButton, {
@@ -877,15 +874,10 @@
                 hideSpinner(this);
                 
                 const content = this.content, 
-                    stc = content.sizeToChildren,
-                    svs = content.getSubviews();
+                    stc = content.sizeToChildren;
                 
                 // Destroy all children except the close button since that gets reused.
-                let i = svs.length;
-                while (i) {
-                    const sv = svs[--i];
-                    if (sv.name !== 'closeBtn') sv.destroy();
-                }
+                content.destroyAllSubviews(sv => sv.name !== 'closeBtn');
                 
                 // The blank dialog sets this.
                 content.setVisible(true);

@@ -7718,6 +7718,20 @@ myt.Destructible = new JS.Module('Destructible', {
             if (this.parent) return this.getODE().previousElementSibling?.model;
         },
         
+        /** Destroy all subviews of this View.
+            @param {?Function} [filterFunc] - An optional function used to filter which subviews
+                will be destroyed. The function is provided the subview and must return true if
+                the subview should be destroyed. When no filter function is provided all subviews
+                will be destroyed.
+            @returns {undefined} */
+        destroyAllSubviews: function(filterFunc) {
+            const svs = this.getSubviews();
+            for (let i = svs.length; i > 0;) {
+                const sv = svs[--i];
+                if (!filterFunc || filterFunc(sv)) sv.destroy();
+            }
+        },
+        
         // Layouts //
         /** Checks if this View has the provided Layout in the layouts array.
             @param {!Object} layout - The myt.Layout to look for.
@@ -18520,9 +18534,8 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             redrawPalette: pkg.debounce(() => {
-                const subs = paletteContainer.getSubviews();
-                let i = subs.length;
-                while (i) subs[--i].destroy();
+                paletteContainer.destroyAllSubviews();
+                
                 const alreadyAdded = new Set();
                 defaultPalette.push(...selectionPalette);
                 for (let color of defaultPalette) {
@@ -18547,9 +18560,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         resetSelectionManager = view => {
             view.deselectAll();
-            const subs = view.getSubviews();
-            let i = subs.length;
-            while (i) subs[--i].destroy();
+            view.destroyAllSubviews();
         },
         
         SelectableBtn = new JSClass('SelectableBtn', TextButton, {
@@ -19065,15 +19076,10 @@ myt.Destructible = new JS.Module('Destructible', {
                 hideSpinner(this);
                 
                 const content = this.content, 
-                    stc = content.sizeToChildren,
-                    svs = content.getSubviews();
+                    stc = content.sizeToChildren;
                 
                 // Destroy all children except the close button since that gets reused.
-                let i = svs.length;
-                while (i) {
-                    const sv = svs[--i];
-                    if (sv.name !== 'closeBtn') sv.destroy();
-                }
+                content.destroyAllSubviews(sv => sv.name !== 'closeBtn');
                 
                 // The blank dialog sets this.
                 content.setVisible(true);

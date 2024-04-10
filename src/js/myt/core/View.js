@@ -993,6 +993,20 @@
             if (this.parent) return this.getODE().previousElementSibling?.model;
         },
         
+        /** Destroy all subviews of this View.
+            @param {?Function} [filterFunc] - An optional function used to filter which subviews
+                will be destroyed. The function is provided the subview and must return true if
+                the subview should be destroyed. When no filter function is provided all subviews
+                will be destroyed.
+            @returns {undefined} */
+        destroyAllSubviews: function(filterFunc) {
+            const svs = this.getSubviews();
+            for (let i = svs.length; i > 0;) {
+                const sv = svs[--i];
+                if (!filterFunc || filterFunc(sv)) sv.destroy();
+            }
+        },
+        
         // Layouts //
         /** Checks if this View has the provided Layout in the layouts array.
             @param {!Object} layout - The myt.Layout to look for.
