@@ -15595,13 +15595,12 @@ myt.Destructible = new JS.Module('Destructible', {
         STYLE_OUTLINE = 'outline',
         
         updateUI = checkbox => {
-            const label = checkbox.label ?? '',
-                checkboxStyle = checkbox.checkboxStyle ?? STYLE_OUTLINE;
+            const label = checkbox.label ?? '';
             checkbox.setText(
                 '<i class="' + 
-                (checkboxStyle === STYLE_SOLID ? 'fas' : 'far') + 
+                (checkbox.checkboxStyle === STYLE_SOLID ? 'fas' : 'far') + 
                 ' fa-' + (checkbox.isChecked() ? 'check-' : '') + 'square"></i>' +
-                (label.length > 0 ? ' ' : '') + label
+                (label.length > 0 ? ' ' + label : '')
             );
         };
     
