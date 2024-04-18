@@ -72,7 +72,7 @@
         },
         
         notifyInstanceThatFontLoaded = instance => {
-            if (instance && !instance.destroyed) instance.sizeViewToDom();
+            if (instance && !instance.destroyed && instance.isVisible()) instance.sizeViewToDom();
         },
         
         // The default locale for I18N.
