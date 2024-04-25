@@ -19566,7 +19566,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @class */
         URLValidator = pkg.URLValidator = new JSClass('URLValidator', Validator, {
             /** @overrides myt.Validator
-                @param {string id
+                @param {string} id
                 @param originalRawQuery:boolean if true this prevents the query from 
                     being normalized. */
             initialize: function(id, originalRawQuery) {
