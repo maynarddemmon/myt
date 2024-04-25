@@ -465,6 +465,13 @@
         include: [pkg.MouseOver, pkg.MouseDown]
     });
     
+    pkg.MouseEventsBubbleUp = new JSModule('MouseEventsBubbleUp', {
+        doMouseOver: function(event) {this.callSuper(event); return true;},
+        doMouseOut: function(event) {this.callSuper(event); return true;},
+        doMouseDown: function(event) {this.callSuper(event); return true;},
+        doMouseUp: function(event) {this.callSuper(event); return true;}
+    });
+    
     /** Makes an myt.View draggable via the mouse.
         
         Also suppresses context menus since the mouse down to open it causes bad behavior since a 
