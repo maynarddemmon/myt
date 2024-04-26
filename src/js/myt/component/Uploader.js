@@ -266,7 +266,7 @@
             uploadFile: function(file, url, fileParam) {
                 const self = this,
                     formData = new FormData();
-                formData.append(fileParam ?? self.requestFileParam, file, file.name);
+                formData.append(fileParam ?? self.requestFileParam, file, file.name.replaceAll('%20', ' '));
                 pkg.doFetch(
                     url ?? self.uploadUrl,
                     self.makeFetchOptionsForUpload(formData),
