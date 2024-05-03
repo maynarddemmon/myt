@@ -3,6 +3,11 @@
         
         {View, SizeToParent} = pkg,
         
+        STATE_EXPANDED = 'expanded',
+        STATE_EXPANDING = 'expanding',
+        STATE_COLLAPSED = 'collapsed',
+        STATE_COLLAPSING = 'collapsing',
+        
         /** A tab slider component.
             
             Events:
@@ -31,6 +36,15 @@
             include: [pkg.Selectable, pkg.Disableable, SizeToParent],
             
             
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                STATE_EXPANDED:STATE_EXPANDED,
+                STATE_EXPANDING:STATE_EXPANDING,
+                STATE_COLLAPSED:STATE_COLLAPSED,
+                STATE_COLLAPSING:STATE_COLLAPSING
+            },
+            
+            
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
                 const self = this;
@@ -38,7 +52,7 @@
                 
                 attrs.defaultPlacement = 'wrapper.container';
                 attrs.percentOfParentWidth = 100;
-                attrs.expansionState = 'collapsed';
+                attrs.expansionState = STATE_COLLAPSED;
                 
                 attrs.tabId ??= pkg.generateGuid();
                 attrs.tabContainer ??= parent;
@@ -51,6 +65,7 @@
                 attrs.fillColorActive ??= '#ccc';
                 attrs.fillColorReady ??= '#fff';
                 attrs.minContainerHeight ??= 100;
+                attrs.layoutPaddingY ??= 0;
                 
                 // Selection must be done via the select method on the tabContainer
                 if (attrs.selected) {
@@ -103,7 +118,7 @@
                     }
                 }]);
                 
-                new pkg.SizeToChildren(wrapper.container = new View(wrapper), {axis:'y'});
+                self._wrapperLayout = new pkg.SizeToChildren(wrapper.container = new View(wrapper), {axis:'y', paddingY:self.layoutPaddingY});
                 
                 self.constrain('__updateHeight', [wrapper, 'y', wrapper, 'height']);
                 
@@ -123,6 +138,11 @@
             
             setTabId: function(v) {this.tabId = v;},
             setTabContainer: function(v) {this.tabContainer = v;},
+            
+            setLayoutPaddingY: function(v) {
+                this.layoutPaddingY = v;
+                if (this.inited) this._wrapperLayout.setPaddingY(v);
+            },
             
             setMinContainerHeight: function(v) {this.minContainerHeight = v;},
             setButtonClass: function(v) {this.buttonClass = v;},
@@ -148,14 +168,14 @@
                     
                     const wrapper = this.wrapper;
                     if (wrapper) {
-                        if (v === 'expanded') {
+                        if (v === STATE_EXPANDED) {
                             wrapper.setMaskFocus(false);
                             wrapper.setOverflow('auto');
-                        } else if (v === 'expanding') {
+                        } else if (v === STATE_EXPANDING) {
                             wrapper.setVisible(true);
-                        } else if (v === 'collapsed') {
+                        } else if (v === STATE_COLLAPSED) {
                             wrapper.setVisible(false);
-                        } else if (v === 'collapsing') {
+                        } else if (v === STATE_COLLAPSING) {
                             wrapper.setMaskFocus(true);
                             wrapper.setOverflow('hidden');
                         }
@@ -189,7 +209,7 @@
                     wrapper = self.wrapper,
                     to = targetHeight - self.getCollapsedHeight();
                 
-                self.setExpansionState('expanding');
+                self.setExpansionState(STATE_EXPANDING);
                 
                 wrapper.stopActiveAnimators();
                 
@@ -197,14 +217,14 @@
                     const duration = self.tabContainer.duration;
                     if (duration === 1) {
                         wrapper.setHeight(to);
-                        self.setExpansionState('expanded');
+                        self.setExpansionState(STATE_EXPANDED);
                     } else {
                         wrapper.animate({
                             attribute:'height', to:to, duration:duration
-                        }).next(success => {self.setExpansionState('expanded');});
+                        }).next(success => {self.setExpansionState(STATE_EXPANDED);});
                     }
                 } else {
-                    self.setExpansionState('expanded');
+                    self.setExpansionState(STATE_EXPANDED);
                 }
             },
             
@@ -214,7 +234,7 @@
                 const self = this,
                     wrapper = self.wrapper;
                 
-                self.setExpansionState('collapsing');
+                self.setExpansionState(STATE_COLLAPSING);
                 
                 wrapper.stopActiveAnimators();
                 
@@ -222,14 +242,14 @@
                     const duration = self.tabContainer.duration;
                     if (duration === 1) {
                         wrapper.setHeight(0);
-                        self.setExpansionState('collapsed');
+                        self.setExpansionState(STATE_COLLAPSED);
                     } else {
                         wrapper.animate({
                             attribute:'height', to:0, duration:duration
-                        }).next(success => {self.setExpansionState('collapsed');});
+                        }).next(success => {self.setExpansionState(STATE_COLLAPSED);});
                     }
                 } else {
-                    self.setExpansionState('collapsed');
+                    self.setExpansionState(STATE_COLLAPSED);
                 }
             },
             
