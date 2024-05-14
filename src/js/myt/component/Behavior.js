@@ -428,8 +428,17 @@
             @param {!Object} event
             @returns {undefined} */
         doMouseDown: function(event) {
-            if (!this.disabled) this.setMouseDown(true);
+            if (this.disabled) {
+                this.doMouseDownWhenDisabled();
+            } else {
+                this.setMouseDown(true);
+            }
         },
+        
+        /** Called by the doMouseDown function when this View is currently disabled:true. Note that
+            the mouseDown attribute of this View will not be true when this function is called.
+            @returns {undefined} */
+        doMouseDownWhenDisabled: () => {/* Subclasses to implement as needed. */},
         
         /** Called when the mouse is up on this view. Subclasses must call super.
             @param {!Object} event
