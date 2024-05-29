@@ -4744,6 +4744,23 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     if (canFireEvent ??= self.inited !== false && self.fireEvent) self.fireEvent(attrName, value); // !== false allows this to work with non-nodes.
                 }
             }
+        },
+        
+        createGetterFunction = (target, attrName) => {
+            const getterName = generateGetterName(attrName);
+            if (target[getterName]) consoleLog('Overwriting getter', getterName);
+            target[getterName] = function() {return this[attrName];};
+        },
+        
+        createSetterFunction = (target, attrName) => {
+            const setterName = generateSetterName(attrName);
+            if (target[setterName]) consoleLog('Overwriting setter', setterName);
+            target[setterName] = function(v) {
+                if (this[attrName] !== v) {
+                    this[attrName] = v;
+                    if (this.inited) this.fireEvent(attrName, v);
+                }
+            };
         };
     
     /** Provides support for getter and setter functions on an object.
@@ -4773,25 +4790,21 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 @param {!Object} target
                 @param {string} attrName
                 @returns {undefined} */
-            createSetterFunction: (target, attrName) => {
-                const setterName = generateSetterName(attrName);
-                if (target[setterName]) consoleLog('Overwriting setter', setterName);
-                target[setterName] = function(v) {
-                    if (this[attrName] !== v) {
-                        this[attrName] = v;
-                        if (this.inited) this.fireEvent(attrName, v);
-                    }
-                };
-            },
+            createSetterFunction: createSetterFunction,
             
             /** Creates a standard getter function for the provided attrName on the target.
                 @param {!Object} target
                 @param {string} attrName
                 @returns {undefined} */
-            createGetterFunction: (target, attrName) => {
-                const getterName = generateGetterName(attrName);
-                if (target[getterName]) consoleLog('Overwriting getter', getterName);
-                target[getterName] = function() {return this[attrName];};
+            createGetterFunction: createGetterFunction,
+            
+            createSetterMixin: (propNames, alsoGetters) => {
+                const mixin = {};
+                for (const propName of propNames) {
+                    createSetterFunction(mixin, propName);
+                    if (alsoGetters) createGetterFunction(mixin, propName);
+                }
+                return mixin;
             }
         },
         
