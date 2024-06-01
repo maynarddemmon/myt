@@ -5325,7 +5325,11 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /*  Gets the animation pool if it exists, or lazy instantiates it 
             first if necessary. Returns a myt.TrackActivesPool */
-        getAnimPool = node => node.__animPool ??= new pkg.TrackActivesPool(pkg.Animator, node);
+        getAnimPool = node => node.__animPool ??= new pkg.TrackActivesPool(pkg.Animator, node),
+        
+        /*  Lazy instantiate the references store on a scope object.
+            @returns {!Object} */
+        getRefs = scope => scope.__REFS ??= {};
         
     /** An object that provides accessors, events and simple lifecycle management. Useful as a 
         light weight alternative to myt.Node when parent child relationships are not needed.
@@ -5758,6 +5762,37 @@ myt.Destructible = new JS.Module('Destructible', {
             @returns {undefined} */
         doOnceOnIdle: function(methodName) {
             this.attachTo(pkg.global.idle, methodName, 'idle', true);
+        },
+        
+        
+        // Reference Store //
+        /*  Use the reference store to hold values in this Node without cluttering up the
+            Node's namespace. */
+        
+        /** Add a reference under a provided name.
+            @param {string} name - The name to store the value under.
+            @param {*} ref - The value to store.
+            @returns {*} */
+        addRef: function(name, ref) {
+            return getRefs(this)[name] = ref;
+        },
+        
+        /** Get a reference stored under a provided name.
+            @param {string} name - The name to get the value for.
+            @returns {*} */
+        getRef: function(name) {
+            return getRefs(this)[name];
+        },
+        
+        /** Remove a reference stored under the provided name and return whatever was stored
+            under that name.
+            @param {string} name - The name to remove the value for.
+            @returns {*} */
+        removeRef: function(name) {
+            const refs = getRefs(this),
+                retval = refs[name];
+            delete refs[name];
+            return retval;
         }
     });
 })(myt);
@@ -20883,7 +20918,7 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         // GridRow
-        getRowSubview = (gridRow, columnHeader) => gridRow[columnHeader.columnId + 'View'],
+        getRowSubview = (gridRow, columnHeader) => gridRow.getRef(columnHeader.columnId),
         
         // SimpleGridColHdr
         updateSortIcon = gridHeader => {
@@ -21650,11 +21685,10 @@ myt.Destructible = new JS.Module('Destructible', {
             if (sortColumnId) {
                 // Default sort function uses the 'text' attribute of 
                 // the subview.
-                const sortNum = sortOrder === 'ascending' ? 1 : -1,
-                    columnName = sortColumnId + 'View';
+                const sortNum = sortOrder === 'ascending' ? 1 : -1;
                 return (a, b) => {
-                    const aValue = a[columnName].text,
-                        bValue = b[columnName].text;
+                    const aValue = a.getRef(sortColumnId).text,
+                        bValue = b.getRef(sortColumnId).text;
                     if (aValue > bValue) {
                         return sortNum;
                     } else if (bValue > aValue) {
@@ -21790,7 +21824,7 @@ myt.Destructible = new JS.Module('Destructible', {
             infiniteList.scrollYTo(v, true);
         },
         
-        getSubview = (gridRow, columnHeader) => gridRow[columnHeader.columnId + 'View'],
+        getSubview = (gridRow, columnHeader) => gridRow.getRef(columnHeader.columnId),
         
         /** A mixin for rows in infinite scrolling lists
             

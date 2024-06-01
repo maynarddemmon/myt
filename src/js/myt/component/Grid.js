@@ -196,7 +196,7 @@
         },
         
         // GridRow
-        getRowSubview = (gridRow, columnHeader) => gridRow[columnHeader.columnId + 'View'],
+        getRowSubview = (gridRow, columnHeader) => gridRow.getRef(columnHeader.columnId),
         
         // SimpleGridColHdr
         updateSortIcon = gridHeader => {
@@ -963,11 +963,10 @@
             if (sortColumnId) {
                 // Default sort function uses the 'text' attribute of 
                 // the subview.
-                const sortNum = sortOrder === 'ascending' ? 1 : -1,
-                    columnName = sortColumnId + 'View';
+                const sortNum = sortOrder === 'ascending' ? 1 : -1;
                 return (a, b) => {
-                    const aValue = a[columnName].text,
-                        bValue = b[columnName].text;
+                    const aValue = a.getRef(sortColumnId).text,
+                        bValue = b.getRef(sortColumnId).text;
                     if (aValue > bValue) {
                         return sortNum;
                     } else if (bValue > aValue) {

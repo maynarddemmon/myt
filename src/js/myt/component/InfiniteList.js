@@ -31,7 +31,7 @@
             infiniteList.scrollYTo(v, true);
         },
         
-        getSubview = (gridRow, columnHeader) => gridRow[columnHeader.columnId + 'View'],
+        getSubview = (gridRow, columnHeader) => gridRow.getRef(columnHeader.columnId),
         
         /** A mixin for rows in infinite scrolling lists
             
