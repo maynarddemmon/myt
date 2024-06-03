@@ -20925,8 +20925,8 @@ myt.Destructible = new JS.Module('Destructible', {
             let glyph = '';
             if (gridHeader.sortable) {
                 switch (gridHeader.sortState) {
-                    case 'ascending': glyph = 'chevron-up'; break;
-                    case 'descending': glyph = 'chevron-down'; break;
+                    case Grid.SORT_ORDER_ASC: glyph = 'chevron-up'; break;
+                    case Grid.SORT_ORDER_DESC: glyph = 'chevron-down'; break;
                 }
             }
             gridHeader.sortIcon.setIcon(glyph);
@@ -21532,173 +21532,180 @@ myt.Destructible = new JS.Module('Destructible', {
             notifyHdrVisibilityChange: function(columnHeader) {
                 getRowSubview(this, columnHeader)?.setVisible(columnHeader.visible);
             }
-        });
-    
-    /** An implementation of a grid component.
+        }),
         
-        Attributes:
-            rowSpacing:number The spacing between rows. Defaults to 1.
-            columnSpacing:number the spacing between columns. Defaults to 1.
-            sizeHeightToRows:boolean If true, this component will be sized to fit all the rows 
-                without showing scrollbars. Defaults to undefined which is equivalent to false.
-        
-        @class */
-    pkg.Grid = new JSClass('Grid', View, {
-        include: [GridController],
-        
-        
-        // Life Cycle //////////////////////////////////////////////////////////
-        /** @overrides myt.View */
-        initNode: function(parent, attrs) {
-            const self = this;
+        /** An implementation of a grid component.
             
-            // Allows horizontal scrolling if the grid columns are too wide.
-            attrs.overflow ??= 'autox';
+            Attributes:
+                rowSpacing:number The spacing between rows. Defaults to 1.
+                columnSpacing:number the spacing between columns. Defaults to 1.
+                sizeHeightToRows:boolean If true, this component will be sized to fit all the rows 
+                    without showing scrollbars. Defaults to undefined which is equivalent to false.
             
-            attrs.bgColor ??= '#ccc';
-            attrs.rowSpacing ??= 1;
-            attrs.columnSpacing ??= 1;
+            @class */
+        Grid = pkg.Grid = new JSClass('Grid', View, {
+            include: [GridController],
             
-            const isAutoScrolling = attrs.isAutoScrolling;
-            delete attrs.isAutoScrolling;
             
-            self.callSuper(parent, attrs);
+            // Class Methods and Attributes ////////////////////////////////////
+            extend: {
+                SORT_ORDER_ASC: 'ascending',
+                SORT_ORDER_DESC: 'descending'
+            },
             
-            // Build UI
-            const header = self.header = new View(self, {overflow:'hidden'});
-            header.xLayout = new SpacedLayout(header, {locked:true, collapseParent:true, spacing:self.columnSpacing});
-            header.yLayout = new pkg.SizeToChildren(header, {locked:true, axis:'y'});
             
-            const sizeHeightToRows = self.sizeHeightToRows,
-                contentMixins = isAutoScrolling ? [pkg.AutoScroller] : [],
-                content = self.content = new View(self, {overflow:sizeHeightToRows ? 'hidden' : 'autoy'}, contentMixins);
-            content.yLayout = new SpacedLayout(content, {locked:true, axis:'y', spacing:self.rowSpacing, collapseParent:sizeHeightToRows});
+            // Life Cycle //////////////////////////////////////////////////////
+            /** @overrides myt.View */
+            initNode: function(parent, attrs) {
+                const self = this;
+                
+                // Allows horizontal scrolling if the grid columns are too wide.
+                attrs.overflow ??= 'autox';
+                
+                attrs.bgColor ??= '#ccc';
+                attrs.rowSpacing ??= 1;
+                attrs.columnSpacing ??= 1;
+                
+                const isAutoScrolling = attrs.isAutoScrolling;
+                delete attrs.isAutoScrolling;
+                
+                self.callSuper(parent, attrs);
+                
+                // Build UI
+                const header = self.header = new View(self, {overflow:'hidden'});
+                header.xLayout = new SpacedLayout(header, {locked:true, collapseParent:true, spacing:self.columnSpacing});
+                header.yLayout = new pkg.SizeToChildren(header, {locked:true, axis:'y'});
+                
+                const sizeHeightToRows = self.sizeHeightToRows,
+                    contentMixins = isAutoScrolling ? [pkg.AutoScroller] : [],
+                    content = self.content = new View(self, {overflow:sizeHeightToRows ? 'hidden' : 'autoy'}, contentMixins);
+                content.yLayout = new SpacedLayout(content, {locked:true, axis:'y', spacing:self.rowSpacing, collapseParent:sizeHeightToRows});
+                
+                self.syncTo(self, 'setGridWidth', 'width');
+                self.syncTo(header, '_updateContentWidth', 'width');
+                self.constrain('_updateContentHeight', [sizeHeightToRows ? content : self, 'height', header, 'height', header, 'y']);
+            },
             
-            self.syncTo(self, 'setGridWidth', 'width');
-            self.syncTo(header, '_updateContentWidth', 'width');
-            self.constrain('_updateContentHeight', [sizeHeightToRows ? content : self, 'height', header, 'height', header, 'y']);
-        },
-        
-        
-        // Accessors ///////////////////////////////////////////////////////////
-        setSizeHeightToRows: function(v) {this.sizeHeightToRows = v;},
-        
-        setRowSpacing: function(v) {
-            if (this.rowSpacing !== v) {
-                this.rowSpacing = v;
-                if (this.inited) this.content.yLayout.setSpacing(v);
-            }
-        },
-        
-        setColumnSpacing: function(v) {
-            if (this.columnSpacing !== v) {
-                this.columnSpacing = v;
-                if (this.inited) this.header.xLayout.setSpacing(v);
-            }
-        },
-        
-        /** @overrides myt.GridController */
-        setLocked: function(v) {
-            // Performance: don't update layouts until the grid is unlocked.
-            if (this.inited) {
-                for (const layout of [this.header.xLayout, this.header.yLayout, this.content.yLayout]) {
-                    if (v) {
-                        layout.incrementLockedCounter();
-                    } else {
-                        layout.decrementLockedCounter();
-                        layout.update();
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setSizeHeightToRows: function(v) {this.sizeHeightToRows = v;},
+            
+            setRowSpacing: function(v) {
+                if (this.rowSpacing !== v) {
+                    this.rowSpacing = v;
+                    if (this.inited) this.content.yLayout.setSpacing(v);
+                }
+            },
+            
+            setColumnSpacing: function(v) {
+                if (this.columnSpacing !== v) {
+                    this.columnSpacing = v;
+                    if (this.inited) this.header.xLayout.setSpacing(v);
+                }
+            },
+            
+            /** @overrides myt.GridController */
+            setLocked: function(v) {
+                // Performance: don't update layouts until the grid is unlocked.
+                if (this.inited) {
+                    for (const layout of [this.header.xLayout, this.header.yLayout, this.content.yLayout]) {
+                        if (v) {
+                            layout.incrementLockedCounter();
+                        } else {
+                            layout.decrementLockedCounter();
+                            layout.update();
+                        }
                     }
                 }
-            }
-            this.callSuper(v);
-        },
-        
-        
-        // Methods /////////////////////////////////////////////////////////////
-        /** @private
-            @param {!Object} event
-            @returns {undefined} */
-        _updateContentWidth: function(event) {
-            const content = this.content,
-                w = event.value;
-            content.setWidth(w);
-            for (const sv of content.getSubviews()) sv.setWidth(w);
-        },
-        
-        /** @private
-            @param {!Object} event
-            @returns {undefined} */
-        _updateContentHeight: function(event) {
-            const self = this,
-                {header, content} = self,
-                y = header.y + header.height;
-            content.setY(y);
+                this.callSuper(v);
+            },
             
-            if (self.sizeHeightToRows) {
-                self.setHeight(y + content.height);
-            } else {
-                content.setHeight(self.height - y);
-            }
-        },
-        
-        /** @overrides myt.Node */
-        determinePlacement: function(placement, subnode) {
-            // Automatically place column headers and rows in the header and content 
-            // views respectively.
-            if (placement === DEFAULT_PLACEMENT) {
-                let target;
-                if (subnode.isA(GridRow)) {
-                    target = this.content;
-                } else if (subnode.isA(GridColHdr)) {
-                    target = this.header;
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** @private
+                @param {!Object} event
+                @returns {undefined} */
+            _updateContentWidth: function(event) {
+                const content = this.content,
+                    w = event.value;
+                content.setWidth(w);
+                for (const sv of content.getSubviews()) sv.setWidth(w);
+            },
+            
+            /** @private
+                @param {!Object} event
+                @returns {undefined} */
+            _updateContentHeight: function(event) {
+                const self = this,
+                    {header, content} = self,
+                    y = header.y + header.height;
+                content.setY(y);
+                
+                if (self.sizeHeightToRows) {
+                    self.setHeight(y + content.height);
+                } else {
+                    content.setHeight(self.height - y);
+                }
+            },
+            
+            /** @overrides myt.Node */
+            determinePlacement: function(placement, subnode) {
+                // Automatically place column headers and rows in the header and content 
+                // views respectively.
+                if (placement === DEFAULT_PLACEMENT) {
+                    let target;
+                    if (subnode.isA(GridRow)) {
+                        target = this.content;
+                    } else if (subnode.isA(GridColHdr)) {
+                        target = this.header;
+                    }
+                    
+                    if (target) {
+                        if (subnode.gridController !== this) subnode.setGridController(this);
+                        return target;
+                    }
                 }
                 
-                if (target) {
-                    if (subnode.gridController !== this) subnode.setGridController(this);
-                    return target;
+                return this.callSuper(placement, subnode);
+            },
+            
+            /** @overrides myt.GridController */
+            doSort: function() {
+                const [sortField, sortOrder] = this.sort ?? ['', ''],
+                    sortFunc = this.getSortFunction(sortField, sortOrder);
+                if (sortFunc) {
+                    const content = this.content, 
+                        yLayout = content.yLayout;
+                    this.rows.sort(sortFunc);
+                    content.sortSubviews(sortFunc);
+                    yLayout.sortSubviews(sortFunc);
+                    yLayout.update();
+                }
+            },
+            
+            /** Gets the sort function used to sort the rows. Subclasses and instances should 
+                implement this as needed.
+                @param {string} sortColumnId,
+                @param {string} sortOrder
+                @returns {!Function}  a comparator function used for sorting. */
+            getSortFunction: (sortColumnId, sortOrder) => {
+                if (sortColumnId) {
+                    // Default sort function uses the 'text' attribute of 
+                    // the subview.
+                    const sortNum = sortOrder === Grid.SORT_ORDER_ASC ? 1 : -1;
+                    return (a, b) => {
+                        const aValue = a.getRef(sortColumnId).text,
+                            bValue = b.getRef(sortColumnId).text;
+                        if (aValue > bValue) {
+                            return sortNum;
+                        } else if (bValue > aValue) {
+                            return -sortNum;
+                        }
+                        return 0;
+                    };
                 }
             }
-            
-            return this.callSuper(placement, subnode);
-        },
-        
-        /** @overrides myt.GridController */
-        doSort: function() {
-            const [sortField, sortOrder] = this.sort ?? ['', ''],
-                sortFunc = this.getSortFunction(sortField, sortOrder);
-            if (sortFunc) {
-                const content = this.content, 
-                    yLayout = content.yLayout;
-                this.rows.sort(sortFunc);
-                content.sortSubviews(sortFunc);
-                yLayout.sortSubviews(sortFunc);
-                yLayout.update();
-            }
-        },
-        
-        /** Gets the sort function used to sort the rows. Subclasses and instances should 
-            implement this as needed.
-            @param {string} sortColumnId,
-            @param {string} sortOrder
-            @returns {!Function}  a comparator function used for sorting. */
-        getSortFunction: (sortColumnId, sortOrder) => {
-            if (sortColumnId) {
-                // Default sort function uses the 'text' attribute of 
-                // the subview.
-                const sortNum = sortOrder === 'ascending' ? 1 : -1;
-                return (a, b) => {
-                    const aValue = a.getRef(sortColumnId).text,
-                        bValue = b.getRef(sortColumnId).text;
-                    if (aValue > bValue) {
-                        return sortNum;
-                    } else if (bValue > aValue) {
-                        return -sortNum;
-                    }
-                    return 0;
-                };
-            }
-        }
-    });
+        });
     
     /** A simple implementation of a grid column header.
         
@@ -21780,7 +21787,7 @@ myt.Destructible = new JS.Module('Destructible', {
         // Methods /////////////////////////////////////////////////////////////
         doActivated: function() {
             if (!this.disabled) {
-                this.setSortState(this.sortState === 'ascending' ? 'descending' : 'ascending');
+                this.setSortState(this.sortState === Grid.SORT_ORDER_ASC ? Grid.SORT_ORDER_DESC : Grid.SORT_ORDER_ASC);
                 this.gridController.setSort([this.columnId, this.sortState]);
             }
         },
@@ -22426,7 +22433,7 @@ myt.Destructible = new JS.Module('Destructible', {
             /** @overrides myt.InfiniteList */
             getSortFunction: function() {
                 const [sortColumnId, sortOrder] = this.gridHeader.sort ?? ['',''];
-                return sortColumnId ? getAlphaObjSortFunc(sortColumnId, sortOrder === 'ascending', false) : this.callSuper();
+                return sortColumnId ? getAlphaObjSortFunc(sortColumnId, sortOrder === pkg.Grid.SORT_ORDER_ASC, false) : this.callSuper();
             },
             
             /** @overrides myt.InfiniteList */

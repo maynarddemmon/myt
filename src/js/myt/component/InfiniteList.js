@@ -633,7 +633,7 @@
             /** @overrides myt.InfiniteList */
             getSortFunction: function() {
                 const [sortColumnId, sortOrder] = this.gridHeader.sort ?? ['',''];
-                return sortColumnId ? getAlphaObjSortFunc(sortColumnId, sortOrder === 'ascending', false) : this.callSuper();
+                return sortColumnId ? getAlphaObjSortFunc(sortColumnId, sortOrder === pkg.Grid.SORT_ORDER_ASC, false) : this.callSuper();
             },
             
             /** @overrides myt.InfiniteList */
