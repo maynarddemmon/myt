@@ -17408,6 +17408,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 // Modify attrs so setter gets called.
                 attrs.requestFileParam ??= 'file';
                 attrs.maxFiles ??= -1;
+                attrs.responseIsRaw ??= false;
                 
                 self.callSuper(parent, attrs);
                 
@@ -17467,7 +17468,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             setUploadUrl: function(v) {this.set('uploadUrl', v, true);},
             setRequestFileParam: function(v) {this.set('requestFileParam', v, true);},
-            
+            setResponseIsRaw: function(v) {this.set('responseIsRaw', v, true);},
             
             
             // Methods /////////////////////////////////////////////////////////
@@ -17514,7 +17515,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 pkg.doFetch(
                     url ?? self.uploadUrl,
                     self.makeFetchOptionsForUpload(formData),
-                    false,
+                    self.responseIsRaw,
                     data => {
                         self.handleUploadSuccess(file, data);
                     },
