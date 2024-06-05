@@ -4979,6 +4979,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     const obj = objPool[--i];
                     if (typeof obj.destroy === 'function') obj.destroy();
                 }
+                objPool.length = 0;
             }
         },
         
