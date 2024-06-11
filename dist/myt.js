@@ -24141,6 +24141,12 @@ myt.Destructible = new JS.Module('Destructible', {
         
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.View */
+        initNode: function(parent, attrs) {
+            this.quickSet(['willReadFrequently'], attrs);
+            this.callSuper(parent, attrs);
+        },
+        
+        /** @overrides myt.View */
         createOurDomElement: function(parent) {
             const elements = this.callSuper(parent),
                 innerElem = Array.isArray(elements) ? elements[1] : elements,
@@ -24149,7 +24155,9 @@ myt.Destructible = new JS.Module('Destructible', {
             innerElem.appendChild(canvas);
             canvas.style.position = 'absolute';
             
-            this.__ctx = canvas.getContext('2d');
+            const params = {};
+            if (this.willReadFrequently) params.willReadFrequently = true;
+            this.__ctx = canvas.getContext('2d', params);
             
             return elements;
         },
