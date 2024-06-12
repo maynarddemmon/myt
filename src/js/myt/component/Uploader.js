@@ -128,14 +128,22 @@
                     the server. */
                 FILE_ATTR_SERVER_PATH: 'serverPath',
                 
-                readFile: (file, handlerFunc, asText) => {
+                readFile: (file, handlerFunc, readAs) => {
                     if (FileReader !== undefined) {
                         const reader = new FileReader();
                         reader.onload = event => {handlerFunc(event.target.result);};
-                        if (asText) {
-                            reader.readAsText(file);
-                        } else {
-                            reader.readAsDataURL(file);
+                        
+                        switch (readAs) {
+                            case 'text':
+                                reader.readAsText(file);
+                                break;
+                            case 'arrayBuffer':
+                                reader.readAsArrayBuffer(file);
+                                break;
+                            case 'dataURL':
+                            default:
+                                reader.readAsDataURL(file);
+                                break;
                         }
                     }
                 },

@@ -193,9 +193,11 @@
                 @param {?Function} [callback] - A function called when the script loads.
                 @param {boolean} [noCacheBust] - If true, not cacheBust query param will be added. 
                     Defaults to undefined which is equivalent to false.
+                @param {string} [integrity] - If provided an integrity and crossorigin check will 
+                    be set on the script element.
                 @returns {?Object} The created script element or null if the script has already 
                     been loaded. */
-            loadScript: function(src, callback, noCacheBust) {
+            loadScript: function(src, callback, noCacheBust, integrity) {
                 // Prevent reloading the same script
                 const loadedScripts = this._loadedScripts ??= {};
                 if (loadedScripts[src]) {
@@ -207,6 +209,11 @@
                     const scriptElem = createElement('script');
                     scriptElem.type = 'text/javascript';
                     scriptElem.async = false;
+                    
+                    if (integrity) {
+                        scriptElem.integrity = integrity;
+                        scriptElem.crossOrigin = 'anonymous';
+                    }
                     
                     if (callback) {
                         let fired = false;

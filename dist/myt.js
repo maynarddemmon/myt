@@ -647,9 +647,11 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 @param {?Function} [callback] - A function called when the script loads.
                 @param {boolean} [noCacheBust] - If true, not cacheBust query param will be added. 
                     Defaults to undefined which is equivalent to false.
+                @param {string} [integrity] - If provided an integrity and crossorigin check will 
+                    be set on the script element.
                 @returns {?Object} The created script element or null if the script has already 
                     been loaded. */
-            loadScript: function(src, callback, noCacheBust) {
+            loadScript: function(src, callback, noCacheBust, integrity) {
                 // Prevent reloading the same script
                 const loadedScripts = this._loadedScripts ??= {};
                 if (loadedScripts[src]) {
@@ -661,6 +663,11 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     const scriptElem = createElement('script');
                     scriptElem.type = 'text/javascript';
                     scriptElem.async = false;
+                    
+                    if (integrity) {
+                        scriptElem.integrity = integrity;
+                        scriptElem.crossOrigin = 'anonymous';
+                    }
                     
                     if (callback) {
                         let fired = false;
@@ -17373,14 +17380,22 @@ myt.Destructible = new JS.Module('Destructible', {
                     the server. */
                 FILE_ATTR_SERVER_PATH: 'serverPath',
                 
-                readFile: (file, handlerFunc, asText) => {
+                readFile: (file, handlerFunc, readAs) => {
                     if (FileReader !== undefined) {
                         const reader = new FileReader();
                         reader.onload = event => {handlerFunc(event.target.result);};
-                        if (asText) {
-                            reader.readAsText(file);
-                        } else {
-                            reader.readAsDataURL(file);
+                        
+                        switch (readAs) {
+                            case 'text':
+                                reader.readAsText(file);
+                                break;
+                            case 'arrayBuffer':
+                                reader.readAsArrayBuffer(file);
+                                break;
+                            case 'dataURL':
+                            default:
+                                reader.readAsDataURL(file);
+                                break;
                         }
                     }
                 },
