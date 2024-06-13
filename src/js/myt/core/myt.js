@@ -190,7 +190,8 @@
             
             /** Dynamically load a script into the dom.
                 @param {string} src - The URL to the script file.
-                @param {?Function} [callback] - A function called when the script loads.
+                @param {?Function} [callback] - A function called when the script loads. A boolean
+                    is passed to it indicating success or failure.
                 @param {boolean} [noCacheBust] - If true, not cacheBust query param will be added. 
                     Defaults to undefined which is equivalent to false.
                 @param {string} [integrity] - If provided an integrity and crossorigin check will 
@@ -217,6 +218,13 @@
                     
                     if (callback) {
                         let fired = false;
+                        scriptElem.onerror = () => {
+                            // Prevent later events from this script. For example, if the src 
+                            // is changed.
+                            scriptElem.onload = scriptElem.onreadystatechange = scriptElem.onerror = null;
+                            
+                            callback(false);
+                        };
                         scriptElem.onload = scriptElem.onreadystatechange = () => {
                             if (!fired && (!scriptElem.readyState || scriptElem.readyState === 'complete')) {
                                 // Prevent refiring callback
@@ -224,9 +232,9 @@
                                 
                                 // Prevent later events from this script. For example, if the src 
                                 // is changed.
-                                scriptElem.onload = scriptElem.onreadystatechange = null;
+                                scriptElem.onload = scriptElem.onreadystatechange = scriptElem.onerror = null;
                                 
-                                callback();
+                                callback(true);
                             }
                         };
                     }
