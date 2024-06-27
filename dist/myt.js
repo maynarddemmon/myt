@@ -17434,6 +17434,9 @@ myt.Destructible = new JS.Module('Destructible', {
                 attrs.maxFiles ??= -1;
                 attrs.responseIsRaw ??= false;
                 
+                const accept = attrs.accept;
+                delete attrs.accept;
+                
                 self.callSuper(parent, attrs);
                 
                 // Support click to upload too.
@@ -17453,10 +17456,17 @@ myt.Destructible = new JS.Module('Destructible', {
                         self.handleFiles(this.getIDE().files, event);
                     }
                 }]);
+                
+                self.setAccept(accept);
             },
             
             
             // Accessors ///////////////////////////////////////////////////////
+            setAccept: function(v) {
+                this.set('accept', v, true);
+                if (this.fileInput) this.fileInput.getIDE().accept = this.accept;
+            },
+            
             /** Add a "remote" file when the value is set.
                 @param {string} v - the URI for a remote file.
                 @returns {string} */
