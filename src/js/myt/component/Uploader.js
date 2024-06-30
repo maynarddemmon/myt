@@ -115,6 +115,37 @@
             handleDroppedFile: (file, event) => {}
         }),
         
+        FileInput = pkg.FileInput = new JSClass('FileInput', pkg.NativeInputWrapper, {
+            // Life Cycle //////////////////////////////////////////////////////
+            initNode: function(parent, attrs) {
+                this.inputType = 'file';
+                this.callSuper(parent, attrs);
+                this.attachToDom(this, '_onChange', 'change');
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setAccept: function(v) {
+                this.set('accept', v, true);
+                this.getIDE().accept = this.accept;
+            },
+            
+            setMaxFiles: function(v) {
+                if (this.maxFiles !== v) {
+                    this.set('maxFiles', v, true);
+                    this.getIDE().multiple = this.maxFiles > 1;
+                }
+            },
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            clearValue: function() {
+                this.getIDE().value = '';
+            },
+            
+            _onChange: event => {/* Subclasses to implement. */}
+        }),
+        
         /** Component to upload files.
             
             @class */
@@ -180,32 +211,24 @@
                 self.callSuper(parent, attrs);
                 
                 // Support click to upload too.
-                self.fileInput = new pkg.NativeInputWrapper(self, {
+                self.fileInput = new FileInput(self, {
+                    maxFiles:self.maxFiles, accept:accept,
                     percentOfParentWidth:100, percentOfParentHeight:100,
                     opacity:0.01, disabled:self.disabled, overflow:'hidden'
                 }, [pkg.SizeToParent, {
-                    initNode: function(parent, attrs) {
-                        this.inputType = 'file';
-                        this.callSuper(parent, attrs);
-                        this.attachToDom(this, '_hndlInput', 'change');
-                        
-                        this.getIDE().multiple = self.maxFiles > 1;
-                    },
-                    
-                    _hndlInput: function(event) {
+                    _onChange: function(event) {
                         self.handleFiles(this.getIDE().files, event);
                     }
                 }]);
-                
-                self.setAccept(accept);
             },
             
             
             // Accessors ///////////////////////////////////////////////////////
-            setAccept: function(v) {
-                this.set('accept', v, true);
-                if (this.fileInput) this.fileInput.getIDE().accept = this.accept;
-            },
+            setAccept: function(v) {this.fileInput?.setAccept(this.accept);},
+            getAccept: function() {return this.fileInput?.accept;},
+            
+            setMaxFiles: function(v) {this.fileInput?.setMaxFiles(this.maxFiles);},
+            getMaxFiles: function() {return this.fileInput?.maxFiles;},
             
             /** Add a "remote" file when the value is set.
                 @param {string} v - the URI for a remote file.
@@ -230,14 +253,6 @@
             setDisabled: function(v) {
                 this.callSuper(v);
                 this.fileInput?.setDisabled(v);
-            },
-            
-            setMaxFiles: function(v) {
-                if (this.maxFiles !== v) {
-                    this.maxFiles = v;
-                    if (this.inited) this.fireEvent('maxFiles', v);
-                    if (this.fileInput) this.fileInput.getIDE().multiple = v > 1;
-                }
             },
             
             setUploadUrl: function(v) {this.set('uploadUrl', v, true);},
@@ -350,7 +365,7 @@
                 
                 // Reset the form element if empty. Otherwise uploading the 
                 // same file again won't trigger a change event.
-                if (!self.value) self.fileInput.getIDE().value = '';
+                if (!self.value) self.fileInput.clearValue();
                 
                 self.verifyChangedState(); // FIXME: mimics what happens in myt.FormElement setValue
                 self.form?.notifyValueChanged(self); // FIXME: mimics what happens in myt.Form setValue
