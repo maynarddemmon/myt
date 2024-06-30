@@ -17644,18 +17644,6 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             
-            // Attributes //////////////////////////////////////////////////////
-            setWidth: function(v) {
-                this.callSuper(v);
-                if (this.inited) this.updateImageSize();
-            },
-            
-            setHeight: function(v) {
-                this.callSuper(v);
-                if (this.inited) this.updateImageSize();
-            },
-            
-            
             // Methods /////////////////////////////////////////////////////////
             filterFiles: function(file) {
                 if (ImageUploader.isImageFile(file) || this.allowNonImages) {
@@ -17671,9 +17659,12 @@ myt.Destructible = new JS.Module('Destructible', {
                 
                 self.callSuper(file);
                 
-                const image = self.image = new pkg.Image(self, {useNaturalSize:false, align:'center', valign:'middle'});
+                const imageView = new pkg.Image(self, {
+                    percentOfParentWidth:100, percentOfParentHeight:100,
+                    useNaturalSize:false, imageSize:'contain', imagePosition:'center'
+                }, [pkg.SizeToParent]);
                 
-                image.file = file;
+                imageView.file = file;
                 
                 // Read into image
                 const readImageFunc = src => {
@@ -17681,7 +17672,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     img.onload = () => {
                         file.width = img.width;
                         file.height = img.height;
-                        if (image && !image.destroyed) self.updateImage(file, image, img.src);
+                        if (imageView && !imageView.destroyed) self.updateImage(file, imageView, img.src);
                     };
                     img.src = src;
                 };
@@ -17693,21 +17684,13 @@ myt.Destructible = new JS.Module('Destructible', {
                     }
                 } else {
                     if (file.size === -1) {
-                        self.updateImage(file, image, file.serverPath);
+                        self.updateImage(file, imageView, file.serverPath);
                     } else {
-                        Uploader.readFile(file, result => {self.updateImage(file, image, result);});
+                        Uploader.readFile(file, result => {self.updateImage(file, imageView, result);});
                     }
                 }
-            },
-            
-            scaleToFit: (boundsWidth, boundsHeight, imgWidth, imgHeight) => {
-                const boundsRatio = boundsWidth / boundsHeight,
-                    imgRatio = imgWidth / imgHeight;
-                if (imgRatio > boundsRatio) {
-                    return [boundsWidth, imgHeight * boundsWidth / imgWidth];
-                } else {
-                    return [imgWidth * boundsHeight / imgHeight, boundsHeight];
-                }
+                
+                return imageView;
             },
             
             removeFile: function(file) {
@@ -17726,29 +17709,13 @@ myt.Destructible = new JS.Module('Destructible', {
             
             handleDroppedFile: function(file, event) {
                 this.callSuper(file, event);
-                
                 this.uploadFile(file, this.uploadUrl);
             },
             
             updateImage: function(file, image, src) {
                 this.nativeWidth = file.width;
                 this.nativeHeight = file.height;
-                
-                this.updateImageSize();
-                
                 image.setImageUrl(src);
-            },
-            
-            updateImageSize: function() {
-                const image = this.image;
-                if (image && !image.destroyed) {
-                    const size = this.scaleToFit(this.width, this.height, this.nativeWidth, this.nativeHeight),
-                        w = mathRound(size[0]), 
-                        h = mathRound(size[1]);
-                    image.setImageSize(w + 'px ' + h + 'px');
-                    image.setWidth(w);
-                    image.setHeight(h);
-                }
             },
             
             getImageSize: function() {
