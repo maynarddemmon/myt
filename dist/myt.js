@@ -17674,7 +17674,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 
                 self.callSuper(file);
                 
-                const imageView = new pkg.Image(self, {
+                const imageView = self.imageView = new pkg.Image(self, {
                     percentOfParentWidth:100, percentOfParentHeight:100,
                     useNaturalSize:false, imageSize:'contain', imagePosition:'center'
                 }, [pkg.SizeToParent]);
