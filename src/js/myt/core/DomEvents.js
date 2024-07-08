@@ -481,10 +481,10 @@
                 false otherwise. */
         attachDomObserver: function(domObserver, methodName, type, capture, passive) {
             if (domObserver && methodName && type) {
-                capture = !!capture;
-                
                 const methodRef = this.createDomHandler(domObserver, methodName, type);
                 if (methodRef) {
+                    capture = !!capture;
+                    
                     const domObserversByType = this.__dobsbt ??= {};
                     
                     // Lazy instantiate dom observers array for type and insert observer.
@@ -564,19 +564,23 @@
                 alse otherwise. */
         detachDomObserver: function(domObserver, methodName, type, capture) {
             if (domObserver && methodName && type) {
-                capture = !!capture;
-                
                 const domObserversByType = this.__dobsbt;
                 if (domObserversByType) {
                     const domObservers = domObserversByType[type];
                     if (domObservers) {
+                        capture = !!capture;
+                        
                         // Remove dom observer
                         const de = this.getDomElementForDomObservable(type);
-                        let retval = false;
-                        for (let i = domObservers.length - 4; i >= 0; i -= 4) {
-                            const [obs, method, handler, cap] = domObservers.slice(i, i + 4);
+                        let retval = false,
+                            i = domObservers.length;
+                        while (i >= 4) {
+                            const cap = domObservers[--i],
+                                methodRef = domObservers[--i],
+                                method = domObservers[--i],
+                                obs = domObservers[--i];
                             if (domObserver === obs && methodName === method && capture === cap) {
-                                if (de) pkg.removeEventListener(de, type, handler, capture);
+                                if (de) pkg.removeEventListener(de, type, methodRef, capture);
                                 domObservers.splice(i, 4);
                                 retval = true;
                             }
@@ -594,8 +598,10 @@
             const domObserversByType = this.__dobsbt;
             if (domObserversByType) {
                 for (const [type, domObservers] of Object.entries(domObserversByType)) {
-                    for (let i = domObservers.length - 2; i >= 0; i -= 4) { // Offset by 2 so we can easily slice methodRef and capture.
-                        const [methodRef, capture] = domObservers.slice(i);
+                    let i = domObservers.length + 2; // Offset by 2 so we can efficiently increment to methodRef and capture.
+                    while (i >= 4) {
+                        const capture = domObservers[i -= 3],
+                            methodRef = domObservers[--i];
                         pkg.removeEventListener(this.getDomElementForDomObservable(type), type, methodRef, capture);
                     }
                     domObservers.length = 0;
@@ -653,27 +659,28 @@
             @returns {boolean} - True if detachment succeeded, false otherwise. */
         detachFromDom: function(observable, methodName, type, capture) {
             if (observable && methodName && type) {
-                capture = !!capture;
-                
                 // No need to detach if observable array doesn't exist.
                 const observablesByType = this.__dobt;
                 if (observablesByType) {
                     const observables = observablesByType[type];
                     if (observables) {
+                        capture = !!capture;
+                        
                         // Remove all instances of this observer/methodName/type/capture 
                         // from the observable
-                        let retval = false;
-                        for (let i = observables.length - 3; i >= 0; i -= 3) {
-                            const [obsCapture, obsMethodName, obsObservable] = observables.slice(i);
+                        let retval = false, // Observable was not found
+                            i = observables.length;
+                        while (i >= 3) {
+                            const obsObservable = observables[--i],
+                                obsMethodName = observables[--i],
+                                obsCapture = observables[--i];
                             if (observable === obsObservable && methodName === obsMethodName && capture === obsCapture) {
                                 if (observable.detachDomObserver(this, methodName, type, capture)) {
                                     observables.splice(i, 3);
-                                    retval = true;
+                                    retval = true; // Observable was found and removed
                                 }
                             }
                         }
-                        
-                        // Observable was not found
                         return retval;
                     }
                 }
@@ -687,8 +694,11 @@
             const observablesByType = this.__dobt;
             if (observablesByType) {
                 for (const [type, observables] of Object.entries(observablesByType)) {
-                    for (let i = observables.length - 3; i >= 0; i -= 3) {
-                        const [capture, methodName, observable] = observables.slice(i);
+                    let i = observables.length;
+                    while (i >= 3) {
+                        const observable = observables[--i],
+                            methodName = observables[--i],
+                            capture = observables[--i];
                         observable.detachDomObserver(this, methodName, type, capture);
                     }
                     observables.length = 0;

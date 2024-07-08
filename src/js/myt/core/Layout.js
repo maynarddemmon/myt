@@ -141,12 +141,9 @@
                     if (wasNotLocked) this.locked = true;
                     
                     // Stop monitoring parent
-                    let svs,
-                        i,
-                        len;
                     if (curParent) {
-                        svs = this.subviews;
-                        i = svs.length;
+                        const svs = this.subviews;
+                        let i = svs.length;
                         while (i) this.removeSubview(svs[--i]);
                         
                         this.detachFrom(curParent, '__hndlPSA', 'subviewAdded');
@@ -158,8 +155,9 @@
                     
                     // Start monitoring new parent
                     if (parent) {
-                        svs = parent.getSubviews();
-                        for (i = 0, len = svs.length; len > i;) this.addSubview(svs[i++]);
+                        const svs = parent.getSubviews(),
+                            len = svs.length;
+                        for (let i = 0; len > i;) this.addSubview(svs[i++]);
                         
                         this.attachTo(parent, '__hndlPSA', 'subviewAdded');
                         this.attachTo(parent, '__hndlPSR', 'subviewRemoved');

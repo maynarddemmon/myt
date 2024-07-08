@@ -70,8 +70,10 @@
             if (this.percentOfParentWidth !== v) {
                 if (this.inited) teardownPercentOfParentWidthConstraint(this);
                 this.percentOfParentWidth = v;
-                if (this.inited) this.fireEvent('percentOfParentWidth', v);
-                setupPercentOfParentWidthConstraint(this);
+                if (this.inited) {
+                    this.fireEvent('percentOfParentWidth', v);
+                    setupPercentOfParentWidthConstraint(this);
+                }
             }
         },
         
@@ -89,8 +91,10 @@
             if (this.percentOfParentHeight !== v) {
                 if (this.inited) teardownPercentOfParentHeightConstraint(this);
                 this.percentOfParentHeight = v;
-                if (this.inited) this.fireEvent('percentOfParentHeight', v);
-                setupPercentOfParentHeightConstraint(this);
+                if (this.inited) {
+                    this.fireEvent('percentOfParentHeight', v);
+                    setupPercentOfParentHeightConstraint(this);
+                }
             }
         },
         

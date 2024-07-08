@@ -18,13 +18,9 @@ myt.Destructible = new JS.Module('Destructible', {
         } else {
             // OPTIMIZATION: Improve garbage collection for JS.Class
             const meta = self.__meta__;
-            if (meta) {
-                const metaKeys = Object.keys(meta);
-                for (let i = metaKeys.length; i > 0;) meta[metaKeys[--i]] = null;
-            }
+            if (meta) for (const key of Object.keys(meta)) meta[key] = null;
             
-            const keys = Object.keys(self);
-            for (let i = keys.length; i > 0;) self[keys[--i]] = null;
+            for (const key of Object.keys(self)) self[key] = null;
             
             self.destroyed = true;
         }

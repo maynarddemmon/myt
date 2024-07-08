@@ -2035,9 +2035,11 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     const observers = observersByType[type];
                     if (observers) {
                         // Remove all instances of the observer and methodName combination.
-                        let retval = false;
-                        for (let i = observers.length - 2; i >= 0; i -= 2) {
-                            const [method, obs] = observers.slice(i);
+                        let retval = false,
+                            i = observers.length;
+                        while (i >= 2) {
+                            const obs = observers[--i],
+                                method = observers[--i];
                             if (observer === obs && methodName === method) {
                                 observers.splice(i, 2); // <- Detach Activity that detachAllObservers cares about.
                                 retval = true;
@@ -2057,9 +2059,10 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             if (observersByType) {
                 for (const type in observersByType) {
                     const observers = observersByType[type];
-                    for (let i = observers.length - 2; i >= 0; i -= 2) {
-                        const [methodName, observer] = observers.slice(i);
-                        
+                    let i = observers.length;
+                    while (i >= 2) {
+                        const observer = observers[--i],
+                            methodName = observers[--i];
                         // If an observer is registered more than once the list may get shortened 
                         // by observer.detachFrom. If so, just continue decrementing downwards.
                         if (observer && methodName) {
@@ -2111,16 +2114,19 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 list of observers and no others.
             @returns {undefined} */
         fireEvent: function(type, value, observers) {
-            // Determine observers to use
+            // Determine observers to use but avoid using getObservers since that lazy instantiates 
+            // __obsbt and fireEvent will get called predominantly when no observers were
+            // passed into this function.
             const self = this;
-            
-            // We avoid using getObservers since that lazy instantiates __obsbt and fireEvent will
-            // get called predominantly when no observers exist.
-            observers = observers ?? (self.hasObservers(type) ? self.__obsbt[type] : null);
+            if (observers == null) {
+                const observersByType = self.__obsbt;
+                if (observersByType) observers = observersByType[type];
+            }
             
             // Fire event
             if (observers) {
-                // Prevent "active" events from being fired again
+                // Prevent "active" events from being fired again which usually indicates an
+                // infinite loop has occurred.
                 const event = {source:self, type:type, value:value}, // Inlined from this.createEvent
                     activeEventTypes = self.__aet ??= {};
                 if (activeEventTypes[type]) {
@@ -2139,9 +2145,10 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     // event handler the index won't get messed up.
                     // FIXME: If necessary we could queue up detachObserver calls that come in 
                     // during iteration or make some sort of adjustment to 'i'.
-                    for (let i = observers.length - 2; i >= 0; i -= 2) {
-                        const [methodName, observer] = observers.slice(i);
-                        
+                    let i = observers.length;
+                    while (i >= 2) {
+                        const observer = observers[--i],
+                            methodName = observers[--i];
                         // Sometimes the list gets shortened as a side effect of the method we 
                         // called thus resulting in a nullish observer and methodName. In that case 
                         // just continue decrementing downwards.
@@ -2229,8 +2236,10 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 if (observablesByType) {
                     const observables = observablesByType[eventType];
                     if (observables) {
-                        for (let i = observables.length - 2; i >= 0; i -= 2) {
-                            const [method, obs] = observables.slice(i);
+                        let i = observables.length;
+                        while (i >= 2) {
+                            const obs = observables[--i],
+                                method = observables[--i];
                             if (observable === obs && methodName === method) return true;
                         }
                     }
@@ -2309,9 +2318,11 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     if (observables) {
                         // Remove all instances of this observer/methodName/eventType from 
                         // the observable
-                        let retval = false;
-                        for (let i = observables.length - 2; i >= 0; i -= 2) {
-                            const [method, obs] = observables.slice(i);
+                        let retval = false,
+                            i = observables.length;
+                        while (i >= 2) {
+                            const obs = observables[--i],
+                                method = observables[--i];
                             if (observable === obs && methodName === method) {
                                 if (observable.detachObserver(this, methodName, eventType)) {
                                     observables.splice(i, 2);
@@ -2334,8 +2345,10 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             const observablesByType = this.__obt;
             if (observablesByType) {
                 for (const [eventType, observables] of Object.entries(observablesByType)) {
-                    for (let i = observables.length - 2; i >= 0; i -= 2) {
-                        const [methodName, observable] = observables.slice(i);
+                    let i = observables.length;
+                    while (i >= 2) {
+                        const observable = observables[--i],
+                            methodName = observables[--i];
                         observable.detachObserver(this, methodName, eventType);
                     }
                     observables.length = 0;
@@ -2363,10 +2376,11 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     
                     // Don't allow a constraint to be clobbered.
                     if (constraint.length > 0) {
-                        consoleLog('Constraint exists for ' + methodName + ' on ' + this);
+                        consoleLog('Constraint exists for ' + methodName + ' on', this);
                     } else {
-                        for (let i = 0; i < len; i += 2) {
-                            const [observable, type] = observables.slice(i);
+                        for (let i = 0; i < len;) {
+                            const observable = observables[i++],
+                                type = observables[i++];
                             if (observable && type) {
                                 this.attachTo(observable, methodName, type);
                                 constraint.push(observable, type);
@@ -2394,8 +2408,10 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 if (constraints) {
                     const constraint = constraints[methodName];
                     if (constraint) {
-                        for (let i = constraint.length; i >= 0; i -= 2) {
-                            const [observable, type] = constraint.slice(i);
+                        let i = constraint.length;
+                        while (i >= 2) {
+                            const type = constraint[i--],
+                                observable = constraint[i--];
                             this.detachFrom(observable, methodName, type);
                         }
                         constraint.length = 0;
@@ -3642,10 +3658,10 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 false otherwise. */
         attachDomObserver: function(domObserver, methodName, type, capture, passive) {
             if (domObserver && methodName && type) {
-                capture = !!capture;
-                
                 const methodRef = this.createDomHandler(domObserver, methodName, type);
                 if (methodRef) {
+                    capture = !!capture;
+                    
                     const domObserversByType = this.__dobsbt ??= {};
                     
                     // Lazy instantiate dom observers array for type and insert observer.
@@ -3725,19 +3741,23 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 alse otherwise. */
         detachDomObserver: function(domObserver, methodName, type, capture) {
             if (domObserver && methodName && type) {
-                capture = !!capture;
-                
                 const domObserversByType = this.__dobsbt;
                 if (domObserversByType) {
                     const domObservers = domObserversByType[type];
                     if (domObservers) {
+                        capture = !!capture;
+                        
                         // Remove dom observer
                         const de = this.getDomElementForDomObservable(type);
-                        let retval = false;
-                        for (let i = domObservers.length - 4; i >= 0; i -= 4) {
-                            const [obs, method, handler, cap] = domObservers.slice(i, i + 4);
+                        let retval = false,
+                            i = domObservers.length;
+                        while (i >= 4) {
+                            const cap = domObservers[--i],
+                                methodRef = domObservers[--i],
+                                method = domObservers[--i],
+                                obs = domObservers[--i];
                             if (domObserver === obs && methodName === method && capture === cap) {
-                                if (de) pkg.removeEventListener(de, type, handler, capture);
+                                if (de) pkg.removeEventListener(de, type, methodRef, capture);
                                 domObservers.splice(i, 4);
                                 retval = true;
                             }
@@ -3755,8 +3775,10 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             const domObserversByType = this.__dobsbt;
             if (domObserversByType) {
                 for (const [type, domObservers] of Object.entries(domObserversByType)) {
-                    for (let i = domObservers.length - 2; i >= 0; i -= 4) { // Offset by 2 so we can easily slice methodRef and capture.
-                        const [methodRef, capture] = domObservers.slice(i);
+                    let i = domObservers.length + 2; // Offset by 2 so we can efficiently increment to methodRef and capture.
+                    while (i >= 4) {
+                        const capture = domObservers[i -= 3],
+                            methodRef = domObservers[--i];
                         pkg.removeEventListener(this.getDomElementForDomObservable(type), type, methodRef, capture);
                     }
                     domObservers.length = 0;
@@ -3814,27 +3836,28 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             @returns {boolean} - True if detachment succeeded, false otherwise. */
         detachFromDom: function(observable, methodName, type, capture) {
             if (observable && methodName && type) {
-                capture = !!capture;
-                
                 // No need to detach if observable array doesn't exist.
                 const observablesByType = this.__dobt;
                 if (observablesByType) {
                     const observables = observablesByType[type];
                     if (observables) {
+                        capture = !!capture;
+                        
                         // Remove all instances of this observer/methodName/type/capture 
                         // from the observable
-                        let retval = false;
-                        for (let i = observables.length - 3; i >= 0; i -= 3) {
-                            const [obsCapture, obsMethodName, obsObservable] = observables.slice(i);
+                        let retval = false, // Observable was not found
+                            i = observables.length;
+                        while (i >= 3) {
+                            const obsObservable = observables[--i],
+                                obsMethodName = observables[--i],
+                                obsCapture = observables[--i];
                             if (observable === obsObservable && methodName === obsMethodName && capture === obsCapture) {
                                 if (observable.detachDomObserver(this, methodName, type, capture)) {
                                     observables.splice(i, 3);
-                                    retval = true;
+                                    retval = true; // Observable was found and removed
                                 }
                             }
                         }
-                        
-                        // Observable was not found
                         return retval;
                     }
                 }
@@ -3848,8 +3871,11 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             const observablesByType = this.__dobt;
             if (observablesByType) {
                 for (const [type, observables] of Object.entries(observablesByType)) {
-                    for (let i = observables.length - 3; i >= 0; i -= 3) {
-                        const [capture, methodName, observable] = observables.slice(i);
+                    let i = observables.length;
+                    while (i >= 3) {
+                        const observable = observables[--i],
+                            methodName = observables[--i],
+                            capture = observables[--i];
                         observable.detachDomObserver(this, methodName, type, capture);
                     }
                     observables.length = 0;
@@ -4954,13 +4980,9 @@ myt.Destructible = new JS.Module('Destructible', {
         } else {
             // OPTIMIZATION: Improve garbage collection for JS.Class
             const meta = self.__meta__;
-            if (meta) {
-                const metaKeys = Object.keys(meta);
-                for (let i = metaKeys.length; i > 0;) meta[metaKeys[--i]] = null;
-            }
+            if (meta) for (const key of Object.keys(meta)) meta[key] = null;
             
-            const keys = Object.keys(self);
-            for (let i = keys.length; i > 0;) self[keys[--i]] = null;
+            for (const key of Object.keys(self)) self[key] = null;
             
             self.destroyed = true;
         }
@@ -5957,12 +5979,9 @@ myt.Destructible = new JS.Module('Destructible', {
                     if (wasNotLocked) this.locked = true;
                     
                     // Stop monitoring parent
-                    let svs,
-                        i,
-                        len;
                     if (curParent) {
-                        svs = this.subviews;
-                        i = svs.length;
+                        const svs = this.subviews;
+                        let i = svs.length;
                         while (i) this.removeSubview(svs[--i]);
                         
                         this.detachFrom(curParent, '__hndlPSA', 'subviewAdded');
@@ -5974,8 +5993,9 @@ myt.Destructible = new JS.Module('Destructible', {
                     
                     // Start monitoring new parent
                     if (parent) {
-                        svs = parent.getSubviews();
-                        for (i = 0, len = svs.length; len > i;) this.addSubview(svs[i++]);
+                        const svs = parent.getSubviews(),
+                            len = svs.length;
+                        for (let i = 0; len > i;) this.addSubview(svs[i++]);
                         
                         this.attachTo(parent, '__hndlPSA', 'subviewAdded');
                         this.attachTo(parent, '__hndlPSR', 'subviewRemoved');
@@ -9164,8 +9184,10 @@ myt.Destructible = new JS.Module('Destructible', {
             if (this.percentOfParentWidth !== v) {
                 if (this.inited) teardownPercentOfParentWidthConstraint(this);
                 this.percentOfParentWidth = v;
-                if (this.inited) this.fireEvent('percentOfParentWidth', v);
-                setupPercentOfParentWidthConstraint(this);
+                if (this.inited) {
+                    this.fireEvent('percentOfParentWidth', v);
+                    setupPercentOfParentWidthConstraint(this);
+                }
             }
         },
         
@@ -9183,8 +9205,10 @@ myt.Destructible = new JS.Module('Destructible', {
             if (this.percentOfParentHeight !== v) {
                 if (this.inited) teardownPercentOfParentHeightConstraint(this);
                 this.percentOfParentHeight = v;
-                if (this.inited) this.fireEvent('percentOfParentHeight', v);
-                setupPercentOfParentHeightConstraint(this);
+                if (this.inited) {
+                    this.fireEvent('percentOfParentHeight', v);
+                    setupPercentOfParentHeightConstraint(this);
+                }
             }
         },
         

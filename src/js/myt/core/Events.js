@@ -47,9 +47,11 @@
                     const observers = observersByType[type];
                     if (observers) {
                         // Remove all instances of the observer and methodName combination.
-                        let retval = false;
-                        for (let i = observers.length - 2; i >= 0; i -= 2) {
-                            const [method, obs] = observers.slice(i);
+                        let retval = false,
+                            i = observers.length;
+                        while (i >= 2) {
+                            const obs = observers[--i],
+                                method = observers[--i];
                             if (observer === obs && methodName === method) {
                                 observers.splice(i, 2); // <- Detach Activity that detachAllObservers cares about.
                                 retval = true;
@@ -69,9 +71,10 @@
             if (observersByType) {
                 for (const type in observersByType) {
                     const observers = observersByType[type];
-                    for (let i = observers.length - 2; i >= 0; i -= 2) {
-                        const [methodName, observer] = observers.slice(i);
-                        
+                    let i = observers.length;
+                    while (i >= 2) {
+                        const observer = observers[--i],
+                            methodName = observers[--i];
                         // If an observer is registered more than once the list may get shortened 
                         // by observer.detachFrom. If so, just continue decrementing downwards.
                         if (observer && methodName) {
@@ -123,16 +126,19 @@
                 list of observers and no others.
             @returns {undefined} */
         fireEvent: function(type, value, observers) {
-            // Determine observers to use
+            // Determine observers to use but avoid using getObservers since that lazy instantiates 
+            // __obsbt and fireEvent will get called predominantly when no observers were
+            // passed into this function.
             const self = this;
-            
-            // We avoid using getObservers since that lazy instantiates __obsbt and fireEvent will
-            // get called predominantly when no observers exist.
-            observers = observers ?? (self.hasObservers(type) ? self.__obsbt[type] : null);
+            if (observers == null) {
+                const observersByType = self.__obsbt;
+                if (observersByType) observers = observersByType[type];
+            }
             
             // Fire event
             if (observers) {
-                // Prevent "active" events from being fired again
+                // Prevent "active" events from being fired again which usually indicates an
+                // infinite loop has occurred.
                 const event = {source:self, type:type, value:value}, // Inlined from this.createEvent
                     activeEventTypes = self.__aet ??= {};
                 if (activeEventTypes[type]) {
@@ -151,9 +157,10 @@
                     // event handler the index won't get messed up.
                     // FIXME: If necessary we could queue up detachObserver calls that come in 
                     // during iteration or make some sort of adjustment to 'i'.
-                    for (let i = observers.length - 2; i >= 0; i -= 2) {
-                        const [methodName, observer] = observers.slice(i);
-                        
+                    let i = observers.length;
+                    while (i >= 2) {
+                        const observer = observers[--i],
+                            methodName = observers[--i];
                         // Sometimes the list gets shortened as a side effect of the method we 
                         // called thus resulting in a nullish observer and methodName. In that case 
                         // just continue decrementing downwards.
@@ -241,8 +248,10 @@
                 if (observablesByType) {
                     const observables = observablesByType[eventType];
                     if (observables) {
-                        for (let i = observables.length - 2; i >= 0; i -= 2) {
-                            const [method, obs] = observables.slice(i);
+                        let i = observables.length;
+                        while (i >= 2) {
+                            const obs = observables[--i],
+                                method = observables[--i];
                             if (observable === obs && methodName === method) return true;
                         }
                     }
@@ -321,9 +330,11 @@
                     if (observables) {
                         // Remove all instances of this observer/methodName/eventType from 
                         // the observable
-                        let retval = false;
-                        for (let i = observables.length - 2; i >= 0; i -= 2) {
-                            const [method, obs] = observables.slice(i);
+                        let retval = false,
+                            i = observables.length;
+                        while (i >= 2) {
+                            const obs = observables[--i],
+                                method = observables[--i];
                             if (observable === obs && methodName === method) {
                                 if (observable.detachObserver(this, methodName, eventType)) {
                                     observables.splice(i, 2);
@@ -346,8 +357,10 @@
             const observablesByType = this.__obt;
             if (observablesByType) {
                 for (const [eventType, observables] of Object.entries(observablesByType)) {
-                    for (let i = observables.length - 2; i >= 0; i -= 2) {
-                        const [methodName, observable] = observables.slice(i);
+                    let i = observables.length;
+                    while (i >= 2) {
+                        const observable = observables[--i],
+                            methodName = observables[--i];
                         observable.detachObserver(this, methodName, eventType);
                     }
                     observables.length = 0;
@@ -375,10 +388,11 @@
                     
                     // Don't allow a constraint to be clobbered.
                     if (constraint.length > 0) {
-                        consoleLog('Constraint exists for ' + methodName + ' on ' + this);
+                        consoleLog('Constraint exists for ' + methodName + ' on', this);
                     } else {
-                        for (let i = 0; i < len; i += 2) {
-                            const [observable, type] = observables.slice(i);
+                        for (let i = 0; i < len;) {
+                            const observable = observables[i++],
+                                type = observables[i++];
                             if (observable && type) {
                                 this.attachTo(observable, methodName, type);
                                 constraint.push(observable, type);
@@ -406,8 +420,10 @@
                 if (constraints) {
                     const constraint = constraints[methodName];
                     if (constraint) {
-                        for (let i = constraint.length; i >= 0; i -= 2) {
-                            const [observable, type] = constraint.slice(i);
+                        let i = constraint.length;
+                        while (i >= 2) {
+                            const type = constraint[i--],
+                                observable = constraint[i--];
                             this.detachFrom(observable, methodName, type);
                         }
                         constraint.length = 0;
