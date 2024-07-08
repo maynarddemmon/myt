@@ -34,7 +34,10 @@
         GUID_COUNTER = 0,
         
         // The current locale for the user.
-        currentLocale;
+        currentLocale,
+        
+        // Used to prevent loading the same stylesheet twice with createStylesheetLink.
+        linkElemsByHref = {};
     
     const consoleWarn = console.warn,
         
@@ -405,11 +408,18 @@
                 @param {string} [href] The href attribute for the link.
                 @returns {!Object} */
             createStylesheetLink: href => {
-                const link = createElement('link');
-                link.rel = 'stylesheet';
-                if (href) link.href = href;
-                headElem.appendChild(link);
-                return link;
+                if (href) {
+                    let linkElem = linkElemsByHref[href];
+                    if (linkElem) {
+                        console.warn('stylesheet already exists', href);
+                    } else {
+                        linkElem = linkElemsByHref[href] = createElement('link');
+                        linkElem.rel = 'stylesheet';
+                        linkElem.href = href;
+                        headElem.appendChild(linkElem);
+                    }
+                    return linkElem;
+                }
             },
             
             /** Creates a "style" dom element.
