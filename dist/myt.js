@@ -523,13 +523,16 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 if (!fontLoaded[fontName]) {
                     fontLoaded[fontName] = true;
                     const targets = fontTargets[fontName] ?? [];
-                    while (targets.length) notifyInstanceThatFontLoaded(targets.pop());
+                    while (targets.length) notifyInstanceThatFontLoaded(targets.pop(), familyName);
                 }
             }
         },
         
-        notifyInstanceThatFontLoaded = instance => {
-            if (instance && !instance.destroyed && instance.isVisible()) instance.sizeViewToDom();
+        notifyInstanceThatFontLoaded = (instance, familyName) => {
+            if (instance && !instance.destroyed && instance.isVisible()) {
+                instance.sizeViewToDom();
+                instance.notifyFontLoaded?.(familyName);
+            }
         },
         
         // The default locale for I18N.
@@ -838,7 +841,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             
             registerForFontNotification: (textView, fontName) => {
                 if (fontLoaded[fontName]) {
-                    notifyInstanceThatFontLoaded(textView);
+                    notifyInstanceThatFontLoaded(textView, fontName);
                 } else {
                     (fontTargets[fontName] ??= []).push(textView);
                 }
