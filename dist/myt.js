@@ -22470,22 +22470,9 @@ myt.Destructible = new JS.Module('Destructible', {
         }),
         
         InfiniteGridMixin = new JSModule('InfiniteGridMixin', {
-            // Life Cycle //////////////////////////////////////////////////////
-            /** @overrides */
-            initNode: function(parent, attrs) {
-                attrs.persistSortOrder ??= true;
-                
-                this.callSuper(parent, attrs);
-            },
-            
-            
             // Accessors ///////////////////////////////////////////////////////
             setGridHeader: function(v) {
                 (this.gridHeader = v)?.setGrid(this);
-            },
-            
-            setPersistSortOrder: function(v) {
-                this.persistSortOrder = v;
             },
             
             
@@ -22494,7 +22481,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 const gridHeader = this.gridHeader;
                 if (gridHeader) {
                     this.forceFullResetOnNextRefresh = forceFullReset;
-                    const persistedSortOrder = this.persistSortOrder ? getDatum(getSortStorageKey(gridHeader)) : undefined;
+                    const persistedSortOrder = gridHeader.persistSortOrder ? getDatum(getSortStorageKey(gridHeader)) : undefined;
                     gridHeader.setSort(persistedSortOrder ?? sortState);
                     gridHeader.setLocked(false);
                 } else {
@@ -22567,6 +22554,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** @overrides */
         initNode: function(parent, attrs) {
             attrs.columnSpacing ??= 1;
+            attrs.persistSortOrder ??= true;
             
             attrs.overflow = 'hidden';
             
@@ -22583,6 +22571,8 @@ myt.Destructible = new JS.Module('Destructible', {
         getColumnSpacingInUse: function() {
             return this.columnSpacing === 0 ? 0 : mathMax(0, this.getVisibleHdrs().length - 1) * this.columnSpacing;
         },
+        
+        setPersistSortOrder: function(v) {this.persistSortOrder = v;},
         
         /** @overrides myt.View */
         setHeight: function(v) {
@@ -22618,11 +22608,14 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** @overrides myt.GridController */
         doSort: function() {
+            this.persistSort();
+            this.grid.refreshListData(true, this.grid.forceFullResetOnNextRefresh);
+        },
+        
+        persistSort: function() {
             // Save the sort order to LocalStorage. Save happens in InfiniteGridMixin.makeReady
             // which calls this function during grid initialization.
-            if (this.grid.persistSortOrder) setDatum(getSortStorageKey(this), this.sort);
-            
-            this.grid.refreshListData(true, this.grid.forceFullResetOnNextRefresh);
+            if (this.persistSortOrder) setDatum(getSortStorageKey(this), this.sort);
         },
         
         /** @overrides myt.GridController */
