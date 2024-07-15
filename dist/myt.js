@@ -656,16 +656,24 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     Defaults to undefined which is equivalent to false.
                 @param {string} [integrity] - If provided an integrity and crossorigin check will 
                     be set on the script element.
-                @returns {?Object} The created script element or null if the script has already 
-                    been loaded. */
+                @returns {undefined} */
             loadScript: function(src, callback, noCacheBust, integrity) {
                 // Prevent reloading the same script
                 const loadedScripts = this._loadedScripts ??= {};
-                if (loadedScripts[src]) {
-                    consoleWarn('script already loaded for src', src);
-                    return null;
+                let loadedScriptState = loadedScripts[src];
+                if (loadedScriptState === true) {
+                    // Script already loaded successfully
+                    callback?.(true);
+                } else if (loadedScriptState === false) {
+                    // Script already loaded unsuccessfully
+                    callback?.(false);
+                } else if (Array.isArray(loadedScriptState)) {
+                    // Script is currently loading so store callback for later resolution.
+                    if (callback) loadedScriptState.push(callback);
                 } else {
-                    loadedScripts[src] = true;
+                    // Load the script
+                    loadedScriptState = loadedScripts[src] = [];
+                    if (callback) loadedScriptState.push(callback);
                     
                     const scriptElem = createElement('script');
                     scriptElem.type = 'text/javascript';
@@ -676,36 +684,23 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                         scriptElem.crossOrigin = 'anonymous';
                     }
                     
-                    if (callback) {
-                        let fired = false;
-                        scriptElem.onerror = () => {
-                            // Prevent later events from this script. For example, if the src 
-                            // is changed.
-                            scriptElem.onload = scriptElem.onreadystatechange = scriptElem.onerror = null;
-                            
-                            callback(false);
-                        };
-                        scriptElem.onload = scriptElem.onreadystatechange = () => {
-                            if (!fired && (!scriptElem.readyState || scriptElem.readyState === 'complete')) {
-                                // Prevent refiring callback
-                                fired = true;
-                                
-                                // Prevent later events from this script. For example, if the src 
-                                // is changed.
-                                scriptElem.onload = scriptElem.onreadystatechange = scriptElem.onerror = null;
-                                
-                                callback(true);
-                            }
-                        };
-                    }
+                    const executeCallbacks = success => {
+                        // Prevent later events from this script. For example, if the src is changed.
+                        scriptElem.onload = scriptElem.onreadystatechange = scriptElem.onerror = null;
+                        
+                        for (const callbackFunc of loadedScriptState) callbackFunc(success);
+                        loadedScripts[src] = success;
+                    };
+                    scriptElem.onerror = () => {executeCallbacks(false);};
+                    scriptElem.onload = scriptElem.onreadystatechange = () => {
+                        if (!scriptElem.readyState || scriptElem.readyState === 'complete') executeCallbacks(true);
+                    };
                     
                     // Must set src AFTER adding onreadystatechange listener otherwise we’ll miss 
                     // the loaded event for cached scripts
                     scriptElem.src = src + (noCacheBust ? '' : (src.includes('?') ? '&' : '?') + 'cacheBust=' + Date.now());
                     
                     headElem.appendChild(scriptElem);
-                    
-                    return scriptElem;
                 }
             },
             
