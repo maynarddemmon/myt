@@ -1,0 +1,1 @@
+const global = module.exports = {};
