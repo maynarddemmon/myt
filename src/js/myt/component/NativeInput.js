@@ -374,6 +374,33 @@
             }
         });
     
+    pkg.InputTextMouseFixMixin = new JS.Module('InputTextMouseFixMixin', {
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            const self = this;
+            
+            self.callSuper(parent, attrs);
+            
+            self.attachToDom(self, 'doMouseDown', 'mousedown');
+            self.attachToDom(self, 'doMouseUp', 'mouseup');
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides
+            Overrides the default way of registering mousedown and mouseup events
+            in myt.MouseObservable which is included into myt.View. */
+        createDomHandler: function(domObserver, methodName, type) {
+            // The mousedown and mouseup events must not prevent default browser behavior so the 
+            // user can interact as expected with the text field.
+            if (type === 'mousedown' || type === 'mouseup') return this.createStandardDomHandler(domObserver, methodName, type, pkg.MouseObservable, false);
+            return this.callSuper(domObserver, methodName, type);
+        },
+        
+        doMouseDown: event => {/* Do nothing by default. */},
+        doMouseUp: event => {/* Do nothing by default. */}
+    }),
+    
     /** Text content that can be edited.
         
         Events:
