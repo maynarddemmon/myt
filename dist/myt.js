@@ -2167,7 +2167,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                                 if (typeof methodName === 'function') {
                                     if (methodName.call(observer, event)) break;
                                 } else {
-                                    if (observer[methodName](event)) break;
+                                    if (observer[methodName]?.(event)) break;
                                 }
                             } catch (err) {
                                 dumpStack(err);
