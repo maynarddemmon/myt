@@ -19754,6 +19754,31 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         });
     
+    /** Validates using a regular expression.
+    
+        @class */
+    pkg.RegexValidator = new JSClass('RegexValidator', Validator, {
+        // Constructor /////////////////////////////////////////////////////
+        /** @overrides myt.Validator
+            @param {string} id
+            @param {string} regex - The regex to validate with
+            @param {string} [errorMsg] - A custom error message for when validation is false.
+            @returns {undefined} */
+        initialize: function(id, regex, errorMsg) {
+            this.callSuper(id);
+            this.regex = new RegExp(regex);
+            this.errorMsg = errorMsg;
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////
+        isValid: function(value, config, errorMessages) {
+            const valid = this.regex.test(value);
+            if (!valid && this.errorMsg) errorMessages?.push(this.errorMsg);
+            return valid;
+        }
+    });
+    
     /** Tests that the value from two fields are equal.
         
         @class */
