@@ -19320,7 +19320,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 self.show();
                 
                 if (opts.showClose === false) {
-                    closeBtn.setVisible(false);
+                    if (!closeBtn.destroyed) closeBtn.setVisible(false);
                 } else {
                     closeBtn.setVisible(true);
                     closeBtn.focus();
