@@ -24600,9 +24600,10 @@ myt.Destructible = new JS.Module('Destructible', {
 (pkg => {
     const {Class:JSClass, Module:JSModule} = JS,
         
-        {View, Text} = pkg,
-        
-        FA_TIMES = pkg.FontAwesome.makeTag(['times']);
+        {
+            View, Text,
+            FontAwesome:{makeTag}
+        } = pkg;
     
     pkg.GrowlManager = new JSClass('GrowlManager', View, {
         include:[pkg.RootView],
@@ -24620,8 +24621,9 @@ myt.Destructible = new JS.Module('Destructible', {
             attrs.pointerEvents ??= 'none';
             
             attrs.moveDuration ??= 300;
+            attrs.dedupe ??= true;
             
-            self.quickSet(['moveDuration'], attrs);
+            self.quickSet(['moveDuration','dedupe'], attrs);
             
             self.callSuper(parent, attrs);
             
@@ -24695,16 +24697,25 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         addGrowl: function(growl) {
-            growl.setParent(this);
+            const self = this;
+            if (self.dedupe) {
+                const hash = growl.getHash(),
+                    svs = self.getSubviews();
+                let i = svs.length;
+                while (i) {
+                    const sv = svs[--i];
+                    if (sv !== growl && sv.getHash?.() === hash) {
+                        self.removeGrowl(sv);
+                        break;
+                    }
+                }
+            }
+            
             growl.setVisible(true);
         },
         
-        removeGrowl: function(growl, destroy) {
-            if (destroy) {
-                growl.destroy();
-            } else {
-                growl.setParent(null);
-            }
+        removeGrowl: function(growl) {
+            growl.destroy();
         },
         
         // Convience Methods
@@ -24822,14 +24833,46 @@ myt.Destructible = new JS.Module('Destructible', {
                     self.callSuper(v);
                 } else {
                     self.animate({attribute:'opacity', to:0, duration:self.hideDuration}).next(success => {
-                        self.parent.removeGrowl(self, true);
+                        self.parent.removeGrowl(self);
                     });
                 }
             } else {
                 self.callSuper(v);
             }
-        }
+        },
+        
+        getHash: function() {
+            return this.hash ??= pkg.hash(this.getHashableString());
+        },
+        
+        /** Subclasses that support deduping should implement this. This implementation more or
+            less guarantees that every Growl will be unique. */
+        getHashableString: () => '' + pkg.generateGuid()
     });
+    
+    const FA_TIMES = makeTag(['times']),
+        FA_CLIPBOARD = makeTag(['clipboard-check']),
+        
+        SIMPLE_GROWL_PARAM_NAMES = [
+            'maxHeight','icon','iconSize','text','padding','spacing','whiteSpace',
+            'showCloseButton','closeIcon','closeOnly',
+            'showCopyButton','copyIcon'
+        ],
+        
+        LocalTxtBtn = new JSClass('LocalTxtBtn', pkg.TextButton, {
+            include:[pkg.KeepShowingChildMixin],
+            
+            initNode: function(parent, attrs) {
+                attrs.width ??= 24;
+                attrs.height ??= 24;
+                attrs.paddingTop ??= 4;
+                attrs.activeColor ??= '#ccc';
+                attrs.hoverColor ??= '#ddd';
+                attrs.readyColor ??= '#eee';
+                
+                this.callSuper(parent, attrs);
+            }
+        });
     
     pkg.SimpleGrowl = new JSClass('SimpleGrowl', View, {
         include:[pkg.GrowlMixin],
@@ -24840,6 +24883,8 @@ myt.Destructible = new JS.Module('Destructible', {
             const self = this,
                 params = {};
             
+            attrs.maxHeight ??= 100;
+            
             attrs.spacing ??= 6;
             attrs.padding ??= 12;
             attrs.whiteSpace ??= 'normal';
@@ -24848,10 +24893,13 @@ myt.Destructible = new JS.Module('Destructible', {
             if (attrs.showCloseButton) {
                 attrs.closeIcon ??= FA_TIMES;
                 attrs.closeOnly ??= false;
-                
+            }
+            attrs.showCopyButton ??= false;
+            if (attrs.showCopyButton) {
+                attrs.copyIcon ??= FA_CLIPBOARD;
             }
             
-            for (const name of ['icon','iconSize','text','padding','spacing','whiteSpace','showCloseButton','closeIcon','closeOnly']) {
+            for (const name of SIMPLE_GROWL_PARAM_NAMES) {
                 params[name] = attrs[name];
                 delete attrs[name];
             }
@@ -24862,29 +24910,45 @@ myt.Destructible = new JS.Module('Destructible', {
             
             self.callSuper(parent, attrs);
             
-            const {padding} = params;
+            const {maxHeight, padding, icon} = params;
             
-            if (params.icon) new Text(self, {y:padding, text:params.icon, fontSize:params.iconSize});
-            new Text(self, {y:padding, text:params.text, whiteSpace:params.whiteSpace, layoutHint:1});
-            if (params.showCloseButton) self.makeCloseButton(params);
+            if (icon) self.iconTxt = new Text(self, {y:padding, text:icon, fontSize:params.iconSize});
+            const msgTxt = self.msgTxt = new Text(self, {y:padding, text:params.text, whiteSpace:params.whiteSpace, layoutHint:1});
+            if (maxHeight > 0) {
+                msgTxt.setOverflow('autoy');
+                msgTxt.getIDS().maxHeight = maxHeight + 'px';
+            }
+            if (params.showCopyButton) {
+                self.copyBtn = self.makeCopyButton(params);
+                msgTxt.setUserUnselectable(false);
+            }
+            if (params.showCloseButton) self.closeBtn = self.makeCloseButton(params);
             
             new pkg.ResizeLayout(self, {inset:padding, spacing:params.spacing, outset:padding});
             new pkg.SizeToChildren(self, {axis:'y', paddingY:padding});
+            
         },
         
+        
+        // Methods /////////////////////////////////////////////////////////////
         makeCloseButton: function(params) {
             const self = this;
-            new pkg.TextButton(self, {
-                y:params.padding, text:params.closeIcon, width:24, height:24,
-                paddingTop:4,
-                activeColor:'#ccc',
-                hoverColor:'#ddd',
-                readyColor :'#eee'
-            }, [pkg.KeepShowingChildMixin, {
+            new LocalTxtBtn(self, {y:params.padding, text:params.closeIcon, tooltip:'Dismiss this notification.'}, [{
                 doActivated: () => {
-                    self.parent.removeGrowl(self, true);
+                    self.parent.removeGrowl(self);
                 }
             }]);
+        },
+        makeCopyButton: function(params) {
+            const self = this;
+            new LocalTxtBtn(self, {y:params.padding, text:params.copyIcon, tooltip:'Copy to system clipboard.'}, [{
+                doActivated: () => {navigator.clipboard.writeText(self.msgTxt.text);}
+            }]);
+        },
+        
+        /** @overrides */
+        getHashableString: function() {
+            return this.iconTxt?.text + ' | ' + this.msgTxt.text;
         }
     });
 })(myt);
