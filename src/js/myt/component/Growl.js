@@ -140,8 +140,10 @@
         
         
         // Methods ////////////////////////////////////////////////////////////
-        keepShowing: function(v, duration=-1) {
+        keepShowing: function(v, duration) {
             const self = this;
+            
+            duration ??= self.keepDuration;
             
             self.__keepShowing = v;
             if (v && self.__timerIdKS) clearTimeout(self.__timerIdKS);
@@ -162,13 +164,13 @@
         
         /** @overrides myt.MouseOver */
         doMouseOver: function(event) {
-            this.keepShowing(true, this.keepDuration);
+            this.keepShowing(true);
             this.callSuper(event);
         },
         
         /** @overrides myt.MouseOver */
         doMouseOut: function(event) {
-            this.keepShowing(false, this.keepDuration);
+            this.keepShowing(false);
             this.callSuper(event);
         }
     });
