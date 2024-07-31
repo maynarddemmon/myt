@@ -124,6 +124,9 @@ JS.Packages(file => {
         .requires('myt.global','myt.URI');
     file(MYT_COMPONENT_ROOT + 'DragAndDrop.js'     ).provides('myt.DragGroupSupport','myt.Dropable','myt.DropTarget','myt.DropSource','myt.AutoScroller')
         .requires('myt.View','myt.Draggable','myt.global.mouse','myt.global.dragManager');
+    file(MYT_COMPONENT_ROOT + 'Growl.js').provides(
+        'myt.GrowlManager','myt.KeepShowingMixin','myt.KeepShowingChildMixin','myt.GrowlMixin','myt.SimpleGrowl'
+    ).requires('myt.TextButton','myt.FontAwesome');
     
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
@@ -141,6 +144,6 @@ JS.Packages(file => {
         'myt.Grid','myt.SimpleGridColHdr','myt.InfiniteGrid',
         'myt.SelectableInfiniteList','myt.SimpleSelectableInfiniteListRow',
         'myt.PanelStack','myt.AutoScroller','myt.Eventable','myt.Annulus',
-        'myt.TooltipMixin','myt.Canvas'
+        'myt.TooltipMixin','myt.Canvas','myt.GrowlManager'
     );
 });
