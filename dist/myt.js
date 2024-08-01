@@ -24606,13 +24606,14 @@ myt.Destructible = new JS.Module('Destructible', {
         } = pkg;
     
     pkg.GrowlManager = new JSClass('GrowlManager', View, {
-        include:[pkg.RootView],
+        include:[pkg.SizeToWindowHeight],
         
         
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
             const self = this;
             
+            attrs.overflow ??= 'autoy';
             attrs.margin ??= 8;
             attrs.spacing ??= 4;
             attrs.reverse ??= true;
@@ -24623,6 +24624,8 @@ myt.Destructible = new JS.Module('Destructible', {
             attrs.moveDuration ??= 300;
             attrs.dedupe ??= true;
             
+            attrs.simpleGrowlClass ??= pkg.SimpleGrowl;
+            
             self.quickSet(['moveDuration','dedupe'], attrs);
             
             self.callSuper(parent, attrs);
@@ -24631,7 +24634,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             const moveDuration = self.moveDuration;
             new pkg.SpacedLayout(self, {
-                axis:'y', reverse:self.reverse, spacing:self.spacing, collapseParent:true
+                axis:'y', reverse:self.reverse, spacing:self.spacing
             }, [{
                 updateParent: function(setterName, value) {
                     if (moveDuration > 0) {
@@ -24655,6 +24658,11 @@ myt.Destructible = new JS.Module('Destructible', {
         
         
         // Accessors ///////////////////////////////////////////////////////////
+        /** @overrides */
+        setHeight: function(v) {
+            this.callSuper(v - 2*this.margin);
+        },
+        
         /** @overrides */
         setVisible: function(v) {
             const self = this;
@@ -24720,10 +24728,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         // Convience Methods
         addSimpleGrowl: function(msg, attrs) {
-            this.addGrowl(new pkg.SimpleGrowl(this, {
-                text:msg, 
-                ...(attrs ?? {})
-            }));
+            this.addGrowl(new this.simpleGrowlClass(this, {text:msg, ...(attrs ?? {})}));
         }
     });
     
