@@ -19800,9 +19800,11 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** @overrides myt.Validator */
         isValid: function(value, config, errorMessages) {
-            if (value && this.fieldA.getValue() === this.fieldB.getValue()) return true;
-            
-            errorMessages?.push('The field "' + this.fieldA.key + '" must be equal to the field "' + this.fieldB.key + '".');
+            const {fieldA, fieldB} = this;
+            if (fieldA?.inited && fieldB?.inited) {
+                if (value && (fieldA.getValue() === fieldB.getValue())) return true;
+                errorMessages?.push('The field "' + fieldA.key + '" must be equal to the field "' + fieldB.key + '".');
+            }
             return false;
         }
     });
