@@ -19411,8 +19411,12 @@ myt.Destructible = new JS.Module('Destructible', {
                 
                 self.show();
                 
-                closeBtn.setVisible(true);
-                closeBtn.focus();
+                if (opts.showClose === false) {
+                    if (!closeBtn.destroyed) closeBtn.setVisible(false);
+                } else {
+                    closeBtn.setVisible(true);
+                    closeBtn.focus();
+                }
                 
                 self.setupTitle(content, opts.titleText);
                 contentContainer.setY(self.header.height + 1);
