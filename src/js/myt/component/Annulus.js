@@ -139,10 +139,10 @@
             /** The difference between the inner and outer radius. */
             setThickness: function(v) {setAndUpdateSize(this, 'thickness', v);},
             
-            /** The start angle in radians. */
+            /** The start angle in degrees. */
             setStartAngle: function(v) {setAndRedraw(this, 'startAngle', v);},
             
-            /** The end angle in radians. */
+            /** The end angle in degrees. */
             setEndAngle: function(v) {setAndRedraw(this, 'endAngle', v);},
             
             /** If true the starting cap will be drawn as a semicircle. */

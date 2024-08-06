@@ -128,6 +128,8 @@ JS.Packages(file => {
         'myt.GrowlManager','myt.KeepShowingMixin','myt.KeepShowingChildMixin','myt.GrowlMixin','myt.SimpleGrowl'
     ).requires('myt.TextButton','myt.FontAwesome');
     
+    file(MYT_COMPONENT_ROOT + 'RadialGuage.js').provides('myt.RadialGuage','myt.ColorThresholdRadialGuage').requires('myt.Annulus','myt.BoundedValueComponent');
+    
     // Include Everything
     file(MYT_ROOT + 'all.js').provides('myt.all').requires(
         'myt.Cookie','myt.LocalStorage',
@@ -143,7 +145,7 @@ JS.Packages(file => {
         'myt.Slider','myt.RangeSlider','myt.HorizontalDivider','myt.VerticalDivider',
         'myt.Grid','myt.SimpleGridColHdr','myt.InfiniteGrid',
         'myt.SelectableInfiniteList','myt.SimpleSelectableInfiniteListRow',
-        'myt.PanelStack','myt.AutoScroller','myt.Eventable','myt.Annulus',
+        'myt.PanelStack','myt.AutoScroller','myt.Eventable','myt.ColorThresholdRadialGuage',
         'myt.TooltipMixin','myt.Canvas','myt.GrowlManager'
     );
 });
