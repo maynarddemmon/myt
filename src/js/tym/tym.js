@@ -391,6 +391,22 @@
                 }
             },
             
+            /** Convert a number to a string of a minimum length. Zero or more
+                of a padding character are prepended to achieve the minimum
+                length.
+                @param {number} num - The number to format.
+                @param {number} length - The minimum length of the formatted
+                    return string.
+                @param {string} [padChar] - The character to left pad with.
+                    Defaults to the string "0".
+                @param {number} [base] - The base for the formatted number.
+                    Defaults to base 10.
+                @returns {string} - The formatted number. */
+            leftPadNumber: (num, length, padChar='0', base=10) => {
+                const numStr = num.toString(base);
+                return padChar.repeat(mathMax(length - numStr.length, 0)) + numStr;
+            },
+            
             /** Memoize a function.
                 @param {!Function} func - The function to memoize
                 @returns {!Function} - The memoized function. */
