@@ -69,12 +69,19 @@
                     color = this.getColorByValue(value, percent);
                 progressView.setEndAngle(this.startAngle + 360 * percent);
                 progressView.setColor(color);
-                valueView.setText('' + value);
+                valueView.setText(this.getTextByValue(value));
                 valueView.setTextColor(color);
+                this.setTooltip(this.getTooltipByValue(value));
             },
             
             getColorByValue: function(value, percent) {
                 return this.color;
+            },
+            getTooltipByValue: function(value) {
+                return this.getTextByValue(value);
+            },
+            getTextByValue: function(value) {
+                return '' + value;
             }
         });
     
