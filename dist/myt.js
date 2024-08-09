@@ -23744,7 +23744,9 @@ myt.Destructible = new JS.Module('Destructible', {
                 
                 attrs.bgColor ??= '#fff';
                 attrs.roundedCorners = radius + thickness;
-                attrs.border = [thickness, 'solid', '#ccc'];
+                attrs.borderWidth ??= thickness;
+                attrs.borderStyle ??= 'solid';
+                attrs.borderColor ??= '#ccc';
                 
                 self.callSuper(parent, attrs);
                 
