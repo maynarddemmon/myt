@@ -10190,6 +10190,24 @@ myt.Destructible = new JS.Module('Destructible', {
                     callback?.call(animator, false);
                 }
             }
+        },
+        
+        wiggleView = (view, to, from, duration, axis) => {
+            view.stopActiveAnimators(axis);
+            const animate = view.animate.bind(view),
+                diff = from - to,
+                bounceBackAttrs = {attribute:axis, to:from, duration:duration};
+            animate({attribute:axis, from:from, to:to, duration:duration}).next(success => {
+                animate(bounceBackAttrs).next(success => {
+                    animate({attribute:axis, to:from - diff * 0.5, duration:duration}).next(success => {
+                        animate(bounceBackAttrs).next(success => {
+                            animate({attribute:axis, to:from - diff * 0.25, duration:duration}).next(success => {
+                                animate(bounceBackAttrs);
+                            });
+                        });
+                    });
+                });
+            });
         };
     
     /** Changes the value of an attribute on a target over time.
@@ -10262,7 +10280,20 @@ myt.Destructible = new JS.Module('Destructible', {
         // Class Methods and Attributes ////////////////////////////////////
         extend: {
             /** An object containing easign functions. */
-            easings: easingFunctions
+            easings: easingFunctions,
+            
+            /** Utility function to bounce a View. */
+            bounceView: (view, to=0, from=6, duration=150) => {
+                wiggleView(view, to, from, duration, 'y');
+            },
+            
+            /** Utility function to shake a View. */
+            shakeView: (view, to=-10, from=0, duration=50) => {
+                wiggleView(view, to, from, duration, 'x');
+            },
+            
+            /** Utility function to bounce or shake a View. */
+            wiggleView:wiggleView
         },
         
         
