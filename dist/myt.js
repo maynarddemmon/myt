@@ -10287,12 +10287,12 @@ myt.Destructible = new JS.Module('Destructible', {
             easings: easingFunctions,
             
             /** Utility function to bounce a View. */
-            bounceView: (view, amount=6, duration=900) => {
+            bounceView: (view, amount=-6, duration=900) => {
                 wiggleView(view, amount, duration, 'y');
             },
             
             /** Utility function to shake a View. */
-            shakeView: (view, amount=-10, duration=300) => {
+            shakeView: (view, amount=10, duration=300) => {
                 wiggleView(view, amount, duration, 'x');
             },
             
