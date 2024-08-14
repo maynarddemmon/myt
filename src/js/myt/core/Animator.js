@@ -8,6 +8,8 @@
         
         makeColorFromHexString = pkg.Color.makeColorFromHexString,
         
+        wiggleLeg = (t, magnitude) => magnitude * ((t*=2) < 1 ? t*t/2 : -((--t)*(t-2) - 1)/2),
+        
         easingFunctions = {
             linear:t => t,
             
@@ -75,7 +77,17 @@
                 }
                 return 7.5625*(t-=(2.625/2.75))*t + 0.984375;
             },
-            inOutBounce:t => (t*=2) < 1 ? easingFunctions.inBounce(t)/2 : (easingFunctions.outBounce(t-1) + 1)/2
+            inOutBounce:t => (t*=2) < 1 ? easingFunctions.inBounce(t)/2 : (easingFunctions.outBounce(t-1) + 1)/2,
+            
+            wiggle:t => {
+                t *= 6;
+                if (t < 1) return wiggleLeg(t - 0, 1);
+                if (t < 2) return wiggleLeg(2 - t, 1);
+                if (t < 3) return wiggleLeg(t - 2, 0.5);
+                if (t < 4) return wiggleLeg(4 - t, 0.5);
+                if (t < 5) return wiggleLeg(t - 4, 0.25);
+                           return wiggleLeg(6 - t, 0.25);
+            }
         },
         
         DEFAULT_EASING = easingFunctions.inOutQuad,
@@ -166,21 +178,13 @@
             }
         },
         
-        wiggleView = (view, to, from, duration, axis) => {
-            view.stopActiveAnimators(axis);
-            const animate = view.animate.bind(view),
-                diff = from - to,
-                bounceBackAttrs = {attribute:axis, to:from, duration:duration};
-            animate({attribute:axis, from:from, to:to, duration:duration}).next(success => {
-                animate(bounceBackAttrs).next(success => {
-                    animate({attribute:axis, to:from - diff * 0.5, duration:duration}).next(success => {
-                        animate(bounceBackAttrs).next(success => {
-                            animate({attribute:axis, to:from - diff * 0.25, duration:duration}).next(success => {
-                                animate(bounceBackAttrs);
-                            });
-                        });
-                    });
-                });
+        wiggleView = (view, amount, duration, axis) => {
+            view.stopActiveAnimators(axis, true);
+            const value = view[axis];
+            view.animate({
+                attribute:axis, from:value, to:value + amount, duration:duration, easingFunction:'wiggle'
+            }).next(() => {
+                view.set(axis, value);
             });
         };
     
@@ -257,13 +261,13 @@
             easings: easingFunctions,
             
             /** Utility function to bounce a View. */
-            bounceView: (view, to=0, from=6, duration=150) => {
-                wiggleView(view, to, from, duration, 'y');
+            bounceView: (view, amount=6, duration=900) => {
+                wiggleView(view, amount, duration, 'y');
             },
             
             /** Utility function to shake a View. */
-            shakeView: (view, to=-10, from=0, duration=50) => {
-                wiggleView(view, to, from, duration, 'x');
+            shakeView: (view, amount=-10, duration=300) => {
+                wiggleView(view, amount, duration, 'x');
             },
             
             /** Utility function to bounce or shake a View. */
