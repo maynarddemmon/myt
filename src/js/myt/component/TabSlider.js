@@ -1,7 +1,7 @@
 (pkg => {
     const JSClass = JS.Class,
         
-        {View, SizeToParent} = pkg,
+        {View, SizeToParent, LocalStorage, debounce} = pkg,
         
         STATE_EXPANDED = 'expanded',
         STATE_EXPANDING = 'expanding',
@@ -276,6 +276,13 @@
             }
         }),
         
+        updateLabelAttr = (textTabSlider, attrName, labelAttrname, v) => {
+            if (textTabSlider[attrName] !== v) {
+                textTabSlider[attrName] = v;
+                textTabSlider.button?.label?.set(labelAttrName, v);
+            }
+        },
+        
         /** A tab slider with a text label.
             
             Attributes:
@@ -287,35 +294,54 @@
         TextTabSlider = pkg.TextTabSlider = new JSClass('TextTabSlider', TabSlider, {
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
+                this.labelTextColorChecked = '#fff';
+                this.labelTextColor = '#333';
+                this.labelAlign = 'center';
+                this.labelValign = 'middle';
+                this.labelFontSize = '16px';
+                this.labelFontWeight = 'bold';
+                
                 attrs.labelTextColorChecked ??= '#fff';
                 attrs.labelTextColor ??= '#333';
+                attrs.labelAlign ??= 'center';
+                attrs.labelValign ??= 'middle';
+                attrs.labelFontSize ??= '16px';
+                attrs.labelFontWeight ??= 'bold';
                 
                 this.callSuper(parent, attrs);
                 
                 this.button.label = new pkg.Text(this.button, {
-                    domClass:'myt-Text mytTextTabSliderLabel', ignorePlacement:true,
-                    text:this.text, align:'center', valign:'middle', 
+                    ignorePlacement:true, fontSize:this.labelFontSize, fontWeight:this.labelFontWeight,
+                    text:this.text, align:this.labelAlign, valign:this.labelValign, 
                     textColor:this.__getTextColor()
                 });
             },
             
             
             // Accessors ///////////////////////////////////////////////////////
-            setLabelTextColorChecked: function(v) {this.labelTextColorChecked = v;},
-            setLabelTextColor: function(v) {this.labelTextColor = v;},
-            
-            setText: function(v) {
-                if (this.text !== v) {
-                    this.text = v;
-                    this.button?.label?.setText(v);
+            setLabelTextColorChecked: function(v) {
+                if (this.labelTextColorChecked !== v) {
+                    this.labelTextColorChecked = v;
+                    this.notifyButtonRedraw();
                 }
             },
+            setLabelTextColor: function(v) {
+                if (this.labelTextColor !== v) {
+                    this.labelTextColor = v;
+                    this.notifyButtonRedraw();
+                }
+            },
+            setLabelAlign: function(v) {updateLabelAttr(this, 'labelAlign', 'align', v);},
+            setLabelValign: function(v) {updateLabelAttr(this, 'labelValign', 'valign', v);},
+            setLabelFontSize: function(v) {updateLabelAttr(this, 'labelFontSize', 'fontSize', v);},
+            setLabelFontWeight: function(v) {updateLabelAttr(this, 'labelFontWeight', 'fontWeight', v);},
+            setText: function(v) {updateLabelAttr(this, 'text', 'text', v);},
             
             
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.TabSlider */
             notifyButtonRedraw: function() {
-                this.button.label?.setTextColor(this.__getTextColor());
+                this.button?.label?.setTextColor(this.__getTextColor());
             },
             
             /** @private
@@ -357,7 +383,7 @@
                 attrs.maxSelected ??= 1;
                 attrs.duration ??= 500;
                 
-                self.updateLayout = pkg.debounce(self.updateLayout);
+                self.updateLayout = debounce(self.updateLayout);
                 
                 self.callSuper(parent, attrs);
                 
@@ -393,6 +419,14 @@
             
             
             // Accessors ///////////////////////////////////////////////////////
+            setPersistenceId: function(v) {this.persistenceId = v;},
+            getTabSliders: function() {return this._tabSliders;},
+            getTabSliderById: function(sliderId) {
+                for (const tabSlider of this._tabSliders) {
+                    if (tabSlider.tabId === sliderId) return tabSlider;
+                }
+            },
+            
             setSpacing: function(v) {
                 if (this.spacing !== v) {
                     this.spacing = v;
@@ -474,6 +508,22 @@
                 
                 // Restore duration
                 if (temporaryDuration > 0) this.setDuration(existingDuration);
+            },
+            
+            // Persistence
+            readState: persistenceId => LocalStorage.getDatum(persistenceId),
+            writeState: (persistenceId, componentState) => {LocalStorage.setDatum(persistenceId, componentState);},
+            saveState: debounce(function() {
+                const expandedTabIds = [];
+                for (const tabSlider of this.getTabSliders()) {
+                    if (tabSlider.expansionState === STATE_EXPANDED) expandedTabIds.push(tabSlider.tabId);
+                }
+                this.writeState(this.persistenceId, expandedTabIds);
+            }, 1000),
+            restoreState: function(defaultState) {
+                for (const expandedTabIds of (this.readState(this.persistenceId) || defaultState)) {
+                    this.select(this.getTabSliderById(expandedTabIds));
+                }
             }
         });
 })(myt);
