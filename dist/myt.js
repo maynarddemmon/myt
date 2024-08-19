@@ -13913,6 +13913,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 attrs.fillColorReady ??= '#fff';
                 attrs.minContainerHeight ??= 100;
                 attrs.layoutPaddingY ??= 0;
+                attrs.wrapperExpandedOverflow ??= 'autoy';
                 
                 // Selection must be done via the select method on the tabContainer
                 if (attrs.selected) {
@@ -13997,6 +13998,7 @@ myt.Destructible = new JS.Module('Destructible', {
             setFillColorHover: function(v) {this.fillColorHover = v;},
             setFillColorActive: function(v) {this.fillColorActive = v;},
             setFillColorReady: function(v) {this.fillColorReady = v;},
+            setWrapperExpandedOverflow: function(v) {this.wrapperExpandedOverflow = v;},
             
             setButtonHeight: function(v) {
                 if (this.buttonHeight !== v) {
@@ -14017,11 +14019,13 @@ myt.Destructible = new JS.Module('Destructible', {
                     if (wrapper) {
                         if (v === STATE_EXPANDED) {
                             wrapper.setMaskFocus(false);
-                            wrapper.setOverflow('auto');
+                            wrapper.setOverflow(this.wrapperExpandedOverflow);
+                            this.tabContainer?.saveState();
                         } else if (v === STATE_EXPANDING) {
                             wrapper.setVisible(true);
                         } else if (v === STATE_COLLAPSED) {
                             wrapper.setVisible(false);
+                            this.tabContainer?.saveState();
                         } else if (v === STATE_COLLAPSING) {
                             wrapper.setMaskFocus(true);
                             wrapper.setOverflow('hidden');
