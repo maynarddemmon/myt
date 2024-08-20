@@ -348,7 +348,13 @@
         makeCopyButton: function(params) {
             const self = this;
             new LocalTxtBtn(self, {y:params.padding, text:params.copyIcon, tooltip:'Copy to system clipboard.'}, [{
-                doActivated: () => {navigator.clipboard.writeText(self.msgTxt.text);}
+                doActivated: () => {
+                    if (global.isSecureContext) {
+                        navigator.clipboard.writeText(self.msgTxt.text);
+                    } else {
+                        console.warn('access to clipboard blocked because of insecure context.');
+                    }
+                }
             }]);
         },
         
