@@ -50,7 +50,10 @@
                 const self = this;
                 let initiallySelected;
                 
-                attrs.defaultPlacement = 'wrapper.container';
+                const noWrapperContainer = attrs.noWrapperContainer;
+                delete attrs.noWrapperContainer;
+                
+                attrs.defaultPlacement = noWrapperContainer ? 'wrapper' : 'wrapper.container';
                 attrs.percentOfParentWidth = 100;
                 attrs.expansionState = STATE_COLLAPSED;
                 
@@ -115,11 +118,13 @@
                     },
                     setWidth: function(v) {
                         this.callSuper(v);
-                        if (this.inited) this.container.setWidth(v);
+                        if (this.inited) this.container?.setWidth(v);
                     }
                 }]);
                 
-                self._wrapperLayout = new pkg.SizeToChildren(wrapper.container = new View(wrapper), {axis:'y', paddingY:self.layoutPaddingY});
+                if (!noWrapperContainer) {
+                    self._wrapperLayout = new pkg.SizeToChildren(wrapper.container = new View(wrapper), {axis:'y', paddingY:self.layoutPaddingY});
+                }
                 
                 self.constrain('__updateHeight', [wrapper, 'y', wrapper, 'height']);
                 
@@ -142,7 +147,7 @@
             
             setLayoutPaddingY: function(v) {
                 this.layoutPaddingY = v;
-                if (this.inited) this._wrapperLayout.setPaddingY(v);
+                if (this.inited) this._wrapperLayout?.setPaddingY(v);
             },
             
             setMinContainerHeight: function(v) {this.minContainerHeight = v;},
@@ -276,7 +281,7 @@
                 vertical scrollbars.
                 @returns number */
             getPreferredExpandedHeight: function() {
-                return this.buttonHeight + this.wrapper.container.height;
+                return this.buttonHeight + this.wrapper.container?.height;
             }
         }),
         
