@@ -948,7 +948,9 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     strings by concatenating them with "".
                 @returns {!Function} */
             getAlphaObjSortFunc: memoize((propName, ascending, caseInsensitive, fixNonStrings) => {
-                const order = ascending ? 1 : -1;
+                const order = ascending ? 1 : -1,
+                    locale = myt.I18N.getLocale(),
+                    options = {sensitivity:caseInsensitive ? 'accent' : 'variant'};
                 return (a, b) => {
                     a = a[propName];
                     b = b[propName];
@@ -961,11 +963,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                         a = a || '';
                         b = b || '';
                     }
-                    if (caseInsensitive) {
-                        a = a.toLowerCase();
-                        b = b.toLowerCase();
-                    }
-                    return a.localeCompare(b) * order;
+                    return a.localeCompare(b, locale, options) * order;
                 };
             }),
             
@@ -1287,7 +1285,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     dictionaries[locale] = dictionary ?? {};
                 },
                 get: (key, ...args) => {
-                    const locale = currentLocale ?? (currentLocale = (navigator.language ?? defaultLocale).split('-')[0].toLowerCase()),
+                    const locale = currentLocale ??= (navigator.language ?? defaultLocale).split('-')[0].toLowerCase(),
                         value = (dictionaries[locale] ?? dictionaries[defaultLocale] ?? {})[key];
                     if (value != null) {
                         if (args.length > 0) {
