@@ -1125,6 +1125,19 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 return padChar.repeat(mathMax(length - numStr.length, 0)) + numStr;
             },
             
+            /** Remove HTML markup from the provided string.
+                @param {string} str - The string to remove the markup from.
+                @param {?Objet} [cfg] - Provides additional information about how to do the
+                    conversion. The only supported config parameter is the boolean
+                    brToLineFeed which converts <br> tags to \n characters.
+                @return {string} - The string with markup removed or empty string if something
+                    falsy was provided. */
+            removeMarkup: (str, cfg) => {
+                if (!str) return '';
+                if (cfg?.brToLineFeed) str = str.replace(/<br\s*\/?>/gi, '\n');
+                return str.replace(/<\/?[^>]+(>|$)/g, '');
+            },
+            
             /** Memoize a function.
                 @param {!Function} func - The function to memoize
                 @returns {!Function} - The memoized function. */
@@ -25173,7 +25186,7 @@ myt.Destructible = new JS.Module('Destructible', {
             new LocalTxtBtn(self, {y:params.padding, text:params.copyIcon, tooltip:'Copy to system clipboard.'}, [{
                 doActivated: () => {
                     if (global.isSecureContext) {
-                        navigator.clipboard.writeText(self.msgTxt.text);
+                        navigator.clipboard.writeText(pkg.removeMarkup(self.msgTxt.text, {brToLineFeed:true}));
                     } else {
                         console.warn('access to clipboard blocked because of insecure context.');
                     }

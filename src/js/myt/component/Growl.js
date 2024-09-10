@@ -332,7 +332,6 @@
             
             new pkg.ResizeLayout(self, {inset:padding, spacing:params.spacing, outset:padding});
             new pkg.SizeToChildren(self, {axis:'y', paddingY:padding});
-            
         },
         
         
@@ -350,7 +349,7 @@
             new LocalTxtBtn(self, {y:params.padding, text:params.copyIcon, tooltip:'Copy to system clipboard.'}, [{
                 doActivated: () => {
                     if (global.isSecureContext) {
-                        navigator.clipboard.writeText(self.msgTxt.text);
+                        navigator.clipboard.writeText(pkg.removeMarkup(self.msgTxt.text, {brToLineFeed:true}));
                     } else {
                         console.warn('access to clipboard blocked because of insecure context.');
                     }
