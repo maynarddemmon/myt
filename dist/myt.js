@@ -21956,8 +21956,10 @@ myt.Destructible = new JS.Module('Destructible', {
             attrs.inset ??= 2;
             attrs.sortIconColor ??= '#666';
             
-            const outset = attrs.outset ?? 2;
-            delete attrs.outset;
+            attrs.outset ??= (attrs.sortable ?? true) ? 14 : 2;
+            
+            const textAlign = attrs.textAlign;
+            delete attrs.textAlign;
             
             self.callSuper(parent, attrs);
             
@@ -21967,15 +21969,11 @@ myt.Destructible = new JS.Module('Destructible', {
                 initNode: function(parent, attrs) {
                     this.callSuper(parent, attrs);
                     this.getIDS().fontSize = '0.7em'; // Looks better a bit smaller.
-                },
-                sizeViewToDom: function() {
-                    this.callSuper();
-                    self.setOutset(this.width + outset);
-                    updateTextWidth(self);
                 }
             }]);
             
             self.textView.enableEllipsis();
+            if (textAlign) self.textView.setTextAlign(textAlign);
             
             self.setDisabled(!self.sortable);
             updateTextWidth(self);
@@ -25168,7 +25166,6 @@ myt.Destructible = new JS.Module('Destructible', {
             
             new pkg.ResizeLayout(self, {inset:padding, spacing:params.spacing, outset:padding});
             new pkg.SizeToChildren(self, {axis:'y', paddingY:padding});
-            
         },
         
         

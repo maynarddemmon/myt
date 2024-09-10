@@ -1006,8 +1006,10 @@
             attrs.inset ??= 2;
             attrs.sortIconColor ??= '#666';
             
-            const outset = attrs.outset ?? 2;
-            delete attrs.outset;
+            attrs.outset ??= (attrs.sortable ?? true) ? 14 : 2;
+            
+            const textAlign = attrs.textAlign;
+            delete attrs.textAlign;
             
             self.callSuper(parent, attrs);
             
@@ -1017,15 +1019,11 @@
                 initNode: function(parent, attrs) {
                     this.callSuper(parent, attrs);
                     this.getIDS().fontSize = '0.7em'; // Looks better a bit smaller.
-                },
-                sizeViewToDom: function() {
-                    this.callSuper();
-                    self.setOutset(this.width + outset);
-                    updateTextWidth(self);
                 }
             }]);
             
             self.textView.enableEllipsis();
+            if (textAlign) self.textView.setTextAlign(textAlign);
             
             self.setDisabled(!self.sortable);
             updateTextWidth(self);
