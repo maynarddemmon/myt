@@ -684,6 +684,19 @@
                 return str.replace(/<\/?[^>]+(>|$)/g, '');
             },
             
+            escapeMarkup: (() => {
+                const REGEX = new RegExp('[&<>"\']', 'g'),
+                    MAP = {
+                        '&':'&amp;',
+                        '<':'&lt;',
+                        '>':'&gt;',
+                        '"':'&quot;',
+                        "'":'&#039;'
+                    },
+                    MATCH_FUNC = match => MAP[match];
+                return str => str.replace(REGEX, MATCH_FUNC);
+            })(),
+            
             /** Memoize a function.
                 @param {!Function} func - The function to memoize
                 @returns {!Function} - The memoized function. */
