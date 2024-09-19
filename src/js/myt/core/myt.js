@@ -815,7 +815,7 @@
                                 successFunc(response);
                             } else {
                                 // Throw application errors to the catch clause below
-                                if (response.success === false) throw new FetchError(200, url, response.message);
+                                if (response.success === false) throw new FetchError(200, url, response.message ?? response.data?.message);
                                 successFunc(response.data);
                             }
                         } catch (ex) {
