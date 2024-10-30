@@ -1086,7 +1086,7 @@
                     size:50, y:opts.msgY == null ? ModalPanel.PADDING_Y : opts.msgY,
                 });
                 if (msg) {
-                    new Text(content, {
+                    self.msgTxt = new Text(content, {
                         text:msg,
                         whiteSpace:opts.whiteSpace,
                         wordWrap:opts.wordWrap,
@@ -1103,6 +1103,10 @@
                 
                 // Focus on the dimmer itself to prevent user interaction.
                 self.focus();
+            },
+            
+            updateMessage: function(msg) {
+                this.msgTxt?.setText(msg);
             },
             
             showColorPicker: function(callbackFunction, opts) {
