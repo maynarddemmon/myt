@@ -23851,6 +23851,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 attrs.startAngle ??= 270;
                 attrs.color ??= '#666';
                 
+                const fontSize = attrs.fontSize ?? attrs.radius;
+                
                 self.quickSet(['radius','thickness','startAngle','color'], attrs);
                 const thickness = self.thickness,
                     radius = self.radius;
@@ -23876,7 +23878,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 });
                 
                 self._valueView = new pkg.Text(self, {
-                    fontSize:radius + 'px', align:'center', valign:'middle'
+                    fontSize:fontSize + 'px', align:'center', valign:'middle'
                 });
                 
                 self.redraw();
