@@ -2,7 +2,7 @@
     /*
      * http://github.com/maynarddemmon/myt
      * Maynard Demmon <maynarddemmon@gmail.com>
-     * @copyright Copyright (c) 2012-2023 Maynard Demmon and contributors
+     * @copyright Copyright (c) 2012-2024 Maynard Demmon and contributors
      * Myt: A simple javascript UI framework
      * Version: 20220118.1318
      * MIT License
@@ -17,6 +17,9 @@
      * * k-d Tree JavaScript - v1.0 (c) Mircea Pricop <pricop@ubilabs.net>,
      *                                  Martin Kleppe <kleppe@ubilabs.net>,
      *                                  Ubilabs http://ubilabs.net (MIT License)
+     * * NameCase Copyright (C) 2013-2014 Mason Gravitt (MIT License)
+     * *   Original PERL version Copyright (c) Mark Summerfield 1998-2008. All Rights Reserved.
+     * *   This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
      */
     
     class FetchError extends Error {
@@ -844,7 +847,117 @@
                 () => {finallyFunc?.();}
             ),
             
-            // I18N
+            // Text Processing //
+            toNameCase: (nameStr, individualFields) => {
+                if (!nameStr) return '';
+                
+                // Split names on regex whitespace, dash or apostrophe, workaround for
+                // Javascript regex word boundary \b splitting on unicode characters
+                // http://stackoverflow.com/questions/5311618/javascript-regular-expression-problem-with-b-and-international-characters
+                nameStr = nameStr.trim().toLowerCase().split(/([\s\-'’"“”().,\/])/).reduce(
+                    (accumulator, token) => accumulator + token.charAt(0).toUpperCase() + token.slice(1), ''
+                );
+                
+                // Name case Mcs and Macs
+                // Exclude names with 1-2 letters after prefix like Mack, Macky, Mace
+                // Exclude names ending in a,c,i,o, or j are typically Polish or Italian
+                if (
+                    /\bMac[A-Za-z]{2,}[^aciozj]\b/.test(nameStr) || /\bMc/.test(nameStr)
+                ) {
+                    nameStr = nameStr.replace(
+                        /\b(Ma?c)([A-Za-z]+)/,
+                        (x, y, z) => y + z.charAt(0).toUpperCase() + z.slice(1)
+                    );
+                    
+                    // Now correct for "Mac" exceptions
+                    nameStr = nameStr
+                        .replace(/\bMacEvicius\b/, 'Macevicius')
+                        .replace(/\bMacHado\b/, 'Machado')
+                        .replace(/\bMacHar\b/, 'Machar')
+                        .replace(/\bMacHin\b/, 'Machin')
+                        .replace(/\bMacHlin\b/, 'Machlin')
+                        .replace(/\bMacIas\b/, 'Macias')
+                        .replace(/\bMacIulis\b/, 'Maciulis')
+                        .replace(/\bMacKie\b/, 'Mackie')
+                        .replace(/\bMacKle\b/, 'Mackle')
+                        .replace(/\bMacKlin\b/, 'Macklin')
+                        .replace(/\bMacQuarie\b/, 'Macquarie')
+                        .replace(/\bMacOmber\b/, 'Macomber')
+                        .replace(/\bMacIn\b/, 'Macin')
+                        .replace(/\bMacKintosh\b/, 'Mackintosh')
+                        .replace(/\bMacKen\b/, 'Macken')
+                        .replace(/\bMacHen\b/, 'Machen')
+                        .replace(/\bMacHiel\b/, 'Machiel')
+                        .replace(/\bMacIol\b/, 'Maciol')
+                        .replace(/\bMacKell\b/, 'Mackell')
+                        .replace(/\bMacKlem\b/, 'Macklem')
+                        .replace(/\bMacKrell\b/, 'Mackrell')
+                        .replace(/\bMacLin\b/, 'Maclin')
+                        .replace(/\bMacKey\b/, 'Mackey')
+                        .replace(/\bMacKley\b/, 'Mackley')
+                        .replace(/\bMacHell\b/, 'Machell')
+                        .replace(/\bMacHon\b/, 'Machon')
+                        .replace(/\bMacAyla\b/, 'Macayla');
+                }
+                
+                // And correct Mac exceptions otherwise missed
+                nameStr = nameStr
+                    .replace(/\bMacmurdo/, 'MacMurdo')
+                    .replace(/\bMacisaac/, 'MacIsaac')
+                    
+                    // Fixes for "son (daughter) of" etc. in various languages.
+                    .replace(/\bAl(?=\s+\w)\b/g,  'al')     // al Arabic or forename Al.
+                    .replace(/\bAp\b/g,           'ap')     // ap Welsh.
+                    .replace(/\bBen(?=\s+\w)\b/g, 'ben')    // ben Hebrew or forename Ben.
+                    .replace(/\bDell([ae])\b/g,   'dell$1') // della and delle Italian.
+                    .replace(/\bD([aeiu])\b/g,    'd$1')    // da, de, di Italian; du French.
+                    .replace(/\bDe([lr])\b/g,     'de$1')   // del Italian; der Dutch/Flemish.
+                    .replace(/\bEl\b/g,           'el')     // el Greek
+                    .replace(/\bLa\b/g,           'la')     // la French
+                    .replace(/\bLe(?=\s+\w)\b/g,  'le')     // le French
+                    .replace(/\bLo\b/g,           'lo')     // lo Italian
+                    .replace(/\bVan(?=\s+\w)\b/g, 'van')    // van German or forename Van.
+                    .replace(/\bVon\b/g,          'von')    // von Dutch/Flemish
+                    .replace(/\bD['’]/g,          'd\'')    // d’Orsay
+                    
+                    // Fixes for roman numeral names, e.g. Henry VIII
+                    .replace(/\b(?:\d{4}|(?:[IVX])(?:X{0,3}I{0,3}|X{0,2}VI{0,3}|X{0,2}I?[VX]))$/i, v => v.toUpperCase())
+                    
+                    // Nation of Islam 2X, 3X, etc. names
+                    .replace(/\b[0-9](x)\b/, v => v.toUpperCase())
+                    
+                    // Somewhat arbitrary rule where two letter combos not containing vowels should be capitalized
+                    // fixes /JJ Abrams/ and /JD Salinger/
+                    // With some exceptions
+                    .replace(/(?:^|\\s)[bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ]{2}\s/, v => v.toUpperCase())
+                    .replace(/\bMR\.?\b/, 'Mr')
+                    .replace(/\bMS\.?\b/, 'Ms')
+                    .replace(/\bDR\.?\b/, 'Dr')
+                    .replace(/\bST\.?\b/, 'St')
+                    .replace(/\bJR\.?\b/, 'Jr')
+                    .replace(/\bSR\.?\b/, 'Sr')
+                    .replace(/\bLT\.?\b/, 'Lt')
+                    
+                    // lowercase words
+                    .replace(/\bThe\b/g, 'the')
+                    .replace(/\bOf\b/g, 'of')
+                    .replace(/\bAnd\b/g, 'and')
+                    .replace(/\bY\s/g, 'y')
+                    
+                    // strip extra spaces
+                    .replace(/\s{2,}/g, ' ');
+                
+                // Check if we should force the first character to caps
+                if (individualFields) {
+                    // First character may be lowercase
+                    return nameStr;
+                } else {
+                    // Force first character to be uppercase
+                    return nameStr.charAt(0).toUpperCase() + nameStr.slice(1);
+                }
+            },
+            
+            // I18N //
             I18N: {
                 setLocale: locale => {
                     currentLocale = locale;
