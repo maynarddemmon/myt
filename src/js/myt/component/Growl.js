@@ -262,7 +262,8 @@
         SIMPLE_GROWL_PARAM_NAMES = [
             'maxHeight','icon','iconSize','text','padding','spacing','whiteSpace',
             'showCloseButton','closeIcon','closeOnly',
-            'showCopyButton','copyIcon'
+            'showCopyButton','copyIcon',
+            'activeColor','hoverColor','readyColor'
         ],
         
         LocalTxtBtn = new JSClass('LocalTxtBtn', pkg.TextButton, {
@@ -338,7 +339,10 @@
         // Methods /////////////////////////////////////////////////////////////
         makeCloseButton: function(params) {
             const self = this;
-            new LocalTxtBtn(self, {y:params.padding, text:params.closeIcon, tooltip:'Dismiss this notification.'}, [{
+            new LocalTxtBtn(self, {
+                y:params.padding, text:params.closeIcon, tooltip:'Dismiss this notification.',
+                activeColor:params.activeColor, hoverColor:params.hoverColor, readyColor:params.readyColor
+            }, [{
                 doActivated: () => {
                     self.parent.removeGrowl(self);
                 }
@@ -346,7 +350,10 @@
         },
         makeCopyButton: function(params) {
             const self = this;
-            new LocalTxtBtn(self, {y:params.padding, text:params.copyIcon, tooltip:'Copy to system clipboard.'}, [{
+            new LocalTxtBtn(self, {
+                y:params.padding, text:params.copyIcon, tooltip:'Copy to system clipboard.',
+                activeColor:params.activeColor, hoverColor:params.hoverColor, readyColor:params.readyColor
+            }, [{
                 doActivated: () => {
                     if (global.isSecureContext) {
                         navigator.clipboard.writeText(pkg.removeMarkup(self.msgTxt.text, {brToLineFeed:true}));
