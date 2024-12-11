@@ -220,7 +220,7 @@
                 
                 // Selection Row
                 inputView = new pkg.InputText(colorPicker, {
-                    x:236, y:y, width:105, height:25, roundedCorners:3, textColor:'#333', border:BORDER_333, maxLength:11,
+                    x:236, y:y, width:105, height:25, roundedCorners:3, textColor:Dialog.INPUT_FGCOLOR, border:BORDER_333, maxLength:11,
                     fontFamily:'monospace'
                 });
                 colorPicker.attachToDom(inputView, '_submitInput', 'blur');
@@ -746,6 +746,8 @@
                 
                 /** The default background color. */
                 BGCOLOR: '#fff',
+                
+                INPUT_FGCOLOR: '#333',
                 
                 /** Makes the text wrap at 200px and the dialog will be at least 200px wide. */
                 WRAP_TEXT_DEFAULTS: {
