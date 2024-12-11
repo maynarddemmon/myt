@@ -114,6 +114,27 @@
             
             generateGuid: generateGuid,
             
+            /** Theme properties for various components.
+                IMPORTANT! Don't import these directly into packages. That would make them
+                    difficult to override in projects that use myt. It is OK to import the
+                    entire theme, just don't do theme:{foo, bar, baz}.
+            */
+            theme:{
+                TextButtonActive:'#ddd',
+                TextButtonHover:'#eee',
+                TextButtonReady:'#fff',
+                
+                DialogDayBtnBorderColor:'#fff',
+                DialogDayBtnBorderColorToday:'#090',
+                
+                focusShadow:[0, 0, 7, '#666'],
+                disabledOpacity:0.5,
+                
+                border1s3:[1, 'solid', '#333'],
+                border1s9:[1, 'solid', '#999'],
+                border1sF:[1, 'solid', '#fff']
+            },
+            
             /** Creates a non-secure hash of a string.
                 @param {string} s - The string to hash.
                 @returns {number} */

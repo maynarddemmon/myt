@@ -568,6 +568,27 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             
             generateGuid: generateGuid,
             
+            /** Theme properties for various components.
+                IMPORTANT! Don't import these directly into packages. That would make them
+                    difficult to override in projects that use myt. It is OK to import the
+                    entire theme, just don't do theme:{foo, bar, baz}.
+            */
+            theme:{
+                TextButtonActive:'#ddd',
+                TextButtonHover:'#eee',
+                TextButtonReady:'#fff',
+                
+                DialogDayBtnBorderColor:'#fff',
+                DialogDayBtnBorderColorToday:'#090',
+                
+                focusShadow:[0, 0, 7, '#666'],
+                disabledOpacity:0.5,
+                
+                border1s3:[1, 'solid', '#333'],
+                border1s9:[1, 'solid', '#999'],
+                border1sF:[1, 'solid', '#fff']
+            },
+            
             /** Creates a non-secure hash of a string.
                 @param {string} s - The string to hash.
                 @returns {number} */
@@ -12056,10 +12077,7 @@ myt.Destructible = new JS.Module('Destructible', {
 (pkg => {
     const {Class:JSClass, Module:JSModule} = JS,
         
-        {View, KeyActivation} = pkg,
-        
-        defaultDisabledOpacity = 0.5,
-        defaultFocusShadowPropertyValue = [0, 0, 7, '#666'],
+        {View, KeyActivation, theme:THEME} = pkg,
         
         /** Provides button functionality to an myt.View. Most of the functionality comes from the 
             mixins included by this mixin. This mixin resolves issues that arise when the various 
@@ -12080,16 +12098,6 @@ myt.Destructible = new JS.Module('Destructible', {
                 pkg.MouseOverAndDown, 
                 KeyActivation
             ],
-            
-            
-            // Class Methods and Attributes ////////////////////////////////////
-            extend: {
-                /** The default focus shadow. */
-                FOCUS_SHADOW: defaultFocusShadowPropertyValue,
-                
-                /** The default disabled state opacity. */
-                DISABLED_OPACITY: defaultDisabledOpacity
-            },
             
             
             // Life Cycle //////////////////////////////////////////////////////
@@ -12243,7 +12251,7 @@ myt.Destructible = new JS.Module('Destructible', {
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.Button */
             drawDisabledState: function() {
-                this.draw(this.readyColor, defaultDisabledOpacity);
+                this.draw(this.readyColor, THEME.disabledOpacity);
             },
             
             /** @overrides myt.Button */
@@ -12423,9 +12431,9 @@ myt.Destructible = new JS.Module('Destructible', {
             attrs.textAlign ??= 'center';
             attrs.paddingTop ??= 1;
             attrs.height ??= 23 - (attrs.paddingTop ?? 0);
-            attrs.activeColor ??= '#ddd';
-            attrs.hoverColor ??= '#eee';
-            attrs.readyColor ??= '#fff';
+            attrs.activeColor ??= THEME.TextButtonActive;
+            attrs.hoverColor ??= THEME.TextButtonHover;
+            attrs.readyColor ??= THEME.TextButtonReady;
             
             this.callSuper(parent, attrs);
         }
@@ -12993,7 +13001,7 @@ myt.Destructible = new JS.Module('Destructible', {
             attrs.defaultItemClass ??= pkg.ListViewItem;
             attrs.overflow ??= 'autoy';
             attrs.bgColor ??= '#ccc';
-            attrs.boxShadow ??= pkg.Button.FOCUS_SHADOW;
+            attrs.boxShadow ??= pkg.theme.focusShadow;
             
             this.callSuper(parent, attrs);
             
@@ -14760,8 +14768,7 @@ myt.Destructible = new JS.Module('Destructible', {
         isArray = Array.isArray,
         
         {
-            SizeToDom, View, Disableable, KeyObservable,
-            Button:{FOCUS_SHADOW}, 
+            SizeToDom, View, Disableable, KeyObservable, theme,
             global:{keys:GlobalKeys}
         } = pkg,
         
@@ -14978,7 +14985,7 @@ myt.Destructible = new JS.Module('Destructible', {
             /** @overrides myt.FocusObservable */
             showFocusIndicator: function() {
                 this.hideDefaultFocusIndicator();
-                this.setBoxShadow(FOCUS_SHADOW);
+                this.setBoxShadow(theme.focusShadow);
             },
             
             /** @overrides myt.FocusObservable */
@@ -15583,7 +15590,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** @overrides myt.FocusObservable */
         showFocusIndicator: function() {
             this.hideDefaultFocusIndicator();
-            this.setBoxShadow(FOCUS_SHADOW);
+            this.setBoxShadow(theme.focusShadow);
         },
         
         /** @overrides myt.FocusObservable */
@@ -18657,15 +18664,10 @@ myt.Destructible = new JS.Module('Destructible', {
         
         {
             View, Text, ModalPanel, SizeToChildren, SpacedLayout, WrappingLayout, SelectionManager, Color, 
-            LocalStorage, Button, TextButton, Draggable,
-            FontAwesome:{makeTag}
+            LocalStorage, Button, TextButton, Draggable, FontAwesome:{makeTag}, theme
         } = pkg,
         
         {min:mathMin, max:mathMax} = Math,
-        
-        BORDER_333 = [1, 'solid', '#333'],
-        BORDER_999 = [1, 'solid', '#999'],
-        BORDER_FFF = [1, 'solid', '#fff'],
         
         /*  Hide spinner related elements. */
         hideSpinner = dialog => {
@@ -18714,7 +18716,7 @@ myt.Destructible = new JS.Module('Destructible', {
             include:[Button],
             initNode: function(parent, attrs) {
                 const size = attrs.width = attrs.height = 16;
-                attrs.border = BORDER_999;
+                attrs.border = theme.border1s9;
                 attrs.domClass = DOM_CLASS_CHECKERBOARD;
                 
                 const bgColor = attrs.bgColor;
@@ -18738,8 +18740,8 @@ myt.Destructible = new JS.Module('Destructible', {
             doActivated: function() {
                 colorPicker.setColor(this.colorView.bgColor);
             },
-            drawHoverState: function() {this.setBorder(BORDER_333);},
-            drawReadyState: function() {this.setBorder(BORDER_999);}
+            drawHoverState: function() {this.setBorder(theme.border1s3);},
+            drawReadyState: function() {this.setBorder(theme.border1s9);}
         }),
         
         /** @class */
@@ -18768,7 +18770,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 new WrappingLayout(paletteContainer, {spacing:4, lineSpacing:4});
                 
                 const colorViewSize = 139;
-                colorView = new View(colorPicker, {x:170, width:colorViewSize, height:colorViewSize, border:BORDER_333}, [Draggable, {
+                colorView = new View(colorPicker, {x:170, width:colorViewSize, height:colorViewSize, border:theme.border1s3}, [Draggable, {
                     requestDragPosition: function(x, y) {
                         colorView.callSuper(colorView.x, colorView.y);
                         const pos = this.getPagePosition();
@@ -18782,9 +18784,9 @@ myt.Destructible = new JS.Module('Destructible', {
                     valView = new View(satView, {width:colorViewSize, height:colorViewSize});
                 satView.getIDS().backgroundImage = 'linear-gradient(to right, #fff, rgba(204, 154, 129, 0))';
                 valView.getIDS().backgroundImage = 'linear-gradient(to top, #000, rgba(204, 154, 129, 0))';
-                colorThumb = new View(valView, {width:6, height:6, bgColor:'#000', border:BORDER_FFF, roundedCorners:4});
+                colorThumb = new View(valView, {width:6, height:6, bgColor:'#000', border:theme.border1sF, roundedCorners:4});
                 
-                hueView = new View(colorPicker, {x:315, y:30, width:24, height:109, border:BORDER_333}, [Draggable, {
+                hueView = new View(colorPicker, {x:315, y:30, width:24, height:109, border:theme.border1s3}, [Draggable, {
                     requestDragPosition: function(x, y) {
                         this.callSuper(hueView.x, hueView.y);
                         currentHue = parseFloat(mathMax(0, mathMin(1, (y + this.dragInitY - this.getPagePosition().y) / this.height)));
@@ -18796,7 +18798,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 hueThumb = new View(hueView, {x:-1, width:24, height:2, bgColor:'#fff', border:[1, 'solid', '#000']});
                 
                 new View(colorPicker, {
-                    x:315, width:24, height:24, border:BORDER_333, tooltip:'Set to transparent.', domClass:DOM_CLASS_CHECKERBOARD
+                    x:315, width:24, height:24, border:theme.border1s3, tooltip:'Set to transparent.', domClass:DOM_CLASS_CHECKERBOARD
                 }, [Button, {doActivated: () => {colorPicker.setColor(TRANSPARENT);}}]);
                 
                 let y = 146;
@@ -18828,7 +18830,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 
                 // Selection Row
                 inputView = new pkg.InputText(colorPicker, {
-                    x:236, y:y, width:105, height:25, roundedCorners:3, textColor:Dialog.INPUT_FGCOLOR, border:BORDER_333, maxLength:11,
+                    x:236, y:y, width:105, height:25, roundedCorners:3, textColor:Dialog.INPUT_FGCOLOR, border:theme.border1s3, maxLength:11,
                     fontFamily:'monospace'
                 });
                 colorPicker.attachToDom(inputView, '_submitInput', 'blur');
@@ -18836,7 +18838,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 inputView.getIDS().paddingLeft = '6px';
                 
                 const initialColorContainer = new View(colorPicker, {
-                    x:170, y:y, width:60, height:23, border:BORDER_333, domClass:DOM_CLASS_CHECKERBOARD
+                    x:170, y:y, width:60, height:23, border:theme.border1s3, domClass:DOM_CLASS_CHECKERBOARD
                 });
                 new View(initialColorContainer, {
                     width:30, height:23, focusIndicator:false,
@@ -19010,7 +19012,7 @@ myt.Destructible = new JS.Module('Destructible', {
         DayBtn = new JSClass('DayBtn', SelectableBtn, {
             initNode: function(parent, attrs) {
                 attrs.width = 23;
-                attrs.border = BORDER_FFF;
+                attrs.border = theme.border1sF;
                 this.callSuper(parent, attrs);
             },
             
@@ -19026,7 +19028,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     this.callSuper();
                     
                     if (!this.isSelected()) this.setTextColor(this.isAnotherMonth ? '#ccc' : (this.isSunday ? '#d40' : (this.isSaturday ? '#04a' : null)));
-                    this.setBorderColor(this.isToday ? '#090' : '#fff');
+                    this.setBorderColor(this.isToday ? theme.DialogDayBtnBorderColorToday : theme.DialogDayBtnBorderColor);
                 }
             },
             
@@ -19350,7 +19352,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 SHADOW: [0, 4, 20, '#666'],
                 
                 /** The default border */
-                BORDER: BORDER_FFF,
+                BORDER: theme.border1sF,
                 
                 /** The default background color. */
                 BGCOLOR: '#fff',

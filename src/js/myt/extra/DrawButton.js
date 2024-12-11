@@ -70,7 +70,7 @@ myt.DrawButton = new JS.Class('DrawButton', myt.Canvas, {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.Button */
     drawDisabledState: function() {
-        this.setOpacity(myt.Button.DISABLED_OPACITY);
+        this.setOpacity(myt.theme.disabledOpacity);
         this.redraw('disabled');
     },
     

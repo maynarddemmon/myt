@@ -136,7 +136,7 @@
             attrs.defaultItemClass ??= pkg.ListViewItem;
             attrs.overflow ??= 'autoy';
             attrs.bgColor ??= '#ccc';
-            attrs.boxShadow ??= pkg.Button.FOCUS_SHADOW;
+            attrs.boxShadow ??= pkg.theme.focusShadow;
             
             this.callSuper(parent, attrs);
             

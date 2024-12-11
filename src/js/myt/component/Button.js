@@ -1,10 +1,7 @@
 (pkg => {
     const {Class:JSClass, Module:JSModule} = JS,
         
-        {View, KeyActivation} = pkg,
-        
-        defaultDisabledOpacity = 0.5,
-        defaultFocusShadowPropertyValue = [0, 0, 7, '#666'],
+        {View, KeyActivation, theme:THEME} = pkg,
         
         /** Provides button functionality to an myt.View. Most of the functionality comes from the 
             mixins included by this mixin. This mixin resolves issues that arise when the various 
@@ -25,16 +22,6 @@
                 pkg.MouseOverAndDown, 
                 KeyActivation
             ],
-            
-            
-            // Class Methods and Attributes ////////////////////////////////////
-            extend: {
-                /** The default focus shadow. */
-                FOCUS_SHADOW: defaultFocusShadowPropertyValue,
-                
-                /** The default disabled state opacity. */
-                DISABLED_OPACITY: defaultDisabledOpacity
-            },
             
             
             // Life Cycle //////////////////////////////////////////////////////
@@ -188,7 +175,7 @@
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.Button */
             drawDisabledState: function() {
-                this.draw(this.readyColor, defaultDisabledOpacity);
+                this.draw(this.readyColor, THEME.disabledOpacity);
             },
             
             /** @overrides myt.Button */
@@ -368,9 +355,9 @@
             attrs.textAlign ??= 'center';
             attrs.paddingTop ??= 1;
             attrs.height ??= 23 - (attrs.paddingTop ?? 0);
-            attrs.activeColor ??= '#ddd';
-            attrs.hoverColor ??= '#eee';
-            attrs.readyColor ??= '#fff';
+            attrs.activeColor ??= THEME.TextButtonActive;
+            attrs.hoverColor ??= THEME.TextButtonHover;
+            attrs.readyColor ??= THEME.TextButtonReady;
             
             this.callSuper(parent, attrs);
         }

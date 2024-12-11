@@ -68,7 +68,7 @@ myt.BaseMouseablePanel = new JS.Module('BaseMouseablePanel', {
     // Methods /////////////////////////////////////////////////////////////////
     /** @overrides myt.Button */
     drawDisabledState: function() {
-        this.setOpacity(myt.Button.DISABLED_OPACITY);
+        this.setOpacity(myt.theme.disabledOpacity);
         this.__updateImageUrls('up');
     },
     

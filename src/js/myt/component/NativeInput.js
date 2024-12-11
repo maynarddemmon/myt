@@ -5,8 +5,7 @@
         isArray = Array.isArray,
         
         {
-            SizeToDom, View, Disableable, KeyObservable,
-            Button:{FOCUS_SHADOW}, 
+            SizeToDom, View, Disableable, KeyObservable, theme,
             global:{keys:GlobalKeys}
         } = pkg,
         
@@ -223,7 +222,7 @@
             /** @overrides myt.FocusObservable */
             showFocusIndicator: function() {
                 this.hideDefaultFocusIndicator();
-                this.setBoxShadow(FOCUS_SHADOW);
+                this.setBoxShadow(theme.focusShadow);
             },
             
             /** @overrides myt.FocusObservable */
@@ -828,7 +827,7 @@
         /** @overrides myt.FocusObservable */
         showFocusIndicator: function() {
             this.hideDefaultFocusIndicator();
-            this.setBoxShadow(FOCUS_SHADOW);
+            this.setBoxShadow(theme.focusShadow);
         },
         
         /** @overrides myt.FocusObservable */
