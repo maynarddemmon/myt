@@ -364,18 +364,12 @@
             
             Attributes:
                 spacing:number The spacing between tab sliders. Defaults to
-                    myt.TabSliderContainer.SPACING which is 1.
+                    myt.theme.TabSliderContainerSpacing which is 1.
                 duration:number The length of time for the animation.
             
             @class */
         TabSliderContainer = pkg.TabSliderContainer = new JS.Module('TabSliderContainer', {
             include: [pkg.SelectionManager],
-            
-            
-            // Class Methods and Attributes ////////////////////////////////////
-            extend: {
-                SPACING:1
-            },
             
             
             // Life Cycle //////////////////////////////////////////////////////
@@ -386,7 +380,7 @@
                 
                 attrs.defaultPlacement = 'container';
                 
-                attrs.spacing ??= TabSliderContainer.SPACING;
+                attrs.spacing ??= pkg.theme.TabSliderContainerSpacing;
                 attrs.overflow ??= 'autoy';
                 attrs.itemSelectionId ??= 'tabId';
                 attrs.maxSelected ??= 1;

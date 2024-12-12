@@ -4,7 +4,7 @@
     
     const JSClass = JS.Class,
         
-        {View, SizeToParent, RootView} = pkg,
+        {View, SizeToParent, RootView, theme} = pkg,
         
         /** A dimmer that can be placed on another myt.View to obscure the subviews of that view.
             
@@ -17,13 +17,6 @@
             @class */
         Dimmer = pkg.Dimmer = new JSClass('Dimmer', View, {
             include: [SizeToParent],
-            
-            
-            // Class Methods and Attributes ////////////////////////////////////
-            extend: {
-                OPACITY: 0.35,
-                COLOR: '#000'
-            },
             
             
             // Life Cycle //////////////////////////////////////////////////////
@@ -44,8 +37,8 @@
                 
                 self.overlay = new View(self, {
                     ignorePlacement:true, 
-                    opacity:Dimmer.OPACITY,
-                    bgColor:Dimmer.COLOR,
+                    opacity:theme.DimmerOpacity,
+                    bgColor:theme.DimmerColor,
                     percentOfParentWidth:100,
                     percentOfParentHeight:100
                 }, [SizeToParent]);
@@ -133,24 +126,6 @@
         ModalPanel = pkg.ModalPanel = new JSClass('ModalPanel', Dimmer, {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                /** The default horizontal padding. */
-                PADDING_X:20,
-                
-                /** The default vertical padding. */
-                PADDING_Y:15,
-                
-                /** The default margin top. */
-                MARGIN_TOP:40,
-                
-                /** The default margin left. */
-                MARGIN_LEFT:40,
-                
-                /** The default margin bottom. */
-                MARGIN_BOTTOM:40,
-                
-                /** The default margin right. */
-                MARGIN_RIGHT:40,
-                
                 getOpenModalPanelCount: () => openModalPanelCount,
                 
                 hasOpenModalPanels: () => openModalPanelCount > 0
@@ -168,14 +143,14 @@
                 attrs.sizingStrategy ??= 'children';
                 
                 // Used for parent sizing strategy
-                attrs.marginTop ??= ModalPanel.MARGIN_TOP;
-                attrs.marginLeft ??= ModalPanel.MARGIN_LEFT;
-                attrs.marginBottom ??= ModalPanel.MARGIN_BOTTOM;
-                attrs.marginRight ??= ModalPanel.MARGIN_RIGHT;
+                attrs.marginTop ??= theme.ModalPanelMarginTop;
+                attrs.marginLeft ??= theme.ModalPanelMarginLeft;
+                attrs.marginBottom ??= theme.ModalPanelMarginBottom;
+                attrs.marginRight ??= theme.ModalPanelMarginRight;
                 
                 // Used for "children" sizing strategy
-                attrs.paddingX ??= ModalPanel.PADDING_X;
-                attrs.paddingY ??= ModalPanel.PADDING_Y;
+                attrs.paddingX ??= theme.ModalPanelPaddingX;
+                attrs.paddingY ??= theme.ModalPanelPaddingY;
                 
                 self.callSuper(parent, attrs);
                 

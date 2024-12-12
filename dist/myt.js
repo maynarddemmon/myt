@@ -578,15 +578,63 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 TextButtonHover:'#eee',
                 TextButtonReady:'#fff',
                 
+                /* The default corner radius for a Dialog. */
+                DialogRadius:12,
+                /* The default background color for a Dialog. */
+                DialogBgColor:'#fff',
+                DialogInputFgColor:'#333',
+                /* The default box shadow for a Dialog. */
+                DialogShadow:[0, 4, 20, '#666'],
+                /* The default border for a Dialog */
+                DialogBorder:[1, 'solid', '#fff'],
+                
+                DialogDayBtnBorder:[1, 'solid', '#fff'],
                 DialogDayBtnBorderColor:'#fff',
                 DialogDayBtnBorderColorToday:'#090',
+                
+                DimmerOpacity:0.35,
+                DimmerColor:'#000',
+                
+                /* The default horizontal padding for a ModalPanel. */
+                ModalPanelPaddingX:20,
+                /* The default vertical padding for a ModalPanel. */
+                ModalPanelPaddingY:15,
+                /* The default margin to for a ModalPanelp. */
+                ModalPanelMarginTop:40,
+                /* The default margin left for a ModalPanel. */
+                ModalPanelMarginLeft:40,
+                /* The default margin bottom for a ModalPanel. */
+                ModalPanelMarginBottom:40,
+                /* The default margin right for a ModalPanel. */
+                ModalPanelMarginRight:40,
+                
+                TabSliderContainerSpacing:1,
+                
+                TabInset:8,
+                TabOutset:8,
+                
+                TabContainerInset:0,
+                TabContainerSpacing:1,
+                
+                /* The default length of time in millis before the tooltip is shown. */
+                BaseTooltipDelay:500,
+                /* The default length of time in millis before the tooltip is hidden. */
+                BaseTooltipHideDelay:100,
+                
+                TooltipEdgeColor:'#444',
+                TooltipBgColor:'#444',
+                TooltipTextColor:'#eee',
+                TooltipShadowColor:'#00000033', // Extra nums are opacity
+                TooltipEdgeSize:0,
+                TooltipShadowSize:2,
+                TooltipHInset:6,
+                TooltipVInset:3,
                 
                 focusShadow:[0, 0, 7, '#666'],
                 disabledOpacity:0.5,
                 
                 border1s3:[1, 'solid', '#333'],
-                border1s9:[1, 'solid', '#999'],
-                border1sF:[1, 'solid', '#fff']
+                border1s9:[1, 'solid', '#999']
             },
             
             /** Creates a non-secure hash of a string.
@@ -870,7 +918,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 @param {string} fontFamily
                 @returns {undefined} */
             createBaseFontCSSRule: fontFamily => {
-                myt.addCSSRule(myt.createStylesheet(), 'body, input', 'font-family:' + fontFamily, 0);
+                myt.addCSSRule(myt.createStylesheet(), 'body, input', 'font-family:' + fontFamily);
             },
             
             /** @param {?Array} fontUrls
@@ -907,7 +955,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             },
             
             addCSSRule: (sheet, selector, rules, index) => {
-                sheet.insertRule(selector + '{' + rules + '}', index);
+                sheet.insertRule(selector + '{' + rules + '}', index ?? 0);
             },
             
             removeCSSRules: sheet => {
@@ -931,7 +979,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 if (color) rules.push('color:' + color);
                 if (fontFamily) rules.push('font-family:' + fontFamily);
                 if (opacity) rules.push('opacity:' + opacity);
-                myt.addCSSRule(sheet, '#' + domId + '::placeholder', rules.join('; '), 0);
+                myt.addCSSRule(sheet, '#' + domId + '::placeholder', rules.join('; '));
             },
             
             // Sort Util
@@ -14356,18 +14404,12 @@ myt.Destructible = new JS.Module('Destructible', {
             
             Attributes:
                 spacing:number The spacing between tab sliders. Defaults to
-                    myt.TabSliderContainer.SPACING which is 1.
+                    myt.theme.TabSliderContainerSpacing which is 1.
                 duration:number The length of time for the animation.
             
             @class */
         TabSliderContainer = pkg.TabSliderContainer = new JS.Module('TabSliderContainer', {
             include: [pkg.SelectionManager],
-            
-            
-            // Class Methods and Attributes ////////////////////////////////////
-            extend: {
-                SPACING:1
-            },
             
             
             // Life Cycle //////////////////////////////////////////////////////
@@ -14378,7 +14420,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 
                 attrs.defaultPlacement = 'container';
                 
-                attrs.spacing ??= TabSliderContainer.SPACING;
+                attrs.spacing ??= pkg.theme.TabSliderContainerSpacing;
                 attrs.overflow ??= 'autoy';
                 attrs.itemSelectionId ??= 'tabId';
                 attrs.maxSelected ??= 1;
@@ -14531,7 +14573,8 @@ myt.Destructible = new JS.Module('Destructible', {
 
 
 (pkg => {
-    const 
+    const theme = pkg.theme,
+        
         updateTextColor = tab => {
             tab.textView.setTextColor(tab.selected ? tab.labelTextSelectedColor : tab.labelTextColor);
         },
@@ -14569,13 +14612,6 @@ myt.Destructible = new JS.Module('Destructible', {
             include: [pkg.Selectable],
             
             
-            // Class Methods and Attributes ////////////////////////////////////
-            extend: {
-                INSET: 8,
-                OUTSET: 8
-            },
-            
-            
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
                 attrs.tabId ??= pkg.generateGuid();
@@ -14589,8 +14625,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 }
                 
                 // myt.SimpleTextButton
-                attrs.inset ??= Tab.INSET;
-                attrs.outset ??= Tab.OUTSET;
+                attrs.inset ??= theme.TabInset;
+                attrs.outset ??= theme.TabOutset;
                 
                 // myt.Tab
                 attrs.selectedColor ??= '#fff';
@@ -14665,19 +14701,12 @@ myt.Destructible = new JS.Module('Destructible', {
             include: [pkg.SelectionManager],
             
             
-            // Class Methods and Attributes ////////////////////////////////////
-            extend: {
-                SPACING:1,
-                INSET:0
-            },
-            
-            
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
                 this.__tabs = [];
                 
-                attrs.spacing ??= TabContainer.SPACING;
-                attrs.inset ??= TabContainer.INSET;
+                attrs.spacing ??= theme.TabContainerSpacing;
+                attrs.inset ??= theme.TabContainerInset;
                 attrs.location ??= 'top';
                 attrs.itemSelectionId ??= 'tabId';
                 attrs.maxSelected ??= 1;
@@ -18193,7 +18222,7 @@ myt.Destructible = new JS.Module('Destructible', {
     
     const JSClass = JS.Class,
         
-        {View, SizeToParent, RootView} = pkg,
+        {View, SizeToParent, RootView, theme} = pkg,
         
         /** A dimmer that can be placed on another myt.View to obscure the subviews of that view.
             
@@ -18206,13 +18235,6 @@ myt.Destructible = new JS.Module('Destructible', {
             @class */
         Dimmer = pkg.Dimmer = new JSClass('Dimmer', View, {
             include: [SizeToParent],
-            
-            
-            // Class Methods and Attributes ////////////////////////////////////
-            extend: {
-                OPACITY: 0.35,
-                COLOR: '#000'
-            },
             
             
             // Life Cycle //////////////////////////////////////////////////////
@@ -18233,8 +18255,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 
                 self.overlay = new View(self, {
                     ignorePlacement:true, 
-                    opacity:Dimmer.OPACITY,
-                    bgColor:Dimmer.COLOR,
+                    opacity:theme.DimmerOpacity,
+                    bgColor:theme.DimmerColor,
                     percentOfParentWidth:100,
                     percentOfParentHeight:100
                 }, [SizeToParent]);
@@ -18322,24 +18344,6 @@ myt.Destructible = new JS.Module('Destructible', {
         ModalPanel = pkg.ModalPanel = new JSClass('ModalPanel', Dimmer, {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                /** The default horizontal padding. */
-                PADDING_X:20,
-                
-                /** The default vertical padding. */
-                PADDING_Y:15,
-                
-                /** The default margin top. */
-                MARGIN_TOP:40,
-                
-                /** The default margin left. */
-                MARGIN_LEFT:40,
-                
-                /** The default margin bottom. */
-                MARGIN_BOTTOM:40,
-                
-                /** The default margin right. */
-                MARGIN_RIGHT:40,
-                
                 getOpenModalPanelCount: () => openModalPanelCount,
                 
                 hasOpenModalPanels: () => openModalPanelCount > 0
@@ -18357,14 +18361,14 @@ myt.Destructible = new JS.Module('Destructible', {
                 attrs.sizingStrategy ??= 'children';
                 
                 // Used for parent sizing strategy
-                attrs.marginTop ??= ModalPanel.MARGIN_TOP;
-                attrs.marginLeft ??= ModalPanel.MARGIN_LEFT;
-                attrs.marginBottom ??= ModalPanel.MARGIN_BOTTOM;
-                attrs.marginRight ??= ModalPanel.MARGIN_RIGHT;
+                attrs.marginTop ??= theme.ModalPanelMarginTop;
+                attrs.marginLeft ??= theme.ModalPanelMarginLeft;
+                attrs.marginBottom ??= theme.ModalPanelMarginBottom;
+                attrs.marginRight ??= theme.ModalPanelMarginRight;
                 
                 // Used for "children" sizing strategy
-                attrs.paddingX ??= ModalPanel.PADDING_X;
-                attrs.paddingY ??= ModalPanel.PADDING_Y;
+                attrs.paddingX ??= theme.ModalPanelPaddingX;
+                attrs.paddingY ??= theme.ModalPanelPaddingY;
                 
                 self.callSuper(parent, attrs);
                 
@@ -18784,7 +18788,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     valView = new View(satView, {width:colorViewSize, height:colorViewSize});
                 satView.getIDS().backgroundImage = 'linear-gradient(to right, #fff, rgba(204, 154, 129, 0))';
                 valView.getIDS().backgroundImage = 'linear-gradient(to top, #000, rgba(204, 154, 129, 0))';
-                colorThumb = new View(valView, {width:6, height:6, bgColor:'#000', border:theme.border1sF, roundedCorners:4});
+                colorThumb = new View(valView, {width:6, height:6, bgColor:'#000', border:[1,'solid','#fff'], roundedCorners:4});
                 
                 hueView = new View(colorPicker, {x:315, y:30, width:24, height:109, border:theme.border1s3}, [Draggable, {
                     requestDragPosition: function(x, y) {
@@ -18830,7 +18834,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 
                 // Selection Row
                 inputView = new pkg.InputText(colorPicker, {
-                    x:236, y:y, width:105, height:25, roundedCorners:3, textColor:Dialog.INPUT_FGCOLOR, border:theme.border1s3, maxLength:11,
+                    x:236, y:y, width:105, height:25, roundedCorners:3, textColor:theme.DialogInputFgColor, border:theme.border1s3, maxLength:11,
                     fontFamily:'monospace'
                 });
                 colorPicker.attachToDom(inputView, '_submitInput', 'blur');
@@ -19012,7 +19016,7 @@ myt.Destructible = new JS.Module('Destructible', {
         DayBtn = new JSClass('DayBtn', SelectableBtn, {
             initNode: function(parent, attrs) {
                 attrs.width = 23;
-                attrs.border = theme.border1sF;
+                attrs.border = theme.DialogDayBtnBorder;
                 this.callSuper(parent, attrs);
             },
             
@@ -19342,22 +19346,8 @@ myt.Destructible = new JS.Module('Destructible', {
         Dialog = pkg.Dialog = new JSClass('Dialog', ModalPanel, {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                /** The default corner radius. */
-                RADIUS: 12,
-                
                 /** The default button class. */
                 BUTTON_CLASS: DialogButton,
-                
-                /** The default box shadow. */
-                SHADOW: [0, 4, 20, '#666'],
-                
-                /** The default border */
-                BORDER: theme.border1sF,
-                
-                /** The default background color. */
-                BGCOLOR: '#fff',
-                
-                INPUT_FGCOLOR: '#333',
                 
                 /** Makes the text wrap at 200px and the dialog will be at least 200px wide. */
                 WRAP_TEXT_DEFAULTS: {
@@ -19422,10 +19412,10 @@ myt.Destructible = new JS.Module('Destructible', {
                 this.callSuper(parent, attrs);
                 
                 const content = this.content;
-                content.setRoundedCorners(Dialog.RADIUS);
-                content.setBgColor(Dialog.BGCOLOR);
-                content.setBoxShadow(Dialog.SHADOW);
-                content.setBorder(Dialog.BORDER);
+                content.setRoundedCorners(theme.DialogRadius);
+                content.setBgColor(theme.DialogBgColor);
+                content.setBoxShadow(theme.DialogShadow);
+                content.setBorder(theme.DialogBorder);
                 content.setFocusCage(true);
                 
                 this.makeCloseButton(content);
@@ -19493,22 +19483,22 @@ myt.Destructible = new JS.Module('Destructible', {
                 
                 // The blank dialog sets this.
                 content.setVisible(true);
-                this.overlay.setBgColor(pkg.Dimmer.COLOR);
+                this.overlay.setBgColor(theme.DimmerColor);
                 
                 // Message and Confirm dialogs set this.
                 this.setCallbackFunction();
                 
                 // The confirm dialog modifies this.
-                stc.setPaddingY(ModalPanel.PADDING_Y);
+                stc.setPaddingY(theme.ModalPanelPaddingY);
                 
                 // The confirm content dialog modifies this.
-                stc.setPaddingX(ModalPanel.PADDING_X);
+                stc.setPaddingX(theme.ModalPanelPaddingX);
                 
                 // Any opts could modify this
-                content.setRoundedCorners(Dialog.RADIUS);
-                content.setBgColor(Dialog.BGCOLOR);
-                content.setBoxShadow(Dialog.SHADOW);
-                content.setBorder(Dialog.BORDER);
+                content.setRoundedCorners(theme.DialogRadius);
+                content.setBgColor(theme.DialogBgColor);
+                content.setBoxShadow(theme.DialogShadow);
+                content.setBorder(theme.DialogBorder);
             },
             
             /** Called by each of the buttons that can trigger the dialog to be hidden.
@@ -19558,8 +19548,8 @@ myt.Destructible = new JS.Module('Destructible', {
                     whiteSpace:opts.whiteSpace,
                     wordWrap:opts.wordWrap,
                     fontWeight:opts.fontWeight,
-                    x:opts.msgX == null ? ModalPanel.PADDING_X : opts.msgX,
-                    y:opts.msgY == null ? ModalPanel.PADDING_Y : opts.msgY,
+                    x:opts.msgX == null ? theme.ModalPanelPaddingX : opts.msgX,
+                    y:opts.msgY == null ? theme.ModalPanelPaddingY : opts.msgY,
                     width:opts.width
                 });
                 
@@ -19695,7 +19685,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 const spinner = self.spinner = new pkg.Spinner(content, {
                     align:'center', visible:true,
                     borderColor:'#ccc',
-                    size:50, y:opts.msgY == null ? ModalPanel.PADDING_Y : opts.msgY,
+                    size:50, y:opts.msgY == null ? theme.ModalPanelPaddingY : opts.msgY,
                 });
                 if (msg) {
                     self.msgTxt = new Text(content, {
@@ -19703,8 +19693,8 @@ myt.Destructible = new JS.Module('Destructible', {
                         whiteSpace:opts.whiteSpace,
                         wordWrap:opts.wordWrap,
                         fontWeight:opts.fontWeight,
-                        x:opts.msgX == null ? ModalPanel.PADDING_X : opts.msgX,
-                        y:spinner.y + spinner.size + ModalPanel.PADDING_Y,
+                        x:opts.msgX == null ? theme.ModalPanelPaddingX : opts.msgX,
+                        y:spinner.y + spinner.size + theme.ModalPanelPaddingY,
                         width:opts.width
                     });
                 }
@@ -19746,8 +19736,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 
                 // Build Picker
                 colorPicker = new ColorPicker(content, {
-                    x:ModalPanel.PADDING_X,
-                    y:ModalPanel.PADDING_Y + 24,
+                    x:theme.ModalPanelPaddingX,
+                    y:theme.ModalPanelPaddingY + 24,
                     width:337,
                     height:177 + (opts.alphaChannel ? 23 : 0),
                     color:opts.color,
@@ -19784,8 +19774,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 
                 // Build Picker
                 datePicker= new DatePicker(content, {
-                    x:ModalPanel.PADDING_X,
-                    y:ModalPanel.PADDING_Y + 24,
+                    x:theme.ModalPanelPaddingX,
+                    y:theme.ModalPanelPaddingY + 24,
                     height:195,
                     opt: {
                         current:new Date(opts.initialDate ?? Date.now()),
@@ -19803,7 +19793,7 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             setupTitle: function(content, titleTxt) {
-                const radius = Dialog.RADIUS;
+                const radius = theme.DialogRadius;
                 (this.header = new View(content, {
                     ignoreLayout:true,
                     width:content.width,
@@ -19822,7 +19812,7 @@ myt.Destructible = new JS.Module('Destructible', {
             setupFooterButtons: function(mainView, opts) {
                 const self = this,
                     content = self.content, 
-                    DPY = ModalPanel.PADDING_Y,
+                    DPY = theme.ModalPanelPaddingY,
                     HALF_DPY = DPY / 2,
                     btnContainer = content.btnContainer = new View(content, {y:mainView.y + mainView.height + DPY, align:'center'}),
                     btnConfigKeys = ['active','hover','ready','text'];
@@ -24069,7 +24059,10 @@ myt.Destructible = new JS.Module('Destructible', {
     
     const JSClass = JS.Class,
         
-        {mouse:GlobalMouse, windowResize:GlobalWindowResize, dragManager} = pkg.global,
+        {
+            global:{mouse:GlobalMouse, windowResize:GlobalWindowResize, dragManager},
+            theme
+        } = pkg,
         
         {min:mathMin, max:mathMax, round:mathRound} = Math,
         
@@ -24111,20 +24104,10 @@ myt.Destructible = new JS.Module('Destructible', {
             include: [pkg.RootView],
             
             
-            // Class Methods and Attributes ////////////////////////////////////
-            extend: {
-                /** The default length of time in millis before the tip is shown. */
-                TIP_DELAY: 500,
-                
-                /** The default length of time in millis before the tip is hidden. */
-                TIP_HIDE_DELAY: 100
-            },
-            
-            
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                this.tipDelay = this.nextTipDelay = BaseTooltip.TIP_DELAY;
-                this.tipHideDelay = BaseTooltip.TIP_HIDE_DELAY;
+                this.tipDelay = this.nextTipDelay = theme.BaseTooltipDelay;
+                this.tipHideDelay = theme.BaseTooltipHideDelay;
                 
                 attrs.visible ??= false;
                 
@@ -24222,29 +24205,16 @@ myt.Destructible = new JS.Module('Destructible', {
             
             @class */
         Tooltip = pkg.Tooltip = new JSClass('Tooltip', BaseTooltip, {
-            // Class Methods and Attributes ////////////////////////////////////
-            extend: {
-                EDGE_SIZE: 0,
-                EDGE_COLOR: '#444',
-                SHADOW_SIZE: 2,
-                SHADOW_COLOR: '#00000033', // Extra nums are opacity
-                HORIZONTAL_INSET: 6,
-                VERTICAL_INSET: 3,
-                TIP_BG_COLOR: '#444',
-                TIP_TEXT_COLOR: '#eee'
-            },
-            
-            
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                attrs.edgeSize ??= Tooltip.EDGE_SIZE;
-                attrs.edgeColor ??= Tooltip.EDGE_COLOR;
-                attrs.shadowSize ??= Tooltip.SHADOW_SIZE;
-                attrs.shadowColor ??= Tooltip.SHADOW_COLOR;
-                attrs.insetH ??= Tooltip.HORIZONTAL_INSET;
-                attrs.insetV ??= Tooltip.VERTICAL_INSET;
-                attrs.tipBgColor ??= Tooltip.TIP_BG_COLOR;
-                attrs.tipTextColor ??= Tooltip.TIP_TEXT_COLOR;
+                attrs.edgeSize ??= theme.TooltipEdgeSize;
+                attrs.edgeColor ??= theme.TooltipEdgeColor;
+                attrs.shadowSize ??= theme.TooltipShadowSize;
+                attrs.shadowColor ??= theme.TooltipShadowColor;
+                attrs.insetH ??= theme.TooltipHInset;
+                attrs.insetV ??= theme.TooltipVInset;
+                attrs.tipBgColor ??= theme.TooltipBgColor;
+                attrs.tipTextColor ??= theme.TooltipTextColor;
                 
                 this.callSuper(parent, attrs);
                 

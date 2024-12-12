@@ -124,15 +124,63 @@
                 TextButtonHover:'#eee',
                 TextButtonReady:'#fff',
                 
+                /* The default corner radius for a Dialog. */
+                DialogRadius:12,
+                /* The default background color for a Dialog. */
+                DialogBgColor:'#fff',
+                DialogInputFgColor:'#333',
+                /* The default box shadow for a Dialog. */
+                DialogShadow:[0, 4, 20, '#666'],
+                /* The default border for a Dialog */
+                DialogBorder:[1, 'solid', '#fff'],
+                
+                DialogDayBtnBorder:[1, 'solid', '#fff'], // Must be a separate instance from DialogBorder to allow independent partial overrides.
                 DialogDayBtnBorderColor:'#fff',
                 DialogDayBtnBorderColorToday:'#090',
+                
+                DimmerOpacity:0.35,
+                DimmerColor:'#000',
+                
+                /* The default horizontal padding for a ModalPanel. */
+                ModalPanelPaddingX:20,
+                /* The default vertical padding for a ModalPanel. */
+                ModalPanelPaddingY:15,
+                /* The default margin to for a ModalPanelp. */
+                ModalPanelMarginTop:40,
+                /* The default margin left for a ModalPanel. */
+                ModalPanelMarginLeft:40,
+                /* The default margin bottom for a ModalPanel. */
+                ModalPanelMarginBottom:40,
+                /* The default margin right for a ModalPanel. */
+                ModalPanelMarginRight:40,
+                
+                TabSliderContainerSpacing:1,
+                
+                TabInset:8,
+                TabOutset:8,
+                
+                TabContainerInset:0,
+                TabContainerSpacing:1,
+                
+                /* The default length of time in millis before the tooltip is shown. */
+                BaseTooltipDelay:500,
+                /* The default length of time in millis before the tooltip is hidden. */
+                BaseTooltipHideDelay:100,
+                
+                TooltipEdgeColor:'#444',
+                TooltipBgColor:'#444',
+                TooltipTextColor:'#eee',
+                TooltipShadowColor:'#00000033', // Extra nums are opacity
+                TooltipEdgeSize:0,
+                TooltipShadowSize:2,
+                TooltipHInset:6,
+                TooltipVInset:3,
                 
                 focusShadow:[0, 0, 7, '#666'],
                 disabledOpacity:0.5,
                 
                 border1s3:[1, 'solid', '#333'],
-                border1s9:[1, 'solid', '#999'],
-                border1sF:[1, 'solid', '#fff']
+                border1s9:[1, 'solid', '#999']
             },
             
             /** Creates a non-secure hash of a string.
@@ -416,7 +464,7 @@
                 @param {string} fontFamily
                 @returns {undefined} */
             createBaseFontCSSRule: fontFamily => {
-                myt.addCSSRule(myt.createStylesheet(), 'body, input', 'font-family:' + fontFamily, 0);
+                myt.addCSSRule(myt.createStylesheet(), 'body, input', 'font-family:' + fontFamily);
             },
             
             /** @param {?Array} fontUrls
@@ -453,7 +501,7 @@
             },
             
             addCSSRule: (sheet, selector, rules, index) => {
-                sheet.insertRule(selector + '{' + rules + '}', index);
+                sheet.insertRule(selector + '{' + rules + '}', index ?? 0);
             },
             
             removeCSSRules: sheet => {
@@ -477,7 +525,7 @@
                 if (color) rules.push('color:' + color);
                 if (fontFamily) rules.push('font-family:' + fontFamily);
                 if (opacity) rules.push('opacity:' + opacity);
-                myt.addCSSRule(sheet, '#' + domId + '::placeholder', rules.join('; '), 0);
+                myt.addCSSRule(sheet, '#' + domId + '::placeholder', rules.join('; '));
             },
             
             // Sort Util

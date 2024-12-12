@@ -1,5 +1,6 @@
 (pkg => {
-    const 
+    const theme = pkg.theme,
+        
         updateTextColor = tab => {
             tab.textView.setTextColor(tab.selected ? tab.labelTextSelectedColor : tab.labelTextColor);
         },
@@ -37,13 +38,6 @@
             include: [pkg.Selectable],
             
             
-            // Class Methods and Attributes ////////////////////////////////////
-            extend: {
-                INSET: 8,
-                OUTSET: 8
-            },
-            
-            
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
                 attrs.tabId ??= pkg.generateGuid();
@@ -57,8 +51,8 @@
                 }
                 
                 // myt.SimpleTextButton
-                attrs.inset ??= Tab.INSET;
-                attrs.outset ??= Tab.OUTSET;
+                attrs.inset ??= theme.TabInset;
+                attrs.outset ??= theme.TabOutset;
                 
                 // myt.Tab
                 attrs.selectedColor ??= '#fff';
@@ -133,19 +127,12 @@
             include: [pkg.SelectionManager],
             
             
-            // Class Methods and Attributes ////////////////////////////////////
-            extend: {
-                SPACING:1,
-                INSET:0
-            },
-            
-            
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
                 this.__tabs = [];
                 
-                attrs.spacing ??= TabContainer.SPACING;
-                attrs.inset ??= TabContainer.INSET;
+                attrs.spacing ??= theme.TabContainerSpacing;
+                attrs.inset ??= theme.TabContainerInset;
                 attrs.location ??= 'top';
                 attrs.itemSelectionId ??= 'tabId';
                 attrs.maxSelected ??= 1;

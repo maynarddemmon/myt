@@ -3,7 +3,10 @@
     
     const JSClass = JS.Class,
         
-        {mouse:GlobalMouse, windowResize:GlobalWindowResize, dragManager} = pkg.global,
+        {
+            global:{mouse:GlobalMouse, windowResize:GlobalWindowResize, dragManager},
+            theme
+        } = pkg,
         
         {min:mathMin, max:mathMax, round:mathRound} = Math,
         
@@ -45,20 +48,10 @@
             include: [pkg.RootView],
             
             
-            // Class Methods and Attributes ////////////////////////////////////
-            extend: {
-                /** The default length of time in millis before the tip is shown. */
-                TIP_DELAY: 500,
-                
-                /** The default length of time in millis before the tip is hidden. */
-                TIP_HIDE_DELAY: 100
-            },
-            
-            
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                this.tipDelay = this.nextTipDelay = BaseTooltip.TIP_DELAY;
-                this.tipHideDelay = BaseTooltip.TIP_HIDE_DELAY;
+                this.tipDelay = this.nextTipDelay = theme.BaseTooltipDelay;
+                this.tipHideDelay = theme.BaseTooltipHideDelay;
                 
                 attrs.visible ??= false;
                 
@@ -156,29 +149,16 @@
             
             @class */
         Tooltip = pkg.Tooltip = new JSClass('Tooltip', BaseTooltip, {
-            // Class Methods and Attributes ////////////////////////////////////
-            extend: {
-                EDGE_SIZE: 0,
-                EDGE_COLOR: '#444',
-                SHADOW_SIZE: 2,
-                SHADOW_COLOR: '#00000033', // Extra nums are opacity
-                HORIZONTAL_INSET: 6,
-                VERTICAL_INSET: 3,
-                TIP_BG_COLOR: '#444',
-                TIP_TEXT_COLOR: '#eee'
-            },
-            
-            
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
-                attrs.edgeSize ??= Tooltip.EDGE_SIZE;
-                attrs.edgeColor ??= Tooltip.EDGE_COLOR;
-                attrs.shadowSize ??= Tooltip.SHADOW_SIZE;
-                attrs.shadowColor ??= Tooltip.SHADOW_COLOR;
-                attrs.insetH ??= Tooltip.HORIZONTAL_INSET;
-                attrs.insetV ??= Tooltip.VERTICAL_INSET;
-                attrs.tipBgColor ??= Tooltip.TIP_BG_COLOR;
-                attrs.tipTextColor ??= Tooltip.TIP_TEXT_COLOR;
+                attrs.edgeSize ??= theme.TooltipEdgeSize;
+                attrs.edgeColor ??= theme.TooltipEdgeColor;
+                attrs.shadowSize ??= theme.TooltipShadowSize;
+                attrs.shadowColor ??= theme.TooltipShadowColor;
+                attrs.insetH ??= theme.TooltipHInset;
+                attrs.insetV ??= theme.TooltipVInset;
+                attrs.tipBgColor ??= theme.TooltipBgColor;
+                attrs.tipTextColor ??= theme.TooltipTextColor;
                 
                 this.callSuper(parent, attrs);
                 

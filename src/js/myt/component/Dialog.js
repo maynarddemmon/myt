@@ -169,7 +169,7 @@
                     valView = new View(satView, {width:colorViewSize, height:colorViewSize});
                 satView.getIDS().backgroundImage = 'linear-gradient(to right, #fff, rgba(204, 154, 129, 0))';
                 valView.getIDS().backgroundImage = 'linear-gradient(to top, #000, rgba(204, 154, 129, 0))';
-                colorThumb = new View(valView, {width:6, height:6, bgColor:'#000', border:theme.border1sF, roundedCorners:4});
+                colorThumb = new View(valView, {width:6, height:6, bgColor:'#000', border:[1,'solid','#fff'], roundedCorners:4});
                 
                 hueView = new View(colorPicker, {x:315, y:30, width:24, height:109, border:theme.border1s3}, [Draggable, {
                     requestDragPosition: function(x, y) {
@@ -215,7 +215,7 @@
                 
                 // Selection Row
                 inputView = new pkg.InputText(colorPicker, {
-                    x:236, y:y, width:105, height:25, roundedCorners:3, textColor:Dialog.INPUT_FGCOLOR, border:theme.border1s3, maxLength:11,
+                    x:236, y:y, width:105, height:25, roundedCorners:3, textColor:theme.DialogInputFgColor, border:theme.border1s3, maxLength:11,
                     fontFamily:'monospace'
                 });
                 colorPicker.attachToDom(inputView, '_submitInput', 'blur');
@@ -397,7 +397,7 @@
         DayBtn = new JSClass('DayBtn', SelectableBtn, {
             initNode: function(parent, attrs) {
                 attrs.width = 23;
-                attrs.border = theme.border1sF;
+                attrs.border = theme.DialogDayBtnBorder;
                 this.callSuper(parent, attrs);
             },
             
@@ -727,22 +727,8 @@
         Dialog = pkg.Dialog = new JSClass('Dialog', ModalPanel, {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                /** The default corner radius. */
-                RADIUS: 12,
-                
                 /** The default button class. */
                 BUTTON_CLASS: DialogButton,
-                
-                /** The default box shadow. */
-                SHADOW: [0, 4, 20, '#666'],
-                
-                /** The default border */
-                BORDER: theme.border1sF,
-                
-                /** The default background color. */
-                BGCOLOR: '#fff',
-                
-                INPUT_FGCOLOR: '#333',
                 
                 /** Makes the text wrap at 200px and the dialog will be at least 200px wide. */
                 WRAP_TEXT_DEFAULTS: {
@@ -807,10 +793,10 @@
                 this.callSuper(parent, attrs);
                 
                 const content = this.content;
-                content.setRoundedCorners(Dialog.RADIUS);
-                content.setBgColor(Dialog.BGCOLOR);
-                content.setBoxShadow(Dialog.SHADOW);
-                content.setBorder(Dialog.BORDER);
+                content.setRoundedCorners(theme.DialogRadius);
+                content.setBgColor(theme.DialogBgColor);
+                content.setBoxShadow(theme.DialogShadow);
+                content.setBorder(theme.DialogBorder);
                 content.setFocusCage(true);
                 
                 this.makeCloseButton(content);
@@ -878,22 +864,22 @@
                 
                 // The blank dialog sets this.
                 content.setVisible(true);
-                this.overlay.setBgColor(pkg.Dimmer.COLOR);
+                this.overlay.setBgColor(theme.DimmerColor);
                 
                 // Message and Confirm dialogs set this.
                 this.setCallbackFunction();
                 
                 // The confirm dialog modifies this.
-                stc.setPaddingY(ModalPanel.PADDING_Y);
+                stc.setPaddingY(theme.ModalPanelPaddingY);
                 
                 // The confirm content dialog modifies this.
-                stc.setPaddingX(ModalPanel.PADDING_X);
+                stc.setPaddingX(theme.ModalPanelPaddingX);
                 
                 // Any opts could modify this
-                content.setRoundedCorners(Dialog.RADIUS);
-                content.setBgColor(Dialog.BGCOLOR);
-                content.setBoxShadow(Dialog.SHADOW);
-                content.setBorder(Dialog.BORDER);
+                content.setRoundedCorners(theme.DialogRadius);
+                content.setBgColor(theme.DialogBgColor);
+                content.setBoxShadow(theme.DialogShadow);
+                content.setBorder(theme.DialogBorder);
             },
             
             /** Called by each of the buttons that can trigger the dialog to be hidden.
@@ -943,8 +929,8 @@
                     whiteSpace:opts.whiteSpace,
                     wordWrap:opts.wordWrap,
                     fontWeight:opts.fontWeight,
-                    x:opts.msgX == null ? ModalPanel.PADDING_X : opts.msgX,
-                    y:opts.msgY == null ? ModalPanel.PADDING_Y : opts.msgY,
+                    x:opts.msgX == null ? theme.ModalPanelPaddingX : opts.msgX,
+                    y:opts.msgY == null ? theme.ModalPanelPaddingY : opts.msgY,
                     width:opts.width
                 });
                 
@@ -1080,7 +1066,7 @@
                 const spinner = self.spinner = new pkg.Spinner(content, {
                     align:'center', visible:true,
                     borderColor:'#ccc',
-                    size:50, y:opts.msgY == null ? ModalPanel.PADDING_Y : opts.msgY,
+                    size:50, y:opts.msgY == null ? theme.ModalPanelPaddingY : opts.msgY,
                 });
                 if (msg) {
                     self.msgTxt = new Text(content, {
@@ -1088,8 +1074,8 @@
                         whiteSpace:opts.whiteSpace,
                         wordWrap:opts.wordWrap,
                         fontWeight:opts.fontWeight,
-                        x:opts.msgX == null ? ModalPanel.PADDING_X : opts.msgX,
-                        y:spinner.y + spinner.size + ModalPanel.PADDING_Y,
+                        x:opts.msgX == null ? theme.ModalPanelPaddingX : opts.msgX,
+                        y:spinner.y + spinner.size + theme.ModalPanelPaddingY,
                         width:opts.width
                     });
                 }
@@ -1131,8 +1117,8 @@
                 
                 // Build Picker
                 colorPicker = new ColorPicker(content, {
-                    x:ModalPanel.PADDING_X,
-                    y:ModalPanel.PADDING_Y + 24,
+                    x:theme.ModalPanelPaddingX,
+                    y:theme.ModalPanelPaddingY + 24,
                     width:337,
                     height:177 + (opts.alphaChannel ? 23 : 0),
                     color:opts.color,
@@ -1169,8 +1155,8 @@
                 
                 // Build Picker
                 datePicker= new DatePicker(content, {
-                    x:ModalPanel.PADDING_X,
-                    y:ModalPanel.PADDING_Y + 24,
+                    x:theme.ModalPanelPaddingX,
+                    y:theme.ModalPanelPaddingY + 24,
                     height:195,
                     opt: {
                         current:new Date(opts.initialDate ?? Date.now()),
@@ -1188,7 +1174,7 @@
             },
             
             setupTitle: function(content, titleTxt) {
-                const radius = Dialog.RADIUS;
+                const radius = theme.DialogRadius;
                 (this.header = new View(content, {
                     ignoreLayout:true,
                     width:content.width,
@@ -1207,7 +1193,7 @@
             setupFooterButtons: function(mainView, opts) {
                 const self = this,
                     content = self.content, 
-                    DPY = ModalPanel.PADDING_Y,
+                    DPY = theme.ModalPanelPaddingY,
                     HALF_DPY = DPY / 2,
                     btnContainer = content.btnContainer = new View(content, {y:mainView.y + mainView.height + DPY, align:'center'}),
                     btnConfigKeys = ['active','hover','ready','text'];
