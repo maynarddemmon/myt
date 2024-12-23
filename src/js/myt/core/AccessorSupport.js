@@ -4,7 +4,7 @@
         GETTER_NAMES = new Map(), // Caches getter names.
         SETTER_NAMES = new Map(), // Caches setter names.
         
-        generateName = (attrName, prefix) => prefix + attrName.charAt(0).toUpperCase() + attrName.slice(1),
+        generateName = (attrName, prefix) => prefix + (attrName[0] ?? '').toUpperCase() + attrName.slice(1),
         generateSetterName = attrName => SETTER_NAMES.get(attrName) ?? (SETTER_NAMES.set(attrName, generateName(attrName, 'set')), SETTER_NAMES.get(attrName)),
         generateGetterName = attrName => GETTER_NAMES.get(attrName) ?? (GETTER_NAMES.set(attrName, generateName(attrName, 'get')), GETTER_NAMES.get(attrName)),
         

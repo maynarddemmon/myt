@@ -924,7 +924,7 @@
                 // Javascript regex word boundary \b splitting on unicode characters
                 // http://stackoverflow.com/questions/5311618/javascript-regular-expression-problem-with-b-and-international-characters
                 nameStr = nameStr.trim().toLowerCase().split(/([\s\-'’"“”().,\/])/).reduce(
-                    (accumulator, token) => accumulator + token.charAt(0).toUpperCase() + token.slice(1), ''
+                    (accumulator, token) => accumulator + (token[0] ?? '').toUpperCase() + token.slice(1), ''
                 );
                 
                 // Name case Mcs and Macs
@@ -935,7 +935,7 @@
                 ) {
                     nameStr = nameStr.replace(
                         /\b(Ma?c)([A-Za-z]+)/,
-                        (x, y, z) => y + z.charAt(0).toUpperCase() + z.slice(1)
+                        (x, y, z) => y + (z[0] ?? '').toUpperCase() + z.slice(1)
                     );
                     
                     // Now correct for "Mac" exceptions
@@ -1022,7 +1022,7 @@
                     return nameStr;
                 } else {
                     // Force first character to be uppercase
-                    return nameStr.charAt(0).toUpperCase() + nameStr.slice(1);
+                    return (nameStr[0] ?? '').toUpperCase() + nameStr.slice(1);
                 }
             },
             

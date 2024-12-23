@@ -588,7 +588,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 /* The default border for a Dialog */
                 DialogBorder:[1, 'solid', '#fff'],
                 
-                DialogDayBtnBorder:[1, 'solid', '#fff'],
+                DialogDayBtnBorder:[1, 'solid', '#fff'], // Must be a separate instance from DialogBorder to allow independent partial overrides.
                 DialogDayBtnBorderColor:'#fff',
                 DialogDayBtnBorderColorToday:'#090',
                 
@@ -1378,7 +1378,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 // Javascript regex word boundary \b splitting on unicode characters
                 // http://stackoverflow.com/questions/5311618/javascript-regular-expression-problem-with-b-and-international-characters
                 nameStr = nameStr.trim().toLowerCase().split(/([\s\-'’"“”().,\/])/).reduce(
-                    (accumulator, token) => accumulator + token.charAt(0).toUpperCase() + token.slice(1), ''
+                    (accumulator, token) => accumulator + (token[0] ?? '').toUpperCase() + token.slice(1), ''
                 );
                 
                 // Name case Mcs and Macs
@@ -1389,7 +1389,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 ) {
                     nameStr = nameStr.replace(
                         /\b(Ma?c)([A-Za-z]+)/,
-                        (x, y, z) => y + z.charAt(0).toUpperCase() + z.slice(1)
+                        (x, y, z) => y + (z[0] ?? '').toUpperCase() + z.slice(1)
                     );
                     
                     // Now correct for "Mac" exceptions
@@ -1476,7 +1476,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     return nameStr;
                 } else {
                     // Force first character to be uppercase
-                    return nameStr.charAt(0).toUpperCase() + nameStr.slice(1);
+                    return (nameStr[0] ?? '').toUpperCase() + nameStr.slice(1);
                 }
             },
             
@@ -4996,7 +4996,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         GETTER_NAMES = new Map(), // Caches getter names.
         SETTER_NAMES = new Map(), // Caches setter names.
         
-        generateName = (attrName, prefix) => prefix + attrName.charAt(0).toUpperCase() + attrName.slice(1),
+        generateName = (attrName, prefix) => prefix + (attrName[0] ?? '').toUpperCase() + attrName.slice(1),
         generateSetterName = attrName => SETTER_NAMES.get(attrName) ?? (SETTER_NAMES.set(attrName, generateName(attrName, 'set')), SETTER_NAMES.get(attrName)),
         generateGetterName = attrName => GETTER_NAMES.get(attrName) ?? (GETTER_NAMES.set(attrName, generateName(attrName, 'get')), GETTER_NAMES.get(attrName)),
         
