@@ -86,7 +86,7 @@ const jsBuild = (manifest, root, include, callback) => {
                 })
             }
         };
-    bundle(P.ROOT, P.Package.extractFilePaths(include), 0);
+    bundle(P.ROOT, P.extractFilePaths(include), 0);
 };
 
 // Remove old files

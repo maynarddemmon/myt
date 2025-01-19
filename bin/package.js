@@ -1,50 +1,55 @@
 ((global, exports) => {
     const HTTP_REGEX = /^https?:/i,
-        
-        pkgByName = {},
-        
-        Package = exports.Package = function(paths) {
-            const self = this,
-                deps = self._deps = new Set();
-            self._paths = paths;
-            
-            // Functions found in manifest files
-            self.provides = (...args) => {
-                for (const name of args) pkgByName[name] = self;
-                return self;
-            };
-            self.requires = (...args) => {
-                for (const name of args) deps.add(name);
-                return self;
-            };
-        };
+        packagesByName = new Map();
     
-    Package.ENV = exports.ENV = global;
-    Package.extractFilePaths = names => {
-        const packages = new Set(),
-            expand = nameOrPkg => {
-                const pkg = typeof nameOrPkg === 'string' ? pkgByName[nameOrPkg] : nameOrPkg;
-                for (const dep of pkg._deps) expand(dep);
-                packages.add(pkg);
-            };
-        for (const name of names) expand(name);
+    class Package {
+        constructor(paths) {
+            this.paths = paths;
+            this.dependencies = new Set();
+        }
         
-        // Extract the file paths out of the packages list. This is necessary because each file() 
-        // declaration in the manifest file can declare more than one file.
-        const includedFiles = [];
-        for (const pkg of packages) {
-            if (!Array.isArray(pkg._paths)) throw new Error('Cannot bundle ' + pkg + ': no path specified in your manifest');
-            for (const path of pkg._paths) {
-                if (!HTTP_REGEX.test(path)) includedFiles.push(path);
-            }
-        };
-        return includedFiles;
-    };
+        // Functions found in manifest files
+        provides(...names) {
+            for (const name of names) packagesByName.set(name, this);
+            return this;
+        }
+        requires(...names) {
+            for (const name of names) this.dependencies.add(name);
+            return this;
+        }
+    }
     
     exports.Packages = manifestFunc => {
         manifestFunc(
             // The "file" function used inside the manifestFunc.
-            (...args) => new Package(args.map(filename => !HTTP_REGEX.test(filename) && exports.ROOT ? exports.ROOT + '/' + filename : filename))
+            (...filePaths) => new Package(filePaths.map(filePath => !HTTP_REGEX.test(filePath) && exports.ROOT ? exports.ROOT + '/' + filePath : filePath))
         );
     };
+    exports.ENV = global;
+    exports.extractFilePaths = names => {
+        const resolvedPackages = new Set(),
+            resolveDependencies = packageName => {
+                const pkg = typeof packageName === 'string' ? packagesByName.get(packageName) : packageName;
+                if (!pkg) throw new Error('Package not found: ' + packageName);
+                
+                for (const dep of pkg.dependencies) {
+                    if (!resolvedPackages.has(dep)) resolveDependencies(dep);
+                }
+                resolvedPackages.add(pkg);
+            };
+        
+        for (const name of names) resolveDependencies(name);
+        
+        // Extract the file paths out of the packages list. This is necessary because each file() 
+        // declaration in the manifest file can declare more than one file.
+        const filePaths = [];
+        for (const pkg of resolvedPackages) {
+            if (!Array.isArray(pkg.paths)) throw new Error('Cannot bundle ' + pkg + ': no path specified in manifest');
+            for (const path of pkg.paths) {
+                if (!HTTP_REGEX.test(path)) filePaths.push(path);
+            }
+        }
+        return filePaths;
+    };
 })(global, exports);
+

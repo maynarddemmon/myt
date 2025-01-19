@@ -1,7 +1,5 @@
 ((global, exports) => {
-    const HTTP_REGEX = /^https?:/i,
-        
-        pkgByName = {}, // Each entry will be: <name>:{pkg:<Package>, obj:Object}
+    const pkgByName = {}, // Each entry will be: <name>:{pkg:<Package>, obj:Object}
         getPkgByName = name => pkgByName[name] ??= {},
         
         getPkgObject = name => {
@@ -175,7 +173,7 @@
     exports.Packages = manifestFunc => {
         manifestFunc(
             // The "file" function used inside the manifestFunc.
-            (...args) => new Package(args.map(filename => !HTTP_REGEX.test(filename) && exports.ROOT ? exports.ROOT + '/' + filename : filename))
+            (...filePaths) => new Package(filePaths)
         );
     };
     
