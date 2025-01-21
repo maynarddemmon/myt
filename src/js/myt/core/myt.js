@@ -2,9 +2,9 @@
     /*
      * http://github.com/maynarddemmon/myt
      * Maynard Demmon <maynarddemmon@gmail.com>
-     * @copyright Copyright (c) 2012-2024 Maynard Demmon and contributors
+     * @copyright Copyright (c) 2012-2025 Maynard Demmon and contributors
      * Myt: A simple javascript UI framework
-     * Version: 20220118.1318
+     * Version: 20250119.1526
      * MIT License
      * 
      * Parts of the Software incorporates code from the following open-source projects:
@@ -90,11 +90,25 @@
         // The localization dictionaries for I18N
         dictionaries = {},
         
-        memoize = func => {
-            const cache = {};
+        /*  Creates a memoized version of the provided function.
+            @param {!Function} func - The function to memoize.
+            @param {Function} [keyResolver] - Optional function to generate custom keys. Defaults to JSON.stringify.
+            @param {number} [cacheLimit] - Optional maximum size of the cache. Defaults to unlimited.
+            @returns {!Function} - The memoized function. */
+        memoize = (func, keyResolver=JSON.stringify, cacheLimit=Infinity) => {
+            const cache = new Map();
             return (...args) => {
-                const hash = JSON.stringify(args);
-                return hash in cache ? cache[hash] : cache[hash] = func(...args);
+                const key = keyResolver(args);
+                if (cache.has(key)) return cache.get(key);
+                
+                const result = func(...args);
+                cache.set(key, result);
+                
+                if (cache.size > cacheLimit) {
+                    const firstKey = cache.keys().next().value;
+                    cache.delete(firstKey);
+                }
+                return result;
             };
         },
         
@@ -427,13 +441,9 @@
             
             // Fonts
             loadFontFaces: (fontList, callback) => {
-                const fonts = [];
-                for (const fontInfo of fontList) {
-                    const fontFace = new FontFace(fontInfo.family, 'url(' + fontInfo.url + ')', fontInfo.options);
-                    fonts.push(fontFace.load());
-                }
-                
-                Promise.all(fonts).then(loadedFonts => {
+                Promise.all(fontList.map(
+                    ({family, url, options}) => new FontFace(family, 'url(' + url + ')', options).load()
+                )).then(loadedFonts => {
                     for (const font of loadedFonts) {
                         docFonts.add(font);
                         notifyFontLoaded(font);
@@ -529,16 +539,16 @@
             },
             
             // Sort Util
-            /** Tests if the provided array is already sorted according to the provided comparator
-                function.
+            /** Checks if the provided array is sorted according to the provided comparator function.
                 @param {!Array} arr - The array to check.
-                @param {!Function} comparatorFunc - The comparator function to check with.
-                @returns {boolean} - True if the array is not sorted, false if it is. */
-            isNotSorted: (arr, comparatorFunc) => {
+                @param {!Function} comparatorFunc - The comparator function to use for sorting checks.
+                @returns {boolean} - True if the array is sorted, false otherwise. */
+            isSorted: (arr, comparatorFunc) => {
                 const len = arr.length;
                 for (let i = 1; i < len; i++) {
-                    if (comparatorFunc(arr[i - 1], arr[i]) > 0) return true;
+                    if (comparatorFunc(arr[i - 1], arr[i]) > 0) return false;
                 }
+                return true;
             },
             
             /** Chains together N comparator functions into a new comparator function such that 
@@ -722,7 +732,7 @@
                         // so pass it through unchanged.
                         return num;
                     default:
-                        consoleWarn('formatAsPercentage: expects a number');
+                        consoleWarn('formatAsPercentage expects a number');
                         return num;
                 }
             },
@@ -774,30 +784,23 @@
                 @returns {!Function} - The memoized function. */
             memoize: memoize,
             
-            /** Returns a function that wraps the provided function and that, as long as it 
-                continues to be invoked, will not invoke the wrapped function. The wrapped function 
-                will be called after the returned function stops being called for "wait" 
-                milliseconds. If "immediate" is passed, the wrapped function will be invoked on the 
-                leading edge instead of the trailing edge.
-                @param {!Function} func - The function to wrap.
-                @param {number} [wait] - The time in millis to delay invocation by. If not 
-                    provided 0 is used.
-                @param {boolean} [immediate] - If true the function will be invoked immediately and 
-                    then the wait time will be used to block subsequent calls.
-                @returns {!Function} - The debounced function. */
-            debounce: (func, wait, immediate) => {
-                const timeoutKey = '__DBTO' + '_' + generateGuid();
-                return function() {
+            /** Creates a debounced function that delays invoking the provided function until after
+                the specified wait time has elapsed since the last time it was invoked.
+                @param {!Function} func - The function to debounce.
+                @param {number} [wait] - The number of milliseconds to delay.
+                @param {boolean} [immediate=false] - Whether to invoke the function immediately on the leading edge.
+                @returns {!Function} - A debounced version of the provided function. */
+            debounce: (func, wait, immediate=false) => {
+                let timeout;
+                return function(...args) {
                     const context = this,
-                        timeout = context[timeoutKey],
-                        args = arguments,
-                        later = function() {
-                            context[timeoutKey] = null;
+                        later = () => {
+                            timeout = null;
                             if (!immediate) func.apply(context, args);
                         },
                         callNow = immediate && !timeout;
                     clearTimeout(timeout);
-                    context[timeoutKey] = setTimeout(later, wait);
+                    timeout = setTimeout(later, wait);
                     if (callNow) func.apply(context, args);
                 };
             },

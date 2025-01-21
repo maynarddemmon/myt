@@ -1182,7 +1182,7 @@
             
             // OPTIMIZATION: Check if the svs are already sorted. If they're not then we will
             // resort and reorder the DOM. This occurs frequently enough that it is worth doing.
-            if (pkg.isNotSorted(svs, sortFunc)) {
+            if (!pkg.isSorted(svs, sortFunc)) {
                 svs.sort(sortFunc);
                 
                 // Rearrange the DOM to match the new sort order.
