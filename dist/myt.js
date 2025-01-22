@@ -1079,7 +1079,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 let arrMatches;
                 while (arrMatches = CSV_OBJECT_REGEX.exec(strData)) {
                     if (arrMatches[1].length && arrMatches[1] !== ',') arrData.push([]);
-                    arrData[arrData.length - 1].push(arrMatches[2] ? arrMatches[2].replace(CSV_UNESCAPE_REGEX, '$1') : arrMatches[3]);
+                    arrData[arrData.length - 1].push(arrMatches[2] !== undefined ? arrMatches[2].replace(CSV_UNESCAPE_REGEX, '$1') : arrMatches[3]);
                 }
                 
                 if (header) {
