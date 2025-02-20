@@ -8667,7 +8667,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 textView.getIDS()[attrName] = v || defaultValue || 'inherit';
                 if (textView.inited) {
                     textView.fireEvent(attrName, v);
-                    textView.sizeViewToDom();
+                    textView.sizeViewToDom?.();
                 }
             }
         };
