@@ -20520,17 +20520,26 @@ myt.Destructible = new JS.Module('Destructible', {
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides myt.BaseSlider */
         initNode: function(parent, attrs) {
+            let rangeFillSize = attrs.rangeFillSize;
+            const rangeFillOffset = attrs.rangeFillOffset ?? 0,
+                rangeFillColor = attrs.rangeFillColor ?? '#666';
+            delete attrs.rangeFillSize;
+            delete attrs.rangeFillOffset;
+            delete attrs.rangeFillColor;
+            
             this.callSuper(parent, attrs);
             
-            const rangeFillView = this.rangeFill = new View(this, {bgColor:'#666'});
+            const rangeFillView = this.rangeFill = new View(this, {bgColor:rangeFillColor});
             if (this.axis === 'x') {
-                rangeFillView.setY(this.thumbOffset);
-                rangeFillView.setHeight(this.thumbHeight);
-                rangeFillView.setRoundedCorners(this.thumbHeight / 2);
+                rangeFillSize ??= this.thumbHeight;
+                rangeFillView.setY(rangeFillOffset + this.thumbOffset);
+                rangeFillView.setHeight(rangeFillSize);
+                rangeFillView.setRoundedCorners(rangeFillSize / 2);
             } else {
-                rangeFillView.setX(this.thumbOffset);
-                rangeFillView.setWidth(this.thumbWidth);
-                rangeFillView.setRoundedCorners(this.thumbWidth / 2);
+                rangeFillSize ??= this.thumbWidth;
+                rangeFillView.setX(rangeFillOffset + this.thumbOffset);
+                rangeFillView.setWidth(rangeFillSize);
+                rangeFillView.setRoundedCorners(rangeFillSize / 2);
             }
             
             this.thumbLower = new SliderThumb(this);
