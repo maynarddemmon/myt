@@ -20601,13 +20601,13 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** @overrides myt.BaseSlider */
         _syncThumbToValue: function(thumb, value) {
-            this.callSuper(thumb, thumb.name === 'thumbLower' ? value.lower : value.upper);
+            this.callSuper(thumb, thumb === this.thumbLower ? value.lower : value.upper);
         },
         
         /** @overrides myt.BaseSlider */
         _syncValueToThumb: function(thumb, converted) {
             let value = this.getValueCopy();
-            value[thumb.name === 'thumbLower' ? 'lower' : 'upper'] = converted;
+            value[thumb === this.thumbLower ? 'lower' : 'upper'] = converted;
             
             this.setValue(value);
             
@@ -20621,7 +20621,7 @@ myt.Destructible = new JS.Module('Destructible', {
         _nudge: function(thumb, up) {
             const value = this.getValueCopy(),
                 adj = this.nudgeAmount * (up ? 1 : -1);
-            if (thumb.name === 'thumbLower') {
+            if (thumb === this.thumbLower) {
                 value.lower = mathMin(value.lower + adj, value.upper);
             } else {
                 value.upper = mathMax(value.upper + adj, value.lower);
@@ -20632,14 +20632,14 @@ myt.Destructible = new JS.Module('Destructible', {
         /** @overrides */
         getMinPixelValueForThumb: function(thumb) {
             return this.convertValueToPixels(
-                thumb.name === 'thumbLower' ? this.minValue : this.getValue().lower
+                thumb === this.thumbLower ? this.minValue : this.getValue().lower
             );
         },
         
         /** @overrides */
         getMaxPixelValueForThumb: function(thumb) {
             return this.convertValueToPixels(
-                thumb.name === 'thumbLower' ? this.getValue().upper : this.maxValue
+                thumb === this.thumbLower ? this.getValue().upper : this.maxValue
             );
         }
     });
