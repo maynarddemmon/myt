@@ -13825,6 +13825,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     provided the count is unlimited. If 1 is provided attempts to select when an 
                     item is already selected will result in the existing selection being cleared 
                     and the the new item being selected. Defaults to -1.
+                minSelected:number The minimum number of items that can be selected. Defaults to 0.
                 selectedCount:number The number of selected items.
             
             Private Attributes:
@@ -13858,6 +13859,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 
                 attrs.itemSelectionId ??= 'id';
                 attrs.maxSelected ??= -1;
+                attrs.minSelected ??= 0;
                 
                 this.callSuper(parent, attrs);
             },
@@ -13979,6 +13981,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 @param {!Object} item
                 @returns {boolean}true if deselection is allowed, false otherwise. */
             canDeselectItem: function(item) {
+                if (this.selectedCount <= this.minSelected) return false;
                 return item.canDeselect(this);
             },
             
