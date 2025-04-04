@@ -4,7 +4,9 @@
         {
             View, Text,
             FontAwesome:{makeTag}
-        } = pkg;
+        } = pkg,
+        
+        FA_TIMES = makeTag(['times']);
     
     pkg.GrowlManager = new JSClass('GrowlManager', View, {
         include:[pkg.SizeToWindowHeight],
@@ -14,7 +16,9 @@
         initNode: function(parent, attrs) {
             const self = this;
             
-            attrs.overflow ??= 'autoy';
+            self.growlCount = 0;
+            
+            attrs.overflow ??= 'visible autoy';
             attrs.margin ??= 8;
             attrs.spacing ??= 4;
             attrs.reverse ??= true;
@@ -24,6 +28,7 @@
             
             attrs.moveDuration ??= 300;
             attrs.dedupe ??= true;
+            attrs.clearAllThreshold ??= 0;
             
             attrs.simpleGrowlClass ??= pkg.SimpleGrowl;
             
@@ -120,11 +125,49 @@
                 }
             }
             
+            this.growlCount++;
             growl.setVisible(true);
+            this.updateClearAll();
         },
         
         removeGrowl: function(growl) {
             growl.destroy();
+            this.growlCount--;
+            this.updateClearAll();
+        },
+        
+        updateClearAll: function() {
+            const self = this,
+                clearAllThreshold = self.clearAllThreshold;
+            if (clearAllThreshold > 0 && self.growlCount >= clearAllThreshold) {
+                self._clearAllBtn ??= self.makeClearAll();
+                self._clearAllBtn.setVisible(true);
+            } else {
+                self._clearAllBtn?.setVisible(false);
+            }
+        },
+        
+        makeClearAll: function() {
+            const self = this;
+            return new pkg.TextButton(self, {
+                width:self.width, height:28, text:FA_TIMES + ' Dismiss All', fontWeight:'bold',
+                paddingTop:5, zIndex:1,
+                visible:false, ignoreLayout:true, pointerEvents:'auto'
+            }, [{
+                setVisible: function(v) {
+                    this.callSuper(v);
+                    self.getFirstLayout().setInset(this.visible ? this.height + self.spacing : 0);
+                },
+                doActivated: function() {
+                    const layout = self.getFirstLayout();
+                    layout.incrementLockedCounter();
+                    self.growlCount = 0;
+                    delete self._clearAllBtn;
+                    layout.setInset(0);
+                    self.destroyAllSubviews();
+                    layout.decrementLockedCounter();
+                }
+            }]);
         },
         
         // Convience Methods
@@ -210,7 +253,6 @@
         initNode: function(parent, attrs) {
             attrs.percentOfParentWidth ??= 100;
             attrs.pointerEvents ??= 'auto';
-            attrs.overflow ??= 'hidden';
             attrs.bgColor ??= '#fff';
             attrs.roundedCorners ??= 3;
             attrs.boxShadow ??= [0, 0, 8, '#00000088'];
@@ -256,8 +298,7 @@
         getHashableString: () => '' + pkg.generateGuid()
     });
     
-    const FA_TIMES = makeTag(['times']),
-        FA_CLIPBOARD = makeTag(['clipboard-check']),
+    const FA_CLIPBOARD = makeTag(['clipboard-check']),
         
         SIMPLE_GROWL_PARAM_NAMES = [
             'maxHeight','icon','iconSize','text','padding','spacing','whiteSpace',
@@ -322,7 +363,7 @@
             if (icon) self.iconTxt = new Text(self, {y:padding, text:icon, fontSize:params.iconSize});
             const msgTxt = self.msgTxt = new Text(self, {y:padding, text:params.text, whiteSpace:params.whiteSpace, layoutHint:1});
             if (maxHeight > 0) {
-                msgTxt.setOverflow('autoy');
+                msgTxt.setOverflow('auto');
                 msgTxt.getIDS().maxHeight = maxHeight + 'px';
             }
             if (params.showCopyButton) {
