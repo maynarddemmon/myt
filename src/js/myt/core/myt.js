@@ -39,6 +39,9 @@
         // The current locale for the user.
         currentLocale,
         
+        // The dictionary for the current locale.
+        activeDictionary = {},
+        
         // Used to prevent loading the same stylesheet twice with createStylesheetLink.
         linkElemsByHref = {};
     
@@ -84,11 +87,16 @@
             }
         },
         
-        // The default locale for I18N.
-        defaultLocale = 'en',
-        
+        // Start:I18N //
         // The localization dictionaries for I18N
         dictionaries = {},
+        
+        // Matches plural replacements of the form: {{plural:$<index>|<singular>|<plural>}}
+        I18N_PLURAL_REGEX = /\{\{plural:\$(\d+)\|([^|]+)\|([^}]+)\}\}/g,
+        
+        // Matches numeric placeholders such as $0, $1, etc.
+        I18N_NUMERIC_ARG_REGEX = /\$(\d+)/g,
+        // End:I18N //
         
         /*  Creates a memoized version of the provided function.
             @param {!Function} func - The function to memoize.
@@ -115,9 +123,6 @@
         /*  Generates a globally unique id, (GUID).
             @returns {number} */
         generateGuid = () => ++GUID_COUNTER,
-        
-        I18N_PLURAL_REGEX = /\{\{plural:\$(.*?)\|(.*?)\|(.*?)\}\}/g,
-        I18N_NUMERIC_ARG_REGEX = /\$(\d+)/g,
         
         CSV_OBJECT_REGEX = /(\,|\r?\n|\r|^)(?:"((?:\\.|""|[^\\"])*)"|([^\,"\r\n]*))/gi,
         CSV_UNESCAPE_REGEX = /[\\"](.)/g,
@@ -1031,19 +1036,26 @@
             
             // I18N //
             I18N: {
+                // Set the locale and update the active dictionary cache.
                 setLocale: locale => {
-                    currentLocale = locale;
+                    currentLocale = locale ?? (navigator.language || 'en').split('-')[0].toLowerCase(); // English is the default locale.
+                    activeDictionary = dictionaries[currentLocale];
                 },
+                // Get the current locale, detect one if missing.
                 getLocale: () => currentLocale,
+                // Add or merge dictionary data for a given locale.
                 addDictionary: (dictionary, locale) => {
                     dictionaries[locale] = Object.assign(dictionaries[locale] ?? {}, dictionary);
+                    if (locale === currentLocale) activeDictionary = dictionaries[locale];
                 },
+                // Replace the dictionary for the specified locale.
                 setDictionary: (dictionary, locale) => {
                     dictionaries[locale] = dictionary ?? {};
+                    if (locale === currentLocale) activeDictionary = dictionaries[locale];
                 },
+                // Lookup translation for a key with optional arguments for substitutions.
                 get: (key, ...args) => {
-                    const locale = currentLocale ??= (navigator.language ?? defaultLocale).split('-')[0].toLowerCase(),
-                        value = (dictionaries[locale] ?? dictionaries[defaultLocale] ?? {})[key];
+                    const value = activeDictionary[key];
                     if (value != null) {
                         if (args.length > 0) {
                             return value.replaceAll(
@@ -1053,9 +1065,8 @@
                                 // Process $n replacement for every arg
                                 I18N_NUMERIC_ARG_REGEX, (m, idx) => args[idx]
                             );
-                        } else {
-                            return value;
                         }
+                        return value;
                     }
                     return key;
                 }
