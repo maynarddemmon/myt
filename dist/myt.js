@@ -535,7 +535,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         },
         
         notifyInstanceThatFontLoaded = (instance, familyName) => {
-            if (instance && !instance.destroyed) {
+            if (instance && !instance.destroyed && instance.isVisible()) {
                 instance.sizeViewToDom();
                 instance.notifyFontLoaded?.(familyName);
             }
