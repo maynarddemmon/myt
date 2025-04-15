@@ -81,7 +81,7 @@
         },
         
         notifyInstanceThatFontLoaded = (instance, familyName) => {
-            if (instance && !instance.destroyed && instance.isVisible()) {
+            if (instance && !instance.destroyed) {
                 instance.sizeViewToDom();
                 instance.notifyFontLoaded?.(familyName);
             }
