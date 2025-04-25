@@ -1006,10 +1006,10 @@
             attrs.inset ??= 2;
             attrs.sortIconColor ??= '#666';
             
-            attrs.outset ??= (attrs.sortable ?? true) ? 14 : 2;
-            
             const textAlign = attrs.textAlign;
             delete attrs.textAlign;
+            
+            attrs.outset ??= (textAlign === 'right' || (attrs.sortable ?? true)) ? 14 : 2;
             
             self.callSuper(parent, attrs);
             
