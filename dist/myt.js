@@ -578,6 +578,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             @returns {number} */
         generateGuid = () => ++GUID_COUNTER,
         
+        CURLY_BRACES_WITH_ESCAPES_REGEX = /\\([{}])|\{([^{}]+)\}/g,
         CSV_OBJECT_REGEX = /(\,|\r?\n|\r|^)(?:"((?:\\.|""|[^\\"])*)"|([^\,"\r\n]*))/gi,
         CSV_UNESCAPE_REGEX = /[\\"](.)/g,
         
@@ -1194,6 +1195,27 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                         consoleWarn('formatAsPercentage expects a number');
                         return num;
                 }
+            },
+            
+            /** Replace data by key into a string template where the template uses {key} to 
+                indicate where the replacement occurs. The \ character can be used to escape
+                curly braces that should not be treated as a replacement target.
+                @param {string} template - The template to do replacements on and return. If not
+                    provided or falsy, empty string will be returned.
+                @param {!Object= data - The data to use for replacements in the template.
+                @returns {string} - The interpolated string.
+                */
+            interpolateString: (template, data={}) => {
+                return template ? template.replace(
+                    CURLY_BRACES_WITH_ESCAPES_REGEX,
+                    (match, escapedChar, key) => {
+                        // If we encounter \{ or \}, `escapedChar` is "{" or "}", so return it.
+                        if (escapedChar) return escapedChar;
+                        
+                        // Otherwise it was a real {key}—replace if found, or leave "{key}" intact.
+                        return key in data ? data[key] : match;
+                    }
+                ) : '';
             },
             
             /** Convert a number to a string of a minimum length. Zero or more
