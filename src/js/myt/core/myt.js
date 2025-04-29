@@ -759,7 +759,8 @@
                         if (escapedChar) return escapedChar;
                         
                         // Otherwise it was a real {key}—replace if found, or leave "{key}" intact.
-                        return key in data ? data[key] : match;
+                        return myt.resolveName(key, data) ?? match;
+                        //return key in data ? myt.resolveName(key, data) : match;
                     }
                 ) : '';
             },
