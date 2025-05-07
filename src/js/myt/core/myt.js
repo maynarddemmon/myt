@@ -124,6 +124,49 @@
             @returns {number} */
         generateGuid = () => ++GUID_COUNTER,
         
+        /*  Test if two values are deeply equal to each other. Handles primitives, Dates, Objects
+            and Arrays. Tracks Objects it has seen to prevent stack overflows from cycles. */
+        deepEqual = (a, b, seenA=new WeakMap(), seenB=new WeakMap()) => {
+            // First do a quick reference check and tests primitives.
+            if (a !== b) {
+                // Make Dates something easy to compare.
+                if (a instanceof Date && b instanceof Date) return a.getTime() === b.getTime();
+                
+                // Ensure we're now dealing with two Objects (or Arrays).
+                if (a === null || b === null || typeof a !== 'object' || typeof b !== 'object') return false;
+                
+                // Prevent cycles
+                if (seenA.has(a)) return seenB.get(b) === seenA.get(a);
+                seenA.set(a, b);
+                seenB.set(b, a);
+                
+                // Quick check for Array vs Object.
+                const isArrA = Array.isArray(a),
+                    isArrB = Array.isArray(b);
+                if (isArrA !== isArrB) return false;
+                
+                // Check Arrays
+                if (isArrA) {
+                    const lenA = a.length;
+                    if (lenA !== b.length) return false;
+                    for (let i = 0; i < lenA; i++) {
+                        if (!deepEqual(a[i], b[i], seenA, seenB)) return false;
+                    }
+                    return true;
+                }
+                
+                // Check Objects
+                const keysA = Object.keys(a),
+                    keysB = Object.keys(b);
+                if (keysA.length !== keysB.length) return false;
+                for (const key of keysA) {
+                    if (!Object.prototype.hasOwnProperty.call(b, key)) return false;
+                    if (!deepEqual(a[key], b[key], seenA, seenB)) return false;
+                }
+            }
+            return true;
+        },
+        
         CURLY_BRACES_WITH_ESCAPES_REGEX = /\\([{}])|\{([^{}]+)\}/g,
         CSV_OBJECT_REGEX = /(\,|\r?\n|\r|^)(?:"((?:\\.|""|[^\\"])*)"|([^\,"\r\n]*))/gi,
         CSV_UNESCAPE_REGEX = /[\\"](.)/g,
@@ -392,7 +435,7 @@
                 return math.floor(myt.getRandom(func) * (mathMax(min, max) - actualMin + 1) + actualMin);
             },
             
-            // Equality
+            // Equality Tests //
             /** Tests if two floats are essentially equal to each other.
                 @param {number} a - A float
                 @param {number} b - A float
@@ -405,14 +448,16 @@
                 return mathAbs(a - b) <= (absA > absB ? absB : absA) * (epsilon == null ? 0.000001 : mathAbs(epsilon));
             },
             
-            /** Tests if two array are equal. For a more complete deep equal implementation 
-                use underscore.js
+            /** Tests if two Arrays are shallowly equal.
                 @param {?Array} a
                 @param {?Array} b
                 @returns {boolean} */
             areArraysEqual: (a, b) => {
+                // First do a quick reference check and tests primitives.
                 if (a !== b) {
-                    if (a == null || b == null) return false;
+                    // Ensure we're now dealing with two Objects (or Arrays).
+                    if (a === null || b === null || typeof a !== 'object' || typeof b !== 'object') return false;
+                    
                     let i = a.length;
                     if (i !== b.length) return false;
                     
@@ -427,14 +472,39 @@
                 @param {?Object} a
                 @param {?Object} b
                 @returns {boolean} */
-            areObjectsEqual: (a, b) => {
+            shallowEqual: (a, b) => {
+                // First do a quick reference check and tests primitives.
                 if (a !== b) {
-                    if (a == null || b == null) return false;
-                    for (const key in a) if (a[key] !== b[key]) return false;
-                    for (const key in b) if (a[key] !== b[key]) return false;
+                    // Ensure we're now dealing with two Objects (or Arrays).
+                    if (a === null || b === null || typeof a !== 'object' || typeof b !== 'object') return false;
+                    
+                    // Quick test using key counts.
+                    const keysA = Object.keys(a),
+                        keysB = Object.keys(b);
+                    if (keysA.length !== keysB.length) return false;
+                    
+                    // Shallow compare values for each key
+                    for (const key of keysA) {
+                        if (a[key] !== b[key]) return false;
+                    }
                 }
                 return true;
             },
+            
+            deepEqual:deepEqual,
+            
+            stableStringify: obj => JSON.stringify(obj, (key_ignored, value) => {
+                /* Only re-order plain objects; leave arrays and primitives untouched.
+                   This works because iteration order is insertion order of String based keys.
+                   Note: you can't have both a numeric and string key in an Object that serializes
+                   to the same value, eg. 2 and "2" can't both exist. */
+                if (value && typeof value === 'object' && !Array.isArray(value)) {
+                    const sorted = {};
+                    for (const key of Object.keys(value).sort()) sorted[key] = value[key];
+                    return sorted;
+                }
+                return value;
+            }),
             
             // DOM
             /** Gets the dom element of the provided tagname and index.
