@@ -496,6 +496,9 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         // The dictionary for the current locale.
         activeDictionary = {},
         
+        // The resource (Functions, Arrays, Objects, etc.) dictionary for the current locale.
+        activeResourceDictionary = {},
+        
         // Used to prevent loading the same stylesheet twice with createStylesheetLink.
         linkElemsByHref = {};
     
@@ -544,6 +547,9 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         // Start:I18N //
         // The localization dictionaries for I18N
         dictionaries = {},
+        
+        // The localization resource dictionaries for I18N
+        resourceDictionaries = {},
         
         // Matches plural replacements of the form: {{plural:$<index>|<singular>|<plural>}}
         I18N_PLURAL_REGEX = /\{\{plural:\$(\d+)\|([^|]+)\|([^}]+)\}\}/g,
@@ -1587,19 +1593,36 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 setLocale: locale => {
                     currentLocale = locale ?? (navigator.language || 'en').split('-')[0].toLowerCase(); // English is the default locale.
                     activeDictionary = dictionaries[currentLocale];
+                    activeResourceDictionary = resourceDictionaries[currentLocale];
                 },
+                
                 // Get the current locale, detect one if missing.
                 getLocale: () => currentLocale,
+                
                 // Add or merge dictionary data for a given locale.
                 addDictionary: (dictionary, locale) => {
                     dictionaries[locale] = Object.assign(dictionaries[locale] ?? {}, dictionary);
                     if (locale === currentLocale) activeDictionary = dictionaries[locale];
                 },
+                
                 // Replace the dictionary for the specified locale.
                 setDictionary: (dictionary, locale) => {
                     dictionaries[locale] = dictionary ?? {};
                     if (locale === currentLocale) activeDictionary = dictionaries[locale];
                 },
+                
+                // Add or merge resource dictionary data for a given locale.
+                addResourceDictionary: (resourceDictionary, locale) => {
+                    resourceDictionaries[locale] = Object.assign(resourceDictionaries[locale] ?? {}, resourceDictionary);
+                    if (locale === currentLocale) activeResourceDictionary = resourceDictionaries[locale];
+                },
+                
+                // Replace the resource dictionary for the specified locale.
+                setResourceDictionary: (resourceDictionary, locale) => {
+                    resourceDictionaries[locale] = resourceDictionary ?? {};
+                    if (locale === currentLocale) activeResourceDictionary = resourceDictionaries[locale];
+                },
+                
                 // Lookup translation for a key with optional arguments for substitutions.
                 get: (key, ...args) => {
                     const value = activeDictionary[key];
@@ -1616,7 +1639,13 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                         return value;
                     }
                     return key;
-                }
+                },
+                
+                // Lookup translation for a key with no argument support.
+                getRaw: key => activeDictionary[key] ?? key,
+                
+                // Lookup a resource for a key.
+                getResource: key => activeResourceDictionary[key]
             }
         };
     
