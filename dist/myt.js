@@ -2210,17 +2210,20 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             @returns {number} - The area of the polygon. */
         getAreaOfPolygon = (vertices, ignoreWinding=true, xAttrName='x', yAttrName='y') => {
             let len = vertices?.length;
-            if (len < 3) return 0;
+            if (len < 3 || !Array.isArray(vertices)) return 0;
             
             // Drop duplicate closing vertex
             if (vertices[0][xAttrName] === vertices[len - 1][xAttrName] && vertices[0][yAttrName] === vertices[len - 1][yAttrName]) len--;
             
             // Use shoelace formula.
-            let area = 0;
+            let area = 0,
+                prev = vertices[len - 1];
             for (let i = 0; i < len; i++) {
-                const j = (i + 1) % len;
-                area += vertices[i][xAttrName] * vertices[j][yAttrName] - vertices[j][xAttrName] * vertices[i][yAttrName];
+                const cur = vertices[i];
+                area += prev[xAttrName] * cur[yAttrName] - cur[xAttrName] * prev[yAttrName];
+                prev = cur;
             }
+            
             return (ignoreWinding ? mathAbs(area) : area) / 2;
         };
     
