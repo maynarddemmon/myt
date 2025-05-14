@@ -1,6 +1,5 @@
 (pkg => {
-    const math = Math,
-        {PI, cos:mathCos, sin:mathSin, sqrt:mathSqrt} = math,
+    const {PI, cos:mathCos, sin:mathSin, sqrt:mathSqrt, abs:mathAbs} = Math,
         
         /*  Convert radians to degrees.
             @param {number} deg - The degrees to convert.
@@ -73,6 +72,30 @@
                 mathSin(lat1) * mathSin(lat2) + 
                 mathCos(lat1) * mathCos(lat2) * mathCos(degreesToRadians(lng2) - degreesToRadians(lng1))
             );
+        },
+        
+        /*  Measures the area of a simple polygon using the shoelace formula.
+            @param {?Array} vertices - The vertices of the polygon. If null/undefined 0 will
+                be returned.
+            @param {?boolean} ignoreWinding - Indicates if the winding order of the vertices should
+                be ignored and thus the returned area will be non-negative.
+            @param {?string} xAttrName - The name used to lookup the x-coordinate of each vertex.
+            @param {?string} yAttrName - The name used to lookup the y-coordinate of each vertex.
+            @returns {number} - The area of the polygon. */
+        getAreaOfPolygon = (vertices, ignoreWinding=true, xAttrName='x', yAttrName='y') => {
+            let len = vertices?.length;
+            if (len < 3) return 0;
+            
+            // Drop duplicate closing vertex
+            if (vertices[0][xAttrName] === vertices[len - 1][xAttrName] && vertices[0][yAttrName] === vertices[len - 1][yAttrName]) len--;
+            
+            // Use shoelace formula.
+            let area = 0;
+            for (let i = 0; i < len; i++) {
+                const j = (i + 1) % len;
+                area += vertices[i][xAttrName] * vertices[j][yAttrName] - vertices[j][xAttrName] * vertices[i][yAttrName];
+            }
+            return (ignoreWinding ? mathAbs(area) : area) / 2;
         };
     
     /** Provides common geometry related functions. */
@@ -221,6 +244,9 @@
             let radians = math.atan2(diffY, diffX);
             if (radians < 0) radians += 2 * PI;
             return [radius, useRadians ? radians : radiansToDegrees(radians)];
-        }
+        },
+        
+        getAreaOfPolygon:getAreaOfPolygon,
+        isClockwisePolygon: (vertices, xAttrName, yAttrName) => getAreaOfPolygon(vertices, false, xAttrName, yAttrName) < 0
     };
 })(myt);
