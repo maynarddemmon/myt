@@ -526,20 +526,24 @@
                 Promise.all(fontList.map(
                     ({family, url, options}) => new FontFace(family, 'url(' + url + ')', options).load()
                 )).then(loadedFonts => {
-                    for (const font of loadedFonts) {
-                        docFonts.add(font);
-                        notifyFontLoaded(font);
+                    if (docFonts) {
+                        for (const font of loadedFonts) {
+                            docFonts.add(font);
+                            notifyFontLoaded(font);
+                        }
+                        callback?.(loadedFonts);
                     }
-                    callback?.(loadedFonts);
                 });
             },
             
             loadFontFace: (fontName, fontUrl, fontOptions={}, callback) => {
                 const fontFace = new FontFace(fontName, 'url(' + fontUrl + ')', fontOptions);
                 fontFace.loaded.then(loadedFontFace => {
-                    docFonts.add(loadedFontFace);
-                    notifyFontLoaded(loadedFontFace);
-                    callback?.(loadedFontFace);
+                    if (docFonts) {
+                        docFonts.add(loadedFontFace);
+                        notifyFontLoaded(loadedFontFace);
+                        callback?.(loadedFontFace);
+                    }
                 });
                 fontFace.load();
             },
@@ -1195,7 +1199,9 @@
             }
         };
     
-    docFonts.onloadingdone = fontFaceSetEvent => {
-        for (const fontFace of fontFaceSetEvent.fontfaces) notifyFontLoaded(fontFace);
-    };
+    if (docFonts) {
+        docFonts.onloadingdone = fontFaceSetEvent => {
+            for (const fontFace of fontFaceSetEvent.fontfaces) notifyFontLoaded(fontFace);
+        };
+    }
 })(global);

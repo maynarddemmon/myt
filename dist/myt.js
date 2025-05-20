@@ -980,20 +980,24 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 Promise.all(fontList.map(
                     ({family, url, options}) => new FontFace(family, 'url(' + url + ')', options).load()
                 )).then(loadedFonts => {
-                    for (const font of loadedFonts) {
-                        docFonts.add(font);
-                        notifyFontLoaded(font);
+                    if (docFonts) {
+                        for (const font of loadedFonts) {
+                            docFonts.add(font);
+                            notifyFontLoaded(font);
+                        }
+                        callback?.(loadedFonts);
                     }
-                    callback?.(loadedFonts);
                 });
             },
             
             loadFontFace: (fontName, fontUrl, fontOptions={}, callback) => {
                 const fontFace = new FontFace(fontName, 'url(' + fontUrl + ')', fontOptions);
                 fontFace.loaded.then(loadedFontFace => {
-                    docFonts.add(loadedFontFace);
-                    notifyFontLoaded(loadedFontFace);
-                    callback?.(loadedFontFace);
+                    if (docFonts) {
+                        docFonts.add(loadedFontFace);
+                        notifyFontLoaded(loadedFontFace);
+                        callback?.(loadedFontFace);
+                    }
                 });
                 fontFace.load();
             },
@@ -1649,9 +1653,11 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             }
         };
     
-    docFonts.onloadingdone = fontFaceSetEvent => {
-        for (const fontFace of fontFaceSetEvent.fontfaces) notifyFontLoaded(fontFace);
-    };
+    if (docFonts) {
+        docFonts.onloadingdone = fontFaceSetEvent => {
+            for (const fontFace of fontFaceSetEvent.fontfaces) notifyFontLoaded(fontFace);
+        };
+    }
 })(global);
 
 
@@ -2376,7 +2382,24 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         },
         
         getAreaOfPolygon:getAreaOfPolygon,
-        isClockwisePolygon: (vertices, xAttrName, yAttrName) => getAreaOfPolygon(vertices, false, xAttrName, yAttrName) < 0
+        isClockwisePolygon: (vertices, xAttrName, yAttrName) => getAreaOfPolygon(vertices, false, xAttrName, yAttrName) < 0,
+        
+        intervalsOverlap: (lowerA, upperA, lowerB, upperB, touchIsOverlap=false, fixBadOrdering=false) => {
+            if (fixBadOrdering) {
+                let temp;
+                if (lowerA > upperA) {
+                    temp = lowerA;
+                    upperA = lowerA;
+                    lowerA = temp;
+                }
+                if (lowerB > upperB) {
+                    temp = lowerB;
+                    upperB = lowerB;
+                    lowerB = temp;
+                }
+            }
+            return touchIsOverlap ? lowerA <= upperB && lowerB <= upperA : lowerA < upperB && lowerB < upperA;
+        }
     };
 })(myt);
 

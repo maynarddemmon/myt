@@ -250,6 +250,23 @@
         },
         
         getAreaOfPolygon:getAreaOfPolygon,
-        isClockwisePolygon: (vertices, xAttrName, yAttrName) => getAreaOfPolygon(vertices, false, xAttrName, yAttrName) < 0
+        isClockwisePolygon: (vertices, xAttrName, yAttrName) => getAreaOfPolygon(vertices, false, xAttrName, yAttrName) < 0,
+        
+        intervalsOverlap: (lowerA, upperA, lowerB, upperB, touchIsOverlap=false, fixBadOrdering=false) => {
+            if (fixBadOrdering) {
+                let temp;
+                if (lowerA > upperA) {
+                    temp = lowerA;
+                    upperA = lowerA;
+                    lowerA = temp;
+                }
+                if (lowerB > upperB) {
+                    temp = lowerB;
+                    upperB = lowerB;
+                    lowerB = temp;
+                }
+            }
+            return touchIsOverlap ? lowerA <= upperB && lowerB <= upperA : lowerA < upperB && lowerB < upperA;
+        }
     };
 })(myt);
