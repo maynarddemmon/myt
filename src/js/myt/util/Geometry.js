@@ -1,5 +1,6 @@
 (pkg => {
-    const {PI, cos:mathCos, sin:mathSin, sqrt:mathSqrt, abs:mathAbs} = Math,
+    const math = Math,
+        {PI, cos:mathCos, sin:mathSin, sqrt:mathSqrt, abs:mathAbs} = math,
         
         /*  Convert radians to degrees.
             @param {number} deg - The degrees to convert.
