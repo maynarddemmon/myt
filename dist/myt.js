@@ -13132,10 +13132,14 @@ myt.Destructible = new JS.Module('Destructible', {
                     itemAttrs.enableEllipsis = true;
                 }
                 for (; cfgLen > i; ++i) {
-                    const cfgItem = cfg[i],
-                        cfgClass = cfgItem.klass ?? defaultItemClass,
+                    const cfgItem = cfg[i];
+                    let item = items[i],
+                        cfgClass,
+                        cfgAttrs;
+                    if (cfgItem) {
+                        cfgClass = cfgItem.klass ?? defaultItemClass;
                         cfgAttrs = cfgItem.attrs ?? {};
-                    let item = items[i];
+                    }
                     
                     // Destroy existing item if it's the wrong class
                     if (item && !item.isA(cfgClass)) {
@@ -13143,17 +13147,19 @@ myt.Destructible = new JS.Module('Destructible', {
                         item = null;
                     }
                     
-                    // Create a new item if no item exists
-                    item ??= items[i] = new cfgClass(contentView, {...itemAttrs});
-                    
-                    // Apply config to item
-                    if (item) {
-                        item.callSetters(cfgAttrs);
+                    if (cfgClass) {
+                        // Create a new item if no item exists
+                        item ??= items[i] = new cfgClass(contentView, {...itemAttrs});
                         
-                        // Create an item index to sort the layout subviews on. This is necessary when 
-                        // the class of list items change so that the newly created items don't end up 
-                        // out of order.
-                        item.__LAYOUT_IDX = i;
+                        // Apply config to item
+                        if (item) {
+                            item.callSetters(cfgAttrs);
+                            
+                            // Create an item index to sort the layout subviews on. This is necessary when 
+                            // the class of list items change so that the newly created items don't end up 
+                            // out of order.
+                            item.__LAYOUT_IDX = i;
+                        }
                     }
                 }
             });
@@ -13166,8 +13172,10 @@ myt.Destructible = new JS.Module('Destructible', {
                 minWidth = listView.minWidth;
                 for (i = 0; cfgLen > i;) {
                     const item = items[i++];
-                    item.syncToDom();
-                    minWidth = math.max(minWidth, item.getMinimumWidth());
+                    if (item) {
+                        item.syncToDom();
+                        minWidth = math.max(minWidth, item.getMinimumWidth());
+                    }
                 }
             }
             
@@ -13316,7 +13324,7 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         updateItemWidth: (item, width) => {
-            item.setWidth(width);
+            item?.setWidth(width);
         },
         
         updateContentWidth: (contentView, width) => {
