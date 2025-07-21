@@ -1,7 +1,7 @@
 (pkg => {
     const JSClass = JS.Class,
         
-        dumpStack = pkg.dumpStack,
+        {NOOP, dumpStack} = pkg,
         
         mathRound = Math.round,
         
@@ -71,15 +71,15 @@
             
             /** @param {!Object} event
                 @returns {undefined} */
-            doDragOver: event => {},
+            doDragOver: NOOP, // event => {},
             
             /** @param {!Object} event
                 @returns {undefined} */
-            doDragEnter: event => {},
+            doDragEnter: NOOP, // event => {},
             
             /** @param {!Object} event
                 @returns {undefined} */
-            doDragLeave: event => {},
+            doDragLeave: NOOP, // event => {},
             
             /** @param {!Object} event
                 @returns {undefined} */
@@ -112,7 +112,7 @@
             /** @param {!Object} file
                 @param {!Object} event
                 @returns {undefined} */
-            handleDroppedFile: (file, event) => {}
+            handleDroppedFile: NOOP // (file, event) => {}
         }),
         
         FileInput = pkg.FileInput = new JSClass('FileInput', pkg.NativeInputWrapper, {
@@ -143,7 +143,7 @@
                 this.getIDE().value = '';
             },
             
-            _onChange: event => {/* Subclasses to implement. */}
+            _onChange: NOOP, // event => {/* Subclasses to implement. */}
         }),
         
         /** Component to upload files.

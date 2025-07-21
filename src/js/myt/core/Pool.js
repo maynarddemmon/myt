@@ -1,6 +1,8 @@
 (pkg => {
     const {Class:JSClass, Module:JSModule} = JS,
         
+        NOOP = pkg.NOOP,
+        
         consoleWarn = console.warn,
         
         /*  Get the object pool.
@@ -42,7 +44,7 @@
             // Constructor /////////////////////////////////////////////////////
             /** Initialize does nothing.
                 @returns {undefined} */
-            initialize: () => {},
+            initialize: NOOP,
             
             
             // Life Cycle //////////////////////////////////////////////////////
@@ -290,6 +292,6 @@
         // Methods /////////////////////////////////////////////////////////////
         /** Puts this object back into a default state suitable for storage in an myt.AbstractPool
             @returns {undefined} */
-        clean: () => {}
+        clean: NOOP
     });
 })(myt);

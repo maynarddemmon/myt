@@ -183,6 +183,10 @@
             
             generateGuid: generateGuid,
             
+            TRUE_FUNC: () => true,
+            FALSE_FUNC: () => false,
+            NOOP: () => {},
+            
             /** Theme properties for various components.
                 IMPORTANT! Don't import these directly into packages. That would make them
                     difficult to override in projects that use myt. It is OK to import the

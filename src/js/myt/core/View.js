@@ -1,8 +1,7 @@
 (pkg => {
     const mathRound = Math.round,
-        DomElementProxy = pkg.DomElementProxy,
         
-        rectContainsPoint = pkg.Geometry.rectContainsPoint,
+        {NOOP, DomElementProxy, Geometry:{rectContainsPoint}} = pkg,
         
         getDomStyle = (view, isInnerElem) => isInnerElem ? view.getIDS() : view.getODS(),
         
@@ -973,13 +972,13 @@
             Instead call setParent.
             @param {!Object} sv - The myt.View that was added.
             @returns {undefined} */
-        subviewAdded: sv => {},
+        subviewAdded: NOOP, // sv => {},
         
         /** Called when a View is removed from this View. Do not call this method to remove a View. 
             Instead call setParent.
             @param {!Object} sv - The myt.View that was removed.
             @returns {undefined} */
-        subviewRemoved: sv => {},
+        subviewRemoved: NOOP, // sv => {},
         
         /** Gets the next sibling view based on lexical ordering of dom elements.
             @returns {?Object} - The next sibling myt.View or undefined if none exists. */
@@ -1026,13 +1025,13 @@
             Instead call setParent.
             @param {!Object} layout - The myt.Layout that was added.
             @returns {undefined} */
-        layoutAdded: layout => {},
+        layoutAdded: NOOP, // layout => {},
         
         /** Called when a Layout is removed from this View. Do not call this method to remove a 
             Layout. Instead call setParent.
             @param {!Object} layout - The myt.Layout that was removed.
             @returns {undefined} */
-        layoutRemoved: layout => {},
+        layoutRemoved: NOOP, // layout => {},
         
         // Dom-Ordering //
         /** Test if the provided view is behind this view. The view to test can be anywhere in 
@@ -1088,7 +1087,7 @@
             @param {?Object} sv The subview that was reorderd or null if no specific subview can 
                 be determined.
             @returns {undefined} */
-        doSubviewsReorderedInDom: sv => {/* Subclasses to implement. */},
+        doSubviewsReorderedInDom: NOOP, // sv => {/* Subclasses to implement. */},
         
         /** Sends the provided subview to the back.
             @param {!Object} sv - The subview of this view to bring to front.

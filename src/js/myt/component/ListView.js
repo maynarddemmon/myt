@@ -114,7 +114,7 @@
             
             /** Part of a performance optimization. Called from updateItems after the items have 
                 been inserted into the dom. Now we can actually measure text width. */
-            syncToDom: () => {}
+            syncToDom: pkg.NOOP
         });
     
     /** A floating panel that contains a list of items.

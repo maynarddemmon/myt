@@ -1,6 +1,8 @@
 (pkg => {
     const JSClass = JS.Class,
         
+        NOOP = pkg.NOOP,
+        
         /** Use this to implement more complex transitions in a PanelStack.
             
             @class */
@@ -114,8 +116,8 @@
             }
         },
         
-        doBeforeTransitionTo: panel => {},
-        doAfterTransitionTo: panel => {},
+        doBeforeTransitionTo: NOOP, // panel => {},
+        doAfterTransitionTo: NOOP, // panel => {},
         
         /** Called by PanelStack.doStackTransition when the provided panel will be the newly 
             deselected panel in the stack. Should not be called directly. Instead change the 
@@ -136,8 +138,8 @@
             }
         },
         
-        doBeforeTransitionFrom: panel => {},
-        doAfterTransitionFrom: panel => {}
+        doBeforeTransitionFrom: NOOP, // panel => {},
+        doAfterTransitionFrom: NOOP // panel => {}
     });
     
     /** Makes a view act as a panel in a myt.PanelStack.

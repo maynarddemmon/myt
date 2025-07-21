@@ -327,7 +327,7 @@
             /** Sorts the rows according to the current sort criteria. Subclasses and instances 
                 should implement this as needed.
                 @returns {undefined} */
-            doSort: () => {},
+            doSort: pkg.NOOP, // () => {}
             
             // Column Headers
             /** Gets the column header before the provided one.

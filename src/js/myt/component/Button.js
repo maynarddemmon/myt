@@ -1,7 +1,7 @@
 (pkg => {
     const {Class:JSClass, Module:JSModule} = JS,
         
-        {View, KeyActivation, theme:THEME} = pkg,
+        {NOOP, View, KeyActivation, theme:THEME} = pkg,
         
         /** Provides button functionality to an myt.View. Most of the functionality comes from the 
             mixins included by this mixin. This mixin resolves issues that arise when the various 
@@ -102,22 +102,22 @@
             /** Draw the UI when the component is on the verge of being interacted with. For mouse 
                 interactions this corresponds to the over state.
                 @returns {undefined} */
-            drawHoverState: () => {/* Subclasses to implement as needed. */},
+            drawHoverState: NOOP, // () => {/* Subclasses to implement as needed. */},
             
             /** Draw the UI when the component has a pending activation. For mouse interactions 
                 this corresponds to the down state.
                 @returns {undefined} */
-            drawActiveState: () => {/* Subclasses to implement as needed. */},
+            drawActiveState: NOOP, // () => {/* Subclasses to implement as needed. */},
             
             /** Draw the UI when the component is ready to be interacted with. For mouse 
                 interactions this corresponds to the enabled state when the mouse is not over 
                 the component.
                 @returns {undefined} */
-            drawReadyState: () => {/* Subclasses to implement as needed. */},
+            drawReadyState: NOOP, // () => {/* Subclasses to implement as needed. */},
             
             /** Draw the UI when the component is in the disabled state.
                 @returns {undefined} */
-            drawDisabledState: () => {/* Subclasses to implement as needed. */},
+            drawDisabledState: NOOP, // () => {/* Subclasses to implement as needed. */},
             
             /** @overrides myt.FocusObservable */
             showFocusIndicator: function() {

@@ -1,7 +1,7 @@
 (pkg => {
     const JSModule = JS.Module,
-    
-        {Draggable, global:{dragManager, mouse:globalMouse}} = pkg,
+        
+        {NOOP, Draggable, global:{dragManager, mouse:globalMouse}} = pkg,
         
         ANY_GROUP = '*',
         
@@ -240,31 +240,31 @@
             matching drag group.
             @param dropable:myt.Dropable The dropable being dragged.
             @returns {undefined} */
-        notifyDragStart: dropable => {},
+        notifyDragStart: NOOP, // dropable => {},
         
         /** Called by myt.GlobalDragManager when a dropable stops being dragged that has a 
             matching drag group.
             @param dropable:myt.Dropable The dropable no longer being dragged.
             @returns {undefined} */
-        notifyDragStop: dropable => {},
+        notifyDragStop: NOOP, // dropable => {},
         
         /** Called by myt.GlobalDragManager when a dropable is dragged over this view and has a 
             matching drag group.
             @param dropable:myt.Dropable The dropable being dragged over this view.
             @returns {undefined} */
-        notifyDragEnter: dropable => {},
+        notifyDragEnter: NOOP, // dropable => {},
         
         /** Called by myt.GlobalDragManager when a dropable is dragged out of this view and has a 
             matching drag group.
             @param dropable:myt.Dropable The dropable being dragged out of this view.
             @returns {undefined} */
-        notifyDragLeave: dropable => {},
+        notifyDragLeave: NOOP, // dropable => {},
         
         /** Called by myt.GlobalDragManager when a dropable is dropped onto this view and has a 
             matching drag group.
             @param dropable:myt.Dropable The dropable being dropped onto this view.
             @returns {undefined} */
-        notifyDrop: dropable => {}
+        notifyDrop: NOOP // dropable => {}
     });
     
     /** Makes an myt.View drag and dropable via the mouse.
@@ -291,7 +291,7 @@
             returns true.
             @param dropTarget:myt.DropTarget The drop target dragged over.
             @returns boolean: True if the drop will be allowed, false otherwise. */
-        willPermitDrop: dropTarget => true,
+        willPermitDrop: pkg.TRUE_FUNC, // dropTarget => true,
         
         /** @overrides myt.Draggable */
         startDrag: function(event) {
@@ -349,12 +349,12 @@
         /** Called after dragging stops and the drop failed. The default implementation 
             does nothing.
             @returns {undefined} */
-        notifyDropFailed: () => {},
+        notifyDropFailed: NOOP,
         
         /** Called after dragging stops and the drop was aborted. The default implementation 
             does nothing.
             @returns {undefined} */
-        notifyDropAborted: () => {}
+        notifyDropAborted: NOOP
     });
     
     /** Makes an myt.View auto scroll during drag and drop.

@@ -176,7 +176,7 @@
                 matcherFunc = matcher;
             } else if (matcher == null) {
                 // Use a unique match anything function
-                matcherFunc = type => true;
+                matcherFunc = pkg.TRUE_FUNC, // type => true;
             } else {
                 // Invalid matcherFunc
             }

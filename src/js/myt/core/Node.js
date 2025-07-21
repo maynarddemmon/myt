@@ -1,6 +1,8 @@
 (pkg => {
     const JSClass = JS.Class,
         
+        NOOP = pkg.NOOP,
+        
         consoleWarn = console.warn,
         
         /*  Common mixins for Eventable and Node. */
@@ -224,7 +226,7 @@
         /** Provides a hook for subclasses to do destruction of their internals. This method is 
             called after the parent has been unset. Subclasses must call super.
             @returns {undefined} */
-        destroyAfterOrphaning: () => {/* Subclasses to implement as needed. */},
+        destroyAfterOrphaning: NOOP, // () => {/* Subclasses to implement as needed. */},
         
         
         // Structural Accessors ////////////////////////////////////////////////
@@ -435,14 +437,14 @@
             subclasses to call super. Do not call this method to add a subnode. Instead call setParent.
             @param {!Object} node - The sub myt.Node that was added.
             @returns {undefined} */
-        subnodeAdded: node => {},
+        subnodeAdded: NOOP, // node => {},
         
         /** Called when a subnode is removed from this node. Provides a hook for subclasses. No need
             for subclasses to call super. Do not call this method to remove a subnode. Instead 
             call setParent.
             @param {!Object} node - The sub myt.Node that was removed.
             @returns {undefined} */
-        subnodeRemoved: node => {},
+        subnodeRemoved: NOOP, // node => {},
         
         
         // Animation //

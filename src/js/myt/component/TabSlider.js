@@ -202,7 +202,7 @@
             /** Called whenever the button is redrawn. Gives subclasses/instances a chance to do 
                 additional things when the button is redrawn.
                 @returns {undefined} */
-            notifyButtonRedraw: () => {},
+            notifyButtonRedraw: pkg.NOOP,
             
             /** @private
                 @param {!Object} event

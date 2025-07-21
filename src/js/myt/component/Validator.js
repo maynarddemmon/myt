@@ -47,7 +47,7 @@
                 @param {?Array} [errorMessages] - Any error messages arising during validation will 
                     be pushed onto thiis array if it is provided.
                 @returns {boolean} true if the value is valid, false otherwise. */
-            isValid: (value, config, errorMessages) => true,
+            isValid: pkg.TRUE_FUNC, // (value, config, errorMessages) => true,
             
             /** Tests if the form is valid or not.
                 @param {!Object} form - The myt.Form to test validity for.

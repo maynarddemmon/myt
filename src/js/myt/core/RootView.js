@@ -82,7 +82,7 @@
             },
             
             /** @overrides myt.Node */
-            setParent: parent => {/* A root view has no parent view so do nothing. */},
+            setParent: pkg.NOOP, // parent => {/* A root view has no parent view so do nothing. */},
             
             
             // Methods /////////////////////////////////////////////////////////

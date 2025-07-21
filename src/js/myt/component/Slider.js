@@ -3,7 +3,7 @@
         
         {min:mathMin, max:mathMax, round:mathRound, abs:mathAbs} = Math,
         
-        View = pkg.View,
+        {NOOP, View} = pkg,
         
         SliderThumb = new JSClass('SliderThumb', pkg.SimpleButton, {
             include: [pkg.Draggable, pkg.ArrowKeyActivation],
@@ -233,7 +233,7 @@
                 this._nudge(thumb, true);
             },
             
-            _nudge: (thumb, up) => {/* Subclasses to implement */},
+            _nudge: NOOP, // (thumb, up) => {/* Subclasses to implement */},
             
             _syncThumbToValue: function(thumb, value) {
                 value = this.convertValueToPixels(value);
@@ -258,7 +258,7 @@
                 }
             },
             
-            _syncValueToThumb: (thumb, converted) => {/* Subclasses to implement */},
+            _syncValueToThumb: NOOP, // (thumb, converted) => {/* Subclasses to implement */},
             
             /** Should only be called by SliderThumb.
                 @private

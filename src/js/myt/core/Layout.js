@@ -8,6 +8,8 @@
     
     const JSClass = JS.Class,
         
+        NOOP = pkg.NOOP,
+        
         /*  A list of layouts to be updated once the global lock is released. */
         deferredLayouts = [],
         
@@ -189,7 +191,7 @@
             /** Updates the layout. Subclasses should call canUpdate to check lock state before 
                 trying to do anything.
                 @returns {undefined} */
-            update: () => {},
+            update: NOOP,
             
             // Subview Methods //
             /** Checks if this Layout has the provided View in the subviews array.
@@ -221,7 +223,7 @@
                 subview that should trigger the update method.
                 @param {?Object} sv - The myt.View to start monitoring for changes.
                 @returns {undefined} */
-            startMonitoringSubview: sv => {},
+            startMonitoringSubview: NOOP, // sv => {},
             
             /** Calls startMonitoringSubview for all views. Used by Layout implementations when a 
                 change occurs to the layout that 
@@ -253,7 +255,7 @@
                 were setup in startMonitoringSubview.
                 @param {?Object} sv - The myt.View to stop monitoring for changes.
                 @returns {undefined} */
-            stopMonitoringSubview: sv => {},
+            stopMonitoringSubview: NOOP, // sv => {},
             
             /** Calls stopMonitoringSubview for all views. Used by Layout implementations when a 
                 change occurs to the layout that requires refreshing all the subview monitoring.
@@ -429,13 +431,13 @@
             /** Called by update before any processing is done. Gives subviews a chance to do any 
                 special setup before update is processed.
                 @returns {undefined} */
-            doBeforeUpdate: () => {/* Subclasses to implement as needed. */},
+            doBeforeUpdate: NOOP, // () => {/* Subclasses to implement as needed. */},
             
             /** Called by update after any processing is done but before the optional collapsing of 
                 parent is done. Gives subviews a chance to do any special teardown after update 
                 is processed.
                 @returns {undefined} */
-            doAfterUpdate: () => {/* Subclasses to implement as needed. */},
+            doAfterUpdate: NOOP, // () => {/* Subclasses to implement as needed. */},
             
             /** Provides a default implementation that calls update when the visibility of a 
                 subview changes.
@@ -478,7 +480,7 @@
                 @param {string} setterName - The name of the setter method to call on the parent.
                 @param {*} value - The value to set on the parent.
                 @returns {undefined} */
-            updateParent: (setterName, value) => {/* Subclasses to implement as needed. */}
+            updateParent: NOOP // (setterName, value) => {/* Subclasses to implement as needed. */}
         }),
         
         /** An extension of VariableLayout that positions views along an axis using an inset, 
@@ -585,7 +587,7 @@
     pkg.ResizeLayout = new JSClass('ResizeLayout', SpacedLayout, {
         // Accessors ///////////////////////////////////////////////////////////
         /** @overrides myt.VariableLayout */
-        setCollapseParent: v => {/* collapseParent attribute is unused in ResizeLayout. */},
+        setCollapseParent: NOOP, // v => {/* collapseParent attribute is unused in ResizeLayout. */},
         
         /** @overrides myt.SpacedLayout */
         setTargetAttrName: function(v) {
@@ -694,7 +696,7 @@
         },
         
         /** @overrides myt.SpacedLayout */
-        updateParent: (setterName, value) => {/* No resizing of parent since this view expands to fill the parent. */}
+        updateParent: NOOP // (setterName, value) => {/* No resizing of parent since this view expands to fill the parent. */}
     });
     
     /** An extension of VariableLayout that also aligns each view vertically or horizontally.

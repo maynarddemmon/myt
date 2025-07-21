@@ -6,7 +6,7 @@
         consoleWarn = console.warn,
         
         {
-            KeyObservable, UpdateableUI,
+            NOOP, KeyObservable, UpdateableUI,
             dumpStack,
             global:G
         } = pkg,
@@ -1129,11 +1129,11 @@
         /** Called when the form is submitted and it is valid.
             @param {*} value
             @returns {undefined} */
-        doValidSubmit: value => {},
+        doValidSubmit: NOOP, // value => {}
         
         /** Called when the form is submitted and it is not valid.
             @returns {undefined} */
-        doInvalidSubmit: () => {},
+        doInvalidSubmit: NOOP, // () => {}
         
         /** Rolls back the form and revalidates it.
             @returns {undefined} */
@@ -1323,7 +1323,7 @@
         
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides myt.FormInputTextMixin */
-        __hndlKeyDown: event => {/* Do nothing so the "accept" accelerator is not invoked. */}
+        __hndlKeyDown: NOOP // Do nothing so the "accept" accelerator is not invoked.
     });
     
     /** An myt.InputSelect that is also a FormElement.

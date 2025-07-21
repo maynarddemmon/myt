@@ -1,6 +1,8 @@
 (pkg => {
     const JSModule = JS.Module,
         
+        NOOP = pkg.NOOP,
+        
         {mouse:GlobalMouse, keys:GlobalKeys, idle:GlobalIdle} = pkg.global,
         
         NO_KEY_DOWN = '',
@@ -16,7 +18,7 @@
         // Methods /////////////////////////////////////////////////////////////
         /** Called when this view should be activated.
             @returns {undefined} */
-        doActivated: () => {/* Subclasses to implement as needed. */}
+        doActivated: NOOP // () => {/* Subclasses to implement as needed. */}
     });
     
     /** Adds an udpateUI method that should be called to update the UI. Various mixins will rely on 
@@ -39,7 +41,7 @@
         /** Updates the UI whenever a change occurs that requires a visual update. Subclasses 
             should implement this as needed.
             @returns {undefined} */
-        updateUI: () => {/* Subclasses to implement as needed. */}
+        updateUI: NOOP // () => {/* Subclasses to implement as needed. */}
     });
     
     /** Adds the capability to be "disabled" to an myt.Node. When an myt.Node is disabled the user 
@@ -203,7 +205,7 @@
             @param code:string - The key code that is down.
             @param isRepeat:boolean - Indicates if this is a key repeat event or not.
             @returns {undefined} */
-        doActivationKeyDown: (code, isRepeat) => {/* Subclasses to implement as needed. */},
+        doActivationKeyDown: NOOP, // (code, isRepeat) => {/* Subclasses to implement as needed. */},
         
         /** Called when an activation key is release up. This executes the "doActivated" method 
             by default. 
@@ -217,7 +219,7 @@
             does nothing.
             @param code:string - The keycode that is down.
             @returns {undefined} */
-        doActivationKeyAborted: code => {/* Subclasses to implement as needed. */}
+        doActivationKeyAborted: NOOP // code => {/* Subclasses to implement as needed. */}
     });
     
     pkg.ArrowKeyActivation = new JSModule('KeyActivation', {
@@ -245,13 +247,13 @@
             @param {boolean} isLeft - Indicates if the Left or Up key triggered the event.
             @param isRepeat:boolean Indicates if this is a key repeat event or not.
             @returns {boolean} If true doActivationKeyDown will not callSuper. */
-        doKeyArrowLeftOrUp: (isLeft, isRepeat) => {/* Subclasses to implement as needed. */},
+        doKeyArrowLeftOrUp: NOOP, // (isLeft, isRepeat) => {/* Subclasses to implement as needed. */},
         
         /** Called when the Right or Down arrow key triggers a down event.
             @param {boolean} isRight - Indicates if the Right or Down key triggered the event.
             @param isRepeat:boolean - Indicates if this is a key repeat event or not.
             @returns {boolean} If true doActivationKeyDown will not callSuper. */
-        doKeyArrowRightOrDown: (isRight, isRepeat) => {/* Subclasses to implement as needed. */}
+        doKeyArrowRightOrDown: NOOP // (isRight, isRepeat) => {/* Subclasses to implement as needed. */}
     }),
     
     /** Provides a 'mouseOver' attribute that tracks mouse over/out state. Also provides a 
@@ -438,7 +440,7 @@
         /** Called by the doMouseDown function when this View is currently disabled:true. Note that
             the mouseDown attribute of this View will not be true when this function is called.
             @returns {undefined} */
-        doMouseDownWhenDisabled: () => {/* Subclasses to implement as needed. */},
+        doMouseDownWhenDisabled: NOOP, // () => {/* Subclasses to implement as needed. */},
         
         /** Called when the mouse is up on this view. Subclasses must call super.
             @param {!Object} event
@@ -595,7 +597,7 @@
         /** @private
             @param {!Object} event
             @returns {undefined} */
-        __doContextMenu: event => {/* Do nothing so the context menu event is suppressed. */},
+        __doContextMenu: NOOP, // event => {/* Do nothing so the context menu event is suppressed. */},
         
         /** @private
             @param {!Object} event

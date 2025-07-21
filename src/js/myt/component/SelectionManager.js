@@ -1,6 +1,7 @@
 (pkg => {
     const JSModule = JS.Module,
-        GlobalKeys = pkg.global.keys,
+        
+        {NOOP, TRUE_FUNC, global:{keys:GlobalKeys}} = pkg,
         
         /** Makes an object selectable.
             
@@ -33,13 +34,13 @@
                 by default.
                 @param {!Object} selectionManager
                 @returns {boolean} */
-            canSelect: selectionManager => true,
+            canSelect: TRUE_FUNC, // selectionManager => true,
             
             /** Checks if the provided myt.SelectionManager can deselect this object. Returns true 
                 by default.
                 @param {!Object} selectionManager
                 @returns {boolean} */
-            canDeselect: selectionManager => true
+            canDeselect: TRUE_FUNC // selectionManager => true
         }),
         
         /** Manages the selection of one or more items.
@@ -144,7 +145,7 @@
             /** Called when an item is selected.
                 @param {!Objectd} item - The newly selected myt.Selectable..
                 @returns {undefined} */
-            doSelected: item => {},
+            doSelected: NOOP, // item => {},
             
             /** Selects the item with the provided item selection ID.
                 @param {string} itemSelectionId
@@ -201,7 +202,7 @@
             /** Called when an item is deselected.
                 @param {!Object} item - The newly deselected myt.Selectable.
                 @returns {undefined} */
-            doDeselected: item => {},
+            doDeselected: NOOP, // item => {},
             
             /** Deselects the item with the provided item selection ID.
                 @param {string} itemSelectionId

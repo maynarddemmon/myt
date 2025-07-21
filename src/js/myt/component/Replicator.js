@@ -78,7 +78,7 @@
             @param {string} key - The name of the message
             @param {*} value - The value of the message.
             @returns {undefined} */
-        notify: (key, value) => {},
+        notify: pkg.NOOP, // (key, value) => {},
         
         /** @overrides myt.Reusable
             Subclasses should call super. */

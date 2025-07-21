@@ -3,6 +3,8 @@
         
         mathMax = Math.max,
         
+        FALSE_FUNC = pkg.FALSE_FUNC,
+        
         adjustListOfViews = (svs, isX, adjAmount, compounded, i=0) => {
             const len = svs.length;
             for (let compoundAdj = adjAmount; i < len; i++) {
@@ -153,8 +155,8 @@
                 return this.inited && !this.__isUpdatingFlexboxLayout && !this.isFlexboxPaused();
             },
             
-            isCompactWidth: () => false,
-            isCompactHeight: () => false,
+            isCompactWidth: FALSE_FUNC,
+            isCompactHeight: FALSE_FUNC,
             isCompactOnMainAxis: function(isRowDirection) {
                 return isRowDirection ? this.isCompactWidth() : this.isCompactHeight();
             },
@@ -478,7 +480,7 @@
                 }
             },
             
-            updateFlexboxLayoutBaselineAdjustment: (items, isRowDirection, crossPositionOffset) => {}
+            updateFlexboxLayoutBaselineAdjustment: pkg.NOOP // (items, isRowDirection, crossPositionOffset) => {}
         });
     
     /** Adds support for flex box child behavior to a myt.View.

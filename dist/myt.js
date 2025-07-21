@@ -637,6 +637,10 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             
             generateGuid: generateGuid,
             
+            TRUE_FUNC: () => true,
+            FALSE_FUNC: () => false,
+            NOOP: () => {},
+            
             /** Theme properties for various components.
                 IMPORTANT! Don't import these directly into packages. That would make them
                     difficult to override in projects that use myt. It is OK to import the
@@ -2867,7 +2871,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             
             
             // Constructor /////////////////////////////////////////////////////
-            initialize: () => {},
+            initialize: pkg.NOOP,
             
             
             // Methods /////////////////////////////////////////////////////////
@@ -4527,6 +4531,8 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         mathMax = Math.max,
         
+        FALSE_FUNC = pkg.FALSE_FUNC,
+        
         adjustListOfViews = (svs, isX, adjAmount, compounded, i=0) => {
             const len = svs.length;
             for (let compoundAdj = adjAmount; i < len; i++) {
@@ -4677,8 +4683,8 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 return this.inited && !this.__isUpdatingFlexboxLayout && !this.isFlexboxPaused();
             },
             
-            isCompactWidth: () => false,
-            isCompactHeight: () => false,
+            isCompactWidth: FALSE_FUNC,
+            isCompactHeight: FALSE_FUNC,
             isCompactOnMainAxis: function(isRowDirection) {
                 return isRowDirection ? this.isCompactWidth() : this.isCompactHeight();
             },
@@ -5002,7 +5008,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 }
             },
             
-            updateFlexboxLayoutBaselineAdjustment: (items, isRowDirection, crossPositionOffset) => {}
+            updateFlexboxLayoutBaselineAdjustment: pkg.NOOP // (items, isRowDirection, crossPositionOffset) => {}
         });
     
     /** Adds support for flex box child behavior to a myt.View.
@@ -5412,6 +5418,8 @@ myt.Destructible = new JS.Module('Destructible', {
 (pkg => {
     const {Class:JSClass, Module:JSModule} = JS,
         
+        NOOP = pkg.NOOP,
+        
         consoleWarn = console.warn,
         
         /*  Get the object pool.
@@ -5453,7 +5461,7 @@ myt.Destructible = new JS.Module('Destructible', {
             // Constructor /////////////////////////////////////////////////////
             /** Initialize does nothing.
                 @returns {undefined} */
-            initialize: () => {},
+            initialize: NOOP,
             
             
             // Life Cycle //////////////////////////////////////////////////////
@@ -5701,13 +5709,15 @@ myt.Destructible = new JS.Module('Destructible', {
         // Methods /////////////////////////////////////////////////////////////
         /** Puts this object back into a default state suitable for storage in an myt.AbstractPool
             @returns {undefined} */
-        clean: () => {}
+        clean: NOOP
     });
 })(myt);
 
 
 (pkg => {
     const JSClass = JS.Class,
+        
+        NOOP = pkg.NOOP,
         
         consoleWarn = console.warn,
         
@@ -5932,7 +5942,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Provides a hook for subclasses to do destruction of their internals. This method is 
             called after the parent has been unset. Subclasses must call super.
             @returns {undefined} */
-        destroyAfterOrphaning: () => {/* Subclasses to implement as needed. */},
+        destroyAfterOrphaning: NOOP, // () => {/* Subclasses to implement as needed. */},
         
         
         // Structural Accessors ////////////////////////////////////////////////
@@ -6143,14 +6153,14 @@ myt.Destructible = new JS.Module('Destructible', {
             subclasses to call super. Do not call this method to add a subnode. Instead call setParent.
             @param {!Object} node - The sub myt.Node that was added.
             @returns {undefined} */
-        subnodeAdded: node => {},
+        subnodeAdded: NOOP, // node => {},
         
         /** Called when a subnode is removed from this node. Provides a hook for subclasses. No need
             for subclasses to call super. Do not call this method to remove a subnode. Instead 
             call setParent.
             @param {!Object} node - The sub myt.Node that was removed.
             @returns {undefined} */
-        subnodeRemoved: node => {},
+        subnodeRemoved: NOOP, // node => {},
         
         
         // Animation //
@@ -6264,6 +6274,8 @@ myt.Destructible = new JS.Module('Destructible', {
         globalLock = false;
     
     const JSClass = JS.Class,
+        
+        NOOP = pkg.NOOP,
         
         /*  A list of layouts to be updated once the global lock is released. */
         deferredLayouts = [],
@@ -6446,7 +6458,7 @@ myt.Destructible = new JS.Module('Destructible', {
             /** Updates the layout. Subclasses should call canUpdate to check lock state before 
                 trying to do anything.
                 @returns {undefined} */
-            update: () => {},
+            update: NOOP,
             
             // Subview Methods //
             /** Checks if this Layout has the provided View in the subviews array.
@@ -6478,7 +6490,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 subview that should trigger the update method.
                 @param {?Object} sv - The myt.View to start monitoring for changes.
                 @returns {undefined} */
-            startMonitoringSubview: sv => {},
+            startMonitoringSubview: NOOP, // sv => {},
             
             /** Calls startMonitoringSubview for all views. Used by Layout implementations when a 
                 change occurs to the layout that 
@@ -6510,7 +6522,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 were setup in startMonitoringSubview.
                 @param {?Object} sv - The myt.View to stop monitoring for changes.
                 @returns {undefined} */
-            stopMonitoringSubview: sv => {},
+            stopMonitoringSubview: NOOP, // sv => {},
             
             /** Calls stopMonitoringSubview for all views. Used by Layout implementations when a 
                 change occurs to the layout that requires refreshing all the subview monitoring.
@@ -6686,13 +6698,13 @@ myt.Destructible = new JS.Module('Destructible', {
             /** Called by update before any processing is done. Gives subviews a chance to do any 
                 special setup before update is processed.
                 @returns {undefined} */
-            doBeforeUpdate: () => {/* Subclasses to implement as needed. */},
+            doBeforeUpdate: NOOP, // () => {/* Subclasses to implement as needed. */},
             
             /** Called by update after any processing is done but before the optional collapsing of 
                 parent is done. Gives subviews a chance to do any special teardown after update 
                 is processed.
                 @returns {undefined} */
-            doAfterUpdate: () => {/* Subclasses to implement as needed. */},
+            doAfterUpdate: NOOP, // () => {/* Subclasses to implement as needed. */},
             
             /** Provides a default implementation that calls update when the visibility of a 
                 subview changes.
@@ -6735,7 +6747,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 @param {string} setterName - The name of the setter method to call on the parent.
                 @param {*} value - The value to set on the parent.
                 @returns {undefined} */
-            updateParent: (setterName, value) => {/* Subclasses to implement as needed. */}
+            updateParent: NOOP // (setterName, value) => {/* Subclasses to implement as needed. */}
         }),
         
         /** An extension of VariableLayout that positions views along an axis using an inset, 
@@ -6842,7 +6854,7 @@ myt.Destructible = new JS.Module('Destructible', {
     pkg.ResizeLayout = new JSClass('ResizeLayout', SpacedLayout, {
         // Accessors ///////////////////////////////////////////////////////////
         /** @overrides myt.VariableLayout */
-        setCollapseParent: v => {/* collapseParent attribute is unused in ResizeLayout. */},
+        setCollapseParent: NOOP, // v => {/* collapseParent attribute is unused in ResizeLayout. */},
         
         /** @overrides myt.SpacedLayout */
         setTargetAttrName: function(v) {
@@ -6951,7 +6963,7 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** @overrides myt.SpacedLayout */
-        updateParent: (setterName, value) => {/* No resizing of parent since this view expands to fill the parent. */}
+        updateParent: NOOP // (setterName, value) => {/* No resizing of parent since this view expands to fill the parent. */}
     });
     
     /** An extension of VariableLayout that also aligns each view vertically or horizontally.
@@ -7228,9 +7240,8 @@ myt.Destructible = new JS.Module('Destructible', {
 
 (pkg => {
     const mathRound = Math.round,
-        DomElementProxy = pkg.DomElementProxy,
         
-        rectContainsPoint = pkg.Geometry.rectContainsPoint,
+        {NOOP, DomElementProxy, Geometry:{rectContainsPoint}} = pkg,
         
         getDomStyle = (view, isInnerElem) => isInnerElem ? view.getIDS() : view.getODS(),
         
@@ -8201,13 +8212,13 @@ myt.Destructible = new JS.Module('Destructible', {
             Instead call setParent.
             @param {!Object} sv - The myt.View that was added.
             @returns {undefined} */
-        subviewAdded: sv => {},
+        subviewAdded: NOOP, // sv => {},
         
         /** Called when a View is removed from this View. Do not call this method to remove a View. 
             Instead call setParent.
             @param {!Object} sv - The myt.View that was removed.
             @returns {undefined} */
-        subviewRemoved: sv => {},
+        subviewRemoved: NOOP, // sv => {},
         
         /** Gets the next sibling view based on lexical ordering of dom elements.
             @returns {?Object} - The next sibling myt.View or undefined if none exists. */
@@ -8254,13 +8265,13 @@ myt.Destructible = new JS.Module('Destructible', {
             Instead call setParent.
             @param {!Object} layout - The myt.Layout that was added.
             @returns {undefined} */
-        layoutAdded: layout => {},
+        layoutAdded: NOOP, // layout => {},
         
         /** Called when a Layout is removed from this View. Do not call this method to remove a 
             Layout. Instead call setParent.
             @param {!Object} layout - The myt.Layout that was removed.
             @returns {undefined} */
-        layoutRemoved: layout => {},
+        layoutRemoved: NOOP, // layout => {},
         
         // Dom-Ordering //
         /** Test if the provided view is behind this view. The view to test can be anywhere in 
@@ -8316,7 +8327,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {?Object} sv The subview that was reorderd or null if no specific subview can 
                 be determined.
             @returns {undefined} */
-        doSubviewsReorderedInDom: sv => {/* Subclasses to implement. */},
+        doSubviewsReorderedInDom: NOOP, // sv => {/* Subclasses to implement. */},
         
         /** Sends the provided subview to the back.
             @param {!Object} sv - The subview of this view to bring to front.
@@ -9791,7 +9802,7 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** @overrides myt.Node */
-            setParent: parent => {/* A root view has no parent view so do nothing. */},
+            setParent: pkg.NOOP, // parent => {/* A root view has no parent view so do nothing. */},
             
             
             // Methods /////////////////////////////////////////////////////////
@@ -10832,6 +10843,8 @@ myt.Destructible = new JS.Module('Destructible', {
 (pkg => {
     const isArray = Array.isArray,
         
+        NOOP = pkg.NOOP,
+        
         /*  Indicates a synchronous transition. */
         SYNC = 'sync',
         
@@ -11077,9 +11090,9 @@ myt.Destructible = new JS.Module('Destructible', {
             return SUCCEEDED;
         },
         
-        doLeaveState: (transitionName, from, to, args) => {/* Subclasses to implement as needed. */},
+        doLeaveState: NOOP, // (transitionName, from, to, args) => {/* Subclasses to implement as needed. */},
         
-        doEnterState: (transitionName, from, to, args) => {/* Subclasses to implement as needed. */},
+        doEnterState: NOOP, // (transitionName, from, to, args) => {/* Subclasses to implement as needed. */},
         
         isFinished: function() {
             return this.is(this.terminal);
@@ -11188,7 +11201,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {string} key - The name of the message
             @param {*} value - The value of the message.
             @returns {undefined} */
-        notify: (key, value) => {},
+        notify: pkg.NOOP, // (key, value) => {},
         
         /** @overrides myt.Reusable
             Subclasses should call super. */
@@ -11579,6 +11592,8 @@ myt.Destructible = new JS.Module('Destructible', {
 (pkg => {
     const JSModule = JS.Module,
         
+        NOOP = pkg.NOOP,
+        
         {mouse:GlobalMouse, keys:GlobalKeys, idle:GlobalIdle} = pkg.global,
         
         NO_KEY_DOWN = '',
@@ -11594,7 +11609,7 @@ myt.Destructible = new JS.Module('Destructible', {
         // Methods /////////////////////////////////////////////////////////////
         /** Called when this view should be activated.
             @returns {undefined} */
-        doActivated: () => {/* Subclasses to implement as needed. */}
+        doActivated: NOOP // () => {/* Subclasses to implement as needed. */}
     });
     
     /** Adds an udpateUI method that should be called to update the UI. Various mixins will rely on 
@@ -11617,7 +11632,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Updates the UI whenever a change occurs that requires a visual update. Subclasses 
             should implement this as needed.
             @returns {undefined} */
-        updateUI: () => {/* Subclasses to implement as needed. */}
+        updateUI: NOOP // () => {/* Subclasses to implement as needed. */}
     });
     
     /** Adds the capability to be "disabled" to an myt.Node. When an myt.Node is disabled the user 
@@ -11781,7 +11796,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @param code:string - The key code that is down.
             @param isRepeat:boolean - Indicates if this is a key repeat event or not.
             @returns {undefined} */
-        doActivationKeyDown: (code, isRepeat) => {/* Subclasses to implement as needed. */},
+        doActivationKeyDown: NOOP, // (code, isRepeat) => {/* Subclasses to implement as needed. */},
         
         /** Called when an activation key is release up. This executes the "doActivated" method 
             by default. 
@@ -11795,7 +11810,7 @@ myt.Destructible = new JS.Module('Destructible', {
             does nothing.
             @param code:string - The keycode that is down.
             @returns {undefined} */
-        doActivationKeyAborted: code => {/* Subclasses to implement as needed. */}
+        doActivationKeyAborted: NOOP // code => {/* Subclasses to implement as needed. */}
     });
     
     pkg.ArrowKeyActivation = new JSModule('KeyActivation', {
@@ -11823,13 +11838,13 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {boolean} isLeft - Indicates if the Left or Up key triggered the event.
             @param isRepeat:boolean Indicates if this is a key repeat event or not.
             @returns {boolean} If true doActivationKeyDown will not callSuper. */
-        doKeyArrowLeftOrUp: (isLeft, isRepeat) => {/* Subclasses to implement as needed. */},
+        doKeyArrowLeftOrUp: NOOP, // (isLeft, isRepeat) => {/* Subclasses to implement as needed. */},
         
         /** Called when the Right or Down arrow key triggers a down event.
             @param {boolean} isRight - Indicates if the Right or Down key triggered the event.
             @param isRepeat:boolean - Indicates if this is a key repeat event or not.
             @returns {boolean} If true doActivationKeyDown will not callSuper. */
-        doKeyArrowRightOrDown: (isRight, isRepeat) => {/* Subclasses to implement as needed. */}
+        doKeyArrowRightOrDown: NOOP // (isRight, isRepeat) => {/* Subclasses to implement as needed. */}
     }),
     
     /** Provides a 'mouseOver' attribute that tracks mouse over/out state. Also provides a 
@@ -12016,7 +12031,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Called by the doMouseDown function when this View is currently disabled:true. Note that
             the mouseDown attribute of this View will not be true when this function is called.
             @returns {undefined} */
-        doMouseDownWhenDisabled: () => {/* Subclasses to implement as needed. */},
+        doMouseDownWhenDisabled: NOOP, // () => {/* Subclasses to implement as needed. */},
         
         /** Called when the mouse is up on this view. Subclasses must call super.
             @param {!Object} event
@@ -12173,7 +12188,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** @private
             @param {!Object} event
             @returns {undefined} */
-        __doContextMenu: event => {/* Do nothing so the context menu event is suppressed. */},
+        __doContextMenu: NOOP, // event => {/* Do nothing so the context menu event is suppressed. */},
         
         /** @private
             @param {!Object} event
@@ -12314,7 +12329,7 @@ myt.Destructible = new JS.Module('Destructible', {
 (pkg => {
     const {Class:JSClass, Module:JSModule} = JS,
         
-        {View, KeyActivation, theme:THEME} = pkg,
+        {NOOP, View, KeyActivation, theme:THEME} = pkg,
         
         /** Provides button functionality to an myt.View. Most of the functionality comes from the 
             mixins included by this mixin. This mixin resolves issues that arise when the various 
@@ -12415,22 +12430,22 @@ myt.Destructible = new JS.Module('Destructible', {
             /** Draw the UI when the component is on the verge of being interacted with. For mouse 
                 interactions this corresponds to the over state.
                 @returns {undefined} */
-            drawHoverState: () => {/* Subclasses to implement as needed. */},
+            drawHoverState: NOOP, // () => {/* Subclasses to implement as needed. */},
             
             /** Draw the UI when the component has a pending activation. For mouse interactions 
                 this corresponds to the down state.
                 @returns {undefined} */
-            drawActiveState: () => {/* Subclasses to implement as needed. */},
+            drawActiveState: NOOP, // () => {/* Subclasses to implement as needed. */},
             
             /** Draw the UI when the component is ready to be interacted with. For mouse 
                 interactions this corresponds to the enabled state when the mouse is not over 
                 the component.
                 @returns {undefined} */
-            drawReadyState: () => {/* Subclasses to implement as needed. */},
+            drawReadyState: NOOP, // () => {/* Subclasses to implement as needed. */},
             
             /** Draw the UI when the component is in the disabled state.
                 @returns {undefined} */
-            drawDisabledState: () => {/* Subclasses to implement as needed. */},
+            drawDisabledState: NOOP, // () => {/* Subclasses to implement as needed. */},
             
             /** @overrides myt.FocusObservable */
             showFocusIndicator: function() {
@@ -13216,7 +13231,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Part of a performance optimization. Called from updateItems after the items have 
                 been inserted into the dom. Now we can actually measure text width. */
-            syncToDom: () => {}
+            syncToDom: pkg.NOOP
         });
     
     /** A floating panel that contains a list of items.
@@ -13961,7 +13976,8 @@ myt.Destructible = new JS.Module('Destructible', {
 
 (pkg => {
     const JSModule = JS.Module,
-        GlobalKeys = pkg.global.keys,
+        
+        {NOOP, TRUE_FUNC, global:{keys:GlobalKeys}} = pkg,
         
         /** Makes an object selectable.
             
@@ -13994,13 +14010,13 @@ myt.Destructible = new JS.Module('Destructible', {
                 by default.
                 @param {!Object} selectionManager
                 @returns {boolean} */
-            canSelect: selectionManager => true,
+            canSelect: TRUE_FUNC, // selectionManager => true,
             
             /** Checks if the provided myt.SelectionManager can deselect this object. Returns true 
                 by default.
                 @param {!Object} selectionManager
                 @returns {boolean} */
-            canDeselect: selectionManager => true
+            canDeselect: TRUE_FUNC // selectionManager => true
         }),
         
         /** Manages the selection of one or more items.
@@ -14105,7 +14121,7 @@ myt.Destructible = new JS.Module('Destructible', {
             /** Called when an item is selected.
                 @param {!Objectd} item - The newly selected myt.Selectable..
                 @returns {undefined} */
-            doSelected: item => {},
+            doSelected: NOOP, // item => {},
             
             /** Selects the item with the provided item selection ID.
                 @param {string} itemSelectionId
@@ -14162,7 +14178,7 @@ myt.Destructible = new JS.Module('Destructible', {
             /** Called when an item is deselected.
                 @param {!Object} item - The newly deselected myt.Selectable.
                 @returns {undefined} */
-            doDeselected: item => {},
+            doDeselected: NOOP, // item => {},
             
             /** Deselects the item with the provided item selection ID.
                 @param {string} itemSelectionId
@@ -14442,7 +14458,7 @@ myt.Destructible = new JS.Module('Destructible', {
             /** Called whenever the button is redrawn. Gives subclasses/instances a chance to do 
                 additional things when the button is redrawn.
                 @returns {undefined} */
-            notifyButtonRedraw: () => {},
+            notifyButtonRedraw: pkg.NOOP,
             
             /** @private
                 @param {!Object} event
@@ -14997,7 +15013,7 @@ myt.Destructible = new JS.Module('Destructible', {
         isArray = Array.isArray,
         
         {
-            SizeToDom, View, Disableable, KeyObservable, theme,
+            NOOP, SizeToDom, View, Disableable, KeyObservable, theme,
             global:{keys:GlobalKeys}
         } = pkg,
         
@@ -15252,7 +15268,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 implementation does nothing.
                 @param {!Object} domEvent - The dom key press event.
                 @returns {undefined} */
-            filterInputPress: domEvent => {/* Subclasses to implement as needed. */},
+            filterInputPress: NOOP, // domEvent => {/* Subclasses to implement as needed. */},
             
             /** @private
                 @param {!Object} event
@@ -15388,8 +15404,8 @@ myt.Destructible = new JS.Module('Destructible', {
             return this.callSuper(domObserver, methodName, type);
         },
         
-        doMouseDown: event => {/* Do nothing by default. */},
-        doMouseUp: event => {/* Do nothing by default. */}
+        doMouseDown: NOOP, // event => {/* Do nothing by default. */},
+        doMouseUp: NOOP // event => {/* Do nothing by default. */}
     }),
     
     /** Text content that can be edited.
@@ -15935,7 +15951,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Called whenever the underlying dom element fires a "change" event.
             @returns {undefined} */
-        doChanged: () => {},
+        doChanged: NOOP,
         
         /** @private
             @returns {undefined} */
@@ -16330,7 +16346,7 @@ myt.Destructible = new JS.Module('Destructible', {
         consoleWarn = console.warn,
         
         {
-            KeyObservable, UpdateableUI,
+            NOOP, KeyObservable, UpdateableUI,
             dumpStack,
             global:G
         } = pkg,
@@ -17453,11 +17469,11 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Called when the form is submitted and it is valid.
             @param {*} value
             @returns {undefined} */
-        doValidSubmit: value => {},
+        doValidSubmit: NOOP, // value => {}
         
         /** Called when the form is submitted and it is not valid.
             @returns {undefined} */
-        doInvalidSubmit: () => {},
+        doInvalidSubmit: NOOP, // () => {}
         
         /** Rolls back the form and revalidates it.
             @returns {undefined} */
@@ -17647,7 +17663,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides myt.FormInputTextMixin */
-        __hndlKeyDown: event => {/* Do nothing so the "accept" accelerator is not invoked. */}
+        __hndlKeyDown: NOOP // Do nothing so the "accept" accelerator is not invoked.
     });
     
     /** An myt.InputSelect that is also a FormElement.
@@ -17803,7 +17819,7 @@ myt.Destructible = new JS.Module('Destructible', {
 (pkg => {
     const JSClass = JS.Class,
         
-        dumpStack = pkg.dumpStack,
+        {NOOP, dumpStack} = pkg,
         
         mathRound = Math.round,
         
@@ -17873,15 +17889,15 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** @param {!Object} event
                 @returns {undefined} */
-            doDragOver: event => {},
+            doDragOver: NOOP, // event => {},
             
             /** @param {!Object} event
                 @returns {undefined} */
-            doDragEnter: event => {},
+            doDragEnter: NOOP, // event => {},
             
             /** @param {!Object} event
                 @returns {undefined} */
-            doDragLeave: event => {},
+            doDragLeave: NOOP, // event => {},
             
             /** @param {!Object} event
                 @returns {undefined} */
@@ -17914,7 +17930,7 @@ myt.Destructible = new JS.Module('Destructible', {
             /** @param {!Object} file
                 @param {!Object} event
                 @returns {undefined} */
-            handleDroppedFile: (file, event) => {}
+            handleDroppedFile: NOOP // (file, event) => {}
         }),
         
         FileInput = pkg.FileInput = new JSClass('FileInput', pkg.NativeInputWrapper, {
@@ -17945,7 +17961,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 this.getIDE().value = '';
             },
             
-            _onChange: event => {/* Subclasses to implement. */}
+            _onChange: NOOP, // event => {/* Subclasses to implement. */}
         }),
         
         /** Component to upload files.
@@ -18484,7 +18500,7 @@ myt.Destructible = new JS.Module('Destructible', {
             /** A handler for mouse events that does nothing and prevents propogation.
                 @param {!Object} event
                 @return boolean True so that the dom event gets eaten. */
-            eatMouseEvent: event => true,
+            eatMouseEvent: pkg.TRUE_FUNC, // event => true,
             
             /** Shows the dimmer and remembers the focus location.
                 @returns {undefined} */
@@ -20115,7 +20131,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 @param {?Array} [errorMessages] - Any error messages arising during validation will 
                     be pushed onto thiis array if it is provided.
                 @returns {boolean} true if the value is valid, false otherwise. */
-            isValid: (value, config, errorMessages) => true,
+            isValid: pkg.TRUE_FUNC, // (value, config, errorMessages) => true,
             
             /** Tests if the form is valid or not.
                 @param {!Object} form - The myt.Form to test validity for.
@@ -20433,7 +20449,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         {min:mathMin, max:mathMax, round:mathRound, abs:mathAbs} = Math,
         
-        View = pkg.View,
+        {NOOP, View} = pkg,
         
         SliderThumb = new JSClass('SliderThumb', pkg.SimpleButton, {
             include: [pkg.Draggable, pkg.ArrowKeyActivation],
@@ -20663,7 +20679,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 this._nudge(thumb, true);
             },
             
-            _nudge: (thumb, up) => {/* Subclasses to implement */},
+            _nudge: NOOP, // (thumb, up) => {/* Subclasses to implement */},
             
             _syncThumbToValue: function(thumb, value) {
                 value = this.convertValueToPixels(value);
@@ -20688,7 +20704,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 }
             },
             
-            _syncValueToThumb: (thumb, converted) => {/* Subclasses to implement */},
+            _syncValueToThumb: NOOP, // (thumb, converted) => {/* Subclasses to implement */},
             
             /** Should only be called by SliderThumb.
                 @private
@@ -21610,7 +21626,7 @@ myt.Destructible = new JS.Module('Destructible', {
             /** Sorts the rows according to the current sort criteria. Subclasses and instances 
                 should implement this as needed.
                 @returns {undefined} */
-            doSort: () => {},
+            doSort: pkg.NOOP, // () => {}
             
             // Column Headers
             /** Gets the column header before the provided one.
@@ -22364,7 +22380,7 @@ myt.Destructible = new JS.Module('Destructible', {
         mathMax = math.max,
         
         {
-            View, LocalStorage:{setDatum, getDatum},
+            NOOP, View, LocalStorage:{setDatum, getDatum},
             global:{focus:GlobalFocus, keys:GlobalKeys},
             getAlphaObjSortFunc
         } = pkg,
@@ -22423,7 +22439,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             
             // Methods /////////////////////////////////////////////////////////
-            notifyRefreshed: () => {/* Subclasses to implement as needed. */}
+            notifyRefreshed: NOOP // () => {/* Subclasses to implement as needed. */}
         }),
         
         /** A mixin for rows in infinite scrolling lists
@@ -22563,7 +22579,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 }
             },
             
-            getFilterFunction: () => {/* Unimplemented which means don't filter anything out. */},
+            getFilterFunction: NOOP, // () => {/* Unimplemented which means don't filter anything out. */},
             
             scrollModelIntoView: function(model, doFocus) {
                 const self = this,
@@ -22783,7 +22799,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             getClassKey: model => DEFAULT_CLASS_KEY,
             
-            updateRow: row => {}
+            updateRow:NOOP // row => {}
         }),
         
         /** A simple implementation of a SelectableInfiniteListRow.
@@ -23153,6 +23169,8 @@ myt.Destructible = new JS.Module('Destructible', {
 (pkg => {
     const JSClass = JS.Class,
         
+        NOOP = pkg.NOOP,
+        
         /** Use this to implement more complex transitions in a PanelStack.
             
             @class */
@@ -23266,8 +23284,8 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         },
         
-        doBeforeTransitionTo: panel => {},
-        doAfterTransitionTo: panel => {},
+        doBeforeTransitionTo: NOOP, // panel => {},
+        doAfterTransitionTo: NOOP, // panel => {},
         
         /** Called by PanelStack.doStackTransition when the provided panel will be the newly 
             deselected panel in the stack. Should not be called directly. Instead change the 
@@ -23288,8 +23306,8 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         },
         
-        doBeforeTransitionFrom: panel => {},
-        doAfterTransitionFrom: panel => {}
+        doBeforeTransitionFrom: NOOP, // panel => {},
+        doAfterTransitionFrom: NOOP // panel => {}
     });
     
     /** Makes a view act as a panel in a myt.PanelStack.
@@ -23492,8 +23510,8 @@ myt.Destructible = new JS.Module('Destructible', {
 
 (pkg => {
     const JSModule = JS.Module,
-    
-        {Draggable, global:{dragManager, mouse:globalMouse}} = pkg,
+        
+        {NOOP, Draggable, global:{dragManager, mouse:globalMouse}} = pkg,
         
         ANY_GROUP = '*',
         
@@ -23732,31 +23750,31 @@ myt.Destructible = new JS.Module('Destructible', {
             matching drag group.
             @param dropable:myt.Dropable The dropable being dragged.
             @returns {undefined} */
-        notifyDragStart: dropable => {},
+        notifyDragStart: NOOP, // dropable => {},
         
         /** Called by myt.GlobalDragManager when a dropable stops being dragged that has a 
             matching drag group.
             @param dropable:myt.Dropable The dropable no longer being dragged.
             @returns {undefined} */
-        notifyDragStop: dropable => {},
+        notifyDragStop: NOOP, // dropable => {},
         
         /** Called by myt.GlobalDragManager when a dropable is dragged over this view and has a 
             matching drag group.
             @param dropable:myt.Dropable The dropable being dragged over this view.
             @returns {undefined} */
-        notifyDragEnter: dropable => {},
+        notifyDragEnter: NOOP, // dropable => {},
         
         /** Called by myt.GlobalDragManager when a dropable is dragged out of this view and has a 
             matching drag group.
             @param dropable:myt.Dropable The dropable being dragged out of this view.
             @returns {undefined} */
-        notifyDragLeave: dropable => {},
+        notifyDragLeave: NOOP, // dropable => {},
         
         /** Called by myt.GlobalDragManager when a dropable is dropped onto this view and has a 
             matching drag group.
             @param dropable:myt.Dropable The dropable being dropped onto this view.
             @returns {undefined} */
-        notifyDrop: dropable => {}
+        notifyDrop: NOOP // dropable => {}
     });
     
     /** Makes an myt.View drag and dropable via the mouse.
@@ -23783,7 +23801,7 @@ myt.Destructible = new JS.Module('Destructible', {
             returns true.
             @param dropTarget:myt.DropTarget The drop target dragged over.
             @returns boolean: True if the drop will be allowed, false otherwise. */
-        willPermitDrop: dropTarget => true,
+        willPermitDrop: pkg.TRUE_FUNC, // dropTarget => true,
         
         /** @overrides myt.Draggable */
         startDrag: function(event) {
@@ -23841,12 +23859,12 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Called after dragging stops and the drop failed. The default implementation 
             does nothing.
             @returns {undefined} */
-        notifyDropFailed: () => {},
+        notifyDropFailed: NOOP,
         
         /** Called after dragging stops and the drop was aborted. The default implementation 
             does nothing.
             @returns {undefined} */
-        notifyDropAborted: () => {}
+        notifyDropAborted: NOOP
     });
     
     /** Makes an myt.View auto scroll during drag and drop.

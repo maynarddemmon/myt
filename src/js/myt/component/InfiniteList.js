@@ -5,7 +5,7 @@
         mathMax = math.max,
         
         {
-            View, LocalStorage:{setDatum, getDatum},
+            NOOP, View, LocalStorage:{setDatum, getDatum},
             global:{focus:GlobalFocus, keys:GlobalKeys},
             getAlphaObjSortFunc
         } = pkg,
@@ -64,7 +64,7 @@
             
             
             // Methods /////////////////////////////////////////////////////////
-            notifyRefreshed: () => {/* Subclasses to implement as needed. */}
+            notifyRefreshed: NOOP // () => {/* Subclasses to implement as needed. */}
         }),
         
         /** A mixin for rows in infinite scrolling lists
@@ -204,7 +204,7 @@
                 }
             },
             
-            getFilterFunction: () => {/* Unimplemented which means don't filter anything out. */},
+            getFilterFunction: NOOP, // () => {/* Unimplemented which means don't filter anything out. */},
             
             scrollModelIntoView: function(model, doFocus) {
                 const self = this,
@@ -424,7 +424,7 @@
             
             getClassKey: model => DEFAULT_CLASS_KEY,
             
-            updateRow: row => {}
+            updateRow:NOOP // row => {}
         }),
         
         /** A simple implementation of a SelectableInfiniteListRow.

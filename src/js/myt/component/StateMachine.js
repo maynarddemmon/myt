@@ -1,6 +1,8 @@
 (pkg => {
     const isArray = Array.isArray,
         
+        NOOP = pkg.NOOP,
+        
         /*  Indicates a synchronous transition. */
         SYNC = 'sync',
         
@@ -246,9 +248,9 @@
             return SUCCEEDED;
         },
         
-        doLeaveState: (transitionName, from, to, args) => {/* Subclasses to implement as needed. */},
+        doLeaveState: NOOP, // (transitionName, from, to, args) => {/* Subclasses to implement as needed. */},
         
-        doEnterState: (transitionName, from, to, args) => {/* Subclasses to implement as needed. */},
+        doEnterState: NOOP, // (transitionName, from, to, args) => {/* Subclasses to implement as needed. */},
         
         isFinished: function() {
             return this.is(this.terminal);

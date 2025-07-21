@@ -5,7 +5,7 @@
         isArray = Array.isArray,
         
         {
-            SizeToDom, View, Disableable, KeyObservable, theme,
+            NOOP, SizeToDom, View, Disableable, KeyObservable, theme,
             global:{keys:GlobalKeys}
         } = pkg,
         
@@ -260,7 +260,7 @@
                 implementation does nothing.
                 @param {!Object} domEvent - The dom key press event.
                 @returns {undefined} */
-            filterInputPress: domEvent => {/* Subclasses to implement as needed. */},
+            filterInputPress: NOOP, // domEvent => {/* Subclasses to implement as needed. */},
             
             /** @private
                 @param {!Object} event
@@ -396,8 +396,8 @@
             return this.callSuper(domObserver, methodName, type);
         },
         
-        doMouseDown: event => {/* Do nothing by default. */},
-        doMouseUp: event => {/* Do nothing by default. */}
+        doMouseDown: NOOP, // event => {/* Do nothing by default. */},
+        doMouseUp: NOOP // event => {/* Do nothing by default. */}
     }),
     
     /** Text content that can be edited.
@@ -943,7 +943,7 @@
         
         /** Called whenever the underlying dom element fires a "change" event.
             @returns {undefined} */
-        doChanged: () => {},
+        doChanged: NOOP,
         
         /** @private
             @returns {undefined} */
