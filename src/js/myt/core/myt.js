@@ -147,8 +147,8 @@
                 seenB.set(b, a);
                 
                 // Quick check for Array vs Object.
-                const isArrA = Array.isArray(a),
-                    isArrB = Array.isArray(b);
+                const isArrA = isArray(a),
+                    isArrB = isArray(b);
                 if (isArrA !== isArrB) return false;
                 
                 // Check Arrays
@@ -179,7 +179,7 @@
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
-            version:20230602.1558,
+            version:20250728.1019,
             
             generateGuid: generateGuid,
             
@@ -256,39 +256,8 @@
                 border1s9:[1, 'solid', '#999']
             },
             
-            /** Creates a non-secure hash of a string.
-                @param {string} s - The string to hash.
-                @returns {number} */
-            hash: s => s.split('').reduce((a, b) => {a = ((a << 5) - a) + b.charCodeAt(0); return a&a;}, 0),
             
-            /** Adds an event listener to a dom element. 
-                @param {!Object} elem - The DomElement to listen to.
-                @param {string} type - The name of the event to listen to.
-                @param {!Function} callback - The callback function that will be registered for 
-                    the event.
-                @param {boolean} [capture] - Indicates if the listener is registered during the 
-                    capture phase or bubble phase.
-                @param {boolean} passive
-                @returns {undefined} */
-            addEventListener: (elem, type, callback, capture, passive) => {
-                elem.addEventListener(type, callback, {
-                    capture:capture || false,
-                    passive:passive || false
-                });
-            },
-            
-            /** Removes an event listener from a dom element. 
-                @param elem:DomElement The dom element to listen to.
-                @param {string} type - The name of the event to listen to.
-                @param {!Function} callback - The callback function that will be registered for 
-                    the event.
-                @param {boolean} [capture] indicates if the listener is registered during the 
-                    capture phase or bubble phase.
-                @returns {undefined} */
-            removeEventListener: (elem, type, callback, capture) => {
-                elem.removeEventListener(type, callback, capture || false);
-            },
-            
+            // Object Utility Functions ////////////////////////////////////////
             /** Takes a '.' separated string such as "foo.bar.baz" and resolves it into the value 
                 found at that location relative to a starting scope. If no scope is provided global 
                 scope is used.
@@ -326,126 +295,44 @@
                 return (value && typeof value.isA === 'function' && value.isA(JS.Class)) ? value : null;
             },
             
-            /** Gets the file extension from a file name.
-                @param {string} fileName - The filename to extract the extension from.
-                @returns {string) The file extension or null if a falsy fileName argument was 
-                    provided. */
-            getExtension: fileName => {
-                if (fileName) {
-                    const parts = fileName.split('.');
-                    return parts.length > 1 ? parts.pop() : null;
-                } else {
-                    return null;
-                }
-            },
-            
-            /** Dynamically load a script into the dom.
-                @param {string} src - The URL to the script file.
-                @param {?Function} [callback] - A function called when the script loads. A boolean
-                    is passed to it indicating success or failure.
-                @param {boolean} [noCacheBust] - If true, not cacheBust query param will be added. 
-                    Defaults to undefined which is equivalent to false.
-                @param {string} [integrity] - If provided an integrity and crossorigin check will 
-                    be set on the script element.
-                @returns {undefined} */
-            loadScript: function(src, callback, noCacheBust, integrity) {
-                // Prevent reloading the same script
-                const loadedScripts = this._loadedScripts ??= {};
-                let loadedScriptState = loadedScripts[src];
-                if (loadedScriptState === true) {
-                    // Script already loaded successfully
-                    callback?.(true);
-                } else if (loadedScriptState === false) {
-                    // Script already loaded unsuccessfully
-                    callback?.(false);
-                } else if (Array.isArray(loadedScriptState)) {
-                    // Script is currently loading so store callback for later resolution.
-                    if (callback) loadedScriptState.push(callback);
-                } else {
-                    // Load the script
-                    loadedScriptState = loadedScripts[src] = [];
-                    if (callback) loadedScriptState.push(callback);
-                    
-                    const scriptElem = createElement('script');
-                    scriptElem.type = 'text/javascript';
-                    scriptElem.async = false;
-                    
-                    if (integrity) {
-                        scriptElem.integrity = integrity;
-                        scriptElem.crossOrigin = 'anonymous';
+            /** Set a value deep into an Object tree creating any missing objects as needed.
+                @param {?Object} root - The Object to set the value on. If falsy no action will
+                    be taken.
+                @param {string|?Array} path - The path into the Object structure. Either an array 
+                    of names or a string with "." delimiters between names. If not falsy nothing 
+                    will be set.
+                @param {*} [value] - The value to set. If not provided undefined will be used.
+                @returns {*} - The value that was set or undefined if the operation failed. And yes,
+                    this means determining the success of setting undefined might be confusing. */
+            setDeepValue: (root, path, value) => {
+                if (root && path) {
+                    const keys = isArray(path) ? path : String(path ?? '').split('.'),
+                        len  = keys.length - 1;
+                    let curr = root;
+                    for (let i = 0; i < len; i++) {
+                        const key = keys[i];
+                        curr[key] ??= {};
+                        curr = curr[key];
                     }
-                    
-                    const executeCallbacks = success => {
-                        // Prevent later events from this script. For example, if the src is changed.
-                        scriptElem.onload = scriptElem.onreadystatechange = scriptElem.onerror = null;
-                        
-                        for (const callbackFunc of loadedScriptState) callbackFunc(success);
-                        loadedScripts[src] = success;
-                    };
-                    scriptElem.onerror = () => {executeCallbacks(false);};
-                    scriptElem.onload = scriptElem.onreadystatechange = () => {
-                        if (!scriptElem.readyState || scriptElem.readyState === 'complete') executeCallbacks(true);
-                    };
-                    
-                    // Must set src AFTER adding onreadystatechange listener otherwise we’ll miss 
-                    // the loaded event for cached scripts
-                    scriptElem.src = src + (noCacheBust ? '' : (src.includes('?') ? '&' : '?') + 'cacheBust=' + Date.now());
-                    
-                    headElem.appendChild(scriptElem);
+                    return curr[keys[len]] = value;
                 }
             },
             
-            /** A wrapper on myt.global.error.notify
-                @param {string|?Error} err - The error or message to dump stack for.
-                @param {string} [type] - The type of console message to write. Allowed values are 
-                    'error', 'warn', 'log' and 'debug'. Defaults to 'error'.
-                @returns {undefined} */
-            dumpStack: (err, type) => {
-                let msg;
-                if (typeof err === 'string') {
-                    msg = err;
-                    err = null;
+            stableStringify: obj => JSON.stringify(obj, (key_ignored, value) => {
+                /* Only re-order plain objects; leave arrays and primitives untouched.
+                   This works because iteration order is insertion order of String based keys.
+                   Note: you can't have both a numeric and string key in an Object that serializes
+                   to the same value, eg. 2 and "2" can't both exist. */
+                if (value && typeof value === 'object' && !isArray(value)) {
+                    const sorted = {};
+                    for (const key of Object.keys(value).sort()) sorted[key] = value[key];
+                    return sorted;
                 }
-                myt.global.error.notify(type || 'error', null, msg, err);
-            },
+                return value;
+            }),
             
-            // Random numbers
-            /** Generates a random number between 0 (inclusive) and 1 (exclusive)
-                @param {?Function} [func] - A distribution function for the random numbers. The 
-                    function should map a number between 0 and 1 to another number between 0 
-                    (inclusive) and 1 (exclusive). If not provided a flat distribution will be 
-                    used. Example functions:
-                        - function(v) {return v * v;} will skew the value towards 0.
-                        - function(v) {return 0.9999999999 - v * v;} will skew the value towards a 
-                          value very close to 1.
-                @returns {number} a random number between 0 and almost 1. */
-            getRandom: func => {
-                const v = math.random();
-                // Min and max is to correct for badly behaved skew functions.
-                return func ? mathMax(0, mathMin(func(v), 0.9999999999)) : v;
-            },
             
-            /** @returns a random number between min (inclusive) and max (exclusive).
-                @param {number} min - the minimum value returned.
-                @param {number} max - the maximum value returned.
-                @param {?Function} [func] - A distribution function. See myt.getRandom for more.
-                @returns {number} a number between min and max. */
-            getRandomArbitrary: (min, max, func) => {
-                const actualMin = mathMin(min, max);
-                return myt.getRandom(func) * (mathMax(min, max) - actualMin) + actualMin;
-            },
-            
-            /** Generates a random integer between min (inclusive) and max (inclusive).
-                @param {number} min - the minimum value returned.
-                @param {number} max - the maximum value returned.
-                @param {?Function} [func] - A distribution function. See myt.getRandom for more.
-                @returns {number} a number between min and max. */
-            getRandomInt: (min, max, func) => {
-                const actualMin = mathMin(min, max);
-                return math.floor(myt.getRandom(func) * (mathMax(min, max) - actualMin + 1) + actualMin);
-            },
-            
-            // Equality Tests //
+            // Equality Tests //////////////////////////////////////////////////
             /** Tests if two floats are essentially equal to each other.
                 @param {number} a - A float
                 @param {number} b - A float
@@ -503,20 +390,45 @@
             
             deepEqual:deepEqual,
             
-            stableStringify: obj => JSON.stringify(obj, (key_ignored, value) => {
-                /* Only re-order plain objects; leave arrays and primitives untouched.
-                   This works because iteration order is insertion order of String based keys.
-                   Note: you can't have both a numeric and string key in an Object that serializes
-                   to the same value, eg. 2 and "2" can't both exist. */
-                if (value && typeof value === 'object' && !Array.isArray(value)) {
-                    const sorted = {};
-                    for (const key of Object.keys(value).sort()) sorted[key] = value[key];
-                    return sorted;
-                }
-                return value;
-            }),
             
-            // DOM
+            // Random numbers //////////////////////////////////////////////////
+            /** Generates a random number between 0 (inclusive) and 1 (exclusive)
+                @param {?Function} [func] - A distribution function for the random numbers. The 
+                    function should map a number between 0 and 1 to another number between 0 
+                    (inclusive) and 1 (exclusive). If not provided a flat distribution will be 
+                    used. Example functions:
+                        - function(v) {return v * v;} will skew the value towards 0.
+                        - function(v) {return 0.9999999999 - v * v;} will skew the value towards a 
+                          value very close to 1.
+                @returns {number} a random number between 0 and almost 1. */
+            getRandom: func => {
+                const v = math.random();
+                // Min and max is to correct for badly behaved skew functions.
+                return func ? mathMax(0, mathMin(func(v), 0.9999999999)) : v;
+            },
+            
+            /** @returns a random number between min (inclusive) and max (exclusive).
+                @param {number} min - the minimum value returned.
+                @param {number} max - the maximum value returned.
+                @param {?Function} [func] - A distribution function. See myt.getRandom for more.
+                @returns {number} a number between min and max. */
+            getRandomArbitrary: (min, max, func) => {
+                const actualMin = mathMin(min, max);
+                return myt.getRandom(func) * (mathMax(min, max) - actualMin) + actualMin;
+            },
+            
+            /** Generates a random integer between min (inclusive) and max (inclusive).
+                @param {number} min - the minimum value returned.
+                @param {number} max - the maximum value returned.
+                @param {?Function} [func] - A distribution function. See myt.getRandom for more.
+                @returns {number} a number between min and max. */
+            getRandomInt: (min, max, func) => {
+                const actualMin = mathMin(min, max);
+                return math.floor(myt.getRandom(func) * (mathMax(min, max) - actualMin + 1) + actualMin);
+            },
+            
+            
+            // DOM /////////////////////////////////////////////////////////////
             /** Gets the dom element of the provided tagname and index.
                 @param {string} [tagname] - The name of the tag to search for. 
                     Defaults to 'body' if not provided
@@ -525,7 +437,36 @@
                 @returns {?Object} a dom element or undefined if none exist. */
             getElement: (tagname, index) => documentElem.getElementsByTagName(tagname || 'body')[index > 0 ? index : 0],
             
-            // Fonts
+            /** Adds an event listener to a dom element. 
+                @param {!Object} elem - The DomElement to listen to.
+                @param {string} type - The name of the event to listen to.
+                @param {!Function} callback - The callback function that will be registered for 
+                    the event.
+                @param {boolean} [capture] - Indicates if the listener is registered during the 
+                    capture phase or bubble phase.
+                @param {boolean} passive
+                @returns {undefined} */
+            addEventListener: (elem, type, callback, capture, passive) => {
+                elem.addEventListener(type, callback, {
+                    capture:capture || false,
+                    passive:passive || false
+                });
+            },
+            
+            /** Removes an event listener from a dom element. 
+                @param elem:DomElement The dom element to listen to.
+                @param {string} type - The name of the event to listen to.
+                @param {!Function} callback - The callback function that will be registered for 
+                    the event.
+                @param {boolean} [capture] indicates if the listener is registered during the 
+                    capture phase or bubble phase.
+                @returns {undefined} */
+            removeEventListener: (elem, type, callback, capture) => {
+                elem.removeEventListener(type, callback, capture || false);
+            },
+            
+            
+            // Fonts ///////////////////////////////////////////////////////////
             loadFontFaces: (fontList, callback) => {
                 Promise.all(fontList.map(
                     ({family, url, options}) => new FontFace(family, 'url(' + url + ')', options).load()
@@ -573,7 +514,8 @@
                 fontUrls?.forEach(myt.createStylesheetLink);
             },
             
-            // CSS
+            
+            // CSS /////////////////////////////////////////////////////////////
             /** Creates a "link" dom element.
                 @param {string} [href] The href attribute for the link.
                 @returns {!Object} */
@@ -628,7 +570,8 @@
                 myt.addCSSRule(sheet, '#' + domId + '::placeholder', rules.join('; '));
             },
             
-            // Sort Util
+            
+            // Sort Utility ////////////////////////////////////////////////////
             /** Checks if the provided array is sorted according to the provided comparator function.
                 @param {!Array} arr - The array to check.
                 @param {!Function} comparatorFunc - The comparator function to use for sorting checks.
@@ -700,109 +643,24 @@
                 };
             }),
             
-            // CSV
-            /** Converts a CSV string to an array of arrays or an array of objects.
-                Code from: https://gist.github.com/plbowers/7560ae793613ee839151624182133159
-                @param {string} [strData]
-                @param {boolean} [header] - If true each row will be converted to an object with 
-                    keys based on the first row being treated as an array of header strings.
-                @returns {!Array} An array of arrays or an array of objects if the header param 
-                    is true. */
-            csvStringToArray: (strData, header) => {
-                if (!strData) return [];
-                
-                const arrData = [[]];
-                let arrMatches;
-                while (arrMatches = CSV_OBJECT_REGEX.exec(strData)) {
-                    if (arrMatches[1].length && arrMatches[1] !== ',') arrData.push([]);
-                    arrData[arrData.length - 1].push(arrMatches[2] !== undefined ? arrMatches[2].replace(CSV_UNESCAPE_REGEX, '$1') : arrMatches[3]);
-                }
-                
-                if (header) {
-                    const headerData = arrData.shift();
-                    return arrData.map(row => {
-                        let i = 0;
-                        return headerData.reduce((acc, key) => {acc[key] = row[i++]; return acc;}, {});
-                    });
+            
+            // String Utility Functions ////////////////////////////////////////
+            /** Creates a non-secure hash of a string.
+                @param {string} s - The string to hash.
+                @returns {number} */
+            hash: s => s.split('').reduce((a, b) => {a = ((a << 5) - a) + b.charCodeAt(0); return a&a;}, 0),
+            
+            /** Gets the file extension from a file name.
+                @param {string} fileName - The filename to extract the extension from.
+                @returns {string) - The file extension, or null if a falsy fileName argument was 
+                    provided. */
+            getExtension: fileName => {
+                if (fileName) {
+                    const parts = fileName.split('.');
+                    return parts.length > 1 ? parts.pop() : null;
                 } else {
-                    return arrData;
+                    return null;
                 }
-            },
-            
-            /** Prepare a CSV data URI according to RFC 4180.
-                @param {?Array} rows
-                @param {?Array} [headerNames]
-                @returns {string} */
-            prepareCSVDataURI: (rows, headerNames) => {
-                const prepareRow = row => {
-                        if (row && isArray(row)) {
-                            const colAccum = [],
-                                len = row.length;
-                            for (let i = 0, col; len > i; i++) {
-                                col = row[i];
-                                
-                                // All columns must have a value.
-                                col = col == null ? '' : col.toString();
-                                
-                                // " are escaped as ""
-                                col = col.replace(/"/g, '""');
-                                
-                                // If the column contains reserved characters it must be wrapped in 
-                                // double quotes.
-                                if (col.search(/("|,|\n)/g) >= 0) col = '"' + col + '"';
-                                
-                                colAccum.push(col);
-                            }
-                            return colAccum.join(',');
-                        } else {
-                            consoleWarn('Unexpected row', row);
-                            return null;
-                        }
-                    },
-                    rowAccum = [];
-                
-                if (headerNames) {
-                    const row = prepareRow(headerNames);
-                    if (row) rowAccum.push(row);
-                }
-                
-                if (rows) {
-                    if (isArray(rows)) {
-                        const len = rows.length;
-                        for (let i = 0; len > i; i++) {
-                            const row = prepareRow(rows[i]);
-                            if (row) rowAccum.push(row);
-                        }
-                    } else {
-                        consoleWarn('Rows were not an array');
-                    }
-                }
-                
-                return myt.encodeCSVDataURI(rowAccum.join('\r\n'), headerNames);
-            },
-            
-            encodeCSVDataURI: (csvData, headerNames) => {
-                const header = headerNames == null ? '' : ';header=' + (headerNames ? 'present' : 'absent');
-                return 'data:text/csv;charset=utf-8' + 
-                    header + ',' + 
-                    encodeURIComponent(csvData);
-            },
-            
-            // Misc
-            dataURIToBlob: dataURI => {
-                const idx = dataURI.indexOf(','),
-                    mimeStr = dataURI.slice(0, idx).split(':')[1].split(';')[0];
-                let data = dataURI.slice(idx + 1);
-                if (mimeStr.startsWith('text/')) {
-                    data = decodeURIComponent(data);
-                } else {
-                    const binStr = atob(data);
-                    let i = binStr.length;
-                    const intArr = new Uint8Array(i);
-                    while (i) intArr[--i] = binStr.charCodeAt(i);
-                    data = intArr;
-                }
-                return new Blob([data], {type:mimeStr});
             },
             
             /** Format a number between 0 and 1 as a percentage.
@@ -891,6 +749,8 @@
                 return str => str.replace(REGEX, MATCH_FUNC);
             })(),
             
+            
+            // Function Utility Functions //////////////////////////////////////
             /** Memoize a function.
                 @param {!Function} func - The function to memoize
                 @returns {!Function} - The memoized function. */
@@ -915,6 +775,139 @@
                     timeout = setTimeout(later, wait);
                     if (callNow) func.apply(context, args);
                 };
+            },
+            
+            
+            // Misc ////////////////////////////////////////////////////////////
+            dataURIToBlob: dataURI => {
+                const idx = dataURI.indexOf(','),
+                    mimeStr = dataURI.slice(0, idx).split(':')[1].split(';')[0];
+                let data = dataURI.slice(idx + 1);
+                if (mimeStr.startsWith('text/')) {
+                    data = decodeURIComponent(data);
+                } else {
+                    const binStr = atob(data);
+                    let i = binStr.length;
+                    const intArr = new Uint8Array(i);
+                    while (i) intArr[--i] = binStr.charCodeAt(i);
+                    data = intArr;
+                }
+                return new Blob([data], {type:mimeStr});
+            },
+            
+            /** Runs code in a Worker for better encapsulation.
+                @param {string} funcBody - The javascript code to run. The provided dataObj will be
+                    exposed to the funcBody as a variable named by dataObjName. Here is an
+                    example function body: "return 100 * data.foo / data.bar;" and 
+                    dataObj {foo:123, bar:456}
+                @param {?Object} dataObj - The data to pass to the function created from funcBody.
+                @param {string}[dataObjName] - The name to expose the dataObj with to the funcBody.
+                    Defaults to "data".
+                @returns {!Promise} - The Promise that will be resolved or rejected once the code
+                    has run. */
+            runInWorker: (funcBody, dataObj, dataObjName='data') => new Promise((resolve, reject) => {
+                const url = URL.createObjectURL(
+                        /* self.onmessage = e => {
+                            try {
+                                const result = (function(${dataObjName}) {"use strict";${funcBody}})(e.data);
+                                self.postMessage({result});
+                            } catch (err) {
+                                self.postMessage({error:err.message});
+                            }
+                        }; */
+                        new Blob([
+                            'self.onmessage=e=>{try{const result=(function(' + dataObjName + '){"use strict";' + funcBody + '})(e.data);self.postMessage({result});}catch(e){self.postMessage({error:e.message});}};'
+                        ], {type:'application/javascript'})
+                    ),
+                    worker = new Worker(url),
+                    cleanup = () => {
+                        worker.terminate();
+                        URL.revokeObjectURL(url);
+                    };
+                worker.onmessage = event => {
+                    const {result, error} = event.data;
+                    if (error) {
+                        reject(new Error(error));
+                    } else {
+                        resolve(result);
+                    }
+                    cleanup();
+                };
+                worker.onerror = err => {
+                    reject(err);
+                    cleanup();
+                };
+                worker.postMessage(dataObj);
+            }),
+            
+            /** Dynamically load a script into the dom.
+                @param {string} src - The URL to the script file.
+                @param {?Function} [callback] - A function called when the script loads. A boolean
+                    is passed to it indicating success or failure.
+                @param {boolean} [noCacheBust] - If true, no cacheBust query param will be added. 
+                    Defaults to undefined which is equivalent to false.
+                @param {string} [integrity] - If provided, an integrity and crossorigin check will 
+                    be set on the script element.
+                @returns {undefined} */
+            loadScript: function(src, callback, noCacheBust, integrity) {
+                // Prevent reloading the same script
+                const loadedScripts = this._loadedScripts ??= {};
+                let loadedScriptState = loadedScripts[src];
+                if (loadedScriptState === true) {
+                    // Script already loaded successfully
+                    callback?.(true);
+                } else if (loadedScriptState === false) {
+                    // Script already loaded unsuccessfully
+                    callback?.(false);
+                } else if (isArray(loadedScriptState)) {
+                    // Script is currently loading so store callback for later resolution.
+                    if (callback) loadedScriptState.push(callback);
+                } else {
+                    // Load the script
+                    loadedScriptState = loadedScripts[src] = [];
+                    if (callback) loadedScriptState.push(callback);
+                    
+                    const scriptElem = createElement('script');
+                    scriptElem.type = 'text/javascript';
+                    scriptElem.async = false;
+                    
+                    if (integrity) {
+                        scriptElem.integrity = integrity;
+                        scriptElem.crossOrigin = 'anonymous';
+                    }
+                    
+                    const executeCallbacks = success => {
+                        // Prevent later events from this script. For example, if the src is changed.
+                        scriptElem.onload = scriptElem.onreadystatechange = scriptElem.onerror = null;
+                        
+                        for (const callbackFunc of loadedScriptState) callbackFunc(success);
+                        loadedScripts[src] = success;
+                    };
+                    scriptElem.onerror = () => {executeCallbacks(false);};
+                    scriptElem.onload = scriptElem.onreadystatechange = () => {
+                        if (!scriptElem.readyState || scriptElem.readyState === 'complete') executeCallbacks(true);
+                    };
+                    
+                    // Must set src AFTER adding onreadystatechange listener otherwise we’ll miss 
+                    // the loaded event for cached scripts
+                    scriptElem.src = src + (noCacheBust ? '' : (src.includes('?') ? '&' : '?') + 'cacheBust=' + Date.now());
+                    
+                    headElem.appendChild(scriptElem);
+                }
+            },
+            
+            /** A wrapper on myt.global.error.notify
+                @param {string|?Error} err - The error or message to dump stack for.
+                @param {string} [type] - The type of console message to write. Allowed values are 
+                    'error', 'warn', 'log' and 'debug'. Defaults to 'error'.
+                @returns {undefined} */
+            dumpStack: (err, type) => {
+                let msg;
+                if (typeof err === 'string') {
+                    msg = err;
+                    err = null;
+                }
+                myt.global.error.notify(type || 'error', null, msg, err);
             },
             
             /** Mixes threshold counter functionality with a fixed threshold onto the provided 
@@ -975,7 +968,97 @@
                 return true;
             },
             
-            // Fetch
+            
+            // CSV /////////////////////////////////////////////////////////////
+            /** Converts a CSV string to an array of arrays or an array of objects.
+                Code from: https://gist.github.com/plbowers/7560ae793613ee839151624182133159
+                @param {string} [strData]
+                @param {boolean} [header] - If true each row will be converted to an object with 
+                    keys based on the first row being treated as an array of header strings.
+                @returns {!Array} An array of arrays or an array of objects if the header param 
+                    is true. */
+            csvStringToArray: (strData, header) => {
+                if (!strData) return [];
+                
+                const arrData = [[]];
+                let arrMatches;
+                while (arrMatches = CSV_OBJECT_REGEX.exec(strData)) {
+                    if (arrMatches[1].length && arrMatches[1] !== ',') arrData.push([]);
+                    arrData[arrData.length - 1].push(arrMatches[2] !== undefined ? arrMatches[2].replace(CSV_UNESCAPE_REGEX, '$1') : arrMatches[3]);
+                }
+                
+                if (header) {
+                    const headerData = arrData.shift();
+                    return arrData.map(row => {
+                        let i = 0;
+                        return headerData.reduce((acc, key) => {acc[key] = row[i++]; return acc;}, {});
+                    });
+                } else {
+                    return arrData;
+                }
+            },
+            
+            /** Prepare a CSV data URI according to RFC 4180.
+                @param {?Array} rows
+                @param {?Array} [headerNames]
+                @returns {string} */
+            prepareCSVDataURI: (rows, headerNames) => {
+                const prepareRow = row => {
+                        if (row && isArray(row)) {
+                            const colAccum = [],
+                                len = row.length;
+                            for (let i = 0, col; len > i; i++) {
+                                col = row[i];
+                                
+                                // All columns must have a value.
+                                col = col == null ? '' : col.toString();
+                                
+                                // " are escaped as ""
+                                col = col.replace(/"/g, '""');
+                                
+                                // If the column contains reserved characters it must be wrapped in 
+                                // double quotes.
+                                if (col.search(/("|,|\n)/g) >= 0) col = '"' + col + '"';
+                                
+                                colAccum.push(col);
+                            }
+                            return colAccum.join(',');
+                        } else {
+                            consoleWarn('Unexpected row', row);
+                            return null;
+                        }
+                    },
+                    rowAccum = [];
+                
+                if (headerNames) {
+                    const row = prepareRow(headerNames);
+                    if (row) rowAccum.push(row);
+                }
+                
+                if (rows) {
+                    if (isArray(rows)) {
+                        const len = rows.length;
+                        for (let i = 0; len > i; i++) {
+                            const row = prepareRow(rows[i]);
+                            if (row) rowAccum.push(row);
+                        }
+                    } else {
+                        consoleWarn('Rows were not an array');
+                    }
+                }
+                
+                return myt.encodeCSVDataURI(rowAccum.join('\r\n'), headerNames);
+            },
+            
+            encodeCSVDataURI: (csvData, headerNames) => {
+                const header = headerNames == null ? '' : ';header=' + (headerNames ? 'present' : 'absent');
+                return 'data:text/csv;charset=utf-8' + 
+                    header + ',' + 
+                    encodeURIComponent(csvData);
+            },
+            
+            
+            // Fetch ///////////////////////////////////////////////////////////
             makeURLSearchParams: (params={}) => {
                 const urlSearchParams = new URLSearchParams();
                 for (const key in params) {
@@ -1031,7 +1114,8 @@
                 () => {finallyFunc?.();}
             ),
             
-            // Text Processing //
+            
+            // String Processing ///////////////////////////////////////////////
             toNameCase: (nameStr, individualFields) => {
                 if (!nameStr) return '';
                 
@@ -1141,7 +1225,8 @@
                 }
             },
             
-            // I18N //
+            
+            // I18N ////////////////////////////////////////////////////////////
             I18N: {
                 // Set the locale and update the active dictionary cache.
                 setLocale: locale => {
