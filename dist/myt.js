@@ -8959,25 +8959,6 @@ myt.Destructible = new JS.Module('Destructible', {
         Requires:
             myt.SizeToDom super mixin.
         
-        Events:
-            text:string
-            textOverflow:string
-            textAlign:string
-            whiteSpace:string
-            overflowWrap:string
-            wordWrap:string
-            textIndent:string
-            textTransform:string
-            textDecoration:string
-            lineHeight:string
-            letterSpacing:string
-            wordSpacing:string
-            fontFamily:string
-            fontStyle:string
-            fontVariant:string
-            fontWeight:string
-            fontSize:string
-        
         Attributes:
             text:string|event(string) The text to be displayed. The value will be assigned to the 
                 inner html of the div.
@@ -8989,6 +8970,9 @@ myt.Destructible = new JS.Module('Destructible', {
                 'pre', 'pre-wrap', 'pre-line', 'break-spaces', inherit'.
             wordWrap:string How line wrapping is done. Supported values: 'anywhere', 'break-word', 
                 'normal'.
+            wordBreak:string Sets whether line breaks appear wherever the text would otherwise 
+                overflow its content box. Supported values: 'normal', 'break-all', 'keep-all' and
+                'break-word'.
             textIndent:string How text gets indented. Supported values: '20px', '10%', 'inherit'.
             textTransform:string Transformation performed on the text during display. Supported 
                 values: 'none', 'capitalize', 'uppercase', 'lowercase', 'inherit'.
@@ -9063,6 +9047,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         setWhiteSpace: function(v) {setAndSizeViewToDom(this, v, 'whiteSpace');},
         setWordWrap: function(v) {setAndSizeViewToDom(this, v, 'wordWrap', 'normal');},
+        setWordBreak: function(v) {setAndSizeViewToDom(this, v, 'wordBreak', 'normal');},
         setTextIndent: function(v) {setAndSizeViewToDom(this, v, 'textIndent');},
         setTextTransform: function(v) {setAndSizeViewToDom(this, v, 'textTransform');},
         setTextDecoration: function(v) {setAndSizeViewToDom(this, v, 'textDecoration');},
