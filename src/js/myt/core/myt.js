@@ -797,7 +797,7 @@
                 @param {?Objet} [cfg] - Provides additional information about how to do the
                     conversion. The only supported config parameter is the boolean
                     brToLineFeed which converts <br> tags to \n characters.
-                @return {string} - The string with markup removed or empty string if something
+                @returns {string} - The string with markup removed or empty string if something
                     falsy was provided. */
             removeMarkup: (str, cfg) => {
                 if (!str) return '';

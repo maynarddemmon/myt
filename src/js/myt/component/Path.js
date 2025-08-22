@@ -105,7 +105,7 @@
         },
         
         /** Gets the bounding box for this path.
-            @return {!Object} with properties x, y, width and height or null if no bounding box 
+            @returns {!Object} with properties x, y, width and height or null if no bounding box 
                 could be calculated. */
         getBoundingBox: function() {
             if (this._boundingBox) return this._boundingBox;

@@ -134,7 +134,7 @@
             @param {!Object} boundingBox - A bounding box object that bounds the path.
             @param {!Araay} path - An array of points where the index 0,2,4,... are the x 
                 values and index 1,3,5,... are the y values.
-            @return {boolean} - True if inside, false otherwise. */
+            @returns {boolean} - True if inside, false otherwise. */
         isPointInPath: (x, y, boundingBox, path) => {
             if (typeof x === 'object') {
                 path = boundingBox;
@@ -180,7 +180,7 @@
             @param {number} cX - The x coordinate of the center of the circle.
             @param {number} cY - The y coordinate of the center of the circle.
             @param {number} cR - The radius of the circle.
-            @return {boolean} - True if the point is inside or on the circle. */
+            @returns {boolean} - True if the point is inside or on the circle. */
         circleContainsPoint: (pX, pY, cX, cY, cR) => measureDistance(pX, pY, cX, cY, true) <= cR * cR,
         
         // Geometry on a sphere
@@ -192,7 +192,7 @@
             @param {number} cR - The radius of the circle in kilometers.
             @param {number} [sphereRadius] - The radius of the sphere the measurement is being 
                 taken on in kilometers. If not provided the radius of the earth is used.
-            @return {boolean} - True if the point is inside or on the circle. */
+            @returns {boolean} - True if the point is inside or on the circle. */
         circleContainsLatLng: (pLat, pLng, cLat, cLng, cR, sphereRadius) => measureLatLngDistance(pLat, pLng, cLat, cLng, sphereRadius) <= cR,
         
         /** Convert from polar to cartesian coordinates.
@@ -236,7 +236,7 @@
             @param {number} [cy] - The y coordinate of the center of the circle.
             @param {boolean} [useRadians] - If true the angle returned will be in radians 
                 otherwise it will be degrees.
-            @return {!Array} An array where index 0 is the radius and index 1 is angle in 
+            @returns {!Array} An array where index 0 is the radius and index 1 is angle in 
                 degrees (or radians if userRadians is true). */
         cartesianToPolar: (x, y, cx, cy, useRadians) => {
             cx ??= 0;

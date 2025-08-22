@@ -164,7 +164,7 @@
         matcherFunctionsByKey = {},
         
         /*  @param {string|?Function} matcher
-            @return {?Function} */
+            @returns {?Function} */
         makeMatcherFunction = matcher => {
             let matcherFunc;
             if (typeof matcher === 'string') {

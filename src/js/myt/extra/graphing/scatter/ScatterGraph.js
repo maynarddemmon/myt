@@ -694,7 +694,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     
     /** Modifies the provided point so the value is in pixels.
         @param p:object with a x and y properties each of which is a number.
-        @return void */
+        @returns void */
     convertPointToPixels: function(p) {
         p.setPx(this.convertXValueToPixel(p.x));
         p.setPy(this.convertYValueToPixel(p.y));
@@ -703,7 +703,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     /** Modifies the provided array of points so the value is in pixels.
         @param points:array an array of object with a x and y properties each 
             of which is a number.
-        @return void */
+        @returns void */
     convertPointsToPixels: function(points) {
         let i = points.length;
         while (i) this.convertPointToPixels(points[--i]);
