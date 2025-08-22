@@ -247,7 +247,7 @@
             /** Should only be called by SliderThumb.
                 @private
                 @param {!Object} thumb
-                @returns {undefined} */
+                @returns {void} */
             syncValueToThumb: function(thumb) {
                 if (this.inited && !this.__lockSync) {
                     this.__lockSync = true;
@@ -360,7 +360,7 @@
         // Methods /////////////////////////////////////////////////////////////
         /** Should only be called by this and the rangeFill View.
             @private
-            @returns {undefined} */
+            @returns {void} */
         _syncRangeFillToValue: function() {
             const rangeFill = this.rangeFill,
                 value = this.getValue(),

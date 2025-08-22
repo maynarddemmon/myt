@@ -17,7 +17,7 @@
                 /** Prevents default drag/drop behavior.
                     @param {!Obect} view - The myt.View the view to suppress default dragover and 
                         drop on.
-                    @returns {undefined} */
+                    @returns {void} */
                 setupCaptureDrop: view => {
                     const ide = view.getIDE(),
                         cdf = view.__captureDrop = event => {event.preventDefault();};
@@ -28,7 +28,7 @@
                 /** Cleanup dom listeners for drag/drop.
                     @param {!Obect} view - The myt.View the view that had suppressed default 
                         dragover and drop on.
-                    @returns {undefined} */
+                    @returns {void} */
                 teardownCaptureDrop: view => {
                     const ide = view.getIDE(), 
                         cdf = view.__captureDrop;

@@ -271,7 +271,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     
     /** @private
         @param {!Object} event
-        @returns {undefined} */
+        @returns {void} */
     _doClick: function(event) {
         const hp = this.highlightedPoint, 
             isToggle = this.isToggleMode(), 
@@ -299,7 +299,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     // Hit testing
     /** @private
         @param {!Object} event
-        @returns {undefined} */
+        @returns {void} */
     _doMouseMove: function(event) {
         const pos = myt.MouseObservable.getMouseFromEventRelativeToView(event, this);
         pos.x = this.convertXPixelToValue(pos.x);
@@ -382,7 +382,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     // Data
     /** Adds a single myt.ScatterGraphPoint
         @param dataPoint:myt.ScatterGraphPoint the point to add.
-        @returns {undefined} */
+        @returns {void} */
     addDataPoint: function(dataPoint) {
         this.data.push(dataPoint);
         this._kdtree.insert(dataPoint);
@@ -391,7 +391,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     
     /** Adds multiple data points.
         @param dataPoints:array of myt.ScatterGraphPoint
-        @returns {undefined} */
+        @returns {void} */
     addDataPoints: function(dataPoints) {
         this.data = this.data.concat(dataPoints);
         this.drawPoints(dataPoints);
@@ -515,7 +515,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     
     // Remove points
     /** Remove all data points from this graph.
-        @returns {undefined} */
+        @returns {void} */
     removeAllDataPoints: function() {
         const data = this.data;
         data.length = 0;
@@ -575,7 +575,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     /** Removes a list of data points that match the provided list of IDs.
         Both still and animating points will be removed if they match.
         @param idList:array an array of IDs to remove.
-        @returns {undefined} */
+        @returns {void} */
     removeDataPointsById: function(idList) {
         let i = idList.length, 
             id, 
@@ -648,7 +648,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     /** Adds an image data object to use as a template for a point.
         @param key:string the key to store the template under.
         @param template:object the template for a point.
-        @returns {undefined} */
+        @returns {void} */
     addPointTemplate: function(key, template) {
         this._pointTemplates[key] = template;
         this._recalcMaxTemplateSizeSquared();

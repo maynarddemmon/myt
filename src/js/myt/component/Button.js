@@ -94,29 +94,29 @@
             
             /** Draw the UI when the component has focus. The default implementation 
                 calls drawHoverState.
-                @returns {undefined} */
+                @returns {void} */
             drawFocusedState: function() {
                 this.drawHoverState();
             },
             
             /** Draw the UI when the component is on the verge of being interacted with. For mouse 
                 interactions this corresponds to the over state.
-                @returns {undefined} */
+                @returns {void} */
             drawHoverState: NOOP, // () => {/* Subclasses to implement as needed. */},
             
             /** Draw the UI when the component has a pending activation. For mouse interactions 
                 this corresponds to the down state.
-                @returns {undefined} */
+                @returns {void} */
             drawActiveState: NOOP, // () => {/* Subclasses to implement as needed. */},
             
             /** Draw the UI when the component is ready to be interacted with. For mouse 
                 interactions this corresponds to the enabled state when the mouse is not over 
                 the component.
-                @returns {undefined} */
+                @returns {void} */
             drawReadyState: NOOP, // () => {/* Subclasses to implement as needed. */},
             
             /** Draw the UI when the component is in the disabled state.
-                @returns {undefined} */
+                @returns {void} */
             drawDisabledState: NOOP, // () => {/* Subclasses to implement as needed. */},
             
             /** @overrides myt.FocusObservable */

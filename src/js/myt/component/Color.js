@@ -197,7 +197,7 @@
                 @param {number} red - The red channel
                 @param {number} green - The green channel
                 @param {number} blue - The blue channel
-                @returns {undefined} */
+                @returns {void} */
             initialize: function(red, green, blue) {
                 this.setRed(red);
                 this.setGreen(green);
@@ -208,21 +208,21 @@
             // Accessors ///////////////////////////////////////////////////////
             /** Sets the red channel value.
                 @param {number} red
-                @return {undefined} */
+                @returns {void} */
             setRed: function(red) {
                 this.red = cleanChannelValue(red);
             },
             
             /** Sets the green channel value.
                 @param {number} green
-                @return {undefined} */
+                @returns {void} */
             setGreen: function(green) {
                 this.green = cleanChannelValue(green);
             },
             
             /** Sets the blue channel value.
                 @param {number} blue
-                @return {undefined} */
+                @returns {void} */
             setBlue: function(blue) {
                 this.blue = cleanChannelValue(blue);
             },

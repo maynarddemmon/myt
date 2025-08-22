@@ -201,12 +201,12 @@
             
             /** Called whenever the button is redrawn. Gives subclasses/instances a chance to do 
                 additional things when the button is redrawn.
-                @returns {undefined} */
+                @returns {void} */
             notifyButtonRedraw: pkg.NOOP,
             
             /** @private
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             __updateHeight: function(event) {
                 this.setHeight(this.wrapper.y + this.wrapper.height);
             },
@@ -443,7 +443,7 @@
             // Methods /////////////////////////////////////////////////////////
             /** @param {!Object} ignoredEvent
                 @param {number} [temporaryDuration]
-                @returns {undefined} */
+                @returns {void} */
             updateLayout: function(ignoredEvent, temporaryDuration) {
                 const tabSliders = this._tabSliders,
                     tabSlidersLen = tabSliders.length;

@@ -128,7 +128,7 @@
         },
         
         /*  @param {!Object} gridHeader
-            @returns {undefined} */
+            @returns {void} */
         updateLast = gridHeader => {
             gridHeader.resizer.setVisible(!(gridHeader.last && gridHeader.gridController.fitToWidth));
         },
@@ -326,7 +326,7 @@
             // Methods /////////////////////////////////////////////////////////
             /** Sorts the rows according to the current sort criteria. Subclasses and instances 
                 should implement this as needed.
-                @returns {undefined} */
+                @returns {void} */
             doSort: pkg.NOOP, // () => {}
             
             // Column Headers
@@ -902,7 +902,7 @@
             // Methods /////////////////////////////////////////////////////////
             /** @private
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             _updateContentWidth: function(event) {
                 const content = this.content,
                     w = event.value;
@@ -912,7 +912,7 @@
             
             /** @private
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             _updateContentHeight: function(event) {
                 const self = this,
                     {header, content} = self,

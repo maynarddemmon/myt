@@ -17,7 +17,7 @@
     pkg.Activateable = new JSModule('Activateable', {
         // Methods /////////////////////////////////////////////////////////////
         /** Called when this view should be activated.
-            @returns {undefined} */
+            @returns {void} */
         doActivated: NOOP // () => {/* Subclasses to implement as needed. */}
     });
     
@@ -40,7 +40,7 @@
         // Methods /////////////////////////////////////////////////////////////
         /** Updates the UI whenever a change occurs that requires a visual update. Subclasses 
             should implement this as needed.
-            @returns {undefined} */
+            @returns {void} */
         updateUI: NOOP // () => {/* Subclasses to implement as needed. */}
     });
     
@@ -82,7 +82,7 @@
         // Methods /////////////////////////////////////////////////////////////
         /** Called after the disabled attribute is set. Default behavior attempts to give away 
             focus and calls the updateUI method of myt.UpdateableUI if it is defined.
-            @returns {undefined} */
+            @returns {void} */
         doDisabled: function() {
             if (this.inited) {
                 // Give away focus if we become disabled and this instance is a FocusObservable
@@ -144,7 +144,7 @@
         // Methods /////////////////////////////////////////////////////////////
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __hndlKeyDown: function(event) {
             if (!this.disabled) {
                 if (this.activateKeyDown === NO_KEY_DOWN || this.repeatKeyDown) {
@@ -164,7 +164,7 @@
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __hndlKeyPress: function(event) {
             if (!this.disabled) {
                 const code = getCodeFromEvent(event);
@@ -176,7 +176,7 @@
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __hndlKeyUp: function(event) {
             if (!this.disabled) {
                 const code = getCodeFromEvent(event);
@@ -190,7 +190,7 @@
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doDomBlur: function(event) {
             if (!this.disabled) {
                 const keyThatWasDown = this.activateKeyDown;
@@ -204,13 +204,13 @@
         /** Called when an activation key is pressed down. Default implementation does nothing.
             @param code:string - The key code that is down.
             @param isRepeat:boolean - Indicates if this is a key repeat event or not.
-            @returns {undefined} */
+            @returns {void} */
         doActivationKeyDown: NOOP, // (code, isRepeat) => {/* Subclasses to implement as needed. */},
         
         /** Called when an activation key is release up. This executes the "doActivated" method 
             by default. 
             @param code:string - The keycode that is up.
-            @returns {undefined} */
+            @returns {void} */
         doActivationKeyUp: function(code) {
             this.doActivated();
         },
@@ -218,7 +218,7 @@
         /** Called when focus is lost while an activation key is down. Default implementation 
             does nothing.
             @param code:string - The keycode that is down.
-            @returns {undefined} */
+            @returns {void} */
         doActivationKeyAborted: NOOP // code => {/* Subclasses to implement as needed. */}
     });
     
@@ -323,7 +323,7 @@
         
         // Methods /////////////////////////////////////////////////////////////
         /** @private
-            @returns {undefined} */
+            @returns {void} */
         __doMouseOverOnIdle: function() {
             this.detachFrom(GlobalIdle, '__doMouseOverOnIdle', 'idle');
             this.__attachedToOverIdle = false;
@@ -340,14 +340,14 @@
         /** Called when mouseOver state changes. This method is called after an event filtering 
             process has reduced frequent over/out events originating from the dom.
             @param {boolean} isOver
-            @returns {undefined} */
+            @returns {void} */
         doSmoothMouseOver: function(isOver) {
             if (this.inited) this.updateUI?.();
         },
         
         /** Called when the mouse is over this view. Subclasses must call super.
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         doMouseOver: function(event) {
             this.__disabledOver = true;
             
@@ -356,7 +356,7 @@
         
         /** Called when the mouse leaves this view. Subclasses must call super.
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         doMouseOut: function(event) {
             this.__disabledOver = false;
             
@@ -428,7 +428,7 @@
         
         /** Called when the mouse is down on this view. Subclasses must call super.
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         doMouseDown: function(event) {
             if (this.disabled) {
                 this.doMouseDownWhenDisabled();
@@ -439,12 +439,12 @@
         
         /** Called by the doMouseDown function when this View is currently disabled:true. Note that
             the mouseDown attribute of this View will not be true when this function is called.
-            @returns {undefined} */
+            @returns {void} */
         doMouseDownWhenDisabled: NOOP, // () => {/* Subclasses to implement as needed. */},
         
         /** Called when the mouse is up on this view. Subclasses must call super.
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         doMouseUp: function(event) {
             // Cleanup global mouse listener since the mouseUp occurred 
             // outside the view.
@@ -463,7 +463,7 @@
         /** Called when the mouse is up and we are still over the view. Executes the "doActivated" 
             method by default.
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         doMouseUpInside: function(event) {
             this.doActivated?.();
         }
@@ -596,12 +596,12 @@
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doContextMenu: NOOP, // event => {/* Do nothing so the context menu event is suppressed. */},
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doMouseDown: function(event) {
             const self = this,
                 pos = getMouseFromEvent(event),
@@ -622,7 +622,7 @@
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doMouseUp: function(event) {
             if (this.isDragging) {
                 this.stopDrag(event, false);
@@ -635,14 +635,14 @@
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __watchForAbort: function(event) {
             if (event.value === GlobalKeys.CODE_ESC) this.stopDrag(event, true);
         },
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doDragCheck: function(event) {
             const self = this,
                 pos = getMouseFromEvent(event),
@@ -656,7 +656,7 @@
         /** Active until stopDrag is called. The view position will be bound to the mouse position. 
             Subclasses typically call this onmousedown for subviews that allow dragging the view.
             @param {!Object} event - The event the mouse event when the drag started.
-            @returns {undefined} */
+            @returns {void} */
         startDrag: function(event) {
             const self = this;
             
@@ -674,7 +674,7 @@
         
         /** Called on every mousemove event while dragging.
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         updateDrag: function(event) {
             this.__lastMousePosition = getMouseFromEvent(event);
             this.reRequestDragPosition();
@@ -682,14 +682,14 @@
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __updateDragInitX: function(event) {
             this.dragInitX = this.width / 2 * (this.scaleX || 1);
         },
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __updateDragInitY: function(event) {
             this.dragInitY = this.height / 2 * (this.scaleY || 1);
         },
@@ -697,7 +697,7 @@
         /** Stop the drag. (see startDrag for more details)
             @param {!Object} event - The event that ended the drag.
             @param {boolean} isAbort - Indicates if the drag ended normally or was aborted.
-            @returns {undefined} */
+            @returns {void} */
         stopDrag: function(event, isAbort) {
             const self = this;
             self.detachFromDom(GlobalMouse, '__doMouseUp', 'mouseup', true);
@@ -715,7 +715,7 @@
             the position.
             @param {number} x - the new x position.
             @param {number} y - the new y position.
-            @returns {undefined} */
+            @returns {void} */
         requestDragPosition: function(x, y) {
             if (!this.disabled) {
                 this.setX(x);

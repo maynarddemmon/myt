@@ -155,7 +155,7 @@
         // Accessors ///////////////////////////////////////////////////////////
         /** Sets the currently focused view.
             @param {?Object} v
-            @returns {undefined} */
+            @returns {void} */
         setFocusedView: v => {
             if (globalFocus.focusedView !== v) {
                 globalFocus.prevFocusedView = globalFocus.focusedView; // Remember previous focus
@@ -169,20 +169,20 @@
         // Methods /////////////////////////////////////////////////////////////
         /** Called by a FocusObservable when it has received focus.
             @param {!Object} focusable - The FocusObservable that received focus.
-            @returns {undefined}. */
+            @returns {void} */
         notifyFocus: focusable => {
             if (globalFocus.focusedView !== focusable) globalFocus.setFocusedView(focusable);
         },
         
         /** Called by a FocusObservable when it has lost focus.
             @param {!Object} focusable - The FocusObservable that lost focus.
-            @returns {undefined}. */
+            @returns {void} */
         notifyBlur: focusable => {
             if (globalFocus.focusedView === focusable) globalFocus.setFocusedView(null);
         },
         
         /** Clears the current focus.
-            @returns {undefined} */
+            @returns {void} */
         clear: () => {
             if (globalFocus.focusedView) {
                 globalFocus.focusedView.blur();
@@ -195,14 +195,14 @@
         // Focus Traversal //
         /** Move focus to the next focusable element.
             @param {boolean} ignoreFocusTrap - If true focus traps will be skipped over.
-            @returns {undefined} */
+            @returns {void} */
         next: ignoreFocusTrap => {
             traverse(true, ignoreFocusTrap)?.focus();
         },
         
         /** Move focus to the previous focusable element.
             @param {boolean} ignoreFocusTrap - If true focus traps will be skipped over.
-            @returns {undefined} */
+            @returns {void} */
         prev: ignoreFocusTrap => {
             traverse(false, ignoreFocusTrap)?.focus();
         },

@@ -65,7 +65,7 @@
         },
         
         /** Removes all observers from this Observable.
-            @returns {undefined} */
+            @returns {void} */
         detachAllObservers: function() {
             const observersByType = this.__obsbt;
             if (observersByType) {
@@ -124,7 +124,7 @@
             @param value:* The value to set on the event.
             @param observers:array (Optional) If provided the event will be sent to this specific 
                 list of observers and no others.
-            @returns {undefined} */
+            @returns {void} */
         fireEvent: function(type, value, observers) {
             // Determine observers to use but avoid using getObservers since that lazy instantiates 
             // __obsbt and fireEvent will get called predominantly when no observers were
@@ -223,7 +223,7 @@
                 of the attribute on the Observable to pull the value from.
             @param once:boolean (optional) if true  this Observer will detach from the Observable 
                 after the event is handled once.
-            @returns {undefined} */
+            @returns {void} */
         syncTo: function(observable, methodName, eventType, attrName, once) {
             attrName ??= eventType;
             try {
@@ -352,7 +352,7 @@
         },
         
         /** Tries to detach this Observer from all Observables it is attached to.
-            @returns {undefined} */
+            @returns {void} */
         detachFromAllObservables: function() {
             const observablesByType = this.__obt;
             if (observablesByType) {
@@ -374,7 +374,7 @@
             @param {string} methodName - The name of the method to call on this object.
             @param {?Array} observables - An array of observable/type pairs. An observer will 
                 attach to each observable for the event type.
-            @returns {undefined} */
+            @returns {void} */
         constrain: function(methodName, observables) {
             if (methodName && observables) {
                 // Make sure an even number of observable/type was provided
@@ -412,7 +412,7 @@
         
         /** Removes a constraint.
             @param {string} methodName
-            @returns {undefined} */
+            @returns {void} */
         releaseConstraint: function(methodName) {
             if (methodName) {
                 // No need to remove if the constraint is already empty.
@@ -433,7 +433,7 @@
         },
         
         /** Removes all constraints.
-            @returns {undefined} */
+            @returns {void} */
         releaseAllConstraints: function() {
             const constraints = this.__cbmn;
             if (constraints) {

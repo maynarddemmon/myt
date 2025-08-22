@@ -4,7 +4,7 @@
         
         /*  Redraws the annulus
             @param {!Object} annulus - The Annulus to redraw.
-            @returns {undefined} */
+            @returns {void} */
         redraw = annulus => {
             // Ensure endAngle is greater than or equal to startAngle
             let startAngle = degreesToRadians(annulus.startAngle), 
@@ -62,7 +62,7 @@
         
         /*  Ensures the size of the view exactly fits the annulus.
             @param {!Object} annulus - The Annulus to update.
-            @returns {undefined} */
+            @returns {void} */
         updateSize = annulus => {
             const size = 2*(annulus.radius + annulus.thickness),
                 svg = annulus.__svg;

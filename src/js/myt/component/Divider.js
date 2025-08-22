@@ -12,7 +12,7 @@
         
         /*  Setup the limitToParent constraint.
             @param {!BaseDivider} divider
-            @returns {undefined} */
+            @returns {void} */
         updateLimitToParentConstraint = divider => {
             const dim = divider.axis === 'y' ? 'height' : 'width';
             divider.constrain('__limitToParent', [divider, 'limitToParent', divider, dim, divider.parent, dim]);
@@ -156,7 +156,7 @@
             /** Update the x or y position of the divider as the value changes.
                 @overrides myt.ValueComponent
                 @param {number} v - The x or y position to set.
-                @returns {undefined} */
+                @returns {void} */
             setValue: function(v) {
                 this.callSuper(v);
                 
@@ -173,7 +173,7 @@
             /** Do the limitToParent constraint.
                 @private
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             __limitToParent: function(event) {
                 const self = this,
                     dim = self.axis === 'y' ? 'height' : 'width';

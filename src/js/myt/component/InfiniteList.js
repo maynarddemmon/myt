@@ -187,7 +187,7 @@
             
             
             // Methods /////////////////////////////////////////////////////////
-            /** @returns {undefined} */
+            /** @returns {void} */
             isScrolledToEnd: function() {
                 return getDomScrollTop(this) + this.height === this._listView.height;
             },

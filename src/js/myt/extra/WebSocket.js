@@ -53,7 +53,7 @@
             /** Connects the WebSocket to the currently configured URL.
                 @param {?Function} [afterOpenCallback] - This callback will be executed once after 
                     the connection is established and the onOpen method has been called.
-                @returns {undefined} */
+                @returns {void} */
             connect: function(afterOpenCallback) {
                 if (!this._ws && this.url) {
                     try {
@@ -114,21 +114,21 @@
                     to 1000 CLOSE_NORMAL.
                 @param reason:string (optional) An explanation of why the close is occurring. 
                     Defaults to "close".
-                @returns {undefined} */
+                @returns {void} */
             close: function(code, reason) {
                 if (this._ws) this._ws.close(code ?? CLOSE_NORMAL, reason ?? 'close');
             },
             
             /** Invoked when after the WebSocket is opened.
                 @param {!Object} event -  The open event fired by the WebSocket.
-                @returns {undefined} */
+                @returns {void} */
             onOpen: function(event) {
                 this.setStatus('open');
             },
             
             /** Invoked when an error occurs in the WebSocket.
                 @param {!Object} event - The error event fired by the WebSocket.
-                @returns {undefined} */
+                @returns {void} */
             onError: function(event) {
                 consoleError(event);
                 
@@ -154,7 +154,7 @@
             
             /** Invoked when the WebSocket is closed.
                 @param {!Object} event - The close event fired by the WebSocket.
-                @returns {undefined} */
+                @returns {void} */
             onClose: function(event) {
                 if (this._ws) delete this._ws;
                 this.setStatus('closed');
@@ -210,7 +210,7 @@
                 or not. If a string is provided it will be converted into an exact match function. 
                 If not provided (or something falsy) is provided a promiscuous matcher function 
                 will be used.
-            @returns {undefined} */
+            @returns {void} */
         registerListener: function(listenerFunc, matcher) {
             if (listenerFunc) {
                 const matcherFunc = makeMatcherFunction(matcher);
@@ -247,7 +247,7 @@
         /** Removed the provided listener function and matcher.
             @param {!Function} listenerFunc
             @param {string|?Function} matcher
-            @returns {undefined} */
+            @returns {void} */
         unregisterListener: function(listenerFunc, matcher) {
             if (listenerFunc) {
                 const matcherFunc = makeMatcherFunction(matcher);
@@ -280,7 +280,8 @@
             @param {string} type The type of the message to send.
             @param {*} msg The message value. Must be convertible to JSON.
             @param {boolean} doNotTryToConnect
-            @returns {undefined} The sent message. */
+            @returns {boolean|undefined} Indicating if the message was sent or not. Undefined 
+                is returned when the connection has to be opened before sending. */
         sendTypedMessage: function(type, msg, doNotTryToConnect) {
             msg = this.createMessage(type, msg);
             if (msg) return this.send(msg, doNotTryToConnect);

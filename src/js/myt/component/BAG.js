@@ -90,7 +90,7 @@
             // Methods /////////////////////////////////////////////////////////
             /** Registeres a node with this group.
                 @param node:myt.Node the node to register with this group.
-                @returns {undefined} */
+                @returns {void} */
             register: function(node) {
                 if (node && !this.isRegistered(node)) {
                     this.__nodes.push(node);
@@ -102,7 +102,7 @@
             
             /** Unregisteres a node from this group.
                 @param node:myt.Node the node to unregister from this group.
-                @returns {undefined} */
+                @returns {void} */
             unregister: function(node) {
                 if (node) {
                     const nodes = this.__nodes,
@@ -118,7 +118,7 @@
             /** Sets the attribute to true on the provided registered node and sets it to false on 
                 all other registered nodes.
                 @param node:myt.Node the node to set the attribute to true on.
-                @returns {undefined} */
+                @returns {void} */
             setTrue: function(node) {
                 if (node && this.trueNode !== node && this.isRegistered(node)) {
                     const attrName = this.attrName,
@@ -142,7 +142,7 @@
             
             /** Sets the attribute to false on the provided registered node.
                 @param node:myt.Node the node to set the attribute to false on.
-                @returns {undefined} */
+                @returns {void} */
             setFalse: function(node) {
                 if (node && this.trueNode === node) {
                     node[generateSetterName(this.attrName)](false);
@@ -152,7 +152,7 @@
             
             /** Checks if a node is already registered or not.
                 @param node:myt.Node the node to test.
-                @returns {undefined} */
+                @returns {void} */
             isRegistered: function(node) {
                 return this.__nodes.includes(node);
             }
@@ -196,7 +196,7 @@
         /** Adds this node to the BAG for the groupId and attribute name.
             @param attrName:string
             @param groupId:string
-            @returns {undefined} */
+            @returns {void} */
         addToBAG: function(attrName, groupId) {
             const group = this.getBAG(attrName, groupId);
             if (!this.isRegisteredWithBAG(group)) {
@@ -213,7 +213,7 @@
         /** Removes this node from the BAG for the groupId and attribute name.
             @param attrName:string
             @param groupId:string
-            @returns {undefined} */
+            @returns {void} */
         removeFromBAG: function(attrName, groupId) {
             const group = this.getBAG(attrName, groupId);
             if (this.isRegisteredWithBAG(group)) {
@@ -238,7 +238,7 @@
         /** Called whenever an event for the attrName is fired.
             @private 
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __updateForBAG: function(event) {
             for (const bag of this.__bags) {
                 if (bag.attrName === event.type) bag[event.value ? 'setTrue' : 'setFalse'](this);

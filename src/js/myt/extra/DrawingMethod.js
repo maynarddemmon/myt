@@ -29,7 +29,7 @@ myt.DrawingMethod = new JS.Class('DrawingMethod', {
             @param {!Objecdt} canvas - The myt.Canvas to draw into.
             @param {?Object} [config] - A map of configuration parameters 
                 that control how the DrawingMethod draws.
-            @returns {undefined} */
+            @returns {void} */
         draw: function(classname, canvas, config) {
             const drawingMethod = this.get(classname);
             if (drawingMethod) {
@@ -46,6 +46,6 @@ myt.DrawingMethod = new JS.Class('DrawingMethod', {
         @param {!Object} canvas - The myt.Canvas to draw into.
         @param {?Object} [config] - A map of configuration parameters 
             that control how the DrawingMethod draws.
-        @returns {undefined} */
+        @returns {void} */
     draw: function(canvas, config) {}
 });

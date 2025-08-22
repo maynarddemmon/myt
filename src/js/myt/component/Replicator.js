@@ -2,7 +2,7 @@
     const sortFunction = (a, b) => a.replicationIndex - b.replicationIndex,
         
         /*  @param {!Array} layouts
-            @returns {undefined} */
+            @returns {void} */
         lockLayouts = layouts => {
             let i = layouts.length;
             while (i) layouts[--i].incrementLockedCounter();
@@ -10,7 +10,7 @@
         
         /*  @param {!Array} layouts
             @param {boolean} update
-            @returns {undefined} */
+            @returns {void} */
         unlockLayouts = (layouts, update) => {
             let i = layouts.length;
             while (i) {
@@ -21,7 +21,7 @@
         },
         
         /*  @param {!Object} replicator
-            @returns {undefined} */
+            @returns {void} */
         setupPool = replicator => {
             destroyOldPool(replicator);
             
@@ -31,7 +31,7 @@
         },
         
         /*  @param {!Object} replicator
-            @returns {undefined} */
+            @returns {void} */
         destroyOldPool = replicator => {
             // Destroy old pool and instances.
             const pool = replicator.__pool;
@@ -67,7 +67,7 @@
         /** Called to configure the replicable object with data. Subclasses should call super.
             @param {?Object} data - The data being replicated for this instance.
             @param {number} idx - The index of the data in the replicated list.
-            @returns {undefined} */
+            @returns {void} */
         replicate: function(data, idx) {
             this.replicationData = data;
             this.replicationIndex = idx;
@@ -77,7 +77,7 @@
         /** Notifies this object that something happened.
             @param {string} key - The name of the message
             @param {*} value - The value of the message.
-            @returns {undefined} */
+            @returns {void} */
         notify: pkg.NOOP, // (key, value) => {},
         
         /** @overrides myt.Reusable
@@ -149,7 +149,7 @@
         
         // Methods /////////////////////////////////////////////////////////////
         /** Performs replication.
-            @returns {undefined} */
+            @returns {void} */
         doReplication: function() {
             const pool = this.__pool;
             let layouts;
@@ -204,7 +204,7 @@
         /** Sends a message to each active myt.Replicable.
             @param {string} key - The name of the message
             @param {*} value - The value of the message.
-            @returns {undefined} */
+            @returns {void} */
         notify: function(key, value) {
             const pool = this.__pool;
             if (pool) {

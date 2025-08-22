@@ -91,13 +91,13 @@
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
                 /** Increments the global lock that prevents all layouts from updating.
-                    @returns {undefined} */
+                    @returns {void} */
                 incrementGlobalLock: () => {
                     if (++globalLockCount === 1) setGlobalLock(true);
                 },
                 
                 /** Decrements the global lock that prevents all layouts from updating.
-                    @returns {undefined} */
+                    @returns {void} */
                 decrementGlobalLock: () => {
                     if (globalLockCount > 0 && --globalLockCount === 0) setGlobalLock(false);
                 }
@@ -190,7 +190,7 @@
             
             /** Updates the layout. Subclasses should call canUpdate to check lock state before 
                 trying to do anything.
-                @returns {undefined} */
+                @returns {void} */
             update: NOOP,
             
             // Subview Methods //
@@ -210,7 +210,7 @@
             
             /** Adds the provided View to the subviews array of this Layout.
                 @param {?Object} sv - The myt.View to add to this layout.
-                @returns {undefined} */
+                @returns {void} */
             addSubview: function(sv) {
                 if (!this.ignore(sv)) {
                     this.subviews.push(sv);
@@ -222,13 +222,13 @@
             /** Subclasses should implement this method to start listening to events from the 
                 subview that should trigger the update method.
                 @param {?Object} sv - The myt.View to start monitoring for changes.
-                @returns {undefined} */
+                @returns {void} */
             startMonitoringSubview: NOOP, // sv => {},
             
             /** Calls startMonitoringSubview for all views. Used by Layout implementations when a 
                 change occurs to the layout that 
                 requires refreshing all the subview monitoring.
-                @returns {undefined} */
+                @returns {void} */
             startMonitoringAllSubviews: function() {
                 const svs = this.subviews;
                 let i = svs.length;
@@ -254,12 +254,12 @@
                 subview that would trigger the update method. This should remove all listeners that 
                 were setup in startMonitoringSubview.
                 @param {?Object} sv - The myt.View to stop monitoring for changes.
-                @returns {undefined} */
+                @returns {void} */
             stopMonitoringSubview: NOOP, // sv => {},
             
             /** Calls stopMonitoringSubview for all views. Used by Layout implementations when a 
                 change occurs to the layout that requires refreshing all the subview monitoring.
-                @returns {undefined} */
+                @returns {void} */
             stopMonitoringAllSubviews: function() {
                 const svs = this.subviews;
                 let i = svs.length;
@@ -275,7 +275,7 @@
             /** If our parent adds a new subview we should add it.
                 @private
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             __hndlPSA: function(event) {
                 const value = event.value;
                 if (value.parent === this.parent) this.addSubview(value);
@@ -284,7 +284,7 @@
             /** If our parent removes a subview we should remove it.
                 @private
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             __hndlPSR: function(event) {
                 const value = event.value;
                 if (value.parent === this.parent) this.removeSubview(value);
@@ -293,7 +293,7 @@
             // Subview ordering //
             /** Sorts the subviews array according to the provided sort function.
                 @param {?Function} sortFunc - The sort function to sort the subviews with.
-                @returns {undefined} */
+                @returns {void} */
             sortSubviews: function(sortFunc) {
                 this.subviews.sort(sortFunc);
             },
@@ -303,7 +303,7 @@
                 be moved to the front of the list.
                 @param {?Object} sv
                 @param {?Object} target
-                @returns {undefined} */
+                @returns {void} */
             moveSubviewBefore: function(sv, target) {
                 moveSubview(this, sv, target, false);
             },
@@ -313,7 +313,7 @@
                 moved to the back of the list.
                 @param {?Object} sv
                 @param {?Object} target
-                @returns {undefined} */
+                @returns {void} */
             moveSubviewAfter: function(sv, target) {
                 moveSubview(this, sv, target, true);
             }
@@ -430,20 +430,20 @@
             
             /** Called by update before any processing is done. Gives subviews a chance to do any 
                 special setup before update is processed.
-                @returns {undefined} */
+                @returns {void} */
             doBeforeUpdate: NOOP, // () => {/* Subclasses to implement as needed. */},
             
             /** Called by update after any processing is done but before the optional collapsing of 
                 parent is done. Gives subviews a chance to do any special teardown after update 
                 is processed.
-                @returns {undefined} */
+                @returns {void} */
             doAfterUpdate: NOOP, // () => {/* Subclasses to implement as needed. */},
             
             /** Provides a default implementation that calls update when the visibility of a 
                 subview changes.
                 @overrides myt.Layout
                 @param {?Object} sv
-                @returns {undefined} */
+                @returns {void} */
             startMonitoringSubview: function(sv) {
                 this.attachTo(sv, 'update', 'visible');
             },
@@ -452,7 +452,7 @@
                 subview changes.
                 @overrides myt.Layout
                 @param {?Object} sv
-                @returns {undefined} */
+                @returns {void} */
             stopMonitoringSubview: function(sv) {
                 this.detachFrom(sv, 'update', 'visible');
             },
@@ -479,7 +479,7 @@
                 they want to modify the parent view.
                 @param {string} setterName - The name of the setter method to call on the parent.
                 @param {*} value - The value to set on the parent.
-                @returns {undefined} */
+                @returns {void} */
             updateParent: NOOP // (setterName, value) => {/* Subclasses to implement as needed. */}
         }),
         
@@ -618,14 +618,14 @@
         // Methods /////////////////////////////////////////////////////////////
         /** Called when monitoring of width/height should start on our parent.
             @param {string} attrName - The name of the attribute to start monitoring.
-            @returns {undefined} */
+            @returns {void} */
         startMonitoringParent: function(attrName) {
             this.attachTo(this.parent, 'update', attrName);
         },
         
         /** Called when monitoring of width/height should stop on our parent.
             @param {string} attrName - The name of the attribute to stop monitoring.
-            @returns {undefined} */
+            @returns {void} */
         stopMonitoringParent: function(attrName) {
             this.detachFrom(this.parent, 'update', attrName);
         },
@@ -886,14 +886,14 @@
         // Methods /////////////////////////////////////////////////////////////
         /** Called when monitoring of width/height should start on our parent.
             @param {string} measureAttrName - The name of the attribute to start monitoring.
-            @returns {undefined} */
+            @returns {void} */
         startMonitoringParent: function(measureAttrName) {
             this.attachTo(this.parent, 'update', measureAttrName);
         },
         
         /** Called when monitoring of width/height should stop on our parent.
             @param {string} measureAttrName - The name of the attribute to stop monitoring.
-            @returns {undefined} */
+            @returns {void} */
         stopMonitoringParent: function(measureAttrName) {
             this.detachFrom(this.parent, 'update', measureAttrName);
         },

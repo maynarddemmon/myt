@@ -97,7 +97,7 @@
         /** The standard JSClass initializer function.
             @param {?Object} [attrs] - A map of attribute names and values.
             @param {?Array} [mixins] - A list of mixins to be added onto the new instance.
-            @returns {undefined} */
+            @returns {void} */
         initialize: function(attrs, mixins) {
             initializer(this, mixins);
             this.init(attrs ?? {});
@@ -108,7 +108,7 @@
         /** Called during initialization. Calls setter methods and lastly, sets inited to true. 
             Subclasses must callSuper.
             @param {?Object} attrs - A map of attribute names and values.
-            @returns {undefined} */
+            @returns {void} */
         init: function(attrs) {
             this.callSetters(attrs);
             this.inited = true;
@@ -174,7 +174,7 @@
                 set as the parent of this myt.Node.
             @param {?Object} [attrs] - A map of attribute names and values.
             @param {?Array} [mixins] - A list of mixins to be added onto the new instance.
-            @returns {undefined} */
+            @returns {void} */
         initialize: function(parent, attrs, mixins) {
             initializer(this, mixins);
             this.initNode(parent, attrs ?? {});
@@ -187,7 +187,7 @@
             @param {?Object} [parent] - The myt.Node (or dom element for RootViews) the parent of 
                 this Node.
             @param {?Object} attrs - A map of attribute names and values.
-            @returns {undefined} */
+            @returns {void} */
         initNode: function(parent, attrs) {
             this.callSetters(attrs);
             this.setParent(parent);
@@ -225,7 +225,7 @@
         
         /** Provides a hook for subclasses to do destruction of their internals. This method is 
             called after the parent has been unset. Subclasses must call super.
-            @returns {undefined} */
+            @returns {void} */
         destroyAfterOrphaning: NOOP, // () => {/* Subclasses to implement as needed. */},
         
         
@@ -237,7 +237,7 @@
         /** Sets the provided Node as the new parent of this Node. This is the most direct method 
             to do reparenting.
             @param {?Object} newParent
-            @returns {undefined} */
+            @returns {void} */
         setParent: function(newParent) {
             const self = this;
             
@@ -280,7 +280,7 @@
             example a Node named 'foo' that is a child of a Node stored in the variable 'bar' 
             would be referenced like this: bar.foo or bar['foo'].
             @param {string} name
-            @returns {undefined} */
+            @returns {void} */
         setName: function(name) {
             if (this.name !== name) {
                 // Remove "name" reference from parent.
@@ -436,14 +436,14 @@
         /** Called when a subnode is added to this node. Provides a hook for subclasses. No need for
             subclasses to call super. Do not call this method to add a subnode. Instead call setParent.
             @param {!Object} node - The sub myt.Node that was added.
-            @returns {undefined} */
+            @returns {void} */
         subnodeAdded: NOOP, // node => {},
         
         /** Called when a subnode is removed from this node. Provides a hook for subclasses. No need
             for subclasses to call super. Do not call this method to remove a subnode. Instead 
             call setParent.
             @param {!Object} node - The sub myt.Node that was removed.
-            @returns {undefined} */
+            @returns {void} */
         subnodeRemoved: NOOP, // node => {},
         
         
@@ -492,7 +492,7 @@
                 values is a string it will be used as a matching attribute name.
             @param {boolean} [executeCallbacks] - If true animator 
                 callbacks will be executed if they exist.
-            @returns {undefined} */
+            @returns {void} */
         stopActiveAnimators: function(filterFunc, executeCallbacks=false) {
             const activeAnims = this.getActiveAnimators(filterFunc);
             let i = activeAnims.length;
@@ -510,7 +510,7 @@
         // Timing and Delay //
         /** A convienence method to execute a method once on idle.
             @param {string} methodName - The name of the method to execute on this object.
-            @returns {undefined} */
+            @returns {void} */
         doOnceOnIdle: function(methodName) {
             this.attachTo(pkg.global.idle, methodName, 'idle', true);
         },

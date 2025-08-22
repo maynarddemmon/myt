@@ -528,7 +528,7 @@
                 @param {boolean} [capture] - Indicates if the listener is registered during the 
                     capture phase or bubble phase.
                 @param {boolean} passive
-                @returns {undefined} */
+                @returns {void} */
             addEventListener: (elem, type, callback, capture, passive) => {
                 elem.addEventListener(type, callback, {
                     capture:capture || false,
@@ -543,7 +543,7 @@
                     the event.
                 @param {boolean} [capture] indicates if the listener is registered during the 
                     capture phase or bubble phase.
-                @returns {undefined} */
+                @returns {void} */
             removeEventListener: (elem, type, callback, capture) => {
                 elem.removeEventListener(type, callback, capture || false);
             },
@@ -586,13 +586,13 @@
             
             /** Create a CSS rule that defines the base font for the document.
                 @param {string} fontFamily
-                @returns {undefined} */
+                @returns {void} */
             createBaseFontCSSRule: fontFamily => {
                 myt.addCSSRule(myt.createStylesheet(), 'body, input', 'font-family:' + fontFamily);
             },
             
             /** @param {?Array} fontUrls
-                @returns {undefined} */
+                @returns {void} */
             loadCSSFonts: fontUrls => {
                 fontUrls?.forEach(myt.loadCSS);
             },
@@ -602,8 +602,6 @@
             loadScript: (...args) => loadResource(RESOURCE_TYPE_SCRIPT, ...args),
             
             loadCSS: (...args) => loadResource(RESOURCE_TYPE_CSS, ...args),
-            
-            //createStylesheetLink: href => myt.loadCSS(href),
             
             /** Creates a "style" dom element.
                 @returns {!Object} */
@@ -915,7 +913,7 @@
                 @param {string|?Error} err - The error or message to dump stack for.
                 @param {string} [type] - The type of console message to write. Allowed values are 
                     'error', 'warn', 'log' and 'debug'. Defaults to 'error'.
-                @returns {undefined} */
+                @returns {void} */
             dumpStack: (err, type) => {
                 let msg;
                 if (typeof err === 'string') {
@@ -958,7 +956,7 @@
                 
                 // Define the "module".
                 /** Increments the counter attribute on the scope object by 1.
-                    @returns {undefined} */
+                    @returns {void} */
                 mod[incrName] = function() {
                     const value = this[counterAttrName] + 1;
                     this[counterAttrName] = value;
@@ -967,7 +965,7 @@
                 };
                 
                 /** Decrements the counter attribute on the scope object by 1.
-                    @returns {undefined} */
+                    @returns {void} */
                 mod[decrName] = function() {
                     const curValue = this[counterAttrName];
                     if (curValue === 0) return;

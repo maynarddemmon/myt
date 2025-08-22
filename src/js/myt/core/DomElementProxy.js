@@ -161,7 +161,7 @@
                 @param {string} eventName - The name of the dom event to generate.
                 @param {?Object} [customOpts] - A map of options that will be added onto the dom 
                     event object.
-                @returns {undefined} */
+                @returns {void} */
             simulateDomEvent: (elem, eventName, customOpts) => {
                 if (elem) {
                     const opts = {
@@ -247,7 +247,7 @@
         /** Sets the dom element(s) to the provided ones. To set the inner and outer dom elements 
             to different dom elements provide an array of two dom elements.
             @param {?Object} v
-            @returns {undefined} */
+            @returns {void} */
         setDomElement: function(v) {
             const self = this;
             if (Array.isArray(v)) {
@@ -278,13 +278,13 @@
         },
         
         /** Removes this DomElementProxy's outer dom element from its parent node.
-            @returns {undefined} */
+            @returns {void} */
         removeDomElement: function() {
             this.__oE.parentNode.removeChild(this.__oE);
         },
         
         /** Called when this DomElementProxy is destroyed.
-            @returns {undefined} */
+            @returns {void} */
         disposeOfDomElement: function() {
             delete this.__iE.model;
             delete this.__iS;
@@ -296,50 +296,52 @@
         
         /** Sets the dom "class" attribute on the inner dom element.
             @param {string} v - The dom class name.
-            @returns {undefined} */
-        setDomClass: function(v) {
-            this.__iE.className = this.domClass = v;
+            @param {boolean} [noDomChange] - If true the dom is not updated, only this model.
+            @returns {void} */
+        setDomClass: function(v, noDomChange) {
+            if (!noDomChange) this.__iE.className = v;
+            this.domClass = v;
         },
         
-        /** Adds a dom "class" to the existing dom classes on the inner dom element.
-            @param {string} v - The dom class to add.
-            @returns {undefined} */
-        addDomClass: function(v) {
-            const existing = this.__iE.className;
-            this.setDomClass((existing ? existing + ' ' : '') + v);
-        },
-        
-        /** Removes a dom "class" from the inner dom element.
-            @param {string} v - The dom class to remove.
-            @returns {undefined} */
-        removeDomClass: function(v) {
-            const existing = this.__iE.className;
-            if (existing) {
-                const parts = existing.split(' ');
-                let i = parts.length;
-                while (i) {
-                    if (parts[--i] === v) parts.splice(i, 1);
-                }
-                this.setDomClass(parts.join(' '));
+        /*  Adds a dom "class" to the existing dom classes on the inner dom element.
+            @param {...string} args - The dom class or classes to add.
+            @returns {void} */
+        addDomClass: function(...args) {
+            const classes = args.filter(c => c && typeof c === 'string');
+            if (classes.length) {
+                this.__iE.classList.add(...classes);
+                this.setDomClass(this.__iE.className, true);
             }
         },
         
-        /** Clears the dom "class" from the inner dom element.
-            @returns {undefined} */
-        clearDomClass: function() {
-            this.setDomClass('');
+        /** Check if a dom "class" is already set on the inner dom element.
+            @param {string} v - The dom class to test for.
+            @returns {boolean} - true if found, otherwise false. */
+        hasDomClass: function(v) {
+            return this.__iE.classList.contains(v);
+        },
+        
+        /** Removes a dom "class" from the inner dom element.
+            @param {...string} args - The dom class or classes to remove.
+            @returns {void} */
+        removeDomClass: function(...args) {
+            const classes = args.filter(c => c && typeof c === 'string');
+            if (classes.length) {
+                this.__iE.classList.remove(...classes);
+                this.setDomClass(this.__iE.className, true);
+            }
         },
         
         /** Sets the dom "id" attribute on the inner dom element.
             @param {string} v - The dom id name.
-            @returns {undefined} */
+            @returns {void} */
         setDomId: function(v) {
             this.__iE.id = this.domId = v;
         },
         
         /** Set the z-index of the outer dom element.
             @param {number} v - The z-index to set.
-            @returns {undefined} */
+            @returns {void} */
         setZIndex: function(v) {
             this.__oS.zIndex = v;
         },
@@ -347,7 +349,7 @@
         /** Set an arbitrary CSS style on the inner dom element style.
             @param {string} propertyName - The name of the CSS property to set.
             @param {*} v - The value to set.
-            @returns {undefined} */
+            @returns {void} */
         setStyleProperty: function(propertyName, v) {
             this.__iS[propertyName] = v;
         },
@@ -365,7 +367,7 @@
         },
         
         /** Generates a dom event "click" on this DomElementProxy's inner dom element.
-            @returns {undefined} */
+            @returns {void} */
         simulateClick: function() {
             DomElementProxy.simulateDomEvent(this.__iE, 'click');
         },
@@ -393,7 +395,7 @@
         
         /** Makes this DomElementProxy's outer dom element the one with the highest z-index 
             relative to its sibling dom elements.
-            @returns {undefined} */
+            @returns {void} */
         makeHighestZIndex: function() {
             this.setZIndex(this.parent.getHighestChildZIndex(this.__iE) + 1);
         },
@@ -402,7 +404,7 @@
             @param {number} [value] - The value to scroll to.
             @param {boolean} [scrollInner] - Indicates if the inner dom element should be used 
                 instead of the outer dom element.
-            @returns {undefined} */
+            @returns {void} */
         scrollYTo: function(value, scrollInner) {
             (scrollInner ? this.__iE : this.__oE).scrollTop = value || 0;
         }

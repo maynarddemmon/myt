@@ -852,7 +852,7 @@
             
             /** Called before a dialog is shown to reset state and cleanup UI elements from the 
                 previous display of the Dialog.
-                @returns {undefined} */
+                @returns {void} */
             destroyContent: function() {
                 hideSpinner(this);
                 
@@ -884,7 +884,7 @@
             
             /** Called by each of the buttons that can trigger the dialog to be hidden.
                 @param {!Object} sourceView - The myt.View that triggered the hiding of the dialog.
-                @returns {undefined} */
+                @returns {void} */
             doCallback: function(sourceView) {
                 const cbf = this.callbackFunction;
                 if (!cbf || !cbf.call(this, sourceView.name)) this.hide();
@@ -893,7 +893,7 @@
             /** Shows this dialog as a regular dimmer.
                 @param {?Object} opts - If opts.bgColor is provided it will be used for the bgColor 
                     of the overlay.
-                @returns {undefined} */
+                @returns {void} */
             showBlank: function(opts) {
                 this.destroyContent();
                 
@@ -912,7 +912,7 @@
                     the close should be aborted.
                 @param {?Object} [opts] - Options that modify how the message is displayed. 
                     Supports: fontWeight, whiteSpace, wordWrap and width.
-                @returns {undefined} */
+                @returns {void} */
             showMessage: function(msg, callbackFunction, opts) {
                 const self = this,
                     content = self.content, 
@@ -1054,7 +1054,7 @@
                 @param {string} msg - the message to show.
                 @param {?Objecft} opts - Options that modify how the message is displayed. 
                     Supports: fontWeight, whiteSpace, wordWrap and width.
-                @returns {undefined} */
+                @returns {void} */
             showSpinner: function(msg, opts) {
                 const self = this,
                     content = self.content;
@@ -1189,7 +1189,7 @@
             /** @private 
                 @param {!Object} mainView
                 @param {!Object} opts
-                @returns {undefined} */
+                @returns {void} */
             setupFooterButtons: function(mainView, opts) {
                 const self = this,
                     content = self.content, 

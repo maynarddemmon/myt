@@ -147,7 +147,7 @@
             @param x:number the x location of the center of the circle.
             @param y:number the y location of the center of the circle.
             @param radius:number the radius of the circle.
-            @returns {undefined} */
+            @returns {void} */
         circle: function(x, y, radius) {
             this.__ctx.arc(x, y, radius, 0, 2 * PI);
         },

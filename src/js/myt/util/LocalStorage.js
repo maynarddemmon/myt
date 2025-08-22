@@ -13,16 +13,16 @@
             replaced with the new value.
             @param {string} key - The key to store the value under.
             @param {*} value - The value to store.
-            @returns {undefined} */
+            @returns {void} */
         setItem = localStorage.setItem.bind(localStorage),
         
         /*  Removes the storage entry for the key.
             @param {string} key - The key to remove.
-            @returns {undefined} */
+            @returns {void} */
         removeItem = localStorage.removeItem.bind(localStorage),
         
         /*  Removes all storage entries.
-            @returns {undefined} */
+            @returns {void} */
         clear = localStorage.clear.bind(localStorage),
         
         getStoreId = storeId => storeId = storeId ?? 'myt',
@@ -100,7 +100,7 @@
                     will be set a large number of times over a short time interval. For example, 
                     when saving the position of a UI control as it is being repositioned or a value 
                     the user is typing.
-                @returns {undefined} */
+                @returns {void} */
             setDatum: (key, value, storeId, delay) => {
                 storeId = getStoreId(storeId);
                 doFuncWithOptionalDelay(() => {
@@ -116,7 +116,7 @@
                     provided the default "myt" storeId will be used.
                 @param {number} [delay] - A number of millis to wait before actually removing 
                     the data.
-                @returns {undefined} */
+                @returns {void} */
             removeDatum: (key, storeId, delay) => {
                 storeId = getStoreId(storeId);
                 doFuncWithOptionalDelay(() => {
@@ -177,7 +177,7 @@
                     default "myt" storeId will be used.
                 @param {number} [delay] - A number of millis to wait beforeactually removing 
                     the data.
-                @returns {undefined} */
+                @returns {void} */
             removeData: (storeId, delay) => {
                 storeId = getStoreId(storeId);
                 doFuncWithOptionalDelay(() => {removeItem(storeId);}, delay, storeId);

@@ -14,7 +14,7 @@
         // Constructor /////////////////////////////////////////////////////////
         /** Create a new Path.
             @param {?Array} vectors
-            @returns {undefined} */
+            @returns {void} */
         initialize: function(vectors) {
             this.setVectors(vectors ?? []);
         },
@@ -30,7 +30,7 @@
         // Methods /////////////////////////////////////////////////////////////
         /** Copy the data from the provided Path into this one.
             @param {!Object} path - An myt.Path
-            @returns {undefined} */
+            @returns {void} */
         copyFrom: function(path) {
             this.vectors = path.vectors.slice();
             this._boundingBox = null;
@@ -38,7 +38,7 @@
         
         /** Draws this path into the provided drawview.
             @param {!Object} canvas
-            @returns {undefined} */
+            @returns {void} */
         drawInto: function(canvas) {
             canvas.beginPath();
             const vecs = this.vectors;
@@ -52,7 +52,7 @@
         /** Shift this path by the provided x and y amount.
             @param {number} dx
             @param {number} dy
-            @returns {undefined} */
+            @returns {void} */
         translate: function(dx, dy) {
             const vecs = this.vectors;
             let i = vecs.length;
@@ -65,7 +65,7 @@
         
         /** Scales the path by the provided amount.
             @param {number} magnitude
-            @returns {undefined} */
+            @returns {void} */
         scale: function(magnitude) {
             const vecs = this.vectors;
             let i = vecs.length;
@@ -78,7 +78,7 @@
         
         /** Rotates this path around 0,0 by the provided angle in radians.
             @param {number} a
-            @returns {undefined} */
+            @returns {void} */
         rotate: function(a) {
             const cosA = math.cos(a),
                 sinA = math.sin(a),
@@ -97,7 +97,7 @@
             @param {number} angle - The angle in radians
             @param {number} xOrigin - The x coordinate to rotate around.
             @param {number} yOrigin - The y coordinate to rotate around.
-            @returns {undefined} */
+            @returns {void} */
         rotateAroundOrigin: function(angle, xOrigin, yOrigin) {
             this.translate(-xOrigin, -yOrigin);
             this.rotate(angle);

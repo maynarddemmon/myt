@@ -144,7 +144,7 @@
             @param {string} id
             @param {string} regex - The regex to validate with
             @param {string} [errorMsg] - A custom error message for when validation is false.
-            @returns {undefined} */
+            @returns {void} */
         initialize: function(id, regex, errorMsg) {
             this.callSuper(id);
             this.regex = new RegExp(regex);
@@ -301,7 +301,7 @@
         /** Add a myt.Validator to this myt.CompoundValidator.
             @param {!Object|string} v - The myt.Validator to add or a string used to lookup a 
                 Validator in the Validator repository.
-            @returns {undefined} */
+            @returns {void} */
         addValidator: function(v) {
             if (typeof v === 'string') v = getValidator(v);
             if (v) this.__v.push(v);
@@ -344,12 +344,12 @@
         // Methods /////////////////////////////////////////////////////////////
         /** Adds a Validator to this registry.
             @param {!Object} identifiable - The myt.Validator to add.
-            @returns {undefined} */
+            @returns {void} */
         register: register,
         
         /** Removes a Validator from this registery.
             @param {!Object} identifiable - The myt.Validator to remove.
-            @returns {undefined} */
+            @returns {void} */
         unregister: identifiable => {
             doFuncOnIdentifiable(identifiable, id => {
                 // Make sure the validator is in the repository then delete.

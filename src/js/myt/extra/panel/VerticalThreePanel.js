@@ -87,7 +87,7 @@ myt.VerticalThreePanel = new JS.Class('VerticalThreePanel', {
     // Methods /////////////////////////////////////////////////////////////////
     /** @private
         @param {!Object} event
-        @returns {undefined} */
+        @returns {void} */
     __updateSize: function(event) {
         const v = this.second;
         v.setWidth(v.naturalWidth);
@@ -96,14 +96,14 @@ myt.VerticalThreePanel = new JS.Class('VerticalThreePanel', {
     
     /** @private
         @param {!Object} event
-        @returns {undefined} */
+        @returns {void} */
     __updateImageSize: function(event) {
         const v = this.second;
         v.setImageSize(this.repeat ? undefined : v.width + 'px ' + v.height + 'px');
     },
     
     /** @private
-        @returns {undefined} */
+        @returns {void} */
     __updateRepeat: function() {
         this.second.setImageRepeat(this.repeat ? 'repeat-y' : 'no-repeat');
     }

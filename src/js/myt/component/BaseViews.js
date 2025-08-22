@@ -60,7 +60,7 @@
         // Methods /////////////////////////////////////////////////////////////
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doMouseDown: function(event) {
             this.__restorePointerEvents = this.pointerEvents;
             this.setPointerEvents('none');
@@ -69,7 +69,7 @@
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doMouseUp: function(event) {
             this.setPointerEvents(this.__restorePointerEvents);
             return true;

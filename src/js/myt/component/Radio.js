@@ -12,7 +12,7 @@
         /*  Search the radio group for a matching node and make that one the true node.
             @param {!Object} radio
             @param {*} value
-            @returns {undefined} */
+            @returns {void} */
         updateGroupValue = (radio, value) => {
             const bag = getBooleanAttributeGroup(radio);
             if (bag) {
@@ -74,7 +74,7 @@
         /** Sets the value of the radio group. Calling this method on any radio button in the group 
             should have the same effect.
             @param {*} v
-            @returns {undefined} */
+            @returns {void} */
         setValue: function(v) {
             if (this.inited) updateGroupValue(this, v);
         },

@@ -53,7 +53,7 @@
         // Methods /////////////////////////////////////////////////////////////
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __updateWidth: function(event) {
             // Only resize the active panel
             this.getActivePanel()?.setWidth(event.value);
@@ -61,7 +61,7 @@
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __updateHeight: function(event) {
             // Only resize the active panel
             this.getActivePanel()?.setHeight(event.value);
@@ -90,7 +90,7 @@
         /** Called by a panel when it transitions between selected states. Should not be called 
             directly. Instead change the panel selection.
             @param panel:myt.StackablePanel The panel that is transitioning.
-            @returns {undefined} */
+            @returns {void} */
         doStackTransition: function(panel) {
             this['doStackTransition' + (panel.selected ? 'To' : 'From')](panel);
         },
@@ -99,7 +99,7 @@
             selected panel in the stack. Should not be called directly. Instead change the 
             panel selection.
             @param panel:myt.StackablePanel The panel that is transitioning.
-            @returns {undefined} */
+            @returns {void} */
         doStackTransitionTo: function(panel) {
             const self = this;
             
@@ -123,7 +123,7 @@
             deselected panel in the stack. Should not be called directly. Instead change the 
             panel selection.
             @param panel:myt.StackablePanel The panel that is transitioning.
-            @returns {undefined} */
+            @returns {void} */
         doStackTransitionFrom: function(panel) {
             const self = this;
             
@@ -189,7 +189,7 @@
         // Methods /////////////////////////////////////////////////////////////
         /** Called whenever a transition between panels is initiated by this panel. Default 
             behavior is to defer to the panelStack's doStackTransition method.
-            @returns {undefined} */
+            @returns {void} */
         doStackTransition: function() {
             this.getPanelStack().doStackTransition(this);
         }

@@ -70,7 +70,7 @@
                         raw:boolean If true the cookie key and value will be used as is. Otherwise 
                             encodeURIComponent will be used.
                         json:boolean If true JSON.stringify will be used to encode the cookie value.
-                @returns {undefined} */
+                @returns {void} */
             write: (key, value, options) => {
                 options = {...Cookie.defaults, ...options};
                 

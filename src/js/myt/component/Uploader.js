@@ -70,26 +70,26 @@
             },
             
             /** @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             doDragOver: NOOP, // event => {},
             
             /** @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             doDragEnter: NOOP, // event => {},
             
             /** @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             doDragLeave: NOOP, // event => {},
             
             /** @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             doDrop: function(event) {
                 this.handleFiles(event.value.dataTransfer.files, event);
             },
             
             /** @param {?Array} files
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             handleFiles: function(files, event) {
                 if (files !== undefined) {
                     let i = files.length;
@@ -111,7 +111,7 @@
             
             /** @param {!Object} file
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             handleDroppedFile: NOOP // (file, event) => {}
         }),
         
@@ -327,7 +327,7 @@
                 By default this returns null.
                 @param {!Object} file
                 @param {!Object} data
-                @returns {undefined} */
+                @returns {void} */
             parseServerPathFromResponse: (file, data) => null,
             
             addFile: function(file) {

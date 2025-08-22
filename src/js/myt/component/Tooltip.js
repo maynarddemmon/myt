@@ -66,7 +66,7 @@
                     text:string The tip text.
                     tipalign:string Tip alignment, 'left' or 'right'.
                     tipvalign:string Tip vertical alignment, 'above' or 'below'.
-                @returns {undefined} */
+                @returns {void} */
             setTooltip: function(v) {
                 if (this.inited) {
                     this.tooltip = v;
@@ -82,7 +82,7 @@
             // Methods /////////////////////////////////////////////////////////
             /** @private
                 @param {!Object} event The event object.
-                @returns {undefined} */
+                @returns {void} */
             __hndl_mousemove: function(event) {
                 const self = this;
                 self._lastPos = pkg.MouseObservable.getMouseFromEvent(event);
@@ -123,7 +123,7 @@
             },
             
             /** Called when the tip will be shown.
-                @returns {undefined} */
+                @returns {void} */
             showTip: function() {
                 // Don't show tooltips while doing drag and drop since tooltips are distracting 
                 // while this is going on.

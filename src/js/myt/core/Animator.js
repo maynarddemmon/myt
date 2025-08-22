@@ -356,7 +356,7 @@
             @param {!Function} callback - The function to run.
             @param {boolean} [replace] - If true the existing callback will be replaced with 
                 the new callback.
-            @returns {undefined} */
+            @returns {void} */
         next: function(callback, replace) {
             const self = this,
                 existingCallback = self.callback;
@@ -373,7 +373,7 @@
         /** Puts the animator back to an initial configured state.
             @param {boolean} [executeCallback] - If true and the callback exists, the callback 
                 will be executed.
-            @returns {undefined} */
+            @returns {void} */
         reset: function(executeCallback) {
             const self = this;
             
@@ -400,7 +400,7 @@
         
         /** @private
             @param {!Object} idleEvent
-            @returns {undefined} */
+            @returns {void} */
         __updateAnim: function(idleEvent) {
             advance(this, idleEvent.value.delta);
         }

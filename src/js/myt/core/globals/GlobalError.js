@@ -43,7 +43,7 @@
                 be taken. If not provided a stacktrace will be automatically generated.
             @param {?Object} [extraInfo] - An object that will be copied onto the Error object 
                 under "extraInfo". This can be used to provide additional context for the Error.
-            @returns {undefined} */
+            @returns {void} */
         notify: (consoleFuncName, eventType, msg, err, extraInfo) => {
             // Generate Stacktrace
             err ??= new Error(msg ?? eventType);

@@ -108,7 +108,7 @@
             
             /** Called when a floating panel has been shown for this anchor.
                 @param {!Object} panel - The myt.FloatingPanel that is now shown.
-                @returns {undefined} */
+                @returns {void} */
             notifyPanelShown: function(panel) {
                 // Subclasses to implement as needed.
                 this.callSuper?.();
@@ -116,7 +116,7 @@
             
             /** Called when a floating panel has been hidden for this anchor.
                 @param {!Object} panel - The myt.FloatingPanel that is now hidden.
-                @returns {undefined} */
+                @returns {void} */
             notifyPanelHidden: function(panel) {
                 // Subclasses to implement as needed.
                 this.callSuper?.();
@@ -242,7 +242,7 @@
         // Methods /////////////////////////////////////////////////////////////
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doMouseDown: function(event) {
             const v = event.value, 
                 px = v.pageX, 
@@ -259,7 +259,7 @@
             hide the panel. This gives subclasses a chance to provide different behavior.
             @param ignoreRestoreFocus:boolean (Optional) If true the restoreFocus method will not 
                 be called. Defaults to undefined which is equivalent to false.
-            @returns {undefined} */
+            @returns {void} */
         doMouseDownOutside: function(ignoreRestoreFocus) {
             if (this.hideOnMouseDown) this.hide(ignoreRestoreFocus);
         },
@@ -291,14 +291,14 @@
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doFocusChange: function(event) {
             const v = event.value;
             if (v && !this.isAncestorOf(v)) this.doLostFocus();
         },
         
         /** Called when focus moves out of the floating panel. Hides the floating panel by default.
-            @returns {undefined} */
+            @returns {void} */
         doLostFocus: function() {
             if (this.hideOnBlur) {
                 if (this.ignoreOwnerForHideOnBlur && GlobalFocus.focusedView === this.owner) return;
@@ -317,7 +317,7 @@
         /** Shows the floating panel for the provided myt.FloatingPanelAnchor.
             @param panelAnchor:myt.FloatingPanelAnchor The floating panel anchor to show the 
                 panel for.
-            @returns {undefined} */
+            @returns {void} */
         show: function(panelAnchor) {
             if (!this.isShown()) {
                 this.bringToFront();
@@ -334,7 +334,7 @@
         /** Hides the floating panel for the provided myt.FloatingPanelAnchor.
             @param ignoreRestoreFocus:boolean (Optional) If true the restoreFocus method will not 
                 be called. Defaults to undefined which is equivalent to false.
-            @returns {undefined} */
+            @returns {void} */
         hide: function(ignoreRestoreFocus) {
             if (this.isShown()) {
                 this.detachFromDom(GlobalMouse, '__doMouseDown', 'mousedown', true);
@@ -348,7 +348,7 @@
         },
         
         /** Sends the focus back to the owner. Can be overridden to send the focus elsewhere.
-            @returns {undefined} */
+            @returns {void} */
         restoreFocus: function() {
             this.owner?.focus();
         },
@@ -356,7 +356,7 @@
         /** Updates the x and y position of the floating panel for the provided floating 
             panel anchor.
             @param panelAnchor:myt.FloatingPanelAnchor The anchor to update the location for.
-            @returns {undefined} */
+            @returns {void} */
         updateLocation: function(panelAnchor) {
             this.setOwner(panelAnchor);
             this.updateLocationX(panelAnchor);

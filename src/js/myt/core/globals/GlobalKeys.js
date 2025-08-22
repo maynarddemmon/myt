@@ -151,7 +151,7 @@
             to for key events.
             @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __hndl_focused: event => {
             const focused = event.value;
             if (focused) {
@@ -166,7 +166,7 @@
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __hndl_keydown: event => {
             const code = getCodeFromEvent(event),
                 domEvent = event.value;
@@ -196,14 +196,14 @@
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __hndl_keypress: event => {
             globalKeys.fireEvent('keypress', getCodeFromEvent(event));
         },
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __hndl_keyup: event => {
             const code = getCodeFromEvent(event),
                 domEvent = event.value;

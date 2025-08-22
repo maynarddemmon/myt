@@ -128,7 +128,7 @@
             
             /** Selects the provided item.
                 @param {!Object} item - The item to select.
-                @returns {undefined} */
+                @returns {void} */
             select: function(item) {
                 if (item && !this.isSelectedItem(item) && this.canSelectItem(item)) {
                     item.setSelected(true);
@@ -144,12 +144,12 @@
             
             /** Called when an item is selected.
                 @param {!Objectd} item - The newly selected myt.Selectable..
-                @returns {undefined} */
+                @returns {void} */
             doSelected: NOOP, // item => {},
             
             /** Selects the item with the provided item selection ID.
                 @param {string} itemSelectionId
-                @returns {undefined} */
+                @returns {void} */
             selectById: function(itemSelectionId) {
                 this.select(this.getSelectableItem(itemSelectionId));
             },
@@ -176,7 +176,7 @@
             },
             
             /** Selects all items that can be selected.
-                @returns {undefined} */
+                @returns {void} */
             selectAll: function() {
                 const items = this.getSelectableItems();
                 let i = items.length;
@@ -185,7 +185,7 @@
             
             /** Deselects the provided item.
                 @param {!Object} item - The item to deselect.
-                @returns {undefined} */
+                @returns {void} */
             deselect: function(item) {
                 if (this.isSelectedItem(item) && this.canDeselectItem(item)) {
                     item.setSelected(false);
@@ -201,12 +201,12 @@
             
             /** Called when an item is deselected.
                 @param {!Object} item - The newly deselected myt.Selectable.
-                @returns {undefined} */
+                @returns {void} */
             doDeselected: NOOP, // item => {},
             
             /** Deselects the item with the provided item selection ID.
                 @param {string} itemSelectionId
-                @returns {undefined} */
+                @returns {void} */
             deselectById: function(itemSelectionId) {
                 this.deselect(this.getSelectableItem(itemSelectionId));
             },
@@ -220,7 +220,7 @@
             },
             
             /** Deselects all selected items.
-                @returns {undefined} */
+                @returns {void} */
             deselectAll: function() {
                 const items = this.__selected;
                 for (const key in items) this.deselect(items[key]);

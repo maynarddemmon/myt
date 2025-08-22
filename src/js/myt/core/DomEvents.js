@@ -274,7 +274,7 @@
             // Methods /////////////////////////////////////////////////////////
             /** Gives the focus to the next focusable element or, if nothing else is focusable, 
                 blurs away from this element.
-                @returns {undefined} */
+                @returns {void} */
             giveAwayFocus: function() {
                 if (this.focused) {
                     // Try to go to next focusable element.
@@ -296,21 +296,21 @@
             /** Calling this method will set focus onto this view if it is focusable.
                 @param noScroll:boolean (optional) if true is provided no auto-scrolling will 
                     occur when focus is set.
-                @returns {undefined} */
+                @returns {void} */
             focus: function(noScroll) {
                 if (this.isFocusable()) this.getIDE().focus({preventScroll:noScroll});
             },
             
             /** Removes the focus from this view. Do not call this method directly.
                 @private
-                @returns {undefined} */
+                @returns {void} */
             blur: function() {
                 this.getIDE().blur();
             },
             
             /** @private
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             __doFocus: function(event) {
                 if (!this.focused) this.setFocused(true);
                 this.doFocus();
@@ -318,13 +318,13 @@
             
             /** @private
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             __doBlur: function(event) {
                 this.doBlur();
                 if (this.focused) this.setFocused(false);
             },
             
-            /** @returns {undefined} */
+            /** @returns {void} */
             doFocus: function() {
                 if (this.focusIndicator) {
                     this.showFocusIndicator();
@@ -333,12 +333,12 @@
                 }
             },
             
-            /** @returns {undefined} */
+            /** @returns {void} */
             doBlur: function() {
                 if (this.focusIndicator) this.hideFocusIndicator();
             },
             
-            /** @returns {undefined} */
+            /** @returns {void} */
             showFocusIndicator: function() {
                 // IE
                 this.getIDE().hideFocus = false;
@@ -351,13 +351,13 @@
                 ids.outlineOffset = '0px';
             },
             
-            /** @returns {undefined} */
+            /** @returns {void} */
             hideFocusIndicator: function() {
                 this.hideDefaultFocusIndicator();
             },
             
             /** Hides the browser's default focus indicator.
-                @returns {undefined}*/
+                @returns {void} */
             hideDefaultFocusIndicator: function() {
                 // IE
                 this.getIDE().hideFocus = true;
@@ -593,7 +593,7 @@
         },
         
         /** Detaches all dom observers from this DomObservable.
-            @returns {undefined} */
+            @returns {void} */
         detachAllDomObservers: function() {
             const domObserversByType = this.__dobsbt;
             if (domObserversByType) {
@@ -636,7 +636,7 @@
             @param {string} type
             @param {boolean} [capture]
             @param {boolean} [passive]
-            @returns {undefined} */
+            @returns {void} */
         attachToDom: function(observable, methodName, type, capture, passive) {
             if (observable && methodName && type) {
                 capture = !!capture;
@@ -689,7 +689,7 @@
         },
         
         /** Detaches this DomObserver from all DomObservables it is attached to.
-            @returns {undefined} */
+            @returns {void} */
         detachFromAllDomSources: function() {
             const observablesByType = this.__dobt;
             if (observablesByType) {

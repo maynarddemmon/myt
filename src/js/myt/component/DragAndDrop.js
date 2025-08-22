@@ -8,7 +8,7 @@
         /*  @param {!Object} autoScroller
             @param {!string} lessDir
             @param {!string} moreDir
-            @returns {undefined} */
+            @returns {void} */
         resetScroll = (autoScroller, lessDir, moreDir) => {
             for (const dir of [lessDir, moreDir]) {
                 autoScroller['__is' + dir] = false;
@@ -17,11 +17,11 @@
         },
         
         /*  @param {!Object} autoScroller
-            @returns {undefined} */
+            @returns {void} */
         resetVScroll = autoScroller => {resetScroll(autoScroller, 'Up', 'Down');},
         
         /*  @param {!Object} autoScroller
-            @returns {undefined} */
+            @returns {void} */
         resetHScroll = autoScroller => {resetScroll(autoScroller, 'Left', 'Right');},
         
         /** Adds drag group and drop group support to drag and drop related classes. Drag groups
@@ -74,7 +74,7 @@
             // Methods /////////////////////////////////////////////////////////
             /** Adds the provided dragGroup to the dragGroups.
                 @param dragGroup:string The drag group to add.
-                @returns {undefined} */
+                @returns {void} */
             addDragGroup: function(dragGroup) {
                 if (dragGroup) {
                     this.__dgs[dragGroup] = true;
@@ -84,7 +84,7 @@
             
             /** Removes the provided dragGroup from the dragGroups.
                 @param dragGroup:string The drag group to remove.
-                @returns {undefined} */
+                @returns {void} */
             removeDragGroup: function(dragGroup) {
                 if (dragGroup) {
                     delete this.__dgs[dragGroup];
@@ -100,7 +100,7 @@
             
             /** Adds the provided dropGroup to the dropGroups.
                 @param dropGroup:string The droup group to add.
-                @returns {undefined} */
+                @returns {void} */
             addDropGroup: function(dropGroup) {
                 if (dropGroup) {
                     this.__drpgs[dropGroup] = true;
@@ -110,7 +110,7 @@
             
             /** Removes the provided dropGroup from the dropGroups.
                 @param dropGroup:string The drop group to remove.
-                @returns {undefined} */
+                @returns {void} */
             removeDropGroup: function(dropGroup) {
                 if (dropGroup) {
                     delete this.__drpgs[dropGroup];
@@ -239,31 +239,31 @@
         /** Called by myt.GlobalDragManager when a dropable starts being dragged that has a 
             matching drag group.
             @param dropable:myt.Dropable The dropable being dragged.
-            @returns {undefined} */
+            @returns {void} */
         notifyDragStart: NOOP, // dropable => {},
         
         /** Called by myt.GlobalDragManager when a dropable stops being dragged that has a 
             matching drag group.
             @param dropable:myt.Dropable The dropable no longer being dragged.
-            @returns {undefined} */
+            @returns {void} */
         notifyDragStop: NOOP, // dropable => {},
         
         /** Called by myt.GlobalDragManager when a dropable is dragged over this view and has a 
             matching drag group.
             @param dropable:myt.Dropable The dropable being dragged over this view.
-            @returns {undefined} */
+            @returns {void} */
         notifyDragEnter: NOOP, // dropable => {},
         
         /** Called by myt.GlobalDragManager when a dropable is dragged out of this view and has a 
             matching drag group.
             @param dropable:myt.Dropable The dropable being dragged out of this view.
-            @returns {undefined} */
+            @returns {void} */
         notifyDragLeave: NOOP, // dropable => {},
         
         /** Called by myt.GlobalDragManager when a dropable is dropped onto this view and has a 
             matching drag group.
             @param dropable:myt.Dropable The dropable being dropped onto this view.
-            @returns {undefined} */
+            @returns {void} */
         notifyDrop: NOOP // dropable => {}
     });
     
@@ -322,14 +322,14 @@
         
         /** Called by myt.GlobalDragManager when this view is dragged over a drop target.
             @param dropTarget:myt.DropTarget The target that was dragged over.
-            @returns {undefined} */
+            @returns {void} */
         notifyDragEntering: function(dropTarget) {
             this.setDropTarget(dropTarget);
         },
         
         /** Called by myt.GlobalDragManager when this view is dragged out of a drop target.
             @param dropTarget:myt.DropTarget The target that was dragged out of.
-            @returns {undefined} */
+            @returns {void} */
         notifyDragLeaving: function(dropTarget) {
             this.setDropTarget();
         },
@@ -339,7 +339,7 @@
                 this dropable was dropped on no drop target.
             @param isAbort:boolean Indicates if the drop was the result of an abort or a 
                 normal drop.
-            @returns {undefined} */
+            @returns {void} */
         notifyDropped: function(dropTarget, isAbort) {
             this.setDropped(true);
             
@@ -348,12 +348,12 @@
         
         /** Called after dragging stops and the drop failed. The default implementation 
             does nothing.
-            @returns {undefined} */
+            @returns {void} */
         notifyDropFailed: NOOP,
         
         /** Called after dragging stops and the drop was aborted. The default implementation 
             does nothing.
-            @returns {undefined} */
+            @returns {void} */
         notifyDropAborted: NOOP
     });
     
@@ -420,7 +420,7 @@
         /** Called by myt.GlobalDragManager when a dropable starts being dragged that has a 
             matching drag group.
             @param {!Object} dropable - The myt.Dropable being dragged.
-            @returns {undefined} */
+            @returns {void} */
         notifyAutoScrollerDragStart: function(dropable) {
             const ide = this.getIDE();
             if (ide.scrollHeight > ide.clientHeight || ide.scrollWidth > ide.clientWidth) {
@@ -431,7 +431,7 @@
         /** Called by myt.GlobalDragManager when a dropable stops being dragged that has a 
             matching drag group.
             @param {!Object} dropable - The myt.Dropable no longer being dragged.
-            @returns {undefined} */
+            @returns {void} */
         notifyAutoScrollerDragStop: function(dropable) {
             this.detachFromDom(globalMouse, '__hndlMove', 'mousemove', true);
             
@@ -442,7 +442,7 @@
         /** Handles global mouse movement.
             @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __hndlMove: function(event) {
             const self = this;
             

@@ -457,9 +457,9 @@
         
         // Dom Selector Attributes //
         /** @overrides myt.DomElementProxy */
-        setDomClass: function(v) {
+        setDomClass: function(v, noDomChange) {
             if (this.domClass !== v) {
-                this.callSuper(v);
+                this.callSuper(v, noDomChange);
                 if (this.inited) this.fireEvent('domClass', v);
             }
         },
@@ -494,14 +494,14 @@
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doAlignCenter: function(event) {
             this.setX(mathRound((this.parent.width - this.width) / 2) + (this.alignOffset || 0));
         },
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doAlignRight: function(event) {
             this.setX(this.parent.width - this.width - (this.alignOffset || 0));
         },
@@ -527,14 +527,14 @@
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doValignMiddle: function(event) {
             this.setY(mathRound((this.parent.height - this.height) / 2) + (this.valignOffset || 0));
         },
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doValignBottom: function(event) {
             this.setY(this.parent.height - this.height - (this.valignOffset || 0));
         },
@@ -688,7 +688,7 @@
             @private
             @param {number} w - the boundsWidth to set.
             @param {number} h - the boundsHeight to set.
-            @returns {undefined} */
+            @returns {void} */
         __updateBounds: function(w, h) {
             if (this.boundsWidth !== w) this.fireEvent('boundsWidth', this.boundsWidth = w);
             if (this.boundsHeight !== h) this.fireEvent('boundsHeight', this.boundsHeight = h);
@@ -699,7 +699,7 @@
             equivalent to false is provided the outline will be suppressed.
             @param {?Array} v - An array where index 0 is outlineWidth, index 1 is outline style 
                 and index 2 is outlineColor.
-            @returns {undefined} */
+            @returns {void} */
         setOutline: function(v) {
             const [width, style, color] = v ?? [];
             this.setOutlineWidth(width);
@@ -724,7 +724,7 @@
             to false is provided the border will be suppressed.
             @param {?Array} v - An array where index 0 is borderWidth, index 1 is border style and 
                 index 2 is borderColor.
-            @returns {undefined} */
+            @returns {void} */
         setBorder: function(v) {
             const [width, style, color] = v ?? [];
             this.setBorderWidth(width);
@@ -747,35 +747,35 @@
         // Edge treatements
         /** A convienence method to set rounded corners on an element.
             @param {number} radius - The radius of the corners.
-            @returns {undefined} */
+            @returns {void} */
         setRoundedCorners: function(radius) {
             this.getODS().borderRadius = radius + 'px';
         },
         
         /** A convienence method to round the top left corner.
             @param {number} radius - The radius of the corner.
-            @returns {undefined} */
+            @returns {void} */
         setRoundedTopLeftCorner: function(radius) {
             this.getODS().borderTopLeftRadius = radius + 'px';
         },
         
         /** A convienence method to round the top right corner.
             @param {number} radius - The radius of the corner.
-            @returns {undefined} */
+            @returns {void} */
         setRoundedTopRightCorner: function(radius) {
             this.getODS().borderTopRightRadius = radius + 'px';
         },
         
         /** A convienence method to round the bottom left corner.
             @param {number} radius - The radius of the corner.
-            @returns {undefined} */
+            @returns {void} */
         setRoundedBottomLeftCorner: function(radius) {
             this.getODS().borderBottomLeftRadius = radius + 'px';
         },
         
         /** A convienence method to round the bottom right corner.
             @param {number} radius - The radius of the corner.
-            @returns {undefined} */
+            @returns {void} */
         setRoundedBottomRightCorner: function(radius) {
             this.getODS().borderBottomRightRadius = radius + 'px';
         },
@@ -783,7 +783,7 @@
         /** Sets the CSS boxShadow property.
             @param {?Array} v - An array where index 0 is the horizontal shadow offset, index 1 is 
                 the vertical shadow offset, index 2 is the blur amount, and index 3 is the color.
-            @returns {undefined} */
+            @returns {void} */
         setBoxShadow: function(v) {
             const [horizontalShadowOffset, verticalShadowOffset, blurAmt, color] = v ?? [];
             this.getODS().boxShadow = v ? (horizontalShadowOffset || 0) + 'px ' + (verticalShadowOffset || 0) + 'px ' + (blurAmt || 7) + 'px ' + (color || '#000') : 'none';
@@ -803,7 +803,7 @@
                     way to designate colors since it will let you use an opacity. For a more 
                     comprehensive description of how to specify color stops 
                     see: https://developer.mozilla.org/en-US/docs/Web/CSS/linear-gradient
-            @returns {undefined} */
+            @returns {void} */
         setGradient: function(v) {
             const self = this,
                 ods = self.getODS();
@@ -880,7 +880,7 @@
         
         /** Sets the tooltip.
             @param {string} v
-            @return {undefined} */
+            @returns {void} */
         setTooltip: function(v) {
             if (this.tooltip !== v) {
                 this.tooltip = this.getODE().title = v;
@@ -908,7 +908,7 @@
         /** @overrides myt.Node
             Calls this.subviewAdded if the added subnode is a myt.View.
             @param {!Object} node
-            @returns {undefined}
+            @returns {void}
             
             @fires subviewAdded event with the provided Node if it's a View. 
             @fires layoutAdded event with the provided node if it's a Layout. */
@@ -928,7 +928,7 @@
         /** @overrides myt.Node
             Calls this.subviewRemoved if the remove subnode is a myt.View.
             @param {!Object} node
-            @returns {undefined}
+            @returns {void}
             
             @fires subviewRemoved event with the provided Node if it's a View and removal succeeds. 
             @fires layoutRemoved event with the provided Node if it's a Layout and removal 
@@ -971,13 +971,13 @@
         /** Called when a View is added to this View. Do not call this method to add a View. 
             Instead call setParent.
             @param {!Object} sv - The myt.View that was added.
-            @returns {undefined} */
+            @returns {void} */
         subviewAdded: NOOP, // sv => {},
         
         /** Called when a View is removed from this View. Do not call this method to remove a View. 
             Instead call setParent.
             @param {!Object} sv - The myt.View that was removed.
-            @returns {undefined} */
+            @returns {void} */
         subviewRemoved: NOOP, // sv => {},
         
         /** Gets the next sibling view based on lexical ordering of dom elements.
@@ -997,7 +997,7 @@
                 will be destroyed. The function is provided the subview and must return true if
                 the subview should be destroyed. When no filter function is provided all subviews
                 will be destroyed.
-            @returns {undefined} */
+            @returns {void} */
         destroyAllSubviews: function(filterFunc) {
             const svs = this.getSubviews();
             for (let i = svs.length; i > 0;) {
@@ -1024,13 +1024,13 @@
         /** Called when a Layout is added to this View. Do not call this method to add a Layout. 
             Instead call setParent.
             @param {!Object} layout - The myt.Layout that was added.
-            @returns {undefined} */
+            @returns {void} */
         layoutAdded: NOOP, // layout => {},
         
         /** Called when a Layout is removed from this View. Do not call this method to remove a 
             Layout. Instead call setParent.
             @param {!Object} layout - The myt.Layout that was removed.
-            @returns {undefined} */
+            @returns {void} */
         layoutRemoved: NOOP, // layout => {},
         
         // Dom-Ordering //
@@ -1055,13 +1055,13 @@
         },
         
         /** Brings this view to the front.
-            @returns {undefined} */
+            @returns {void} */
         bringToFront: function() {
             this.parent.bringSubviewToFront(this);
         },
         
         /** Sends this view to the back.
-            @returns {undefined} */
+            @returns {void} */
         sendToBack: function() {
             this.parent.sendSubviewToBack(this);
         },
@@ -1069,7 +1069,7 @@
         /** Sends this view behind the provided sibling view.
             @param {!Object} sv
             @param {?Object} [layout] - An optional layout that will also get updated.
-            @returns {undefined} */
+            @returns {void} */
         sendBehind: function(sv, layout) {
             this.parent.sendSubviewBehind(this, sv, layout);
         },
@@ -1077,7 +1077,7 @@
         /** Sends this view in front of the provided sibling view.
             @param {!Object} sv
             @param {?Object} [layout] - An optional layout that will also get updated.
-            @returns {undefined} */
+            @returns {void} */
         sendInFrontOf: function(sv, layout) {
             this.parent.sendSubviewInFrontOf(this, sv, layout);
         },
@@ -1086,12 +1086,12 @@
             functions of myt.View.
             @param {?Object} sv The subview that was reorderd or null if no specific subview can 
                 be determined.
-            @returns {undefined} */
+            @returns {void} */
         doSubviewsReorderedInDom: NOOP, // sv => {/* Subclasses to implement. */},
         
         /** Sends the provided subview to the back.
             @param {!Object} sv - The subview of this view to bring to front.
-            @returns {undefined} */
+            @returns {void} */
         bringSubviewToFront: function(sv) {
             const self = this;
             if (sv?.parent === self) {
@@ -1108,7 +1108,7 @@
         
         /** Sends the provided subview to the back.
             @param {?Object} sv - The sub myt.View of this myt.View to send to back.
-            @returns {undefined} */
+            @returns {void} */
         sendSubviewToBack: function(sv) {
             const self = this;
             if (sv?.parent === self) {
@@ -1128,7 +1128,7 @@
             @param {!Object} sv - The sub myt.View to send behind the existing myt.View.
             @param {?Object} existing - The sub myt.View to send the other sub myt.View behind.
             @param {?Object} [layout] - An optional layout that will also get updated.
-            @returns {undefined} */
+            @returns {void} */
         sendSubviewBehind: function(sv, existing, layout) {
             layout?.moveSubviewBefore(sv, existing);
             const self = this;
@@ -1150,7 +1150,7 @@
             @param {!Object} sv - the subview to send in front of the existing view.
             @param {!Object} existing - the subview to send the other subview in front of.
             @param {?Object} [layout] - An optional layout that will also get updated.
-            @returns {undefined} */
+            @returns {void} */
         sendSubviewInFrontOf: function(sv, existing, layout) {
             layout?.moveSubviewAfter(sv, existing);
             const self = this;
@@ -1173,7 +1173,7 @@
         /** Sorts the subviews array according to the provided sort function. Also rearranges the 
             dom elements so that focus navigation and z-ordering get updated.
             @param {!Function} sortFunc - The sort function to sort the subviews with.
-            @returns {undefined} */
+            @returns {void} */
         sortSubviews: function(sortFunc) {
             // Sort subviews
             const self = this,

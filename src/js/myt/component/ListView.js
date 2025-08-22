@@ -195,7 +195,7 @@
         /** ListViewItems should call this method when they are activated. The default 
             implementation invokes doItemActivated on the ListViewAnchor.
             @param {!Object} itemView
-            @returns {undefined} */
+            @returns {void} */
         doItemActivated: function(itemView) {
             this?.owner.doItemActivated(itemView);
         },
@@ -293,7 +293,7 @@
         
         /** Called by the list view when an item is activated. By default it hides the list view.
             @param {!Object} itemView
-            @returns {undefined} */
+            @returns {void} */
         doItemActivated: function(itemView) {
             this.hideFloatingPanel();
         },

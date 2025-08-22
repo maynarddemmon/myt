@@ -69,7 +69,7 @@
             eatMouseEvent: pkg.TRUE_FUNC, // event => true,
             
             /** Shows the dimmer and remembers the focus location.
-                @returns {undefined} */
+                @returns {void} */
             show: function() {
                 const self = this,
                     globalFocus = pkg.global.focus;
@@ -85,7 +85,7 @@
             
             /** Hides the dimmer and restores focus if necessary.
                 @param {boolean} [ignoreRestoreFocus] - When true focus will not be restored.
-                @returns {undefined} */
+                @returns {void} */
             hide: function(ignoreRestoreFocus) {
                 const self = this;
                 if (self.visible) {

@@ -982,7 +982,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 @param {boolean} [capture] - Indicates if the listener is registered during the 
                     capture phase or bubble phase.
                 @param {boolean} passive
-                @returns {undefined} */
+                @returns {void} */
             addEventListener: (elem, type, callback, capture, passive) => {
                 elem.addEventListener(type, callback, {
                     capture:capture || false,
@@ -997,7 +997,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     the event.
                 @param {boolean} [capture] indicates if the listener is registered during the 
                     capture phase or bubble phase.
-                @returns {undefined} */
+                @returns {void} */
             removeEventListener: (elem, type, callback, capture) => {
                 elem.removeEventListener(type, callback, capture || false);
             },
@@ -1040,13 +1040,13 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             
             /** Create a CSS rule that defines the base font for the document.
                 @param {string} fontFamily
-                @returns {undefined} */
+                @returns {void} */
             createBaseFontCSSRule: fontFamily => {
                 myt.addCSSRule(myt.createStylesheet(), 'body, input', 'font-family:' + fontFamily);
             },
             
             /** @param {?Array} fontUrls
-                @returns {undefined} */
+                @returns {void} */
             loadCSSFonts: fontUrls => {
                 fontUrls?.forEach(myt.loadCSS);
             },
@@ -1056,8 +1056,6 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             loadScript: (...args) => loadResource(RESOURCE_TYPE_SCRIPT, ...args),
             
             loadCSS: (...args) => loadResource(RESOURCE_TYPE_CSS, ...args),
-            
-            //createStylesheetLink: href => myt.loadCSS(href),
             
             /** Creates a "style" dom element.
                 @returns {!Object} */
@@ -1369,7 +1367,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 @param {string|?Error} err - The error or message to dump stack for.
                 @param {string} [type] - The type of console message to write. Allowed values are 
                     'error', 'warn', 'log' and 'debug'. Defaults to 'error'.
-                @returns {undefined} */
+                @returns {void} */
             dumpStack: (err, type) => {
                 let msg;
                 if (typeof err === 'string') {
@@ -1412,7 +1410,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 
                 // Define the "module".
                 /** Increments the counter attribute on the scope object by 1.
-                    @returns {undefined} */
+                    @returns {void} */
                 mod[incrName] = function() {
                     const value = this[counterAttrName] + 1;
                     this[counterAttrName] = value;
@@ -1421,7 +1419,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 };
                 
                 /** Decrements the counter attribute on the scope object by 1.
-                    @returns {undefined} */
+                    @returns {void} */
                 mod[decrName] = function() {
                     const curValue = this[counterAttrName];
                     if (curValue === 0) return;
@@ -1837,7 +1835,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                         raw:boolean If true the cookie key and value will be used as is. Otherwise 
                             encodeURIComponent will be used.
                         json:boolean If true JSON.stringify will be used to encode the cookie value.
-                @returns {undefined} */
+                @returns {void} */
             write: (key, value, options) => {
                 options = {...Cookie.defaults, ...options};
                 
@@ -1893,16 +1891,16 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             replaced with the new value.
             @param {string} key - The key to store the value under.
             @param {*} value - The value to store.
-            @returns {undefined} */
+            @returns {void} */
         setItem = localStorage.setItem.bind(localStorage),
         
         /*  Removes the storage entry for the key.
             @param {string} key - The key to remove.
-            @returns {undefined} */
+            @returns {void} */
         removeItem = localStorage.removeItem.bind(localStorage),
         
         /*  Removes all storage entries.
-            @returns {undefined} */
+            @returns {void} */
         clear = localStorage.clear.bind(localStorage),
         
         getStoreId = storeId => storeId = storeId ?? 'myt',
@@ -1980,7 +1978,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     will be set a large number of times over a short time interval. For example, 
                     when saving the position of a UI control as it is being repositioned or a value 
                     the user is typing.
-                @returns {undefined} */
+                @returns {void} */
             setDatum: (key, value, storeId, delay) => {
                 storeId = getStoreId(storeId);
                 doFuncWithOptionalDelay(() => {
@@ -1996,7 +1994,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     provided the default "myt" storeId will be used.
                 @param {number} [delay] - A number of millis to wait before actually removing 
                     the data.
-                @returns {undefined} */
+                @returns {void} */
             removeDatum: (key, storeId, delay) => {
                 storeId = getStoreId(storeId);
                 doFuncWithOptionalDelay(() => {
@@ -2057,7 +2055,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     default "myt" storeId will be used.
                 @param {number} [delay] - A number of millis to wait beforeactually removing 
                     the data.
-                @returns {undefined} */
+                @returns {void} */
             removeData: (storeId, delay) => {
                 storeId = getStoreId(storeId);
                 doFuncWithOptionalDelay(() => {removeItem(storeId);}, delay, storeId);
@@ -2576,7 +2574,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         },
         
         /** Removes all observers from this Observable.
-            @returns {undefined} */
+            @returns {void} */
         detachAllObservers: function() {
             const observersByType = this.__obsbt;
             if (observersByType) {
@@ -2635,7 +2633,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             @param value:* The value to set on the event.
             @param observers:array (Optional) If provided the event will be sent to this specific 
                 list of observers and no others.
-            @returns {undefined} */
+            @returns {void} */
         fireEvent: function(type, value, observers) {
             // Determine observers to use but avoid using getObservers since that lazy instantiates 
             // __obsbt and fireEvent will get called predominantly when no observers were
@@ -2734,7 +2732,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 of the attribute on the Observable to pull the value from.
             @param once:boolean (optional) if true  this Observer will detach from the Observable 
                 after the event is handled once.
-            @returns {undefined} */
+            @returns {void} */
         syncTo: function(observable, methodName, eventType, attrName, once) {
             attrName ??= eventType;
             try {
@@ -2863,7 +2861,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         },
         
         /** Tries to detach this Observer from all Observables it is attached to.
-            @returns {undefined} */
+            @returns {void} */
         detachFromAllObservables: function() {
             const observablesByType = this.__obt;
             if (observablesByType) {
@@ -2885,7 +2883,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             @param {string} methodName - The name of the method to call on this object.
             @param {?Array} observables - An array of observable/type pairs. An observer will 
                 attach to each observable for the event type.
-            @returns {undefined} */
+            @returns {void} */
         constrain: function(methodName, observables) {
             if (methodName && observables) {
                 // Make sure an even number of observable/type was provided
@@ -2923,7 +2921,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         /** Removes a constraint.
             @param {string} methodName
-            @returns {undefined} */
+            @returns {void} */
         releaseConstraint: function(methodName) {
             if (methodName) {
                 // No need to remove if the constraint is already empty.
@@ -2944,7 +2942,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         },
         
         /** Removes all constraints.
-            @returns {undefined} */
+            @returns {void} */
         releaseAllConstraints: function() {
             const constraints = this.__cbmn;
             if (constraints) {
@@ -2980,7 +2978,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 unregistered first.
                 @param {string} key
                 @param {!Object} v
-                @returns {undefined} */
+                @returns {void} */
             register: (key, v) => {
                 if (globalRegistry.hasOwnProperty(key)) {
                     consoleWarn('Global key in use', key);
@@ -2993,7 +2991,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             /** Unegisters the global for the provided key. Fires an unregister<key> event if the 
                 key exists.
                 @param {string} key
-                @returns {undefined} */
+                @returns {void} */
             unregister: key => {
                 if (globalRegistry.hasOwnProperty(key)) {
                     const v = globalRegistry[key];
@@ -3052,7 +3050,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 be taken. If not provided a stacktrace will be automatically generated.
             @param {?Object} [extraInfo] - An object that will be copied onto the Error object 
                 under "extraInfo". This can be used to provide additional context for the Error.
-            @returns {undefined} */
+            @returns {void} */
         notify: (consoleFuncName, eventType, msg, err, extraInfo) => {
             // Generate Stacktrace
             err ??= new Error(msg ?? eventType);
@@ -3227,7 +3225,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 @param {string} eventName - The name of the dom event to generate.
                 @param {?Object} [customOpts] - A map of options that will be added onto the dom 
                     event object.
-                @returns {undefined} */
+                @returns {void} */
             simulateDomEvent: (elem, eventName, customOpts) => {
                 if (elem) {
                     const opts = {
@@ -3313,7 +3311,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         /** Sets the dom element(s) to the provided ones. To set the inner and outer dom elements 
             to different dom elements provide an array of two dom elements.
             @param {?Object} v
-            @returns {undefined} */
+            @returns {void} */
         setDomElement: function(v) {
             const self = this;
             if (Array.isArray(v)) {
@@ -3344,13 +3342,13 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         },
         
         /** Removes this DomElementProxy's outer dom element from its parent node.
-            @returns {undefined} */
+            @returns {void} */
         removeDomElement: function() {
             this.__oE.parentNode.removeChild(this.__oE);
         },
         
         /** Called when this DomElementProxy is destroyed.
-            @returns {undefined} */
+            @returns {void} */
         disposeOfDomElement: function() {
             delete this.__iE.model;
             delete this.__iS;
@@ -3362,50 +3360,52 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         /** Sets the dom "class" attribute on the inner dom element.
             @param {string} v - The dom class name.
-            @returns {undefined} */
-        setDomClass: function(v) {
-            this.__iE.className = this.domClass = v;
+            @param {boolean} [noDomChange] - If true the dom is not updated, only this model.
+            @returns {void} */
+        setDomClass: function(v, noDomChange) {
+            if (!noDomChange) this.__iE.className = v;
+            this.domClass = v;
         },
         
-        /** Adds a dom "class" to the existing dom classes on the inner dom element.
-            @param {string} v - The dom class to add.
-            @returns {undefined} */
-        addDomClass: function(v) {
-            const existing = this.__iE.className;
-            this.setDomClass((existing ? existing + ' ' : '') + v);
-        },
-        
-        /** Removes a dom "class" from the inner dom element.
-            @param {string} v - The dom class to remove.
-            @returns {undefined} */
-        removeDomClass: function(v) {
-            const existing = this.__iE.className;
-            if (existing) {
-                const parts = existing.split(' ');
-                let i = parts.length;
-                while (i) {
-                    if (parts[--i] === v) parts.splice(i, 1);
-                }
-                this.setDomClass(parts.join(' '));
+        /*  Adds a dom "class" to the existing dom classes on the inner dom element.
+            @param {...string} args - The dom class or classes to add.
+            @returns {void} */
+        addDomClass: function(...args) {
+            const classes = args.filter(c => c && typeof c === 'string');
+            if (classes.length) {
+                this.__iE.classList.add(...classes);
+                this.setDomClass(this.__iE.className, true);
             }
         },
         
-        /** Clears the dom "class" from the inner dom element.
-            @returns {undefined} */
-        clearDomClass: function() {
-            this.setDomClass('');
+        /** Check if a dom "class" is already set on the inner dom element.
+            @param {string} v - The dom class to test for.
+            @returns {boolean} - true if found, otherwise false. */
+        hasDomClass: function(v) {
+            return this.__iE.classList.contains(v);
+        },
+        
+        /** Removes a dom "class" from the inner dom element.
+            @param {...string} args - The dom class or classes to remove.
+            @returns {void} */
+        removeDomClass: function(...args) {
+            const classes = args.filter(c => c && typeof c === 'string');
+            if (classes.length) {
+                this.__iE.classList.remove(...classes);
+                this.setDomClass(this.__iE.className, true);
+            }
         },
         
         /** Sets the dom "id" attribute on the inner dom element.
             @param {string} v - The dom id name.
-            @returns {undefined} */
+            @returns {void} */
         setDomId: function(v) {
             this.__iE.id = this.domId = v;
         },
         
         /** Set the z-index of the outer dom element.
             @param {number} v - The z-index to set.
-            @returns {undefined} */
+            @returns {void} */
         setZIndex: function(v) {
             this.__oS.zIndex = v;
         },
@@ -3413,7 +3413,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         /** Set an arbitrary CSS style on the inner dom element style.
             @param {string} propertyName - The name of the CSS property to set.
             @param {*} v - The value to set.
-            @returns {undefined} */
+            @returns {void} */
         setStyleProperty: function(propertyName, v) {
             this.__iS[propertyName] = v;
         },
@@ -3431,7 +3431,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         },
         
         /** Generates a dom event "click" on this DomElementProxy's inner dom element.
-            @returns {undefined} */
+            @returns {void} */
         simulateClick: function() {
             DomElementProxy.simulateDomEvent(this.__iE, 'click');
         },
@@ -3459,7 +3459,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         /** Makes this DomElementProxy's outer dom element the one with the highest z-index 
             relative to its sibling dom elements.
-            @returns {undefined} */
+            @returns {void} */
         makeHighestZIndex: function() {
             this.setZIndex(this.parent.getHighestChildZIndex(this.__iE) + 1);
         },
@@ -3468,7 +3468,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             @param {number} [value] - The value to scroll to.
             @param {boolean} [scrollInner] - Indicates if the inner dom element should be used 
                 instead of the outer dom element.
-            @returns {undefined} */
+            @returns {void} */
         scrollYTo: function(value, scrollInner) {
             (scrollInner ? this.__iE : this.__oE).scrollTop = value || 0;
         }
@@ -3632,7 +3632,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         // Accessors ///////////////////////////////////////////////////////////
         /** Sets the currently focused view.
             @param {?Object} v
-            @returns {undefined} */
+            @returns {void} */
         setFocusedView: v => {
             if (globalFocus.focusedView !== v) {
                 globalFocus.prevFocusedView = globalFocus.focusedView; // Remember previous focus
@@ -3646,20 +3646,20 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         // Methods /////////////////////////////////////////////////////////////
         /** Called by a FocusObservable when it has received focus.
             @param {!Object} focusable - The FocusObservable that received focus.
-            @returns {undefined}. */
+            @returns {void} */
         notifyFocus: focusable => {
             if (globalFocus.focusedView !== focusable) globalFocus.setFocusedView(focusable);
         },
         
         /** Called by a FocusObservable when it has lost focus.
             @param {!Object} focusable - The FocusObservable that lost focus.
-            @returns {undefined}. */
+            @returns {void} */
         notifyBlur: focusable => {
             if (globalFocus.focusedView === focusable) globalFocus.setFocusedView(null);
         },
         
         /** Clears the current focus.
-            @returns {undefined} */
+            @returns {void} */
         clear: () => {
             if (globalFocus.focusedView) {
                 globalFocus.focusedView.blur();
@@ -3672,14 +3672,14 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         // Focus Traversal //
         /** Move focus to the next focusable element.
             @param {boolean} ignoreFocusTrap - If true focus traps will be skipped over.
-            @returns {undefined} */
+            @returns {void} */
         next: ignoreFocusTrap => {
             traverse(true, ignoreFocusTrap)?.focus();
         },
         
         /** Move focus to the previous focusable element.
             @param {boolean} ignoreFocusTrap - If true focus traps will be skipped over.
-            @returns {undefined} */
+            @returns {void} */
         prev: ignoreFocusTrap => {
             traverse(false, ignoreFocusTrap)?.focus();
         },
@@ -3974,7 +3974,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             // Methods /////////////////////////////////////////////////////////
             /** Gives the focus to the next focusable element or, if nothing else is focusable, 
                 blurs away from this element.
-                @returns {undefined} */
+                @returns {void} */
             giveAwayFocus: function() {
                 if (this.focused) {
                     // Try to go to next focusable element.
@@ -3996,21 +3996,21 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             /** Calling this method will set focus onto this view if it is focusable.
                 @param noScroll:boolean (optional) if true is provided no auto-scrolling will 
                     occur when focus is set.
-                @returns {undefined} */
+                @returns {void} */
             focus: function(noScroll) {
                 if (this.isFocusable()) this.getIDE().focus({preventScroll:noScroll});
             },
             
             /** Removes the focus from this view. Do not call this method directly.
                 @private
-                @returns {undefined} */
+                @returns {void} */
             blur: function() {
                 this.getIDE().blur();
             },
             
             /** @private
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             __doFocus: function(event) {
                 if (!this.focused) this.setFocused(true);
                 this.doFocus();
@@ -4018,13 +4018,13 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             
             /** @private
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             __doBlur: function(event) {
                 this.doBlur();
                 if (this.focused) this.setFocused(false);
             },
             
-            /** @returns {undefined} */
+            /** @returns {void} */
             doFocus: function() {
                 if (this.focusIndicator) {
                     this.showFocusIndicator();
@@ -4033,12 +4033,12 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 }
             },
             
-            /** @returns {undefined} */
+            /** @returns {void} */
             doBlur: function() {
                 if (this.focusIndicator) this.hideFocusIndicator();
             },
             
-            /** @returns {undefined} */
+            /** @returns {void} */
             showFocusIndicator: function() {
                 // IE
                 this.getIDE().hideFocus = false;
@@ -4051,13 +4051,13 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 ids.outlineOffset = '0px';
             },
             
-            /** @returns {undefined} */
+            /** @returns {void} */
             hideFocusIndicator: function() {
                 this.hideDefaultFocusIndicator();
             },
             
             /** Hides the browser's default focus indicator.
-                @returns {undefined}*/
+                @returns {void} */
             hideDefaultFocusIndicator: function() {
                 // IE
                 this.getIDE().hideFocus = true;
@@ -4293,7 +4293,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         },
         
         /** Detaches all dom observers from this DomObservable.
-            @returns {undefined} */
+            @returns {void} */
         detachAllDomObservers: function() {
             const domObserversByType = this.__dobsbt;
             if (domObserversByType) {
@@ -4336,7 +4336,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             @param {string} type
             @param {boolean} [capture]
             @param {boolean} [passive]
-            @returns {undefined} */
+            @returns {void} */
         attachToDom: function(observable, methodName, type, capture, passive) {
             if (observable && methodName && type) {
                 capture = !!capture;
@@ -4389,7 +4389,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         },
         
         /** Detaches this DomObserver from all DomObservables it is attached to.
-            @returns {undefined} */
+            @returns {void} */
         detachFromAllDomSources: function() {
             const observablesByType = this.__dobt;
             if (observablesByType) {
@@ -4562,7 +4562,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             to for key events.
             @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __hndl_focused: event => {
             const focused = event.value;
             if (focused) {
@@ -4577,7 +4577,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __hndl_keydown: event => {
             const code = getCodeFromEvent(event),
                 domEvent = event.value;
@@ -4607,14 +4607,14 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __hndl_keypress: event => {
             globalKeys.fireEvent('keypress', getCodeFromEvent(event));
         },
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __hndl_keyup: event => {
             const code = getCodeFromEvent(event),
                 domEvent = event.value;
@@ -5355,13 +5355,13 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 assumes the target is an myt.Observable.
                 @param {!Object} target
                 @param {string} attrName
-                @returns {undefined} */
+                @returns {void} */
             createSetterFunction: createSetterFunction,
             
             /** Creates a standard getter function for the provided attrName on the target.
                 @param {!Object} target
                 @param {string} attrName
-                @returns {undefined} */
+                @returns {void} */
             createGetterFunction: createGetterFunction,
             
             createSetterMixin: (propNames, alsoGetters) => {
@@ -5385,7 +5385,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             an initializer.
             @param {?Array} attrNames - An array of attribute names.
             @param {?Object} attrs - The attrs Object to extract values from.
-            @returns {undefined}. */
+            @returns {void} */
         quickSet: function(attrNames, attrs) {
             if (attrNames) {
                 for (const attrName of attrNames) {
@@ -5397,7 +5397,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         /** Calls a setter function for each attribute in the provided map.
             @param {?Object} attrs - A map of attributes to set.
-            @returns {undefined}. */
+            @returns {void} */
         callSetters: function(attrs) {
             const self = this,
                 earlyAttrs = self.earlyAttrs,
@@ -5465,7 +5465,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             @param {boolean} [skipSetter] - If true no attempt will be made to invoke a setter 
                 function. Useful when you want to invoke standard setter behavior. Defaults to 
                 undefined which is equivalent to false.
-            @returns {undefined} */
+            @returns {void} */
         set: function(attrName, v, skipSetter) {
             const self = this;
             
@@ -5497,7 +5497,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
 myt.Destructible = new JS.Module('Destructible', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Destroys this Object. Subclasses must call super.
-        @returns {undefined} */
+        @returns {void} */
     destroy: function() {
         const self = this;
         if (self.destroyed) {
@@ -5560,7 +5560,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             // Constructor /////////////////////////////////////////////////////
             /** Initialize does nothing.
-                @returns {undefined} */
+                @returns {void} */
             initialize: NOOP,
             
             
@@ -5591,7 +5591,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Puts the object back in the pool. The object will be "cleaned" before it is stored.
                 @param {!Object} obj - The object to put in the pool.
-                @returns {undefined} */
+                @returns {void} */
             putInstance: function(obj) {
                 getObjPool(this, true).push(this.cleanInstance(obj));
             },
@@ -5608,7 +5608,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Calls the destroy method on all object stored in the pool if they have a 
                 destroy function.
-                @returns {undefined} */
+                @returns {void} */
             destroyPooledInstances: function() {
                 destroyObjectPool(getObjPool(this));
             }
@@ -5628,7 +5628,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 @param {!Function} instanceClass - The JS.Class to create instances from.
                 @param {?Object} [instanceParent] - The place to create instances on. When 
                     instanceClass is an myt.Node this will be the node parent.
-                @returns {undefined} */
+                @returns {void} */
             initialize: function(instanceClass, instanceParent) {
                 this.callSuper();
                 
@@ -5714,7 +5714,7 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** Puts all the active instances back in the pool.
-                @returns {undefined} */
+                @returns {void} */
             putActives: function() {
                 const actives = getActiveObjArray(this);
                 if (actives) {
@@ -5808,7 +5808,7 @@ myt.Destructible = new JS.Module('Destructible', {
     pkg.Reusable = new JSModule('Reusable', {
         // Methods /////////////////////////////////////////////////////////////
         /** Puts this object back into a default state suitable for storage in an myt.AbstractPool
-            @returns {undefined} */
+            @returns {void} */
         clean: NOOP
     });
 })(myt);
@@ -5913,7 +5913,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** The standard JSClass initializer function.
             @param {?Object} [attrs] - A map of attribute names and values.
             @param {?Array} [mixins] - A list of mixins to be added onto the new instance.
-            @returns {undefined} */
+            @returns {void} */
         initialize: function(attrs, mixins) {
             initializer(this, mixins);
             this.init(attrs ?? {});
@@ -5924,7 +5924,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Called during initialization. Calls setter methods and lastly, sets inited to true. 
             Subclasses must callSuper.
             @param {?Object} attrs - A map of attribute names and values.
-            @returns {undefined} */
+            @returns {void} */
         init: function(attrs) {
             this.callSetters(attrs);
             this.inited = true;
@@ -5990,7 +5990,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 set as the parent of this myt.Node.
             @param {?Object} [attrs] - A map of attribute names and values.
             @param {?Array} [mixins] - A list of mixins to be added onto the new instance.
-            @returns {undefined} */
+            @returns {void} */
         initialize: function(parent, attrs, mixins) {
             initializer(this, mixins);
             this.initNode(parent, attrs ?? {});
@@ -6003,7 +6003,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {?Object} [parent] - The myt.Node (or dom element for RootViews) the parent of 
                 this Node.
             @param {?Object} attrs - A map of attribute names and values.
-            @returns {undefined} */
+            @returns {void} */
         initNode: function(parent, attrs) {
             this.callSetters(attrs);
             this.setParent(parent);
@@ -6041,7 +6041,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Provides a hook for subclasses to do destruction of their internals. This method is 
             called after the parent has been unset. Subclasses must call super.
-            @returns {undefined} */
+            @returns {void} */
         destroyAfterOrphaning: NOOP, // () => {/* Subclasses to implement as needed. */},
         
         
@@ -6053,7 +6053,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Sets the provided Node as the new parent of this Node. This is the most direct method 
             to do reparenting.
             @param {?Object} newParent
-            @returns {undefined} */
+            @returns {void} */
         setParent: function(newParent) {
             const self = this;
             
@@ -6096,7 +6096,7 @@ myt.Destructible = new JS.Module('Destructible', {
             example a Node named 'foo' that is a child of a Node stored in the variable 'bar' 
             would be referenced like this: bar.foo or bar['foo'].
             @param {string} name
-            @returns {undefined} */
+            @returns {void} */
         setName: function(name) {
             if (this.name !== name) {
                 // Remove "name" reference from parent.
@@ -6252,14 +6252,14 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Called when a subnode is added to this node. Provides a hook for subclasses. No need for
             subclasses to call super. Do not call this method to add a subnode. Instead call setParent.
             @param {!Object} node - The sub myt.Node that was added.
-            @returns {undefined} */
+            @returns {void} */
         subnodeAdded: NOOP, // node => {},
         
         /** Called when a subnode is removed from this node. Provides a hook for subclasses. No need
             for subclasses to call super. Do not call this method to remove a subnode. Instead 
             call setParent.
             @param {!Object} node - The sub myt.Node that was removed.
-            @returns {undefined} */
+            @returns {void} */
         subnodeRemoved: NOOP, // node => {},
         
         
@@ -6308,7 +6308,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 values is a string it will be used as a matching attribute name.
             @param {boolean} [executeCallbacks] - If true animator 
                 callbacks will be executed if they exist.
-            @returns {undefined} */
+            @returns {void} */
         stopActiveAnimators: function(filterFunc, executeCallbacks=false) {
             const activeAnims = this.getActiveAnimators(filterFunc);
             let i = activeAnims.length;
@@ -6326,7 +6326,7 @@ myt.Destructible = new JS.Module('Destructible', {
         // Timing and Delay //
         /** A convienence method to execute a method once on idle.
             @param {string} methodName - The name of the method to execute on this object.
-            @returns {undefined} */
+            @returns {void} */
         doOnceOnIdle: function(methodName) {
             this.attachTo(pkg.global.idle, methodName, 'idle', true);
         },
@@ -6458,13 +6458,13 @@ myt.Destructible = new JS.Module('Destructible', {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
                 /** Increments the global lock that prevents all layouts from updating.
-                    @returns {undefined} */
+                    @returns {void} */
                 incrementGlobalLock: () => {
                     if (++globalLockCount === 1) setGlobalLock(true);
                 },
                 
                 /** Decrements the global lock that prevents all layouts from updating.
-                    @returns {undefined} */
+                    @returns {void} */
                 decrementGlobalLock: () => {
                     if (globalLockCount > 0 && --globalLockCount === 0) setGlobalLock(false);
                 }
@@ -6557,7 +6557,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Updates the layout. Subclasses should call canUpdate to check lock state before 
                 trying to do anything.
-                @returns {undefined} */
+                @returns {void} */
             update: NOOP,
             
             // Subview Methods //
@@ -6577,7 +6577,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Adds the provided View to the subviews array of this Layout.
                 @param {?Object} sv - The myt.View to add to this layout.
-                @returns {undefined} */
+                @returns {void} */
             addSubview: function(sv) {
                 if (!this.ignore(sv)) {
                     this.subviews.push(sv);
@@ -6589,13 +6589,13 @@ myt.Destructible = new JS.Module('Destructible', {
             /** Subclasses should implement this method to start listening to events from the 
                 subview that should trigger the update method.
                 @param {?Object} sv - The myt.View to start monitoring for changes.
-                @returns {undefined} */
+                @returns {void} */
             startMonitoringSubview: NOOP, // sv => {},
             
             /** Calls startMonitoringSubview for all views. Used by Layout implementations when a 
                 change occurs to the layout that 
                 requires refreshing all the subview monitoring.
-                @returns {undefined} */
+                @returns {void} */
             startMonitoringAllSubviews: function() {
                 const svs = this.subviews;
                 let i = svs.length;
@@ -6621,12 +6621,12 @@ myt.Destructible = new JS.Module('Destructible', {
                 subview that would trigger the update method. This should remove all listeners that 
                 were setup in startMonitoringSubview.
                 @param {?Object} sv - The myt.View to stop monitoring for changes.
-                @returns {undefined} */
+                @returns {void} */
             stopMonitoringSubview: NOOP, // sv => {},
             
             /** Calls stopMonitoringSubview for all views. Used by Layout implementations when a 
                 change occurs to the layout that requires refreshing all the subview monitoring.
-                @returns {undefined} */
+                @returns {void} */
             stopMonitoringAllSubviews: function() {
                 const svs = this.subviews;
                 let i = svs.length;
@@ -6642,7 +6642,7 @@ myt.Destructible = new JS.Module('Destructible', {
             /** If our parent adds a new subview we should add it.
                 @private
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             __hndlPSA: function(event) {
                 const value = event.value;
                 if (value.parent === this.parent) this.addSubview(value);
@@ -6651,7 +6651,7 @@ myt.Destructible = new JS.Module('Destructible', {
             /** If our parent removes a subview we should remove it.
                 @private
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             __hndlPSR: function(event) {
                 const value = event.value;
                 if (value.parent === this.parent) this.removeSubview(value);
@@ -6660,7 +6660,7 @@ myt.Destructible = new JS.Module('Destructible', {
             // Subview ordering //
             /** Sorts the subviews array according to the provided sort function.
                 @param {?Function} sortFunc - The sort function to sort the subviews with.
-                @returns {undefined} */
+                @returns {void} */
             sortSubviews: function(sortFunc) {
                 this.subviews.sort(sortFunc);
             },
@@ -6670,7 +6670,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 be moved to the front of the list.
                 @param {?Object} sv
                 @param {?Object} target
-                @returns {undefined} */
+                @returns {void} */
             moveSubviewBefore: function(sv, target) {
                 moveSubview(this, sv, target, false);
             },
@@ -6680,7 +6680,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 moved to the back of the list.
                 @param {?Object} sv
                 @param {?Object} target
-                @returns {undefined} */
+                @returns {void} */
             moveSubviewAfter: function(sv, target) {
                 moveSubview(this, sv, target, true);
             }
@@ -6797,20 +6797,20 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Called by update before any processing is done. Gives subviews a chance to do any 
                 special setup before update is processed.
-                @returns {undefined} */
+                @returns {void} */
             doBeforeUpdate: NOOP, // () => {/* Subclasses to implement as needed. */},
             
             /** Called by update after any processing is done but before the optional collapsing of 
                 parent is done. Gives subviews a chance to do any special teardown after update 
                 is processed.
-                @returns {undefined} */
+                @returns {void} */
             doAfterUpdate: NOOP, // () => {/* Subclasses to implement as needed. */},
             
             /** Provides a default implementation that calls update when the visibility of a 
                 subview changes.
                 @overrides myt.Layout
                 @param {?Object} sv
-                @returns {undefined} */
+                @returns {void} */
             startMonitoringSubview: function(sv) {
                 this.attachTo(sv, 'update', 'visible');
             },
@@ -6819,7 +6819,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 subview changes.
                 @overrides myt.Layout
                 @param {?Object} sv
-                @returns {undefined} */
+                @returns {void} */
             stopMonitoringSubview: function(sv) {
                 this.detachFrom(sv, 'update', 'visible');
             },
@@ -6846,7 +6846,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 they want to modify the parent view.
                 @param {string} setterName - The name of the setter method to call on the parent.
                 @param {*} value - The value to set on the parent.
-                @returns {undefined} */
+                @returns {void} */
             updateParent: NOOP // (setterName, value) => {/* Subclasses to implement as needed. */}
         }),
         
@@ -6985,14 +6985,14 @@ myt.Destructible = new JS.Module('Destructible', {
         // Methods /////////////////////////////////////////////////////////////
         /** Called when monitoring of width/height should start on our parent.
             @param {string} attrName - The name of the attribute to start monitoring.
-            @returns {undefined} */
+            @returns {void} */
         startMonitoringParent: function(attrName) {
             this.attachTo(this.parent, 'update', attrName);
         },
         
         /** Called when monitoring of width/height should stop on our parent.
             @param {string} attrName - The name of the attribute to stop monitoring.
-            @returns {undefined} */
+            @returns {void} */
         stopMonitoringParent: function(attrName) {
             this.detachFrom(this.parent, 'update', attrName);
         },
@@ -7253,14 +7253,14 @@ myt.Destructible = new JS.Module('Destructible', {
         // Methods /////////////////////////////////////////////////////////////
         /** Called when monitoring of width/height should start on our parent.
             @param {string} measureAttrName - The name of the attribute to start monitoring.
-            @returns {undefined} */
+            @returns {void} */
         startMonitoringParent: function(measureAttrName) {
             this.attachTo(this.parent, 'update', measureAttrName);
         },
         
         /** Called when monitoring of width/height should stop on our parent.
             @param {string} measureAttrName - The name of the attribute to stop monitoring.
-            @returns {undefined} */
+            @returns {void} */
         stopMonitoringParent: function(measureAttrName) {
             this.detachFrom(this.parent, 'update', measureAttrName);
         },
@@ -7797,9 +7797,9 @@ myt.Destructible = new JS.Module('Destructible', {
         
         // Dom Selector Attributes //
         /** @overrides myt.DomElementProxy */
-        setDomClass: function(v) {
+        setDomClass: function(v, noDomChange) {
             if (this.domClass !== v) {
-                this.callSuper(v);
+                this.callSuper(v, noDomChange);
                 if (this.inited) this.fireEvent('domClass', v);
             }
         },
@@ -7834,14 +7834,14 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doAlignCenter: function(event) {
             this.setX(mathRound((this.parent.width - this.width) / 2) + (this.alignOffset || 0));
         },
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doAlignRight: function(event) {
             this.setX(this.parent.width - this.width - (this.alignOffset || 0));
         },
@@ -7867,14 +7867,14 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doValignMiddle: function(event) {
             this.setY(mathRound((this.parent.height - this.height) / 2) + (this.valignOffset || 0));
         },
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doValignBottom: function(event) {
             this.setY(this.parent.height - this.height - (this.valignOffset || 0));
         },
@@ -8028,7 +8028,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @private
             @param {number} w - the boundsWidth to set.
             @param {number} h - the boundsHeight to set.
-            @returns {undefined} */
+            @returns {void} */
         __updateBounds: function(w, h) {
             if (this.boundsWidth !== w) this.fireEvent('boundsWidth', this.boundsWidth = w);
             if (this.boundsHeight !== h) this.fireEvent('boundsHeight', this.boundsHeight = h);
@@ -8039,7 +8039,7 @@ myt.Destructible = new JS.Module('Destructible', {
             equivalent to false is provided the outline will be suppressed.
             @param {?Array} v - An array where index 0 is outlineWidth, index 1 is outline style 
                 and index 2 is outlineColor.
-            @returns {undefined} */
+            @returns {void} */
         setOutline: function(v) {
             const [width, style, color] = v ?? [];
             this.setOutlineWidth(width);
@@ -8064,7 +8064,7 @@ myt.Destructible = new JS.Module('Destructible', {
             to false is provided the border will be suppressed.
             @param {?Array} v - An array where index 0 is borderWidth, index 1 is border style and 
                 index 2 is borderColor.
-            @returns {undefined} */
+            @returns {void} */
         setBorder: function(v) {
             const [width, style, color] = v ?? [];
             this.setBorderWidth(width);
@@ -8087,35 +8087,35 @@ myt.Destructible = new JS.Module('Destructible', {
         // Edge treatements
         /** A convienence method to set rounded corners on an element.
             @param {number} radius - The radius of the corners.
-            @returns {undefined} */
+            @returns {void} */
         setRoundedCorners: function(radius) {
             this.getODS().borderRadius = radius + 'px';
         },
         
         /** A convienence method to round the top left corner.
             @param {number} radius - The radius of the corner.
-            @returns {undefined} */
+            @returns {void} */
         setRoundedTopLeftCorner: function(radius) {
             this.getODS().borderTopLeftRadius = radius + 'px';
         },
         
         /** A convienence method to round the top right corner.
             @param {number} radius - The radius of the corner.
-            @returns {undefined} */
+            @returns {void} */
         setRoundedTopRightCorner: function(radius) {
             this.getODS().borderTopRightRadius = radius + 'px';
         },
         
         /** A convienence method to round the bottom left corner.
             @param {number} radius - The radius of the corner.
-            @returns {undefined} */
+            @returns {void} */
         setRoundedBottomLeftCorner: function(radius) {
             this.getODS().borderBottomLeftRadius = radius + 'px';
         },
         
         /** A convienence method to round the bottom right corner.
             @param {number} radius - The radius of the corner.
-            @returns {undefined} */
+            @returns {void} */
         setRoundedBottomRightCorner: function(radius) {
             this.getODS().borderBottomRightRadius = radius + 'px';
         },
@@ -8123,7 +8123,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Sets the CSS boxShadow property.
             @param {?Array} v - An array where index 0 is the horizontal shadow offset, index 1 is 
                 the vertical shadow offset, index 2 is the blur amount, and index 3 is the color.
-            @returns {undefined} */
+            @returns {void} */
         setBoxShadow: function(v) {
             const [horizontalShadowOffset, verticalShadowOffset, blurAmt, color] = v ?? [];
             this.getODS().boxShadow = v ? (horizontalShadowOffset || 0) + 'px ' + (verticalShadowOffset || 0) + 'px ' + (blurAmt || 7) + 'px ' + (color || '#000') : 'none';
@@ -8143,7 +8143,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     way to designate colors since it will let you use an opacity. For a more 
                     comprehensive description of how to specify color stops 
                     see: https://developer.mozilla.org/en-US/docs/Web/CSS/linear-gradient
-            @returns {undefined} */
+            @returns {void} */
         setGradient: function(v) {
             const self = this,
                 ods = self.getODS();
@@ -8220,7 +8220,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Sets the tooltip.
             @param {string} v
-            @return {undefined} */
+            @returns {void} */
         setTooltip: function(v) {
             if (this.tooltip !== v) {
                 this.tooltip = this.getODE().title = v;
@@ -8248,7 +8248,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** @overrides myt.Node
             Calls this.subviewAdded if the added subnode is a myt.View.
             @param {!Object} node
-            @returns {undefined}
+            @returns {void}
             
             @fires subviewAdded event with the provided Node if it's a View. 
             @fires layoutAdded event with the provided node if it's a Layout. */
@@ -8268,7 +8268,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** @overrides myt.Node
             Calls this.subviewRemoved if the remove subnode is a myt.View.
             @param {!Object} node
-            @returns {undefined}
+            @returns {void}
             
             @fires subviewRemoved event with the provided Node if it's a View and removal succeeds. 
             @fires layoutRemoved event with the provided Node if it's a Layout and removal 
@@ -8311,13 +8311,13 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Called when a View is added to this View. Do not call this method to add a View. 
             Instead call setParent.
             @param {!Object} sv - The myt.View that was added.
-            @returns {undefined} */
+            @returns {void} */
         subviewAdded: NOOP, // sv => {},
         
         /** Called when a View is removed from this View. Do not call this method to remove a View. 
             Instead call setParent.
             @param {!Object} sv - The myt.View that was removed.
-            @returns {undefined} */
+            @returns {void} */
         subviewRemoved: NOOP, // sv => {},
         
         /** Gets the next sibling view based on lexical ordering of dom elements.
@@ -8337,7 +8337,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 will be destroyed. The function is provided the subview and must return true if
                 the subview should be destroyed. When no filter function is provided all subviews
                 will be destroyed.
-            @returns {undefined} */
+            @returns {void} */
         destroyAllSubviews: function(filterFunc) {
             const svs = this.getSubviews();
             for (let i = svs.length; i > 0;) {
@@ -8364,13 +8364,13 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Called when a Layout is added to this View. Do not call this method to add a Layout. 
             Instead call setParent.
             @param {!Object} layout - The myt.Layout that was added.
-            @returns {undefined} */
+            @returns {void} */
         layoutAdded: NOOP, // layout => {},
         
         /** Called when a Layout is removed from this View. Do not call this method to remove a 
             Layout. Instead call setParent.
             @param {!Object} layout - The myt.Layout that was removed.
-            @returns {undefined} */
+            @returns {void} */
         layoutRemoved: NOOP, // layout => {},
         
         // Dom-Ordering //
@@ -8395,13 +8395,13 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** Brings this view to the front.
-            @returns {undefined} */
+            @returns {void} */
         bringToFront: function() {
             this.parent.bringSubviewToFront(this);
         },
         
         /** Sends this view to the back.
-            @returns {undefined} */
+            @returns {void} */
         sendToBack: function() {
             this.parent.sendSubviewToBack(this);
         },
@@ -8409,7 +8409,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Sends this view behind the provided sibling view.
             @param {!Object} sv
             @param {?Object} [layout] - An optional layout that will also get updated.
-            @returns {undefined} */
+            @returns {void} */
         sendBehind: function(sv, layout) {
             this.parent.sendSubviewBehind(this, sv, layout);
         },
@@ -8417,7 +8417,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Sends this view in front of the provided sibling view.
             @param {!Object} sv
             @param {?Object} [layout] - An optional layout that will also get updated.
-            @returns {undefined} */
+            @returns {void} */
         sendInFrontOf: function(sv, layout) {
             this.parent.sendSubviewInFrontOf(this, sv, layout);
         },
@@ -8426,12 +8426,12 @@ myt.Destructible = new JS.Module('Destructible', {
             functions of myt.View.
             @param {?Object} sv The subview that was reorderd or null if no specific subview can 
                 be determined.
-            @returns {undefined} */
+            @returns {void} */
         doSubviewsReorderedInDom: NOOP, // sv => {/* Subclasses to implement. */},
         
         /** Sends the provided subview to the back.
             @param {!Object} sv - The subview of this view to bring to front.
-            @returns {undefined} */
+            @returns {void} */
         bringSubviewToFront: function(sv) {
             const self = this;
             if (sv?.parent === self) {
@@ -8448,7 +8448,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Sends the provided subview to the back.
             @param {?Object} sv - The sub myt.View of this myt.View to send to back.
-            @returns {undefined} */
+            @returns {void} */
         sendSubviewToBack: function(sv) {
             const self = this;
             if (sv?.parent === self) {
@@ -8468,7 +8468,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {!Object} sv - The sub myt.View to send behind the existing myt.View.
             @param {?Object} existing - The sub myt.View to send the other sub myt.View behind.
             @param {?Object} [layout] - An optional layout that will also get updated.
-            @returns {undefined} */
+            @returns {void} */
         sendSubviewBehind: function(sv, existing, layout) {
             layout?.moveSubviewBefore(sv, existing);
             const self = this;
@@ -8490,7 +8490,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {!Object} sv - the subview to send in front of the existing view.
             @param {!Object} existing - the subview to send the other subview in front of.
             @param {?Object} [layout] - An optional layout that will also get updated.
-            @returns {undefined} */
+            @returns {void} */
         sendSubviewInFrontOf: function(sv, existing, layout) {
             layout?.moveSubviewAfter(sv, existing);
             const self = this;
@@ -8513,7 +8513,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Sorts the subviews array according to the provided sort function. Also rearranges the 
             dom elements so that focus navigation and z-ordering get updated.
             @param {!Function} sortFunc - The sort function to sort the subviews with.
-            @returns {undefined} */
+            @returns {void} */
         sortSubviews: function(sortFunc) {
             // Sort subviews
             const self = this,
@@ -8868,7 +8868,7 @@ myt.Destructible = new JS.Module('Destructible', {
         // Methods /////////////////////////////////////////////////////////////
         /** Call this method after any change to the width or height of the dom element would 
             have occurred.
-            @returns {undefined} */
+            @returns {void} */
         sizeViewToDom: function() {
             sizeWidth(this);
             sizeHeight(this);
@@ -8905,7 +8905,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         // Methods /////////////////////////////////////////////////////////////
         /** Call this method after any change to the width of the dom element would have occurred.
-            @returns {undefined} */
+            @returns {void} */
         sizeViewToDom: function() {
             sizeWidth(this);
         }
@@ -8941,7 +8941,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         // Methods /////////////////////////////////////////////////////////////
         /** Call this method after any change to the height of the dom element would have occurred.
-            @returns {undefined} */
+            @returns {void} */
         sizeViewToDom: function() {
             sizeHeight(this);
         }
@@ -8957,7 +8957,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {string|number} v
             @param {string} attrName
             @param {string|number} defaultValue
-            @returns {undefined} */
+            @returns {void} */
         setAndSizeViewToDom = (textView, v, attrName, defaultValue) => {
             if (textView[attrName] !== v) {
                 textView[attrName] = v;
@@ -9091,7 +9091,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Configures the attributes for this Text so that an ellipsis will be displayed. To 
             actually see an ellipsis, an explicit width should be set on the Text so that overflow 
             will occur.
-            @returns {undefined} */
+            @returns {void} */
         enableEllipsis: function() {
             this.setWhiteSpace('nowrap');
             this.setOverflow('hidden');
@@ -9100,7 +9100,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Turns ellipsis off by setting overflow to 'visible'. Other CSS related changes for 
             ellipsis are not undone such as whiteSpace and textOverflow.
-            @returns {undefined} */
+            @returns {void} */
         disableEllipsis: function() {
             this.setOverflow('visible');
         },
@@ -9113,7 +9113,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {number} [blur] - The bluriness in pixels of the shadow. Defaults to 2 if 
                 not provided.
             @param {string} [color] - The color of the shadow. Defaults to '#000' if not provided.
-            @returns {undefined} */
+            @returns {void} */
         showTextShadow: function(x, y, blur, color) {
             this.getIDS().textShadow = 
                 (x || 0) + 'px ' + 
@@ -9123,7 +9123,7 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** Turns off a text shadow.
-            @returns {undefined} */
+            @returns {void} */
         hideTextShadow: function() {
             this.getIDS().textShadow = 'none';
         }
@@ -9500,7 +9500,7 @@ myt.Destructible = new JS.Module('Destructible', {
         // Methods /////////////////////////////////////////////////////////////
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doMouseDown: function(event) {
             this.__restorePointerEvents = this.pointerEvents;
             this.setPointerEvents('none');
@@ -9509,7 +9509,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doMouseUp: function(event) {
             this.setPointerEvents(this.__restorePointerEvents);
             return true;
@@ -9731,7 +9731,7 @@ myt.Destructible = new JS.Module('Destructible', {
         // Methods /////////////////////////////////////////////////////////////
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doPOPW: function(event) {
             this.setWidth((this.percentOfParentWidthOffset || 0) + mathRound(this.parent.width * (this.percentOfParentWidth / 100)));
             // Force width event if not inited yet so that align constraint in myt.View will work.
@@ -9740,7 +9740,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doPOPH: function(event) {
             this.setHeight((this.percentOfParentHeightOffset || 0) + mathRound(this.parent.height * (this.percentOfParentHeight / 100)));
             // Force height event if not inited yet so that valign constraint in myt.View will work.
@@ -9783,7 +9783,7 @@ myt.Destructible = new JS.Module('Destructible', {
         // Methods /////////////////////////////////////////////////////////////
         /** Add a rootable to the global list of root views.
             @param {!Object} r - The RootView to add.
-            @returns {undefined} */
+            @returns {void} */
         addRoot: r => {
             roots.push(r);
             globalRootViewRegistry.fireEvent('rootAdded', r);
@@ -9791,7 +9791,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Remove a rootable from the global list of root views.
             @param {!Object} rootToRemove - The RootView to remove.
-            @returns {undefined} */
+            @returns {void} */
         removeRoot: rootToRemove => {
             const idx = roots.indexOf(rootToRemove);
             if (idx > -1) {
@@ -9822,7 +9822,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 /** Prevents default drag/drop behavior.
                     @param {!Obect} view - The myt.View the view to suppress default dragover and 
                         drop on.
-                    @returns {undefined} */
+                    @returns {void} */
                 setupCaptureDrop: view => {
                     const ide = view.getIDE(),
                         cdf = view.__captureDrop = event => {event.preventDefault();};
@@ -9833,7 +9833,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 /** Cleanup dom listeners for drag/drop.
                     @param {!Obect} view - The myt.View the view that had suppressed default 
                         dragover and drop on.
-                    @returns {undefined} */
+                    @returns {void} */
                 teardownCaptureDrop: view => {
                     const ide = view.getIDE(), 
                         cdf = view.__captureDrop;
@@ -10139,7 +10139,7 @@ myt.Destructible = new JS.Module('Destructible', {
             // Methods /////////////////////////////////////////////////////////
             /** @private
                 @param {!Object} ignoredEvent
-                @returns {undefined} */
+                @returns {void} */
             __hndlResize: function(ignoredEvent) {
                 handleResize(this);
             }
@@ -10376,7 +10376,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 @param {number} red - The red channel
                 @param {number} green - The green channel
                 @param {number} blue - The blue channel
-                @returns {undefined} */
+                @returns {void} */
             initialize: function(red, green, blue) {
                 this.setRed(red);
                 this.setGreen(green);
@@ -10387,21 +10387,21 @@ myt.Destructible = new JS.Module('Destructible', {
             // Accessors ///////////////////////////////////////////////////////
             /** Sets the red channel value.
                 @param {number} red
-                @return {undefined} */
+                @returns {void} */
             setRed: function(red) {
                 this.red = cleanChannelValue(red);
             },
             
             /** Sets the green channel value.
                 @param {number} green
-                @return {undefined} */
+                @returns {void} */
             setGreen: function(green) {
                 this.green = cleanChannelValue(green);
             },
             
             /** Sets the blue channel value.
                 @param {number} blue
-                @return {undefined} */
+                @returns {void} */
             setBlue: function(blue) {
                 this.blue = cleanChannelValue(blue);
             },
@@ -10873,7 +10873,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {!Function} callback - The function to run.
             @param {boolean} [replace] - If true the existing callback will be replaced with 
                 the new callback.
-            @returns {undefined} */
+            @returns {void} */
         next: function(callback, replace) {
             const self = this,
                 existingCallback = self.callback;
@@ -10890,7 +10890,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Puts the animator back to an initial configured state.
             @param {boolean} [executeCallback] - If true and the callback exists, the callback 
                 will be executed.
-            @returns {undefined} */
+            @returns {void} */
         reset: function(executeCallback) {
             const self = this;
             
@@ -10917,7 +10917,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** @private
             @param {!Object} idleEvent
-            @returns {undefined} */
+            @returns {void} */
         __updateAnim: function(idleEvent) {
             advance(this, idleEvent.value.delta);
         }
@@ -11210,7 +11210,7 @@ myt.Destructible = new JS.Module('Destructible', {
     const sortFunction = (a, b) => a.replicationIndex - b.replicationIndex,
         
         /*  @param {!Array} layouts
-            @returns {undefined} */
+            @returns {void} */
         lockLayouts = layouts => {
             let i = layouts.length;
             while (i) layouts[--i].incrementLockedCounter();
@@ -11218,7 +11218,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /*  @param {!Array} layouts
             @param {boolean} update
-            @returns {undefined} */
+            @returns {void} */
         unlockLayouts = (layouts, update) => {
             let i = layouts.length;
             while (i) {
@@ -11229,7 +11229,7 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /*  @param {!Object} replicator
-            @returns {undefined} */
+            @returns {void} */
         setupPool = replicator => {
             destroyOldPool(replicator);
             
@@ -11239,7 +11239,7 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /*  @param {!Object} replicator
-            @returns {undefined} */
+            @returns {void} */
         destroyOldPool = replicator => {
             // Destroy old pool and instances.
             const pool = replicator.__pool;
@@ -11275,7 +11275,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Called to configure the replicable object with data. Subclasses should call super.
             @param {?Object} data - The data being replicated for this instance.
             @param {number} idx - The index of the data in the replicated list.
-            @returns {undefined} */
+            @returns {void} */
         replicate: function(data, idx) {
             this.replicationData = data;
             this.replicationIndex = idx;
@@ -11285,7 +11285,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Notifies this object that something happened.
             @param {string} key - The name of the message
             @param {*} value - The value of the message.
-            @returns {undefined} */
+            @returns {void} */
         notify: pkg.NOOP, // (key, value) => {},
         
         /** @overrides myt.Reusable
@@ -11357,7 +11357,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         // Methods /////////////////////////////////////////////////////////////
         /** Performs replication.
-            @returns {undefined} */
+            @returns {void} */
         doReplication: function() {
             const pool = this.__pool;
             let layouts;
@@ -11412,7 +11412,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Sends a message to each active myt.Replicable.
             @param {string} key - The name of the message
             @param {*} value - The value of the message.
-            @returns {undefined} */
+            @returns {void} */
         notify: function(key, value) {
             const pool = this.__pool;
             if (pool) {
@@ -11593,14 +11593,14 @@ myt.Destructible = new JS.Module('Destructible', {
         // Methods /////////////////////////////////////////////////////////////
         /** Registers the provided auto scroller to receive notifications.
             @param {!Object} autoScroller - The myt.AutoScroller to register.
-            @returns {undefined} */
+            @returns {void} */
         registerAutoScroller: autoScroller => {
             autoScrollers.push(autoScroller);
         },
         
         /** Unregisters the provided auto scroller.
             @param {!Object} autoScroller - The myt.AutoScroller to unregister.
-            @returns {undefined} */
+            @returns {void} */
         unregisterAutoScroller: autoScroller => {
             const idx = autoScrollers.indexOf(autoScroller);
             if (idx > -1) autoScrollers.splice(idx, 1);
@@ -11608,14 +11608,14 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Registers the provided drop target to receive notifications.
             @param {!Object} dropTarget - The myt.DropTarget to register.
-            @returns {undefined} */
+            @returns {void} */
         registerDropTarget: dropTarget => {
             dropTargets.push(dropTarget);
         },
         
         /** Unregisters the provided drop target.
             @param {!Object} dropTarget - The myt.DropTarget to unregister.
-            @returns {undefined} */
+            @returns {void} */
         unregisterDropTarget: dropTarget => {
             const idx = dropTargets.indexOf(dropTarget);
             if (idx > -1) dropTargets.splice(idx, 1);
@@ -11623,7 +11623,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Called by a myt.Dropable when a drag starts.
             @param {!Object} dropable - The myt.Dropable that started the drag.
-            @returns {undefined} */
+            @returns {void} */
         startDrag: dropable => {
             setDragView(dropable);
         },
@@ -11632,7 +11632,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {!Object} event -The mouse event that triggered the stop drag.
             @param {!Object} dropable - The myt.Dropable that stopped being dragged.
             @param {boolean} isAbort
-            @returns {undefined} */
+            @returns {void} */
         stopDrag: (event, dropable, isAbort) => {
             dropable.notifyDropped(overView, isAbort);
             if (!isAbort) overView?.notifyDrop(dropable);
@@ -11646,7 +11646,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Called by a myt.Dropable during dragging.
             @param {!Object} event - The mousemove event for the drag update.
             @param {!Object} dropable - The myt.Dropable that is being dragged.
-            @returns {undefined} */
+            @returns {void} */
         updateDrag: (event, dropable) => {
             // Get the frontmost myt.DropTarget that is registered with this manager and is under 
             // the current mouse location and has a matching drag group.
@@ -11693,7 +11693,7 @@ myt.Destructible = new JS.Module('Destructible', {
     pkg.Activateable = new JSModule('Activateable', {
         // Methods /////////////////////////////////////////////////////////////
         /** Called when this view should be activated.
-            @returns {undefined} */
+            @returns {void} */
         doActivated: NOOP // () => {/* Subclasses to implement as needed. */}
     });
     
@@ -11716,7 +11716,7 @@ myt.Destructible = new JS.Module('Destructible', {
         // Methods /////////////////////////////////////////////////////////////
         /** Updates the UI whenever a change occurs that requires a visual update. Subclasses 
             should implement this as needed.
-            @returns {undefined} */
+            @returns {void} */
         updateUI: NOOP // () => {/* Subclasses to implement as needed. */}
     });
     
@@ -11758,7 +11758,7 @@ myt.Destructible = new JS.Module('Destructible', {
         // Methods /////////////////////////////////////////////////////////////
         /** Called after the disabled attribute is set. Default behavior attempts to give away 
             focus and calls the updateUI method of myt.UpdateableUI if it is defined.
-            @returns {undefined} */
+            @returns {void} */
         doDisabled: function() {
             if (this.inited) {
                 // Give away focus if we become disabled and this instance is a FocusObservable
@@ -11820,7 +11820,7 @@ myt.Destructible = new JS.Module('Destructible', {
         // Methods /////////////////////////////////////////////////////////////
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __hndlKeyDown: function(event) {
             if (!this.disabled) {
                 if (this.activateKeyDown === NO_KEY_DOWN || this.repeatKeyDown) {
@@ -11840,7 +11840,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __hndlKeyPress: function(event) {
             if (!this.disabled) {
                 const code = getCodeFromEvent(event);
@@ -11852,7 +11852,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __hndlKeyUp: function(event) {
             if (!this.disabled) {
                 const code = getCodeFromEvent(event);
@@ -11866,7 +11866,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doDomBlur: function(event) {
             if (!this.disabled) {
                 const keyThatWasDown = this.activateKeyDown;
@@ -11880,13 +11880,13 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Called when an activation key is pressed down. Default implementation does nothing.
             @param code:string - The key code that is down.
             @param isRepeat:boolean - Indicates if this is a key repeat event or not.
-            @returns {undefined} */
+            @returns {void} */
         doActivationKeyDown: NOOP, // (code, isRepeat) => {/* Subclasses to implement as needed. */},
         
         /** Called when an activation key is release up. This executes the "doActivated" method 
             by default. 
             @param code:string - The keycode that is up.
-            @returns {undefined} */
+            @returns {void} */
         doActivationKeyUp: function(code) {
             this.doActivated();
         },
@@ -11894,7 +11894,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Called when focus is lost while an activation key is down. Default implementation 
             does nothing.
             @param code:string - The keycode that is down.
-            @returns {undefined} */
+            @returns {void} */
         doActivationKeyAborted: NOOP // code => {/* Subclasses to implement as needed. */}
     });
     
@@ -11999,7 +11999,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         // Methods /////////////////////////////////////////////////////////////
         /** @private
-            @returns {undefined} */
+            @returns {void} */
         __doMouseOverOnIdle: function() {
             this.detachFrom(GlobalIdle, '__doMouseOverOnIdle', 'idle');
             this.__attachedToOverIdle = false;
@@ -12016,14 +12016,14 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Called when mouseOver state changes. This method is called after an event filtering 
             process has reduced frequent over/out events originating from the dom.
             @param {boolean} isOver
-            @returns {undefined} */
+            @returns {void} */
         doSmoothMouseOver: function(isOver) {
             if (this.inited) this.updateUI?.();
         },
         
         /** Called when the mouse is over this view. Subclasses must call super.
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         doMouseOver: function(event) {
             this.__disabledOver = true;
             
@@ -12032,7 +12032,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Called when the mouse leaves this view. Subclasses must call super.
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         doMouseOut: function(event) {
             this.__disabledOver = false;
             
@@ -12104,7 +12104,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Called when the mouse is down on this view. Subclasses must call super.
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         doMouseDown: function(event) {
             if (this.disabled) {
                 this.doMouseDownWhenDisabled();
@@ -12115,12 +12115,12 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Called by the doMouseDown function when this View is currently disabled:true. Note that
             the mouseDown attribute of this View will not be true when this function is called.
-            @returns {undefined} */
+            @returns {void} */
         doMouseDownWhenDisabled: NOOP, // () => {/* Subclasses to implement as needed. */},
         
         /** Called when the mouse is up on this view. Subclasses must call super.
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         doMouseUp: function(event) {
             // Cleanup global mouse listener since the mouseUp occurred 
             // outside the view.
@@ -12139,7 +12139,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Called when the mouse is up and we are still over the view. Executes the "doActivated" 
             method by default.
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         doMouseUpInside: function(event) {
             this.doActivated?.();
         }
@@ -12272,12 +12272,12 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doContextMenu: NOOP, // event => {/* Do nothing so the context menu event is suppressed. */},
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doMouseDown: function(event) {
             const self = this,
                 pos = getMouseFromEvent(event),
@@ -12298,7 +12298,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doMouseUp: function(event) {
             if (this.isDragging) {
                 this.stopDrag(event, false);
@@ -12311,14 +12311,14 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __watchForAbort: function(event) {
             if (event.value === GlobalKeys.CODE_ESC) this.stopDrag(event, true);
         },
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doDragCheck: function(event) {
             const self = this,
                 pos = getMouseFromEvent(event),
@@ -12332,7 +12332,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Active until stopDrag is called. The view position will be bound to the mouse position. 
             Subclasses typically call this onmousedown for subviews that allow dragging the view.
             @param {!Object} event - The event the mouse event when the drag started.
-            @returns {undefined} */
+            @returns {void} */
         startDrag: function(event) {
             const self = this;
             
@@ -12350,7 +12350,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Called on every mousemove event while dragging.
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         updateDrag: function(event) {
             this.__lastMousePosition = getMouseFromEvent(event);
             this.reRequestDragPosition();
@@ -12358,14 +12358,14 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __updateDragInitX: function(event) {
             this.dragInitX = this.width / 2 * (this.scaleX || 1);
         },
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __updateDragInitY: function(event) {
             this.dragInitY = this.height / 2 * (this.scaleY || 1);
         },
@@ -12373,7 +12373,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Stop the drag. (see startDrag for more details)
             @param {!Object} event - The event that ended the drag.
             @param {boolean} isAbort - Indicates if the drag ended normally or was aborted.
-            @returns {undefined} */
+            @returns {void} */
         stopDrag: function(event, isAbort) {
             const self = this;
             self.detachFromDom(GlobalMouse, '__doMouseUp', 'mouseup', true);
@@ -12391,7 +12391,7 @@ myt.Destructible = new JS.Module('Destructible', {
             the position.
             @param {number} x - the new x position.
             @param {number} y - the new y position.
-            @returns {undefined} */
+            @returns {void} */
         requestDragPosition: function(x, y) {
             if (!this.disabled) {
                 this.setX(x);
@@ -12507,29 +12507,29 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Draw the UI when the component has focus. The default implementation 
                 calls drawHoverState.
-                @returns {undefined} */
+                @returns {void} */
             drawFocusedState: function() {
                 this.drawHoverState();
             },
             
             /** Draw the UI when the component is on the verge of being interacted with. For mouse 
                 interactions this corresponds to the over state.
-                @returns {undefined} */
+                @returns {void} */
             drawHoverState: NOOP, // () => {/* Subclasses to implement as needed. */},
             
             /** Draw the UI when the component has a pending activation. For mouse interactions 
                 this corresponds to the down state.
-                @returns {undefined} */
+                @returns {void} */
             drawActiveState: NOOP, // () => {/* Subclasses to implement as needed. */},
             
             /** Draw the UI when the component is ready to be interacted with. For mouse 
                 interactions this corresponds to the enabled state when the mouse is not over 
                 the component.
-                @returns {undefined} */
+                @returns {void} */
             drawReadyState: NOOP, // () => {/* Subclasses to implement as needed. */},
             
             /** Draw the UI when the component is in the disabled state.
-                @returns {undefined} */
+                @returns {void} */
             drawDisabledState: NOOP, // () => {/* Subclasses to implement as needed. */},
             
             /** @overrides myt.FocusObservable */
@@ -12888,7 +12888,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Called when a floating panel has been shown for this anchor.
                 @param {!Object} panel - The myt.FloatingPanel that is now shown.
-                @returns {undefined} */
+                @returns {void} */
             notifyPanelShown: function(panel) {
                 // Subclasses to implement as needed.
                 this.callSuper?.();
@@ -12896,7 +12896,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Called when a floating panel has been hidden for this anchor.
                 @param {!Object} panel - The myt.FloatingPanel that is now hidden.
-                @returns {undefined} */
+                @returns {void} */
             notifyPanelHidden: function(panel) {
                 // Subclasses to implement as needed.
                 this.callSuper?.();
@@ -13022,7 +13022,7 @@ myt.Destructible = new JS.Module('Destructible', {
         // Methods /////////////////////////////////////////////////////////////
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doMouseDown: function(event) {
             const v = event.value, 
                 px = v.pageX, 
@@ -13039,7 +13039,7 @@ myt.Destructible = new JS.Module('Destructible', {
             hide the panel. This gives subclasses a chance to provide different behavior.
             @param ignoreRestoreFocus:boolean (Optional) If true the restoreFocus method will not 
                 be called. Defaults to undefined which is equivalent to false.
-            @returns {undefined} */
+            @returns {void} */
         doMouseDownOutside: function(ignoreRestoreFocus) {
             if (this.hideOnMouseDown) this.hide(ignoreRestoreFocus);
         },
@@ -13071,14 +13071,14 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doFocusChange: function(event) {
             const v = event.value;
             if (v && !this.isAncestorOf(v)) this.doLostFocus();
         },
         
         /** Called when focus moves out of the floating panel. Hides the floating panel by default.
-            @returns {undefined} */
+            @returns {void} */
         doLostFocus: function() {
             if (this.hideOnBlur) {
                 if (this.ignoreOwnerForHideOnBlur && GlobalFocus.focusedView === this.owner) return;
@@ -13097,7 +13097,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Shows the floating panel for the provided myt.FloatingPanelAnchor.
             @param panelAnchor:myt.FloatingPanelAnchor The floating panel anchor to show the 
                 panel for.
-            @returns {undefined} */
+            @returns {void} */
         show: function(panelAnchor) {
             if (!this.isShown()) {
                 this.bringToFront();
@@ -13114,7 +13114,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Hides the floating panel for the provided myt.FloatingPanelAnchor.
             @param ignoreRestoreFocus:boolean (Optional) If true the restoreFocus method will not 
                 be called. Defaults to undefined which is equivalent to false.
-            @returns {undefined} */
+            @returns {void} */
         hide: function(ignoreRestoreFocus) {
             if (this.isShown()) {
                 this.detachFromDom(GlobalMouse, '__doMouseDown', 'mousedown', true);
@@ -13128,7 +13128,7 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** Sends the focus back to the owner. Can be overridden to send the focus elsewhere.
-            @returns {undefined} */
+            @returns {void} */
         restoreFocus: function() {
             this.owner?.focus();
         },
@@ -13136,7 +13136,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Updates the x and y position of the floating panel for the provided floating 
             panel anchor.
             @param panelAnchor:myt.FloatingPanelAnchor The anchor to update the location for.
-            @returns {undefined} */
+            @returns {void} */
         updateLocation: function(panelAnchor) {
             this.setOwner(panelAnchor);
             this.updateLocationX(panelAnchor);
@@ -13397,7 +13397,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** ListViewItems should call this method when they are activated. The default 
             implementation invokes doItemActivated on the ListViewAnchor.
             @param {!Object} itemView
-            @returns {undefined} */
+            @returns {void} */
         doItemActivated: function(itemView) {
             this?.owner.doItemActivated(itemView);
         },
@@ -13495,7 +13495,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Called by the list view when an item is activated. By default it hides the list view.
             @param {!Object} itemView
-            @returns {undefined} */
+            @returns {void} */
         doItemActivated: function(itemView) {
             this.hideFloatingPanel();
         },
@@ -13767,7 +13767,7 @@ myt.Destructible = new JS.Module('Destructible', {
             // Methods /////////////////////////////////////////////////////////
             /** Registeres a node with this group.
                 @param node:myt.Node the node to register with this group.
-                @returns {undefined} */
+                @returns {void} */
             register: function(node) {
                 if (node && !this.isRegistered(node)) {
                     this.__nodes.push(node);
@@ -13779,7 +13779,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Unregisteres a node from this group.
                 @param node:myt.Node the node to unregister from this group.
-                @returns {undefined} */
+                @returns {void} */
             unregister: function(node) {
                 if (node) {
                     const nodes = this.__nodes,
@@ -13795,7 +13795,7 @@ myt.Destructible = new JS.Module('Destructible', {
             /** Sets the attribute to true on the provided registered node and sets it to false on 
                 all other registered nodes.
                 @param node:myt.Node the node to set the attribute to true on.
-                @returns {undefined} */
+                @returns {void} */
             setTrue: function(node) {
                 if (node && this.trueNode !== node && this.isRegistered(node)) {
                     const attrName = this.attrName,
@@ -13819,7 +13819,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Sets the attribute to false on the provided registered node.
                 @param node:myt.Node the node to set the attribute to false on.
-                @returns {undefined} */
+                @returns {void} */
             setFalse: function(node) {
                 if (node && this.trueNode === node) {
                     node[generateSetterName(this.attrName)](false);
@@ -13829,7 +13829,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Checks if a node is already registered or not.
                 @param node:myt.Node the node to test.
-                @returns {undefined} */
+                @returns {void} */
             isRegistered: function(node) {
                 return this.__nodes.includes(node);
             }
@@ -13873,7 +13873,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Adds this node to the BAG for the groupId and attribute name.
             @param attrName:string
             @param groupId:string
-            @returns {undefined} */
+            @returns {void} */
         addToBAG: function(attrName, groupId) {
             const group = this.getBAG(attrName, groupId);
             if (!this.isRegisteredWithBAG(group)) {
@@ -13890,7 +13890,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Removes this node from the BAG for the groupId and attribute name.
             @param attrName:string
             @param groupId:string
-            @returns {undefined} */
+            @returns {void} */
         removeFromBAG: function(attrName, groupId) {
             const group = this.getBAG(attrName, groupId);
             if (this.isRegisteredWithBAG(group)) {
@@ -13915,7 +13915,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Called whenever an event for the attrName is fired.
             @private 
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __updateForBAG: function(event) {
             for (const bag of this.__bags) {
                 if (bag.attrName === event.type) bag[event.value ? 'setTrue' : 'setFalse'](this);
@@ -13939,7 +13939,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /*  Search the radio group for a matching node and make that one the true node.
             @param {!Object} radio
             @param {*} value
-            @returns {undefined} */
+            @returns {void} */
         updateGroupValue = (radio, value) => {
             const bag = getBooleanAttributeGroup(radio);
             if (bag) {
@@ -14001,7 +14001,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Sets the value of the radio group. Calling this method on any radio button in the group 
             should have the same effect.
             @param {*} v
-            @returns {undefined} */
+            @returns {void} */
         setValue: function(v) {
             if (this.inited) updateGroupValue(this, v);
         },
@@ -14189,7 +14189,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Selects the provided item.
                 @param {!Object} item - The item to select.
-                @returns {undefined} */
+                @returns {void} */
             select: function(item) {
                 if (item && !this.isSelectedItem(item) && this.canSelectItem(item)) {
                     item.setSelected(true);
@@ -14205,12 +14205,12 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Called when an item is selected.
                 @param {!Objectd} item - The newly selected myt.Selectable..
-                @returns {undefined} */
+                @returns {void} */
             doSelected: NOOP, // item => {},
             
             /** Selects the item with the provided item selection ID.
                 @param {string} itemSelectionId
-                @returns {undefined} */
+                @returns {void} */
             selectById: function(itemSelectionId) {
                 this.select(this.getSelectableItem(itemSelectionId));
             },
@@ -14237,7 +14237,7 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** Selects all items that can be selected.
-                @returns {undefined} */
+                @returns {void} */
             selectAll: function() {
                 const items = this.getSelectableItems();
                 let i = items.length;
@@ -14246,7 +14246,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Deselects the provided item.
                 @param {!Object} item - The item to deselect.
-                @returns {undefined} */
+                @returns {void} */
             deselect: function(item) {
                 if (this.isSelectedItem(item) && this.canDeselectItem(item)) {
                     item.setSelected(false);
@@ -14262,12 +14262,12 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Called when an item is deselected.
                 @param {!Object} item - The newly deselected myt.Selectable.
-                @returns {undefined} */
+                @returns {void} */
             doDeselected: NOOP, // item => {},
             
             /** Deselects the item with the provided item selection ID.
                 @param {string} itemSelectionId
-                @returns {undefined} */
+                @returns {void} */
             deselectById: function(itemSelectionId) {
                 this.deselect(this.getSelectableItem(itemSelectionId));
             },
@@ -14281,7 +14281,7 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** Deselects all selected items.
-                @returns {undefined} */
+                @returns {void} */
             deselectAll: function() {
                 const items = this.__selected;
                 for (const key in items) this.deselect(items[key]);
@@ -14542,12 +14542,12 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Called whenever the button is redrawn. Gives subclasses/instances a chance to do 
                 additional things when the button is redrawn.
-                @returns {undefined} */
+                @returns {void} */
             notifyButtonRedraw: pkg.NOOP,
             
             /** @private
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             __updateHeight: function(event) {
                 this.setHeight(this.wrapper.y + this.wrapper.height);
             },
@@ -14784,7 +14784,7 @@ myt.Destructible = new JS.Module('Destructible', {
             // Methods /////////////////////////////////////////////////////////
             /** @param {!Object} ignoredEvent
                 @param {number} [temporaryDuration]
-                @returns {undefined} */
+                @returns {void} */
             updateLayout: function(ignoredEvent, temporaryDuration) {
                 const tabSliders = this._tabSliders,
                     tabSlidersLen = tabSliders.length;
@@ -15185,7 +15185,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Sets the value on the DOM.
                 @param v:* The value to set.
-                @returns {undefined} */
+                @returns {void} */
             setDomValue: function(v) {
                 const ide = this.getIDE();
                 if (ide.value !== v) ide.value = v;
@@ -15326,14 +15326,14 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** @private
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             __filterInput: function(event) {
                 this.setDomValue(this.filterInput(this.getDomValue()));
             },
             
             /** @private
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             __filterInputPress: function(event) {
                 // Filter for allowed characters
                 const domEvent = event.value,
@@ -15352,12 +15352,12 @@ myt.Destructible = new JS.Module('Destructible', {
             /** A hook for subclasses/instances to do input filtering during key press. The default 
                 implementation does nothing.
                 @param {!Object} domEvent - The dom key press event.
-                @returns {undefined} */
+                @returns {void} */
             filterInputPress: NOOP, // domEvent => {/* Subclasses to implement as needed. */},
             
             /** @private
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             __syncToDom: function(event) {
                 this.setValue(this.getDomValue());
             },
@@ -15379,7 +15379,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 @param start:int the start of the selection or location of the caret if no end 
                     is provided.
                 @param end:int (optional) the end of the selection.
-                @returns {undefined} */
+                @returns {void} */
             setCaretPosition: function(start, end) {
                 if (end == null || start === end) {
                     // Don't update if the current position already matches.
@@ -15401,20 +15401,20 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** Sets the caret to the start of the text input.
-                @returns {undefined} */
+                @returns {void} */
             setCaretToStart: function() {
                 this.setCaretPosition(0);
             },
             
             /** Sets the caret to the end of the text input.
-                @returns {undefined} */
+                @returns {void} */
             setCaretToEnd: function() {
                 this.setCaretPosition(this.getDomValue().length);
             },
             
             // Selection //
             /** Selects all the text in the input element.
-                @returns {undefined} */
+                @returns {void} */
             selectAll: function() {
                 this.getIDE().select();
             },
@@ -15575,7 +15575,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __cleanInput: function(event) {
             // Prevent enter key from inserting a div
             if (KeyObservable.isEnterKeyEvent(event)) {
@@ -15636,7 +15636,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __userInteraction: function(event) {
             this.saveSelection();
             return true;
@@ -15975,7 +15975,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         // Selection //
         /** Deselects all selected options included disabled options.
-            @returns {undefined} */
+            @returns {void} */
         deselectAll: function() {
             let changed = false;
             for (const option of this.getOptions()) {
@@ -15994,14 +15994,14 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Selects the option that has the provided value.
             @param value:* The value of the option to select.
-            @returns {undefined} */
+            @returns {void} */
         selectValue: function(value) {
             this.select(this.getOptionForValue(value));
         },
         
         /** Selects the provided option.
             @param option:myt.InputSelectOption The option to select.
-            @returns {undefined} */
+            @returns {void} */
         select: function(option) {
             if (option?.canSelect(this)) {
                 option.setSelected(true);
@@ -16011,14 +16011,14 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Deselects the option that has the provided value.
             @param {*} value - The value of the option to deselect.
-            @returns {undefined} */
+            @returns {void} */
         deselectValue: function(value) {
             this.deselect(this.getOptionForValue(value));
         },
         
         /** Deselects the provided option.
             @param option:myt.InputSelectOption The option to deselect.
-            @returns {undefined} */
+            @returns {void} */
         deselect: function(option) {
             if (option?.canDeselect(this)) {
                 option.setSelected(false);
@@ -16028,18 +16028,18 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doChanged: function(event) {
             this.__syncToDom();
             this.doChanged();
         },
         
         /** Called whenever the underlying dom element fires a "change" event.
-            @returns {undefined} */
+            @returns {void} */
         doChanged: NOOP,
         
         /** @private
-            @returns {undefined} */
+            @returns {void} */
         __syncToDom: function() {
             this.setValue(this.multiple ? this.getSelectedOptionValues() : this.getDomValue());
         }
@@ -16098,7 +16098,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 @param filter:function the value filter to add.
                 @param where:string (optional) Determines where to add the filter. Supported values 
                     are 'first' and 'last'. Defaults to 'first'.
-                @returns {undefined} */
+                @returns {void} */
             chainValueFilter: function(filter, where) {
                 const existingFilter = this.valueFilter;
                 let chainedFilter;
@@ -16480,7 +16480,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /*  Search the radio group for a matching node and make that one the true node.
             @param {!Object} formRadioGroup
-            @returns {undefined} */
+            @returns {void} */
         updateRadioGroupValue = formRadioGroup => {
             const bag = getBooleanAttributeGroup(formRadioGroup);
             if (bag) {
@@ -16561,7 +16561,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 @param {boolean} [runForDefault]
                 @param {boolean} [runForRollback]
                 @param {boolean} [runForCurrent]
-                @returns {undefined} */
+                @returns {void} */
             initialize: function(id, runForDefault, runForRollback, runForCurrent) {
                 this.id = id;
                 
@@ -16611,7 +16611,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 @param {boolean} [runForCurrent]
                 @param trim:string Determines the type of trimming to do. Allowed values are 'left',
                     'right' or 'both'. The default value is 'both'.
-                @returns {undefined} */
+                @returns {void} */
             initialize: function(id, runForDefault, runForRollback, runForCurrent, trim) {
                 this.callSuper(id, runForDefault, runForRollback, runForCurrent);
                 
@@ -16650,7 +16650,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 @param {boolean} [runForRollback]
                 @param {boolean} [runForCurrent]
                 @param {*} [defaultValue] - The default value to convert undefined to.
-                @returns {undefined} */
+                @returns {void} */
             initialize: function(id, runForDefault, runForRollback, runForCurrent, defaultValue) {
                 this.callSuper(id, runForDefault, runForRollback, runForCurrent);
                 
@@ -16796,7 +16796,7 @@ myt.Destructible = new JS.Module('Destructible', {
             /** Allows bulk setting of validators.
                 @param validators:array An array of myt.Validator instances or IDs of validators 
                     from the myt.global.validators registry.
-                @returns {undefined} */
+                @returns {void} */
             setValidators: function(validators) {
                 let i = validators.length;
                 while (i) {
@@ -16919,14 +16919,14 @@ myt.Destructible = new JS.Module('Destructible', {
             /** Add an accelerator to this form.
                 @param id:string the ID for the accelerator.
                 @param func:function the function to call when the accelerator is invoked.
-                @returns {undefined} */
+                @returns {void} */
             addAccelerator: function(id, func) {
                 this.__acc[id] = func;
             },
             
             /** Removes an accelerator from this form.
                 @param id:string the ID for the accelerator.
-                @returns {undefined} */
+                @returns {void} */
             removeAccelerator: function(id) {
                 delete this.__acc[id];
             },
@@ -16934,14 +16934,14 @@ myt.Destructible = new JS.Module('Destructible', {
             /** Executes an accelerator in this form with the provided ID.
                 @param id:string The ID of the accelerator to invoke.
                 @param value:* (optional) The value to pass to the function.
-                @returns {undefined} */
+                @returns {void} */
             invokeAccelerator: function(id, value) {
                 this.__acc[id]?.call(this, value ?? null);
             },
             
             /** Adds a validator to this form.
                 @param validator:myt.Validator The validator to add.
-                @returns {undefined} */
+                @returns {void} */
             addValidator: function(validator) {
                 if (validator) this.__v.push(validator);
             },
@@ -16971,7 +16971,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Adds an myt.Form to this form.
                 @param subform:myt.Form the form to add as a subform.
-                @returns {undefined} */
+                @returns {void} */
             addSubForm: function(subform) {
                 const id = subform.id;
                 if (this.getSubForm(id) != null) {
@@ -17036,7 +17036,7 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** Called when a subform changes to the "invalid" state.
-                @returns {undefined} */
+                @returns {void} */
             notifySubFormInvalid: function() {
                 this.setIsValid(false);
             },
@@ -17074,13 +17074,13 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Called whenever a value changes for the form or any subform therein.
                 @param sourceForm:myt.Form the form that had a value change.
-                @returns {undefined} */
+                @returns {void} */
             notifyValueChanged: function(sourceForm) {
                 this.form?.notifyValueChanged(sourceForm);
             },
             
             /** Called when a subform changed to the "changed" state.
-                @returns {undefined} */
+                @returns {void} */
             notifySubFormChanged: function() {
                 this.setIsChanged(true);
             },
@@ -17105,7 +17105,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 @param defaultValue:object The default value.
                 @param rollbackValue:object The rollback value.
                 @param value:object The current value.
-                @returns {undefined} */
+                @returns {void} */
             setup: function(defaultValue, rollbackValue, value) {
                 this._lockCascade = true;
                 this.setIsChanged(false);
@@ -17122,7 +17122,7 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** Resets this form to the default values.
-                @returns {undefined} */
+                @returns {void} */
             resetForm: function() {
                 this._lockCascade = true;
                 
@@ -17137,7 +17137,7 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** Rolls back this form to the rollback values.
-                @returns {undefined} */
+                @returns {void} */
             rollbackForm: function() {
                 this._lockCascade = true;
                 
@@ -17245,7 +17245,7 @@ myt.Destructible = new JS.Module('Destructible', {
             /** Allows bulk setting of ValueProcessors.
                 @param processors:array An array of myt.ValueProcessor instances or IDs of value 
                     processors from the myt.global.valueProcessors registry.
-                @returns {undefined} */
+                @returns {void} */
             setValueProcessors: function(processors) {
                 let i = processors.length;
                 while (i) {
@@ -17263,7 +17263,7 @@ myt.Destructible = new JS.Module('Destructible', {
             // Methods /////////////////////////////////////////////////////////
             /** Adds a ValueProcessor to this form element.
                 @param processor:myt.ValueProcessor
-                @returns {undefined} */
+                @returns {void} */
             addValueProcessor: function(processor) {
                 this.__vp.push(processor);
             },
@@ -17490,14 +17490,14 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** @private
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             __hndlKeyDown: function(event) {
                 if (KeyObservable.isEnterKeyEvent(event)) this.invokeAccelerator(ACCELERATOR_ACCEPT);
             },
             
             /** @private
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             __hndlKeyUp: function(event) {
                 if (KeyObservable.isEscKeyEvent(event)) this.invokeAccelerator(ACCELERATOR_REJECT);
             },
@@ -17553,15 +17553,15 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Called when the form is submitted and it is valid.
             @param {*} value
-            @returns {undefined} */
+            @returns {void} */
         doValidSubmit: NOOP, // value => {}
         
         /** Called when the form is submitted and it is not valid.
-            @returns {undefined} */
+            @returns {void} */
         doInvalidSubmit: NOOP, // () => {}
         
         /** Rolls back the form and revalidates it.
-            @returns {undefined} */
+            @returns {void} */
         doCancel: function() {
             this.rollbackForm();
             this.doValidation();
@@ -17823,7 +17823,7 @@ myt.Destructible = new JS.Module('Destructible', {
         // Methods /////////////////////////////////////////////////////////////
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __syncValue: function(event) {
             const value = event.value;
             this.setValue(value ? value.optionValue : null);
@@ -17845,7 +17845,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {boolean} [runForRollback]
             @param {boolean} [runForCurrent]
             @param {!Object} [otherField] - The myt.FormElement to pull the value from.
-            @returns {undefined} */
+            @returns {void} */
         initialize: function(id, runForDefault, runForRollback, runForCurrent, otherField) {
             this.callSuper(id, runForDefault, runForRollback, runForCurrent);
             
@@ -17885,12 +17885,12 @@ myt.Destructible = new JS.Module('Destructible', {
         // Methods /////////////////////////////////////////////////////////////
         /** Adds a ValueProcessor to this registry.
             @param identifiable:myt.ValueProcessor the ValueProcessor to add.
-            @returns {undefined} */
+            @returns {void} */
         register: registerValueProcessor,
         
         /** Removes a ValueProcessor from this registery.
             @param identifiable:myt.ValueProcessor the ValueProcessor to remove.
-            @returns {undefined} */
+            @returns {void} */
         unregister: identifiable => {
             doFuncOnIdentifiable(identifiable, id => {
                 // Make sure the processor is in the repository then delete.
@@ -17973,26 +17973,26 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             doDragOver: NOOP, // event => {},
             
             /** @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             doDragEnter: NOOP, // event => {},
             
             /** @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             doDragLeave: NOOP, // event => {},
             
             /** @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             doDrop: function(event) {
                 this.handleFiles(event.value.dataTransfer.files, event);
             },
             
             /** @param {?Array} files
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             handleFiles: function(files, event) {
                 if (files !== undefined) {
                     let i = files.length;
@@ -18014,7 +18014,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** @param {!Object} file
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             handleDroppedFile: NOOP // (file, event) => {}
         }),
         
@@ -18230,7 +18230,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 By default this returns null.
                 @param {!Object} file
                 @param {!Object} data
-                @returns {undefined} */
+                @returns {void} */
             parseServerPathFromResponse: (file, data) => null,
             
             addFile: function(file) {
@@ -18588,7 +18588,7 @@ myt.Destructible = new JS.Module('Destructible', {
             eatMouseEvent: pkg.TRUE_FUNC, // event => true,
             
             /** Shows the dimmer and remembers the focus location.
-                @returns {undefined} */
+                @returns {void} */
             show: function() {
                 const self = this,
                     globalFocus = pkg.global.focus;
@@ -18604,7 +18604,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Hides the dimmer and restores focus if necessary.
                 @param {boolean} [ignoreRestoreFocus] - When true focus will not be restored.
-                @returns {undefined} */
+                @returns {void} */
             hide: function(ignoreRestoreFocus) {
                 const self = this;
                 if (self.visible) {
@@ -19772,7 +19772,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Called before a dialog is shown to reset state and cleanup UI elements from the 
                 previous display of the Dialog.
-                @returns {undefined} */
+                @returns {void} */
             destroyContent: function() {
                 hideSpinner(this);
                 
@@ -19804,7 +19804,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Called by each of the buttons that can trigger the dialog to be hidden.
                 @param {!Object} sourceView - The myt.View that triggered the hiding of the dialog.
-                @returns {undefined} */
+                @returns {void} */
             doCallback: function(sourceView) {
                 const cbf = this.callbackFunction;
                 if (!cbf || !cbf.call(this, sourceView.name)) this.hide();
@@ -19813,7 +19813,7 @@ myt.Destructible = new JS.Module('Destructible', {
             /** Shows this dialog as a regular dimmer.
                 @param {?Object} opts - If opts.bgColor is provided it will be used for the bgColor 
                     of the overlay.
-                @returns {undefined} */
+                @returns {void} */
             showBlank: function(opts) {
                 this.destroyContent();
                 
@@ -19832,7 +19832,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     the close should be aborted.
                 @param {?Object} [opts] - Options that modify how the message is displayed. 
                     Supports: fontWeight, whiteSpace, wordWrap and width.
-                @returns {undefined} */
+                @returns {void} */
             showMessage: function(msg, callbackFunction, opts) {
                 const self = this,
                     content = self.content, 
@@ -19974,7 +19974,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 @param {string} msg - the message to show.
                 @param {?Objecft} opts - Options that modify how the message is displayed. 
                     Supports: fontWeight, whiteSpace, wordWrap and width.
-                @returns {undefined} */
+                @returns {void} */
             showSpinner: function(msg, opts) {
                 const self = this,
                     content = self.content;
@@ -20109,7 +20109,7 @@ myt.Destructible = new JS.Module('Destructible', {
             /** @private 
                 @param {!Object} mainView
                 @param {!Object} opts
-                @returns {undefined} */
+                @returns {void} */
             setupFooterButtons: function(mainView, opts) {
                 const self = this,
                     content = self.content, 
@@ -20313,7 +20313,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {string} id
             @param {string} regex - The regex to validate with
             @param {string} [errorMsg] - A custom error message for when validation is false.
-            @returns {undefined} */
+            @returns {void} */
         initialize: function(id, regex, errorMsg) {
             this.callSuper(id);
             this.regex = new RegExp(regex);
@@ -20470,7 +20470,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Add a myt.Validator to this myt.CompoundValidator.
             @param {!Object|string} v - The myt.Validator to add or a string used to lookup a 
                 Validator in the Validator repository.
-            @returns {undefined} */
+            @returns {void} */
         addValidator: function(v) {
             if (typeof v === 'string') v = getValidator(v);
             if (v) this.__v.push(v);
@@ -20513,12 +20513,12 @@ myt.Destructible = new JS.Module('Destructible', {
         // Methods /////////////////////////////////////////////////////////////
         /** Adds a Validator to this registry.
             @param {!Object} identifiable - The myt.Validator to add.
-            @returns {undefined} */
+            @returns {void} */
         register: register,
         
         /** Removes a Validator from this registery.
             @param {!Object} identifiable - The myt.Validator to remove.
-            @returns {undefined} */
+            @returns {void} */
         unregister: identifiable => {
             doFuncOnIdentifiable(identifiable, id => {
                 // Make sure the validator is in the repository then delete.
@@ -20778,7 +20778,7 @@ myt.Destructible = new JS.Module('Destructible', {
             /** Should only be called by SliderThumb.
                 @private
                 @param {!Object} thumb
-                @returns {undefined} */
+                @returns {void} */
             syncValueToThumb: function(thumb) {
                 if (this.inited && !this.__lockSync) {
                     this.__lockSync = true;
@@ -20891,7 +20891,7 @@ myt.Destructible = new JS.Module('Destructible', {
         // Methods /////////////////////////////////////////////////////////////
         /** Should only be called by this and the rangeFill View.
             @private
-            @returns {undefined} */
+            @returns {void} */
         _syncRangeFillToValue: function() {
             const rangeFill = this.rangeFill,
                 value = this.getValue(),
@@ -21082,7 +21082,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /*  Setup the limitToParent constraint.
             @param {!BaseDivider} divider
-            @returns {undefined} */
+            @returns {void} */
         updateLimitToParentConstraint = divider => {
             const dim = divider.axis === 'y' ? 'height' : 'width';
             divider.constrain('__limitToParent', [divider, 'limitToParent', divider, dim, divider.parent, dim]);
@@ -21226,7 +21226,7 @@ myt.Destructible = new JS.Module('Destructible', {
             /** Update the x or y position of the divider as the value changes.
                 @overrides myt.ValueComponent
                 @param {number} v - The x or y position to set.
-                @returns {undefined} */
+                @returns {void} */
             setValue: function(v) {
                 this.callSuper(v);
                 
@@ -21243,7 +21243,7 @@ myt.Destructible = new JS.Module('Destructible', {
             /** Do the limitToParent constraint.
                 @private
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             __limitToParent: function(event) {
                 const self = this,
                     dim = self.axis === 'y' ? 'height' : 'width';
@@ -21512,7 +21512,7 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /*  @param {!Object} gridHeader
-            @returns {undefined} */
+            @returns {void} */
         updateLast = gridHeader => {
             gridHeader.resizer.setVisible(!(gridHeader.last && gridHeader.gridController.fitToWidth));
         },
@@ -21710,7 +21710,7 @@ myt.Destructible = new JS.Module('Destructible', {
             // Methods /////////////////////////////////////////////////////////
             /** Sorts the rows according to the current sort criteria. Subclasses and instances 
                 should implement this as needed.
-                @returns {undefined} */
+                @returns {void} */
             doSort: pkg.NOOP, // () => {}
             
             // Column Headers
@@ -22286,7 +22286,7 @@ myt.Destructible = new JS.Module('Destructible', {
             // Methods /////////////////////////////////////////////////////////
             /** @private
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             _updateContentWidth: function(event) {
                 const content = this.content,
                     w = event.value;
@@ -22296,7 +22296,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** @private
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             _updateContentHeight: function(event) {
                 const self = this,
                     {header, content} = self,
@@ -22647,7 +22647,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             
             // Methods /////////////////////////////////////////////////////////
-            /** @returns {undefined} */
+            /** @returns {void} */
             isScrolledToEnd: function() {
                 return getDomScrollTop(this) + this.height === this._listView.height;
             },
@@ -23306,7 +23306,7 @@ myt.Destructible = new JS.Module('Destructible', {
         // Methods /////////////////////////////////////////////////////////////
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __updateWidth: function(event) {
             // Only resize the active panel
             this.getActivePanel()?.setWidth(event.value);
@@ -23314,7 +23314,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __updateHeight: function(event) {
             // Only resize the active panel
             this.getActivePanel()?.setHeight(event.value);
@@ -23343,7 +23343,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Called by a panel when it transitions between selected states. Should not be called 
             directly. Instead change the panel selection.
             @param panel:myt.StackablePanel The panel that is transitioning.
-            @returns {undefined} */
+            @returns {void} */
         doStackTransition: function(panel) {
             this['doStackTransition' + (panel.selected ? 'To' : 'From')](panel);
         },
@@ -23352,7 +23352,7 @@ myt.Destructible = new JS.Module('Destructible', {
             selected panel in the stack. Should not be called directly. Instead change the 
             panel selection.
             @param panel:myt.StackablePanel The panel that is transitioning.
-            @returns {undefined} */
+            @returns {void} */
         doStackTransitionTo: function(panel) {
             const self = this;
             
@@ -23376,7 +23376,7 @@ myt.Destructible = new JS.Module('Destructible', {
             deselected panel in the stack. Should not be called directly. Instead change the 
             panel selection.
             @param panel:myt.StackablePanel The panel that is transitioning.
-            @returns {undefined} */
+            @returns {void} */
         doStackTransitionFrom: function(panel) {
             const self = this;
             
@@ -23442,7 +23442,7 @@ myt.Destructible = new JS.Module('Destructible', {
         // Methods /////////////////////////////////////////////////////////////
         /** Called whenever a transition between panels is initiated by this panel. Default 
             behavior is to defer to the panelStack's doStackTransition method.
-            @returns {undefined} */
+            @returns {void} */
         doStackTransition: function() {
             this.getPanelStack().doStackTransition(this);
         }
@@ -23603,7 +23603,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /*  @param {!Object} autoScroller
             @param {!string} lessDir
             @param {!string} moreDir
-            @returns {undefined} */
+            @returns {void} */
         resetScroll = (autoScroller, lessDir, moreDir) => {
             for (const dir of [lessDir, moreDir]) {
                 autoScroller['__is' + dir] = false;
@@ -23612,11 +23612,11 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /*  @param {!Object} autoScroller
-            @returns {undefined} */
+            @returns {void} */
         resetVScroll = autoScroller => {resetScroll(autoScroller, 'Up', 'Down');},
         
         /*  @param {!Object} autoScroller
-            @returns {undefined} */
+            @returns {void} */
         resetHScroll = autoScroller => {resetScroll(autoScroller, 'Left', 'Right');},
         
         /** Adds drag group and drop group support to drag and drop related classes. Drag groups
@@ -23669,7 +23669,7 @@ myt.Destructible = new JS.Module('Destructible', {
             // Methods /////////////////////////////////////////////////////////
             /** Adds the provided dragGroup to the dragGroups.
                 @param dragGroup:string The drag group to add.
-                @returns {undefined} */
+                @returns {void} */
             addDragGroup: function(dragGroup) {
                 if (dragGroup) {
                     this.__dgs[dragGroup] = true;
@@ -23679,7 +23679,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Removes the provided dragGroup from the dragGroups.
                 @param dragGroup:string The drag group to remove.
-                @returns {undefined} */
+                @returns {void} */
             removeDragGroup: function(dragGroup) {
                 if (dragGroup) {
                     delete this.__dgs[dragGroup];
@@ -23695,7 +23695,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Adds the provided dropGroup to the dropGroups.
                 @param dropGroup:string The droup group to add.
-                @returns {undefined} */
+                @returns {void} */
             addDropGroup: function(dropGroup) {
                 if (dropGroup) {
                     this.__drpgs[dropGroup] = true;
@@ -23705,7 +23705,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Removes the provided dropGroup from the dropGroups.
                 @param dropGroup:string The drop group to remove.
-                @returns {undefined} */
+                @returns {void} */
             removeDropGroup: function(dropGroup) {
                 if (dropGroup) {
                     delete this.__drpgs[dropGroup];
@@ -23834,31 +23834,31 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Called by myt.GlobalDragManager when a dropable starts being dragged that has a 
             matching drag group.
             @param dropable:myt.Dropable The dropable being dragged.
-            @returns {undefined} */
+            @returns {void} */
         notifyDragStart: NOOP, // dropable => {},
         
         /** Called by myt.GlobalDragManager when a dropable stops being dragged that has a 
             matching drag group.
             @param dropable:myt.Dropable The dropable no longer being dragged.
-            @returns {undefined} */
+            @returns {void} */
         notifyDragStop: NOOP, // dropable => {},
         
         /** Called by myt.GlobalDragManager when a dropable is dragged over this view and has a 
             matching drag group.
             @param dropable:myt.Dropable The dropable being dragged over this view.
-            @returns {undefined} */
+            @returns {void} */
         notifyDragEnter: NOOP, // dropable => {},
         
         /** Called by myt.GlobalDragManager when a dropable is dragged out of this view and has a 
             matching drag group.
             @param dropable:myt.Dropable The dropable being dragged out of this view.
-            @returns {undefined} */
+            @returns {void} */
         notifyDragLeave: NOOP, // dropable => {},
         
         /** Called by myt.GlobalDragManager when a dropable is dropped onto this view and has a 
             matching drag group.
             @param dropable:myt.Dropable The dropable being dropped onto this view.
-            @returns {undefined} */
+            @returns {void} */
         notifyDrop: NOOP // dropable => {}
     });
     
@@ -23917,14 +23917,14 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Called by myt.GlobalDragManager when this view is dragged over a drop target.
             @param dropTarget:myt.DropTarget The target that was dragged over.
-            @returns {undefined} */
+            @returns {void} */
         notifyDragEntering: function(dropTarget) {
             this.setDropTarget(dropTarget);
         },
         
         /** Called by myt.GlobalDragManager when this view is dragged out of a drop target.
             @param dropTarget:myt.DropTarget The target that was dragged out of.
-            @returns {undefined} */
+            @returns {void} */
         notifyDragLeaving: function(dropTarget) {
             this.setDropTarget();
         },
@@ -23934,7 +23934,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 this dropable was dropped on no drop target.
             @param isAbort:boolean Indicates if the drop was the result of an abort or a 
                 normal drop.
-            @returns {undefined} */
+            @returns {void} */
         notifyDropped: function(dropTarget, isAbort) {
             this.setDropped(true);
             
@@ -23943,12 +23943,12 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Called after dragging stops and the drop failed. The default implementation 
             does nothing.
-            @returns {undefined} */
+            @returns {void} */
         notifyDropFailed: NOOP,
         
         /** Called after dragging stops and the drop was aborted. The default implementation 
             does nothing.
-            @returns {undefined} */
+            @returns {void} */
         notifyDropAborted: NOOP
     });
     
@@ -24015,7 +24015,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Called by myt.GlobalDragManager when a dropable starts being dragged that has a 
             matching drag group.
             @param {!Object} dropable - The myt.Dropable being dragged.
-            @returns {undefined} */
+            @returns {void} */
         notifyAutoScrollerDragStart: function(dropable) {
             const ide = this.getIDE();
             if (ide.scrollHeight > ide.clientHeight || ide.scrollWidth > ide.clientWidth) {
@@ -24026,7 +24026,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Called by myt.GlobalDragManager when a dropable stops being dragged that has a 
             matching drag group.
             @param {!Object} dropable - The myt.Dropable no longer being dragged.
-            @returns {undefined} */
+            @returns {void} */
         notifyAutoScrollerDragStop: function(dropable) {
             this.detachFromDom(globalMouse, '__hndlMove', 'mousemove', true);
             
@@ -24037,7 +24037,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Handles global mouse movement.
             @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __hndlMove: function(event) {
             const self = this;
             
@@ -24094,7 +24094,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /*  Redraws the annulus
             @param {!Object} annulus - The Annulus to redraw.
-            @returns {undefined} */
+            @returns {void} */
         redraw = annulus => {
             // Ensure endAngle is greater than or equal to startAngle
             let startAngle = degreesToRadians(annulus.startAngle), 
@@ -24152,7 +24152,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /*  Ensures the size of the view exactly fits the annulus.
             @param {!Object} annulus - The Annulus to update.
-            @returns {undefined} */
+            @returns {void} */
         updateSize = annulus => {
             const size = 2*(annulus.radius + annulus.thickness),
                 svg = annulus.__svg;
@@ -24434,7 +24434,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     text:string The tip text.
                     tipalign:string Tip alignment, 'left' or 'right'.
                     tipvalign:string Tip vertical alignment, 'above' or 'below'.
-                @returns {undefined} */
+                @returns {void} */
             setTooltip: function(v) {
                 if (this.inited) {
                     this.tooltip = v;
@@ -24450,7 +24450,7 @@ myt.Destructible = new JS.Module('Destructible', {
             // Methods /////////////////////////////////////////////////////////
             /** @private
                 @param {!Object} event The event object.
-                @returns {undefined} */
+                @returns {void} */
             __hndl_mousemove: function(event) {
                 const self = this;
                 self._lastPos = pkg.MouseObservable.getMouseFromEvent(event);
@@ -24491,7 +24491,7 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** Called when the tip will be shown.
-                @returns {undefined} */
+                @returns {void} */
             showTip: function() {
                 // Don't show tooltips while doing drag and drop since tooltips are distracting 
                 // while this is going on.
@@ -24708,7 +24708,7 @@ myt.Destructible = new JS.Module('Destructible', {
         // Constructor /////////////////////////////////////////////////////////
         /** Create a new Path.
             @param {?Array} vectors
-            @returns {undefined} */
+            @returns {void} */
         initialize: function(vectors) {
             this.setVectors(vectors ?? []);
         },
@@ -24724,7 +24724,7 @@ myt.Destructible = new JS.Module('Destructible', {
         // Methods /////////////////////////////////////////////////////////////
         /** Copy the data from the provided Path into this one.
             @param {!Object} path - An myt.Path
-            @returns {undefined} */
+            @returns {void} */
         copyFrom: function(path) {
             this.vectors = path.vectors.slice();
             this._boundingBox = null;
@@ -24732,7 +24732,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Draws this path into the provided drawview.
             @param {!Object} canvas
-            @returns {undefined} */
+            @returns {void} */
         drawInto: function(canvas) {
             canvas.beginPath();
             const vecs = this.vectors;
@@ -24746,7 +24746,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Shift this path by the provided x and y amount.
             @param {number} dx
             @param {number} dy
-            @returns {undefined} */
+            @returns {void} */
         translate: function(dx, dy) {
             const vecs = this.vectors;
             let i = vecs.length;
@@ -24759,7 +24759,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Scales the path by the provided amount.
             @param {number} magnitude
-            @returns {undefined} */
+            @returns {void} */
         scale: function(magnitude) {
             const vecs = this.vectors;
             let i = vecs.length;
@@ -24772,7 +24772,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Rotates this path around 0,0 by the provided angle in radians.
             @param {number} a
-            @returns {undefined} */
+            @returns {void} */
         rotate: function(a) {
             const cosA = math.cos(a),
                 sinA = math.sin(a),
@@ -24791,7 +24791,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @param {number} angle - The angle in radians
             @param {number} xOrigin - The x coordinate to rotate around.
             @param {number} yOrigin - The y coordinate to rotate around.
-            @returns {undefined} */
+            @returns {void} */
         rotateAroundOrigin: function(angle, xOrigin, yOrigin) {
             this.translate(-xOrigin, -yOrigin);
             this.rotate(angle);
@@ -24999,7 +24999,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @param x:number the x location of the center of the circle.
             @param y:number the y location of the center of the circle.
             @param radius:number the radius of the circle.
-            @returns {undefined} */
+            @returns {void} */
         circle: function(x, y, radius) {
             this.__ctx.arc(x, y, radius, 0, 2 * PI);
         },

@@ -68,13 +68,13 @@
                 assumes the target is an myt.Observable.
                 @param {!Object} target
                 @param {string} attrName
-                @returns {undefined} */
+                @returns {void} */
             createSetterFunction: createSetterFunction,
             
             /** Creates a standard getter function for the provided attrName on the target.
                 @param {!Object} target
                 @param {string} attrName
-                @returns {undefined} */
+                @returns {void} */
             createGetterFunction: createGetterFunction,
             
             createSetterMixin: (propNames, alsoGetters) => {
@@ -98,7 +98,7 @@
             an initializer.
             @param {?Array} attrNames - An array of attribute names.
             @param {?Object} attrs - The attrs Object to extract values from.
-            @returns {undefined}. */
+            @returns {void} */
         quickSet: function(attrNames, attrs) {
             if (attrNames) {
                 for (const attrName of attrNames) {
@@ -110,7 +110,7 @@
         
         /** Calls a setter function for each attribute in the provided map.
             @param {?Object} attrs - A map of attributes to set.
-            @returns {undefined}. */
+            @returns {void} */
         callSetters: function(attrs) {
             const self = this,
                 earlyAttrs = self.earlyAttrs,
@@ -178,7 +178,7 @@
             @param {boolean} [skipSetter] - If true no attempt will be made to invoke a setter 
                 function. Useful when you want to invoke standard setter behavior. Defaults to 
                 undefined which is equivalent to false.
-            @returns {undefined} */
+            @returns {void} */
         set: function(attrName, v, skipSetter) {
             const self = this;
             

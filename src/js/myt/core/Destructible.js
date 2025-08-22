@@ -10,7 +10,7 @@
 myt.Destructible = new JS.Module('Destructible', {
     // Methods /////////////////////////////////////////////////////////////////
     /** Destroys this Object. Subclasses must call super.
-        @returns {undefined} */
+        @returns {void} */
     destroy: function() {
         const self = this;
         if (self.destroyed) {

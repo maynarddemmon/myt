@@ -43,7 +43,7 @@
             
             // Constructor /////////////////////////////////////////////////////
             /** Initialize does nothing.
-                @returns {undefined} */
+                @returns {void} */
             initialize: NOOP,
             
             
@@ -74,7 +74,7 @@
             
             /** Puts the object back in the pool. The object will be "cleaned" before it is stored.
                 @param {!Object} obj - The object to put in the pool.
-                @returns {undefined} */
+                @returns {void} */
             putInstance: function(obj) {
                 getObjPool(this, true).push(this.cleanInstance(obj));
             },
@@ -91,7 +91,7 @@
             
             /** Calls the destroy method on all object stored in the pool if they have a 
                 destroy function.
-                @returns {undefined} */
+                @returns {void} */
             destroyPooledInstances: function() {
                 destroyObjectPool(getObjPool(this));
             }
@@ -111,7 +111,7 @@
                 @param {!Function} instanceClass - The JS.Class to create instances from.
                 @param {?Object} [instanceParent] - The place to create instances on. When 
                     instanceClass is an myt.Node this will be the node parent.
-                @returns {undefined} */
+                @returns {void} */
             initialize: function(instanceClass, instanceParent) {
                 this.callSuper();
                 
@@ -197,7 +197,7 @@
             },
             
             /** Puts all the active instances back in the pool.
-                @returns {undefined} */
+                @returns {void} */
             putActives: function() {
                 const actives = getActiveObjArray(this);
                 if (actives) {
@@ -291,7 +291,7 @@
     pkg.Reusable = new JSModule('Reusable', {
         // Methods /////////////////////////////////////////////////////////////
         /** Puts this object back into a default state suitable for storage in an myt.AbstractPool
-            @returns {undefined} */
+            @returns {void} */
         clean: NOOP
     });
 })(myt);

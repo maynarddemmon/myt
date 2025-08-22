@@ -23,7 +23,7 @@
                 unregistered first.
                 @param {string} key
                 @param {!Object} v
-                @returns {undefined} */
+                @returns {void} */
             register: (key, v) => {
                 if (globalRegistry.hasOwnProperty(key)) {
                     consoleWarn('Global key in use', key);
@@ -36,7 +36,7 @@
             /** Unegisters the global for the provided key. Fires an unregister<key> event if the 
                 key exists.
                 @param {string} key
-                @returns {undefined} */
+                @returns {void} */
             unregister: key => {
                 if (globalRegistry.hasOwnProperty(key)) {
                     const v = globalRegistry[key];

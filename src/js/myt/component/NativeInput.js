@@ -92,7 +92,7 @@
             
             /** Sets the value on the DOM.
                 @param v:* The value to set.
-                @returns {undefined} */
+                @returns {void} */
             setDomValue: function(v) {
                 const ide = this.getIDE();
                 if (ide.value !== v) ide.value = v;
@@ -233,14 +233,14 @@
             
             /** @private
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             __filterInput: function(event) {
                 this.setDomValue(this.filterInput(this.getDomValue()));
             },
             
             /** @private
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             __filterInputPress: function(event) {
                 // Filter for allowed characters
                 const domEvent = event.value,
@@ -259,12 +259,12 @@
             /** A hook for subclasses/instances to do input filtering during key press. The default 
                 implementation does nothing.
                 @param {!Object} domEvent - The dom key press event.
-                @returns {undefined} */
+                @returns {void} */
             filterInputPress: NOOP, // domEvent => {/* Subclasses to implement as needed. */},
             
             /** @private
                 @param {!Object} event
-                @returns {undefined} */
+                @returns {void} */
             __syncToDom: function(event) {
                 this.setValue(this.getDomValue());
             },
@@ -286,7 +286,7 @@
                 @param start:int the start of the selection or location of the caret if no end 
                     is provided.
                 @param end:int (optional) the end of the selection.
-                @returns {undefined} */
+                @returns {void} */
             setCaretPosition: function(start, end) {
                 if (end == null || start === end) {
                     // Don't update if the current position already matches.
@@ -308,20 +308,20 @@
             },
             
             /** Sets the caret to the start of the text input.
-                @returns {undefined} */
+                @returns {void} */
             setCaretToStart: function() {
                 this.setCaretPosition(0);
             },
             
             /** Sets the caret to the end of the text input.
-                @returns {undefined} */
+                @returns {void} */
             setCaretToEnd: function() {
                 this.setCaretPosition(this.getDomValue().length);
             },
             
             // Selection //
             /** Selects all the text in the input element.
-                @returns {undefined} */
+                @returns {void} */
             selectAll: function() {
                 this.getIDE().select();
             },
@@ -482,7 +482,7 @@
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __cleanInput: function(event) {
             // Prevent enter key from inserting a div
             if (KeyObservable.isEnterKeyEvent(event)) {
@@ -543,7 +543,7 @@
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __userInteraction: function(event) {
             this.saveSelection();
             return true;
@@ -882,7 +882,7 @@
         
         // Selection //
         /** Deselects all selected options included disabled options.
-            @returns {undefined} */
+            @returns {void} */
         deselectAll: function() {
             let changed = false;
             for (const option of this.getOptions()) {
@@ -901,14 +901,14 @@
         
         /** Selects the option that has the provided value.
             @param value:* The value of the option to select.
-            @returns {undefined} */
+            @returns {void} */
         selectValue: function(value) {
             this.select(this.getOptionForValue(value));
         },
         
         /** Selects the provided option.
             @param option:myt.InputSelectOption The option to select.
-            @returns {undefined} */
+            @returns {void} */
         select: function(option) {
             if (option?.canSelect(this)) {
                 option.setSelected(true);
@@ -918,14 +918,14 @@
         
         /** Deselects the option that has the provided value.
             @param {*} value - The value of the option to deselect.
-            @returns {undefined} */
+            @returns {void} */
         deselectValue: function(value) {
             this.deselect(this.getOptionForValue(value));
         },
         
         /** Deselects the provided option.
             @param option:myt.InputSelectOption The option to deselect.
-            @returns {undefined} */
+            @returns {void} */
         deselect: function(option) {
             if (option?.canDeselect(this)) {
                 option.setSelected(false);
@@ -935,18 +935,18 @@
         
         /** @private
             @param {!Object} event
-            @returns {undefined} */
+            @returns {void} */
         __doChanged: function(event) {
             this.__syncToDom();
             this.doChanged();
         },
         
         /** Called whenever the underlying dom element fires a "change" event.
-            @returns {undefined} */
+            @returns {void} */
         doChanged: NOOP,
         
         /** @private
-            @returns {undefined} */
+            @returns {void} */
         __syncToDom: function() {
             this.setValue(this.multiple ? this.getSelectedOptionValues() : this.getDomValue());
         }

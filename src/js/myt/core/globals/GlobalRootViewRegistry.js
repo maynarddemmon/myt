@@ -31,7 +31,7 @@
         // Methods /////////////////////////////////////////////////////////////
         /** Add a rootable to the global list of root views.
             @param {!Object} r - The RootView to add.
-            @returns {undefined} */
+            @returns {void} */
         addRoot: r => {
             roots.push(r);
             globalRootViewRegistry.fireEvent('rootAdded', r);
@@ -39,7 +39,7 @@
         
         /** Remove a rootable from the global list of root views.
             @param {!Object} rootToRemove - The RootView to remove.
-            @returns {undefined} */
+            @returns {void} */
         removeRoot: rootToRemove => {
             const idx = roots.indexOf(rootToRemove);
             if (idx > -1) {

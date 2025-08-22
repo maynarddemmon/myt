@@ -49,7 +49,7 @@
                 @param filter:function the value filter to add.
                 @param where:string (optional) Determines where to add the filter. Supported values 
                     are 'first' and 'last'. Defaults to 'first'.
-                @returns {undefined} */
+                @returns {void} */
             chainValueFilter: function(filter, where) {
                 const existingFilter = this.valueFilter;
                 let chainedFilter;

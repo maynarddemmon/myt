@@ -6,7 +6,7 @@
             @param {string|number} v
             @param {string} attrName
             @param {string|number} defaultValue
-            @returns {undefined} */
+            @returns {void} */
         setAndSizeViewToDom = (textView, v, attrName, defaultValue) => {
             if (textView[attrName] !== v) {
                 textView[attrName] = v;
@@ -140,7 +140,7 @@
         /** Configures the attributes for this Text so that an ellipsis will be displayed. To 
             actually see an ellipsis, an explicit width should be set on the Text so that overflow 
             will occur.
-            @returns {undefined} */
+            @returns {void} */
         enableEllipsis: function() {
             this.setWhiteSpace('nowrap');
             this.setOverflow('hidden');
@@ -149,7 +149,7 @@
         
         /** Turns ellipsis off by setting overflow to 'visible'. Other CSS related changes for 
             ellipsis are not undone such as whiteSpace and textOverflow.
-            @returns {undefined} */
+            @returns {void} */
         disableEllipsis: function() {
             this.setOverflow('visible');
         },
@@ -162,7 +162,7 @@
             @param {number} [blur] - The bluriness in pixels of the shadow. Defaults to 2 if 
                 not provided.
             @param {string} [color] - The color of the shadow. Defaults to '#000' if not provided.
-            @returns {undefined} */
+            @returns {void} */
         showTextShadow: function(x, y, blur, color) {
             this.getIDS().textShadow = 
                 (x || 0) + 'px ' + 
@@ -172,7 +172,7 @@
         },
         
         /** Turns off a text shadow.
-            @returns {undefined} */
+            @returns {void} */
         hideTextShadow: function() {
             this.getIDS().textShadow = 'none';
         }
