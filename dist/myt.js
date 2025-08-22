@@ -497,10 +497,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         activeDictionary = {},
         
         // The resource (Functions, Arrays, Objects, etc.) dictionary for the current locale.
-        activeResourceDictionary = {},
-        
-        // Used to prevent loading the same stylesheet twice with createStylesheetLink.
-        linkElemsByHref = {};
+        activeResourceDictionary = {};
     
     const consoleWarn = console.warn,
         
@@ -512,6 +509,92 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         documentElem = document,
         headElem = documentElem.head,
         createElement = documentElem.createElement.bind(documentElem),
+        
+        /* Start:resource loading */
+        RESOURCE_TYPE_SCRIPT = 'script',
+        RESOURCE_TYPE_CSS = 'css',
+        
+        // Used to prevent loading the same resource more than once.
+        loadedResources = {},
+        
+        // Holds references to the DOM elements that loaded a resource.
+        resourceElemsByHref = {},
+        
+        /*  Dynamically load a resource into the dom.
+            @param {string} type - The type of resource to load. This will be either "script"
+                or "css".
+            @param {string} src - The URL to the resource.
+            @param {?Function} [callback] - A function called when the resource loads. A boolean
+                is passed to it indicating success or failure.
+            @param {boolean} [noCacheBust] - If true, no cacheBust query param will be added. 
+                Defaults to undefined which is equivalent to false.
+            @param {string} [integrity] - If provided, an integrity, crossorigin check and 
+                no-referrer policy will be set on the dom element.
+            @returns {?Object} - The DOM element for the resource or undefined if no src was
+                provided. */
+        loadResource = (type, src, callback, noCacheBust, integrity) => {
+            if (!src) return;
+            
+            // Prevent reloading the same resource
+            let loadedResourceState = loadedResources[src],
+                elem = resourceElemsByHref[src];
+            if (loadedResourceState === true) {
+                // Resource already loaded successfully
+                callback?.(true);
+            } else if (loadedResourceState === false) {
+                // Resource already loaded unsuccessfully
+                callback?.(false);
+            } else if (isArray(loadedResourceState)) {
+                // Resource is currently loading so store callback for later resolution.
+                if (callback) loadedResourceState.push(callback);
+            } else {
+                // Load the resource
+                loadedResourceState = loadedResources[src] = [];
+                if (callback) loadedResourceState.push(callback);
+                
+                let srcPropName;
+                switch (type) {
+                    case RESOURCE_TYPE_SCRIPT:
+                        elem = createElement('script');
+                        elem.type = 'text/javascript';
+                        elem.async = false;
+                        srcPropName = 'src';
+                        break;
+                    case RESOURCE_TYPE_CSS:
+                        elem = createElement('link');
+                        elem.rel = 'stylesheet';
+                        srcPropName = 'href';
+                        break;
+                }
+                
+                if (integrity) {
+                    elem.integrity = integrity;
+                    elem.crossOrigin = 'anonymous';
+                    elem.referrerpolicy = 'no-referrer';
+                }
+                
+                const executeCallbacks = success => {
+                    // Prevent later events from this script. For example, if the src is changed.
+                    elem.onload = elem.onerror = null;
+                    
+                    for (const callbackFunc of loadedResourceState) callbackFunc(success);
+                    loadedResources[src] = success;
+                };
+                elem.onerror = () => {executeCallbacks(false);};
+                elem.onload = () => {executeCallbacks(true);};
+                
+                // Must set src AFTER adding onreadystatechange listener otherwise we’ll miss 
+                // the loaded event for cached scripts
+                elem[srcPropName] = src + (noCacheBust ? '' : (src.includes('?') ? '&' : '?') + 'cacheBust=' + Date.now());
+                
+                headElem.appendChild(elem);
+                
+                resourceElemsByHref[src] = elem;
+            }
+            
+            return elem;
+        },
+        /* End:resource loading */
         
         /* Font functionality */
         fontTargets = {},
@@ -965,28 +1048,16 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             /** @param {?Array} fontUrls
                 @returns {undefined} */
             loadCSSFonts: fontUrls => {
-                fontUrls?.forEach(myt.createStylesheetLink);
+                fontUrls?.forEach(myt.loadCSS);
             },
             
             
-            // CSS /////////////////////////////////////////////////////////////
-            /** Creates a "link" dom element.
-                @param {string} [href] The href attribute for the link.
-                @returns {!Object} */
-            createStylesheetLink: href => {
-                if (href) {
-                    let linkElem = linkElemsByHref[href];
-                    if (linkElem) {
-                        console.warn('stylesheet already exists', href);
-                    } else {
-                        linkElem = linkElemsByHref[href] = createElement('link');
-                        linkElem.rel = 'stylesheet';
-                        linkElem.href = href;
-                        headElem.appendChild(linkElem);
-                    }
-                    return linkElem;
-                }
-            },
+            // CSS and Script Loading //////////////////////////////////////////
+            loadScript: (...args) => loadResource(RESOURCE_TYPE_SCRIPT, ...args),
+            
+            loadCSS: (...args) => loadResource(RESOURCE_TYPE_CSS, ...args),
+            
+            //createStylesheetLink: href => myt.loadCSS(href),
             
             /** Creates a "style" dom element.
                 @returns {!Object} */
@@ -1293,62 +1364,6 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 };
                 worker.postMessage(dataObj);
             }),
-            
-            /** Dynamically load a script into the dom.
-                @param {string} src - The URL to the script file.
-                @param {?Function} [callback] - A function called when the script loads. A boolean
-                    is passed to it indicating success or failure.
-                @param {boolean} [noCacheBust] - If true, no cacheBust query param will be added. 
-                    Defaults to undefined which is equivalent to false.
-                @param {string} [integrity] - If provided, an integrity and crossorigin check will 
-                    be set on the script element.
-                @returns {undefined} */
-            loadScript: function(src, callback, noCacheBust, integrity) {
-                // Prevent reloading the same script
-                const loadedScripts = this._loadedScripts ??= {};
-                let loadedScriptState = loadedScripts[src];
-                if (loadedScriptState === true) {
-                    // Script already loaded successfully
-                    callback?.(true);
-                } else if (loadedScriptState === false) {
-                    // Script already loaded unsuccessfully
-                    callback?.(false);
-                } else if (isArray(loadedScriptState)) {
-                    // Script is currently loading so store callback for later resolution.
-                    if (callback) loadedScriptState.push(callback);
-                } else {
-                    // Load the script
-                    loadedScriptState = loadedScripts[src] = [];
-                    if (callback) loadedScriptState.push(callback);
-                    
-                    const scriptElem = createElement('script');
-                    scriptElem.type = 'text/javascript';
-                    scriptElem.async = false;
-                    
-                    if (integrity) {
-                        scriptElem.integrity = integrity;
-                        scriptElem.crossOrigin = 'anonymous';
-                    }
-                    
-                    const executeCallbacks = success => {
-                        // Prevent later events from this script. For example, if the src is changed.
-                        scriptElem.onload = scriptElem.onreadystatechange = scriptElem.onerror = null;
-                        
-                        for (const callbackFunc of loadedScriptState) callbackFunc(success);
-                        loadedScripts[src] = success;
-                    };
-                    scriptElem.onerror = () => {executeCallbacks(false);};
-                    scriptElem.onload = scriptElem.onreadystatechange = () => {
-                        if (!scriptElem.readyState || scriptElem.readyState === 'complete') executeCallbacks(true);
-                    };
-                    
-                    // Must set src AFTER adding onreadystatechange listener otherwise we’ll miss 
-                    // the loaded event for cached scripts
-                    scriptElem.src = src + (noCacheBust ? '' : (src.includes('?') ? '&' : '?') + 'cacheBust=' + Date.now());
-                    
-                    headElem.appendChild(scriptElem);
-                }
-            },
             
             /** A wrapper on myt.global.error.notify
                 @param {string|?Error} err - The error or message to dump stack for.
