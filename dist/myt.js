@@ -610,7 +610,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             // Fix for Firefox and FontAwesome because of double quotes returned in the font family 
             // name. Seems OK to just do it for all fonts since double quotes in a font name is 
             // most likely going to be confusing anyhow.
-            const familyName = fontFace.family.split('"').join('');
+            const familyName = fontFace.family.replaceAll('"', '');
             for (const fontName of [familyName, familyName + ' ' + fontFace.weight]) {
                 if (!fontLoaded[fontName]) {
                     fontLoaded[fontName] = true;
@@ -1804,7 +1804,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             read: (key, options) => {
                 options = {...Cookie.defaults, ...options};
                 
-                const decodeFunc = options.raw ? str => str : str => decodeURIComponent(str.split('+').join(' ')),
+                const decodeFunc = options.raw ? str => str : str => decodeURIComponent(str.replaceAll('+', ' ')),
                     useJson = options.json,
                     cookies = document.cookie.split('; '),
                     len = cookies.length,
@@ -2157,7 +2157,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         /** Unescape a query param value.
             @param {string} paramValue
             @returns {string} */
-        decodeQueryParam: paramValue => decodeURIComponent(paramValue).split('+').join(' '),
+        decodeQueryParam: paramValue => decodeURIComponent(paramValue).replaceAll('+', ' '),
         
         getQuery: function() {
             const pairs = this.queryPairs,
@@ -2720,7 +2720,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             @param {*} v The candidate event or value to get the value from. An event like value 
                 is a non-null Object with a truthy "type" property.
             @returns {*} the provided event or the event's value if found. */
-        valueFromEvent: v => v && typeof v === 'object' && v.type ? v.value : v,
+        valueFromEvent: v => v?.type ? v.value : v,
         
         /** Does the same thing as this.attachTo and also immediately calls the method with an 
             event containing the attributes value. If 'once' is true no attachment will occur 
@@ -3067,6 +3067,8 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         getComputedStyle = GLOBAL.getComputedStyle,
         DOCUMENT_ELEMENT = document,
         
+        assign = Object.assign,
+        
         mathMax = Math.max,
         
         /*  Gets the z-index of the dom element or, if it does not define a stacking context, 
@@ -3123,12 +3125,12 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 @param {?Object} [styles] - A map of style keys and values to add to the style 
                     property of the new element.
                 @param {?Object} [props] - A map of keys and values to add to the new element.
-                @returns {!Object} the created element. */
+                @returns {!HTMLElement} the created element. */
             createElement: (tagname, styles, props) => {
-                const elem = DOCUMENT_ELEMENT.createElement(tagname);
-                for (const key in props) elem[key] = props[key];
-                for (const key in styles) elem.style[key] = styles[key];
-                return elem;
+                const el = DOCUMENT_ELEMENT.createElement(tagname);
+                if (props) assign(el, props);
+                if (styles) assign(el.style, styles);
+                return el;
             },
             
             /** Tests if a dom element is visible or not.
@@ -5376,10 +5378,10 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         
         // Methods /////////////////////////////////////////////////////////////
-        appendToEarlyAttrs: function() {(this.earlyAttrs ??= []).push(...arguments);},
-        prependToEarlyAttrs: function() {(this.earlyAttrs ??= []).unshift(...arguments);},
-        appendToLateAttrs: function() {(this.lateAttrs ??= []).push(...arguments);},
-        prependToLateAttrs: function() {(this.lateAttrs ??= []).unshift(...arguments);},
+        appendToEarlyAttrs: function(...args) {(this.earlyAttrs ??= []).push(...args);},
+        prependToEarlyAttrs: function(...args) {(this.earlyAttrs ??= []).unshift(...args);},
+        appendToLateAttrs: function(...args) {(this.lateAttrs ??= []).push(...args);},
+        prependToLateAttrs: function(...args) {(this.lateAttrs ??= []).unshift(...args);},
         
         /** Used to quickly extract and set attributes from the attrs object passed to 
             an initializer.
@@ -5504,10 +5506,16 @@ myt.Destructible = new JS.Module('Destructible', {
             console.warn('Already destroyed');
         } else {
             // OPTIMIZATION: Improve garbage collection for JS.Class
-            const meta = self.__meta__;
-            if (meta) for (const key of Object.keys(meta)) meta[key] = null;
-            
-            for (const key of Object.keys(self)) self[key] = null;
+            const hasOwn = Object.hasOwn,
+                meta = self.__meta__;
+            if (meta) {
+                for (const key in meta) {
+                    if (hasOwn(meta, key)) meta[key] = null;
+                }
+            }
+            for (const key in self) {
+                if (hasOwn(self, key)) self[key] = null;
+            }
             
             self.destroyed = true;
         }
@@ -5516,38 +5524,23 @@ myt.Destructible = new JS.Module('Destructible', {
 
 
 (pkg => {
-    const {Class:JSClass, Module:JSModule} = JS,
+    const JSClass = JS.Class,
         
         NOOP = pkg.NOOP,
         
         consoleWarn = console.warn,
         
         /*  Get the object pool.
-            @private
             @param {boolean} lazy - If true a pool will be lazily instantiated.
             @returns {!Object} */
         getObjPool = (abstractPool, lazy) => lazy ? abstractPool.__op ??= [] : abstractPool.__op,
         
         /*  Get the active objects array.
-            @private
             @param {boolean} lazy - If true a list will be lazily instantiated.
             @returns {!Array} */
         getActiveObjArray = (trackActivesPool, lazy) => lazy ? trackActivesPool.__actives ??= [] : trackActivesPool.__actives,
         
-        makeInstance = (parent, instanceClass, attrs) => parent ? new instanceClass(parent, attrs) : new instanceClass(),
-        
-        destroyObjectPool = objPool => {
-            if (objPool) {
-                let i = objPool.length;
-                while (i) {
-                    const obj = objPool[--i];
-                    if (typeof obj.destroy === 'function') obj.destroy();
-                }
-                objPool.length = 0;
-            }
-        },
-        
-        /** Implements an object pool. Subclasses must at a minimum implement the 
+        /** Implements an object pool. Subclasses must, at a minimum, implement the 
             createInstance method.
             
             Private Attributes:
@@ -5559,9 +5552,8 @@ myt.Destructible = new JS.Module('Destructible', {
             
             
             // Constructor /////////////////////////////////////////////////////
-            /** Initialize does nothing.
-                @returns {void} */
-            initialize: NOOP,
+            /*  No initialize since it would do nothing. Subclasses must not
+                call super during initialization. */
             
             
             // Life Cycle //////////////////////////////////////////////////////
@@ -5576,18 +5568,17 @@ myt.Destructible = new JS.Module('Destructible', {
             
             // Methods /////////////////////////////////////////////////////////
             /** Get an instance from the pool.
-                The arguments passed in will be passed to the createInstance method. Note: these 
-                have no effect if an object already exists in the pool.
+                @param {?Object} [attrs] - The attributes used to initialize the instance if and
+                    existing instance can't be pulled from the Pool.
                 @returns {!Object} */
-            getInstance: function() {
-                const objPool = getObjPool(this, true);
-                return objPool.length ? objPool.pop() : this.createInstance.apply(this, arguments);
+            getInstance: function(attrs) {
+                return getObjPool(this, true).pop() ?? this.createInstance(attrs);
             },
             
             /** Creates a new object that can be stored in the pool. The default implementation 
                 does nothing.
                 @returns {?Object} */
-            createInstance: () => null,
+            createInstance: NOOP,
             
             /** Puts the object back in the pool. The object will be "cleaned" before it is stored.
                 @param {!Object} obj - The object to put in the pool.
@@ -5610,7 +5601,15 @@ myt.Destructible = new JS.Module('Destructible', {
                 destroy function.
                 @returns {void} */
             destroyPooledInstances: function() {
-                destroyObjectPool(getObjPool(this));
+                const objPool = getObjPool(this);
+                if (objPool) {
+                    let i = objPool.length;
+                    while (i) {
+                        const obj = objPool[--i];
+                        if (typeof obj.destroy === 'function') obj.destroy();
+                    }
+                    objPool.length = 0;
+                }
             }
         }),
         
@@ -5624,39 +5623,38 @@ myt.Destructible = new JS.Module('Destructible', {
             @class */
         SimplePool = pkg.SimplePool = new JSClass('SimplePool', AbstractPool, {
             // Constructor /////////////////////////////////////////////////////
-            /** Create a new myt.SimplePool
+            /** @overrides myt.AbstractPool
+                Create a new myt.SimplePool
                 @param {!Function} instanceClass - The JS.Class to create instances from.
                 @param {?Object} [instanceParent] - The place to create instances on. When 
                     instanceClass is an myt.Node this will be the node parent.
                 @returns {void} */
             initialize: function(instanceClass, instanceParent) {
-                this.callSuper();
-                
-                this.instanceClass = instanceClass ?? Object;
+                this.instanceClass = instanceClass;
                 this.instanceParent = instanceParent;
             },
             
             
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.AbstractPool
-                Creates an instance of this.instanceClass and passes in this.instanceParent as the 
-                first argument if it exists.
-                arguments[0]:object (optional) the attrs to be passed to a 
-                created myt.Node.
-                @returns {?Object} */
-            createInstance: function() {
-                return makeInstance(this.instanceParent, this.instanceClass, arguments[0]);
+                Creates an instance of this Pool's instanceClass and passes in this Pool's
+                instanceParent, if it exists, as the first argument to the instance.
+                @param {?Object} [attrs] - The attributes used to initialize the instance.
+                @returns {?Object} - The new instance. */
+            createInstance: function(attrs) {
+                const {instanceClass, instanceParent} = this;
+                return instanceParent ? new instanceClass(instanceParent, attrs) : new instanceClass();
             }
         }),
         
-        /** Tracks which objects are "active". An "active" object is one that has been obtained by 
-            the getInstance method.
+        /** A myt.SimplePoolTracks that tracks which objects are "active". An "active" object is 
+            one that has been obtained by the getInstance method and is thus in use.
             
             Private Attributes:
                 __actives:array an array of active instances.
             
             @class */
-        TrackActives = new JSModule('TrackActives', {
+        TrackActivesPool = pkg.TrackActivesPool = new JSClass('TrackActivesPool', SimplePool, {
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides myt.Destructible */
             destroy: function() {
@@ -5669,8 +5667,8 @@ myt.Destructible = new JS.Module('Destructible', {
             
             // Methods /////////////////////////////////////////////////////////
             /** @overrides myt.AbstractPool */
-            getInstance: function() {
-                const instance = this.callSuper();
+            getInstance: function(attrs) {
+                const instance = this.callSuper(attrs);
                 getActiveObjArray(this, true).push(instance);
                 return instance;
             },
@@ -5722,13 +5720,6 @@ myt.Destructible = new JS.Module('Destructible', {
                     while (i) this.putInstance(actives[--i]);
                 }
             }
-        }),
-        
-        /** An myt.SimplePool that tracks which objects are "active".
-            
-            @class */
-        TrackActivesPool = pkg.TrackActivesPool = new JSClass('TrackActivesPool', SimplePool, {
-            include: [TrackActives]
         });
     
     /** A pool that tracks which objects are "active" and stores objects of different classes in 
@@ -5736,16 +5727,14 @@ myt.Destructible = new JS.Module('Destructible', {
         
         Private Attributes:
             __pbk:object Stores TrackActivesPools by key.
+            __pbCN:object Stores TrackActivesPools by the display name of the instance classes.
         
         @class */
     pkg.TrackActivesMultiPool = new JSClass('TrackActivesMultiPool', AbstractPool, {
         // Constructor /////////////////////////////////////////////////////////
+        /** @overrides myt.AbstractPool */
         initialize: function(instanceClassesByKey, instanceParent) {
-            this.callSuper();
-            
-            this.instanceClassesByKey = instanceClassesByKey;
-            
-            const poolsByClassName = this._poolsByClassName = {},
+            const poolsByClassName = this.__pbCN = {},
                 poolsByKey = this.__pbk = {};
             for (const key in instanceClassesByKey) {
                 const klass = instanceClassesByKey[key];
@@ -5764,18 +5753,19 @@ myt.Destructible = new JS.Module('Destructible', {
         
         
         // Methods /////////////////////////////////////////////////////////////
-        getInstance: function() {
-            const key = arguments[0],
-                pool = this.__pbk[key];
+        /** @overrides myt.AbstractPool */
+        getInstance: function(key, attrs) {
+            const pool = this.__pbk[key];
             if (pool) {
-                return pool.getInstance(arguments);
+                return pool.getInstance(attrs);
             } else {
                 consoleWarn('No pool for key', key);
             }
         },
         
+        /** @overrides myt.AbstractPool */
         putInstance: function(obj) {
-            const pool = this._poolsByClassName[obj.klass.__displayName];
+            const pool = this.__pbCN[obj.klass.__displayName];
             if (pool) {
                 pool.putInstance(obj);
             } else {
@@ -5783,11 +5773,17 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         },
         
+        /** @overrides myt.AbstractPool */
         destroyPooledInstances: function() {
             const poolsByKey = this.__pbk;
             for (const key in poolsByKey) poolsByKey[key].destroyPooledInstances();
         },
         
+        /** Gets the active instances across all TrackActivesPools contained herein. This mimics
+            part of the TrackActivesPools API so a TrackActivesMultiPool can be treated like
+            a TrackActivesPool.
+            @param {?Function} [filterFunc] - If provided filters the results.
+            @returns {!Array} */
         getActives: function(filterFunc) {
             let actives = [];
             const poolsByKey = this.__pbk;
@@ -5795,6 +5791,9 @@ myt.Destructible = new JS.Module('Destructible', {
             return actives;
         },
         
+        /** Puts all active instances, across all TrackActivesPools contained herein, back in
+            their respective Pools. This mimics part of the TrackActivesPools API so a 
+            TrackActivesMultiPool can be treated like a TrackActivesPool. */
         putActives: function() {
             const poolsByKey = this.__pbk;
             for (const key in poolsByKey) poolsByKey[key].putActives();
@@ -5805,7 +5804,7 @@ myt.Destructible = new JS.Module('Destructible', {
         "clean" method.
         
         @class */
-    pkg.Reusable = new JSModule('Reusable', {
+    pkg.Reusable = new JS.Module('Reusable', {
         // Methods /////////////////////////////////////////////////////////////
         /** Puts this object back into a default state suitable for storage in an myt.AbstractPool
             @returns {void} */
@@ -6760,7 +6759,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     // Prevent inadvertent loops
                     this.incrementLockedCounter();
                     
-                    this.doBeforeUpdate();
+                    if (this.doBeforeUpdate !== NOOP) this.doBeforeUpdate();
                     
                     const setterName = this.setterName, 
                         svs = this.subviews, 
@@ -6773,19 +6772,20 @@ myt.Destructible = new JS.Module('Destructible', {
                         i = len;
                         while (i) {
                             const sv = svs[--i];
-                            if (this.skipSubview(sv)) continue;
-                            value = this.updateSubview(++count, sv, setterName, value);
+                            if (!this.skipSubview(sv)) {
+                                value = this.updateSubview(++count, sv, setterName, value);
+                            }
                         }
                     } else {
-                        i = 0;
-                        while (len > i) {
+                        for (i = 0; i < len;) {
                             const sv = svs[i++];
-                            if (this.skipSubview(sv)) continue;
-                            value = this.updateSubview(++count, sv, setterName, value);
+                            if (!this.skipSubview(sv)) {
+                                value = this.updateSubview(++count, sv, setterName, value);
+                            }
                         }
                     }
                     
-                    this.doAfterUpdate();
+                    if (this.doAfterUpdate !== NOOP) this.doAfterUpdate();
                     
                     if (this.collapseParent && !this.parent.isBeingDestroyed) {
                         this.updateParent(setterName, value);
@@ -7477,8 +7477,7 @@ myt.Destructible = new JS.Module('Destructible', {
             switch (view.align) {
                 case 'center': view.releaseConstraint('__doAlignCenter'); break;
                 case 'right': view.releaseConstraint('__doAlignRight'); break;
-                case 'left':
-                default: // Do nothing
+                // case 'left': // Do nothing
             }
         },
         
@@ -7495,7 +7494,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     case 'left':
                         view.setX(view.alignOffset || 0);
                         break;
-                    default: // Do nothing
+                    // default: // Do nothing
                 }
             }
         },
@@ -7504,8 +7503,7 @@ myt.Destructible = new JS.Module('Destructible', {
             switch (view.valign) {
                 case 'middle': view.releaseConstraint('__doValignMiddle'); break;
                 case 'bottom': view.releaseConstraint('__doValignBottom'); break;
-                case 'top':
-                default: // Do nothing
+                // case 'top': // Do nothing
             }
         },
         
@@ -7522,7 +7520,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     case 'top':
                         view.setY(view.valignOffset || 0);
                         break;
-                    default: // Do nothing
+                    // default: // Do nothing
                 }
             }
         };
@@ -7691,7 +7689,7 @@ myt.Destructible = new JS.Module('Destructible', {
             elem.style.position = 'absolute';
             
             // Make dom elements easier to location via selectors
-            elem.className = this.klass.__cssClassName ??= 'myt-' + this.klass.__displayName.split('.').join('-');
+            elem.className = this.klass.__cssClassName ??= 'myt-' + this.klass.__displayName.replaceAll('.', '-');
             
             return elem;
         },
@@ -8257,11 +8255,11 @@ myt.Destructible = new JS.Module('Destructible', {
                 this.getIDE().appendChild(node.getODE());
                 this.getSubviews().push(node);
                 this.fireEvent('subviewAdded', node);
-                this.subviewAdded(node);
+                if (this.subviewAdded !== NOOP) this.subviewAdded(node);
             } else if (node instanceof pkg.Layout) {
                 this.getLayouts().push(node);
                 this.fireEvent('layoutAdded', node);
-                this.layoutAdded(node);
+                if (this.layoutAdded !== NOOP) this.layoutAdded(node);
             }
         },
         
@@ -8281,14 +8279,14 @@ myt.Destructible = new JS.Module('Destructible', {
                     this.fireEvent('subviewRemoved', node);
                     node.removeDomElement();
                     this.subviews.splice(idx, 1);
-                    this.subviewRemoved(node);
+                    if (this.subviewRemoved !== NOOP) this.subviewRemoved(node);
                 }
             } else if (node instanceof pkg.Layout) {
                 idx = this.getLayoutIndex(node);
                 if (idx > -1) {
                     this.fireEvent('layoutRemoved', node);
                     this.layouts.splice(idx, 1);
-                    this.layoutRemoved(node);
+                    if (this.layoutRemoved !== NOOP) this.layoutRemoved(node);
                 }
             }
         },
@@ -8440,7 +8438,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 if (svOde !== innerElem.lastElementChild) {
                     retainFocusDuringDomUpdate(sv, () => {
                         innerElem.appendChild(svOde);
-                        self.doSubviewsReorderedInDom(sv);
+                        if (self.doSubviewsReorderedInDom !== NOOP) self.doSubviewsReorderedInDom(sv);
                     });
                 }
             }
@@ -8458,7 +8456,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 if (svOde !== firstElementChild) {
                     retainFocusDuringDomUpdate(sv, () => {
                         innerElem.insertBefore(svOde, firstElementChild);
-                        self.doSubviewsReorderedInDom(sv);
+                        if (self.doSubviewsReorderedInDom !== NOOP) self.doSubviewsReorderedInDom(sv);
                     });
                 }
             }
@@ -8479,7 +8477,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     const innerElem = self.getIDE();
                     retainFocusDuringDomUpdate(sv, () => {
                         innerElem.insertBefore(svOde, existingOde);
-                        self.doSubviewsReorderedInDom(sv);
+                        if (self.doSubviewsReorderedInDom !== NOOP) self.doSubviewsReorderedInDom(sv);
                     });
                 }
             }
@@ -8503,7 +8501,7 @@ myt.Destructible = new JS.Module('Destructible', {
                         // Relies on insertBefore behavior: If existingOdeNextElementSibling is 
                         // nullish, then svOde is inserted at the end of innerElem's child nodes.
                         innerElem.insertBefore(svOde, existingOdeNextElementSibling);
-                        self.doSubviewsReorderedInDom(sv);
+                        if (self.doSubviewsReorderedInDom !== NOOP) self.doSubviewsReorderedInDom(sv);
                     });
                 }
             }
@@ -8534,7 +8532,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     self.getIDE().appendChild(fragment);
                 }, true);
                 
-                self.doSubviewsReorderedInDom(null);
+                if (self.doSubviewsReorderedInDom !== NOOP) self.doSubviewsReorderedInDom(null);
             }
         },
         
@@ -22589,7 +22587,6 @@ myt.Destructible = new JS.Module('Destructible', {
                 
                 // Build UI
                 const listView = self._listView = new View(self);
-                self._scrollAnchorView = new View(listView, {width:1, height:1, bgColor:'transparent'});
                 self._itemPool = self.makePool(rowClasses, listView);
                 
                 self.attachTo(self, 'refreshListUI', 'height');
@@ -22737,29 +22734,29 @@ myt.Destructible = new JS.Module('Destructible', {
                 }
             },
             
-            getIndexOfModelInData: function(model) {
-                if (model) {
-                    const self = this,
-                        data = self.getListData();
-                    let i = data.length;
-                    while (i) if (self.areModelsEqual(data[--i], model)) return i;
-                }
-                return -1;
-            },
-            
             areModelsEqual: function(modelA, modelB) {
                 const modelIDName = this.modelIDName;
                 return modelA[modelIDName] === modelB[modelIDName];
             },
             
+            getIndexOfModelInData: function(model) {
+                if (model) {
+                    const data = this.getListData(),
+                        areModelsEqual = this.areModelsEqual.bind(this);
+                    let i = data.length;
+                    while (i) if (areModelsEqual(data[--i], model)) return i;
+                }
+                return -1;
+            },
+            
             getActiveRowForModel: function(model) {
                 if (model) {
-                    const self = this,
-                        activeRows = self._itemPool.getActives();
+                    const activeRows = this._itemPool.getActives(),
+                        areModelsEqual = this.areModelsEqual.bind(this);
                     let i = activeRows.length;
                     while (i) {
                         const row = activeRows[--i];
-                        if (self.areModelsEqual(row.model, model)) return row;
+                        if (areModelsEqual(row.model, model)) return row;
                     }
                 }
             },
@@ -22773,12 +22770,10 @@ myt.Destructible = new JS.Module('Destructible', {
                 const self = this,
                     data = self.getListData(),
                     len = data.length,
-                    listView = self._listView,
-                    scrollAnchorView = self._scrollAnchorView;
+                    listView = self._listView;
                 
                 // Resize the listView to the height to accomodate all rows
                 listView.setHeight(len * self._rowExtent - (len > 0 ? self.rowSpacing : 0) + self.rowInset + self.rowOutset);
-                scrollAnchorView.setY(listView.height - scrollAnchorView.height);
                 
                 // Ensure the next refreshListUI actually refreshes
                 self._startIdx = self._endIdx = -1;
@@ -22828,7 +22823,11 @@ myt.Destructible = new JS.Module('Destructible', {
                     const rowWidth = self.width,
                         rowHeight = self.rowHeight,
                         visibleRowsByIdx = self._visibleRowsByIdx,
-                        focusToModel = self._focusToModel;
+                        focusToModel = self._focusToModel,
+                        areModelsEqual = self.areModelsEqual.bind(self);
+                    
+                    // FIXME: change visibleRowsByIdx to an array. Then use _startIdx as an offset
+                    // for access. (basically the array goes from 1...n but shift by _startIdx to keep it starting at 0)
                     
                     self._startIdx = startIdx;
                     self._endIdx = endIdx;
@@ -22862,7 +22861,7 @@ myt.Destructible = new JS.Module('Destructible', {
                             mustUpdateRow = true;
                         }
                         
-                        if (forceFullReset || !row.model || !self.areModelsEqual(row.model, model)) {
+                        if (forceFullReset || !row.model || !areModelsEqual(row.model, model)) {
                             row.setModel(model);
                             self.updateRow(row);
                         } else if (mustUpdateRow) {
@@ -22874,7 +22873,7 @@ myt.Destructible = new JS.Module('Destructible', {
                         // Maintain tab ordering by updating the underlying dom order.
                         row.bringToFront();
                         
-                        if (focusToModel && self.areModelsEqual(focusToModel, model)) {
+                        if (focusToModel && areModelsEqual(focusToModel, model)) {
                             row.focus();
                             self._focusToModel = null;
                         }

@@ -3,6 +3,8 @@
         getComputedStyle = GLOBAL.getComputedStyle,
         DOCUMENT_ELEMENT = document,
         
+        assign = Object.assign,
+        
         mathMax = Math.max,
         
         /*  Gets the z-index of the dom element or, if it does not define a stacking context, 
@@ -59,12 +61,12 @@
                 @param {?Object} [styles] - A map of style keys and values to add to the style 
                     property of the new element.
                 @param {?Object} [props] - A map of keys and values to add to the new element.
-                @returns {!Object} the created element. */
+                @returns {!HTMLElement} the created element. */
             createElement: (tagname, styles, props) => {
-                const elem = DOCUMENT_ELEMENT.createElement(tagname);
-                for (const key in props) elem[key] = props[key];
-                for (const key in styles) elem.style[key] = styles[key];
-                return elem;
+                const el = DOCUMENT_ELEMENT.createElement(tagname);
+                if (props) assign(el, props);
+                if (styles) assign(el.style, styles);
+                return el;
             },
             
             /** Tests if a dom element is visible or not.

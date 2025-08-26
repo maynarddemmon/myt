@@ -137,8 +137,7 @@
             switch (view.align) {
                 case 'center': view.releaseConstraint('__doAlignCenter'); break;
                 case 'right': view.releaseConstraint('__doAlignRight'); break;
-                case 'left':
-                default: // Do nothing
+                // case 'left': // Do nothing
             }
         },
         
@@ -155,7 +154,7 @@
                     case 'left':
                         view.setX(view.alignOffset || 0);
                         break;
-                    default: // Do nothing
+                    // default: // Do nothing
                 }
             }
         },
@@ -164,8 +163,7 @@
             switch (view.valign) {
                 case 'middle': view.releaseConstraint('__doValignMiddle'); break;
                 case 'bottom': view.releaseConstraint('__doValignBottom'); break;
-                case 'top':
-                default: // Do nothing
+                // case 'top': // Do nothing
             }
         },
         
@@ -182,7 +180,7 @@
                     case 'top':
                         view.setY(view.valignOffset || 0);
                         break;
-                    default: // Do nothing
+                    // default: // Do nothing
                 }
             }
         };
@@ -351,7 +349,7 @@
             elem.style.position = 'absolute';
             
             // Make dom elements easier to location via selectors
-            elem.className = this.klass.__cssClassName ??= 'myt-' + this.klass.__displayName.split('.').join('-');
+            elem.className = this.klass.__cssClassName ??= 'myt-' + this.klass.__displayName.replaceAll('.', '-');
             
             return elem;
         },
@@ -917,11 +915,11 @@
                 this.getIDE().appendChild(node.getODE());
                 this.getSubviews().push(node);
                 this.fireEvent('subviewAdded', node);
-                this.subviewAdded(node);
+                if (this.subviewAdded !== NOOP) this.subviewAdded(node);
             } else if (node instanceof pkg.Layout) {
                 this.getLayouts().push(node);
                 this.fireEvent('layoutAdded', node);
-                this.layoutAdded(node);
+                if (this.layoutAdded !== NOOP) this.layoutAdded(node);
             }
         },
         
@@ -941,14 +939,14 @@
                     this.fireEvent('subviewRemoved', node);
                     node.removeDomElement();
                     this.subviews.splice(idx, 1);
-                    this.subviewRemoved(node);
+                    if (this.subviewRemoved !== NOOP) this.subviewRemoved(node);
                 }
             } else if (node instanceof pkg.Layout) {
                 idx = this.getLayoutIndex(node);
                 if (idx > -1) {
                     this.fireEvent('layoutRemoved', node);
                     this.layouts.splice(idx, 1);
-                    this.layoutRemoved(node);
+                    if (this.layoutRemoved !== NOOP) this.layoutRemoved(node);
                 }
             }
         },
@@ -1100,7 +1098,7 @@
                 if (svOde !== innerElem.lastElementChild) {
                     retainFocusDuringDomUpdate(sv, () => {
                         innerElem.appendChild(svOde);
-                        self.doSubviewsReorderedInDom(sv);
+                        if (self.doSubviewsReorderedInDom !== NOOP) self.doSubviewsReorderedInDom(sv);
                     });
                 }
             }
@@ -1118,7 +1116,7 @@
                 if (svOde !== firstElementChild) {
                     retainFocusDuringDomUpdate(sv, () => {
                         innerElem.insertBefore(svOde, firstElementChild);
-                        self.doSubviewsReorderedInDom(sv);
+                        if (self.doSubviewsReorderedInDom !== NOOP) self.doSubviewsReorderedInDom(sv);
                     });
                 }
             }
@@ -1139,7 +1137,7 @@
                     const innerElem = self.getIDE();
                     retainFocusDuringDomUpdate(sv, () => {
                         innerElem.insertBefore(svOde, existingOde);
-                        self.doSubviewsReorderedInDom(sv);
+                        if (self.doSubviewsReorderedInDom !== NOOP) self.doSubviewsReorderedInDom(sv);
                     });
                 }
             }
@@ -1163,7 +1161,7 @@
                         // Relies on insertBefore behavior: If existingOdeNextElementSibling is 
                         // nullish, then svOde is inserted at the end of innerElem's child nodes.
                         innerElem.insertBefore(svOde, existingOdeNextElementSibling);
-                        self.doSubviewsReorderedInDom(sv);
+                        if (self.doSubviewsReorderedInDom !== NOOP) self.doSubviewsReorderedInDom(sv);
                     });
                 }
             }
@@ -1194,7 +1192,7 @@
                     self.getIDE().appendChild(fragment);
                 }, true);
                 
-                self.doSubviewsReorderedInDom(null);
+                if (self.doSubviewsReorderedInDom !== NOOP) self.doSubviewsReorderedInDom(null);
             }
         },
         

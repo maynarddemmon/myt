@@ -39,7 +39,7 @@
             read: (key, options) => {
                 options = {...Cookie.defaults, ...options};
                 
-                const decodeFunc = options.raw ? str => str : str => decodeURIComponent(str.split('+').join(' ')),
+                const decodeFunc = options.raw ? str => str : str => decodeURIComponent(str.replaceAll('+', ' ')),
                     useJson = options.json,
                     cookies = document.cookie.split('; '),
                     len = cookies.length,

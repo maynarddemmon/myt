@@ -211,7 +211,7 @@
             @param {*} v The candidate event or value to get the value from. An event like value 
                 is a non-null Object with a truthy "type" property.
             @returns {*} the provided event or the event's value if found. */
-        valueFromEvent: v => v && typeof v === 'object' && v.type ? v.value : v,
+        valueFromEvent: v => v?.type ? v.value : v,
         
         /** Does the same thing as this.attachTo and also immediately calls the method with an 
             event containing the attributes value. If 'once' is true no attachment will occur 

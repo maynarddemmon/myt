@@ -72,7 +72,7 @@
         /** Unescape a query param value.
             @param {string} paramValue
             @returns {string} */
-        decodeQueryParam: paramValue => decodeURIComponent(paramValue).split('+').join(' '),
+        decodeQueryParam: paramValue => decodeURIComponent(paramValue).replaceAll('+', ' '),
         
         getQuery: function() {
             const pairs = this.queryPairs,

@@ -393,7 +393,7 @@
                     // Prevent inadvertent loops
                     this.incrementLockedCounter();
                     
-                    this.doBeforeUpdate();
+                    if (this.doBeforeUpdate !== NOOP) this.doBeforeUpdate();
                     
                     const setterName = this.setterName, 
                         svs = this.subviews, 
@@ -406,19 +406,20 @@
                         i = len;
                         while (i) {
                             const sv = svs[--i];
-                            if (this.skipSubview(sv)) continue;
-                            value = this.updateSubview(++count, sv, setterName, value);
+                            if (!this.skipSubview(sv)) {
+                                value = this.updateSubview(++count, sv, setterName, value);
+                            }
                         }
                     } else {
-                        i = 0;
-                        while (len > i) {
+                        for (i = 0; i < len;) {
                             const sv = svs[i++];
-                            if (this.skipSubview(sv)) continue;
-                            value = this.updateSubview(++count, sv, setterName, value);
+                            if (!this.skipSubview(sv)) {
+                                value = this.updateSubview(++count, sv, setterName, value);
+                            }
                         }
                     }
                     
-                    this.doAfterUpdate();
+                    if (this.doAfterUpdate !== NOOP) this.doAfterUpdate();
                     
                     if (this.collapseParent && !this.parent.isBeingDestroyed) {
                         this.updateParent(setterName, value);

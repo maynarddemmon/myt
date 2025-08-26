@@ -17,10 +17,16 @@ myt.Destructible = new JS.Module('Destructible', {
             console.warn('Already destroyed');
         } else {
             // OPTIMIZATION: Improve garbage collection for JS.Class
-            const meta = self.__meta__;
-            if (meta) for (const key of Object.keys(meta)) meta[key] = null;
-            
-            for (const key of Object.keys(self)) self[key] = null;
+            const hasOwn = Object.hasOwn,
+                meta = self.__meta__;
+            if (meta) {
+                for (const key in meta) {
+                    if (hasOwn(meta, key)) meta[key] = null;
+                }
+            }
+            for (const key in self) {
+                if (hasOwn(self, key)) self[key] = null;
+            }
             
             self.destroyed = true;
         }

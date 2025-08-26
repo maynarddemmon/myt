@@ -156,7 +156,7 @@
             // Fix for Firefox and FontAwesome because of double quotes returned in the font family 
             // name. Seems OK to just do it for all fonts since double quotes in a font name is 
             // most likely going to be confusing anyhow.
-            const familyName = fontFace.family.split('"').join('');
+            const familyName = fontFace.family.replaceAll('"', '');
             for (const fontName of [familyName, familyName + ' ' + fontFace.weight]) {
                 if (!fontLoaded[fontName]) {
                     fontLoaded[fontName] = true;

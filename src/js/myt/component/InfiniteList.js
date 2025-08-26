@@ -129,7 +129,6 @@
                 
                 // Build UI
                 const listView = self._listView = new View(self);
-                self._scrollAnchorView = new View(listView, {width:1, height:1, bgColor:'transparent'});
                 self._itemPool = self.makePool(rowClasses, listView);
                 
                 self.attachTo(self, 'refreshListUI', 'height');
@@ -277,29 +276,29 @@
                 }
             },
             
-            getIndexOfModelInData: function(model) {
-                if (model) {
-                    const self = this,
-                        data = self.getListData();
-                    let i = data.length;
-                    while (i) if (self.areModelsEqual(data[--i], model)) return i;
-                }
-                return -1;
-            },
-            
             areModelsEqual: function(modelA, modelB) {
                 const modelIDName = this.modelIDName;
                 return modelA[modelIDName] === modelB[modelIDName];
             },
             
+            getIndexOfModelInData: function(model) {
+                if (model) {
+                    const data = this.getListData(),
+                        areModelsEqual = this.areModelsEqual.bind(this);
+                    let i = data.length;
+                    while (i) if (areModelsEqual(data[--i], model)) return i;
+                }
+                return -1;
+            },
+            
             getActiveRowForModel: function(model) {
                 if (model) {
-                    const self = this,
-                        activeRows = self._itemPool.getActives();
+                    const activeRows = this._itemPool.getActives(),
+                        areModelsEqual = this.areModelsEqual.bind(this);
                     let i = activeRows.length;
                     while (i) {
                         const row = activeRows[--i];
-                        if (self.areModelsEqual(row.model, model)) return row;
+                        if (areModelsEqual(row.model, model)) return row;
                     }
                 }
             },
@@ -313,12 +312,10 @@
                 const self = this,
                     data = self.getListData(),
                     len = data.length,
-                    listView = self._listView,
-                    scrollAnchorView = self._scrollAnchorView;
+                    listView = self._listView;
                 
                 // Resize the listView to the height to accomodate all rows
                 listView.setHeight(len * self._rowExtent - (len > 0 ? self.rowSpacing : 0) + self.rowInset + self.rowOutset);
-                scrollAnchorView.setY(listView.height - scrollAnchorView.height);
                 
                 // Ensure the next refreshListUI actually refreshes
                 self._startIdx = self._endIdx = -1;
@@ -368,7 +365,11 @@
                     const rowWidth = self.width,
                         rowHeight = self.rowHeight,
                         visibleRowsByIdx = self._visibleRowsByIdx,
-                        focusToModel = self._focusToModel;
+                        focusToModel = self._focusToModel,
+                        areModelsEqual = self.areModelsEqual.bind(self);
+                    
+                    // FIXME: change visibleRowsByIdx to an array. Then use _startIdx as an offset
+                    // for access. (basically the array goes from 1...n but shift by _startIdx to keep it starting at 0)
                     
                     self._startIdx = startIdx;
                     self._endIdx = endIdx;
@@ -402,7 +403,7 @@
                             mustUpdateRow = true;
                         }
                         
-                        if (forceFullReset || !row.model || !self.areModelsEqual(row.model, model)) {
+                        if (forceFullReset || !row.model || !areModelsEqual(row.model, model)) {
                             row.setModel(model);
                             self.updateRow(row);
                         } else if (mustUpdateRow) {
@@ -414,7 +415,7 @@
                         // Maintain tab ordering by updating the underlying dom order.
                         row.bringToFront();
                         
-                        if (focusToModel && self.areModelsEqual(focusToModel, model)) {
+                        if (focusToModel && areModelsEqual(focusToModel, model)) {
                             row.focus();
                             self._focusToModel = null;
                         }

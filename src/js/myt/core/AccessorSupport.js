@@ -89,10 +89,10 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        appendToEarlyAttrs: function() {(this.earlyAttrs ??= []).push(...arguments);},
-        prependToEarlyAttrs: function() {(this.earlyAttrs ??= []).unshift(...arguments);},
-        appendToLateAttrs: function() {(this.lateAttrs ??= []).push(...arguments);},
-        prependToLateAttrs: function() {(this.lateAttrs ??= []).unshift(...arguments);},
+        appendToEarlyAttrs: function(...args) {(this.earlyAttrs ??= []).push(...args);},
+        prependToEarlyAttrs: function(...args) {(this.earlyAttrs ??= []).unshift(...args);},
+        appendToLateAttrs: function(...args) {(this.lateAttrs ??= []).push(...args);},
+        prependToLateAttrs: function(...args) {(this.lateAttrs ??= []).unshift(...args);},
         
         /** Used to quickly extract and set attributes from the attrs object passed to 
             an initializer.
