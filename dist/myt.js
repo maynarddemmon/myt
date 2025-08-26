@@ -22459,8 +22459,7 @@ myt.Destructible = new JS.Module('Destructible', {
 (pkg => {
     const {Class:JSClass, Module:JSModule} = JS,
         
-        math = Math,
-        mathMax = math.max,
+        {min:mathMin, max:mathMax, floor:mathFloor, ceil:mathCeil} = Math,
         
         {
             NOOP, View, LocalStorage:{setDatum, getDatum},
@@ -22490,6 +22489,8 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         getSubview = (gridRow, columnHeader) => gridRow.getRef(columnHeader.columnId),
+        
+        getVisibleRowsIterator = infiniteList => infiniteList._visibleRowsByIdx.values(),
         
         /*  Build a sort storage key from a hash of the grid header's columnIds sorted
             and comma joined. */
@@ -22549,7 +22550,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 _listData:array The data for the rows in the list.
                 _startIdx:int The index into the data of the first row shown
                 _endIdx:int The index into the data of the last row shown
-                _visibleRowsByIdx:object A cache of what rows are currently shown by the index of 
+                _visibleRowsByIdx:Map - A cache of what rows are currently shown by the index of 
                     the data for the row. This provides faster performance when refreshing the list.
                 _listView:myt.View The view that contains the rows in the list.
                 _itemPool:myt.TrackActivesPool The pool for row views.
@@ -22581,7 +22582,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 
                 self._rowExtent = self.rowSpacing = self.rowHeight = 0;
                 self._startIdx = self._endIdx = -1;
-                self._visibleRowsByIdx = {};
+                self._visibleRowsByIdx = new Map();
                 
                 self.callSuper(parent, attrs);
                 
@@ -22627,15 +22628,12 @@ myt.Destructible = new JS.Module('Destructible', {
                 }
             },
             
-            getVisibleRows: function() {
-                return Object.values(this._visibleRowsByIdx ?? {});
-            },
+            /*getVisibleRowsAsArray: function() {
+                return Array.from(getVisibleRowsIterator(this));
+            },*/
             
             getVisibleRowForModel: function(model) {
-                const rows = this.getVisibleRows();
-                let i = rows.length;
-                while (i) {
-                    const row = rows[--i];
+                for (const row of this._visibleRowsByIdx.values()) {
                     if (row.model === model) return row;
                 }
             },
@@ -22794,7 +22792,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 // Clear or reassign focus since the row will get reused and the reused row will 
                 // likely not be the appropriate focus.
                 const currentFocus = GlobalFocus.focusedView;
-                if (currentFocus?.isDescendantOf(row)) {
+                if (GlobalFocus.focusedView?.isDescendantOf(row)) {
                     const focusTrap = this.getFocusTrap();
                     if (focusTrap) {
                         focusTrap.focus();
@@ -22814,8 +22812,8 @@ myt.Destructible = new JS.Module('Destructible', {
                     forceFullReset = self.forceFullResetOnNextRefresh,
                     scrollY = getDomScrollTop(self),
                     data = self.getListData() ?? [],
-                    startIdx = mathMax(0, math.floor((scrollY - rowInset) / rowExtent)),
-                    endIdx = math.min(data.length, math.ceil((scrollY - rowInset + self.height) / rowExtent));
+                    startIdx = mathMax(0, mathFloor((scrollY - rowInset) / rowExtent)),
+                    endIdx = mathMin(data.length, mathCeil((scrollY - rowInset + self.height) / rowExtent));
                 
                 if (self.forceFullResetOnNextRefresh) self.forceFullResetOnNextRefresh = false;
                 
@@ -22826,22 +22824,19 @@ myt.Destructible = new JS.Module('Destructible', {
                         focusToModel = self._focusToModel,
                         areModelsEqual = self.areModelsEqual.bind(self);
                     
-                    // FIXME: change visibleRowsByIdx to an array. Then use _startIdx as an offset
-                    // for access. (basically the array goes from 1...n but shift by _startIdx to keep it starting at 0)
-                    
                     self._startIdx = startIdx;
                     self._endIdx = endIdx;
                     
                     // Put all visible rows that are not within the idx range back into the pool
-                    for (const idx in visibleRowsByIdx) {
+                    for (const [idx, row] of visibleRowsByIdx) {
                         if (idx < startIdx || idx >= endIdx) {
-                            self.putRowBackInPool(visibleRowsByIdx[idx]);
-                            delete visibleRowsByIdx[idx];
+                            self.putRowBackInPool(row);
+                            visibleRowsByIdx.delete(idx);
                         }
                     }
                     
                     for (let i = startIdx; i < endIdx; i++) {
-                        let row = visibleRowsByIdx[i];
+                        let row = visibleRowsByIdx.get(i);
                         
                         const model = data[i],
                             classKey = self.getClassKey(model);
@@ -22849,7 +22844,7 @@ myt.Destructible = new JS.Module('Destructible', {
                         if (!row || row.classKey !== classKey) {
                             if (row) self.putRowBackInPool(row);
                             
-                            visibleRowsByIdx[i] = row = self._itemPool.getInstance(classKey);
+                            visibleRowsByIdx.set(i, row = self._itemPool.getInstance(classKey));
                             
                             row.setInfiniteOwner(self);
                             row.setClassKey(classKey);
@@ -23113,15 +23108,15 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             notifyXChange: function(columnHeader) {
-                for (const row of this.getVisibleRows()) row.notifyXChange(columnHeader);
+                for (const row of getVisibleRowsIterator(this)) row.notifyXChange(columnHeader);
             },
             
             notifyWidthChange: function(columnHeader) {
-                for (const row of this.getVisibleRows()) row.notifyWidthChange(columnHeader);
+                for (const row of getVisibleRowsIterator(this)) row.notifyWidthChange(columnHeader);
             },
             
             notifyVisibilityChange: function(columnHeader) {
-                for (const row of this.getVisibleRows()) row.notifyVisibilityChange(columnHeader);
+                for (const row of getVisibleRowsIterator(this)) row.notifyVisibilityChange(columnHeader);
             }
         });
     
