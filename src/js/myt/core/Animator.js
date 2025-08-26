@@ -111,29 +111,31 @@
         },
         
         advance = (animator, timeDiff) => {
-            const {running, paused, reverse, duration, repeat, __prog:oldProgress, easingFunction, callback} = animator;
-            if (running && !paused) {
-                // An animation in reverse is like time going backward.
-                if (reverse) timeDiff *= -1;
+            if (animator.running && !animator.paused) {
+                const {reverse, duration, repeat, __prog:oldProgress, easingFunction, callback} = animator;
                 
-                // Determine how much time to move forward by.
-                let progress = oldProgress + timeDiff;
+                // Determine how much time to move forward by. An animation in reverse is like 
+                // time going backward.
+                let progress = oldProgress + (reverse ? -timeDiff : timeDiff),
+                    remainderTime = 0;
                 
                 // Check for overage
-                let remainderTime = 0;
                 if (progress > duration) {
-                    remainderTime = progress - duration;
+                    // Forward case. Increment loop count and halt looping if necessary
+                    if (++animator.__loopCnt === repeat) {
+                        remainderTime = 0;
+                    } else {
+                        remainderTime = progress - duration;
+                    }
                     progress = duration;
-                    
-                    // Increment loop count and halt looping if necessary
-                    if (++animator.__loopCnt === repeat) remainderTime = 0;
                 } else if (0 > progress) {
-                    // Reverse case
-                    remainderTime = -progress; // Flip reverse time back to forward time
+                    // Reverse case. Decrement loop count and halt looping if necessary
+                    if (0 > --animator.__loopCnt && repeat > 0) {
+                        remainderTime = 0;
+                    } else {
+                        remainderTime = -progress; // Flip reverse time back to forward time
+                    }
                     progress = 0;
-                    
-                    // Decrement loop count and halt looping if necessary
-                    if (0 > --animator.__loopCnt && repeat > 0) remainderTime = 0;
                 }
                 
                 const target = getTarget(animator);

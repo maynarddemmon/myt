@@ -10626,29 +10626,31 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         advance = (animator, timeDiff) => {
-            const {running, paused, reverse, duration, repeat, __prog:oldProgress, easingFunction, callback} = animator;
-            if (running && !paused) {
-                // An animation in reverse is like time going backward.
-                if (reverse) timeDiff *= -1;
+            if (animator.running && !animator.paused) {
+                const {reverse, duration, repeat, __prog:oldProgress, easingFunction, callback} = animator;
                 
-                // Determine how much time to move forward by.
-                let progress = oldProgress + timeDiff;
+                // Determine how much time to move forward by. An animation in reverse is like 
+                // time going backward.
+                let progress = oldProgress + (reverse ? -timeDiff : timeDiff),
+                    remainderTime = 0;
                 
                 // Check for overage
-                let remainderTime = 0;
                 if (progress > duration) {
-                    remainderTime = progress - duration;
+                    // Forward case. Increment loop count and halt looping if necessary
+                    if (++animator.__loopCnt === repeat) {
+                        remainderTime = 0;
+                    } else {
+                        remainderTime = progress - duration;
+                    }
                     progress = duration;
-                    
-                    // Increment loop count and halt looping if necessary
-                    if (++animator.__loopCnt === repeat) remainderTime = 0;
                 } else if (0 > progress) {
-                    // Reverse case
-                    remainderTime = -progress; // Flip reverse time back to forward time
+                    // Reverse case. Decrement loop count and halt looping if necessary
+                    if (0 > --animator.__loopCnt && repeat > 0) {
+                        remainderTime = 0;
+                    } else {
+                        remainderTime = -progress; // Flip reverse time back to forward time
+                    }
                     progress = 0;
-                    
-                    // Decrement loop count and halt looping if necessary
-                    if (0 > --animator.__loopCnt && repeat > 0) remainderTime = 0;
                 }
                 
                 const target = getTarget(animator);
@@ -22792,7 +22794,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 // Clear or reassign focus since the row will get reused and the reused row will 
                 // likely not be the appropriate focus.
                 const currentFocus = GlobalFocus.focusedView;
-                if (GlobalFocus.focusedView?.isDescendantOf(row)) {
+                if (currentFocus?.isDescendantOf(row)) {
                     const focusTrap = this.getFocusTrap();
                     if (focusTrap) {
                         focusTrap.focus();
@@ -23185,12 +23187,11 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** @overrides myt.View */
         setWidth: function(v) {
-            const self = this;
-            self.callSuper(mathMax(self.minWidth, v));
-            if (self.inited) {
-                const width = self.width;
-                self.setGridWidth(width);
-                self.grid.setWidth(width);
+            this.callSuper(mathMax(this.minWidth, v));
+            if (this.inited) {
+                const width = this.width;
+                this.setGridWidth(width);
+                this.grid.setWidth(width);
             }
         },
         

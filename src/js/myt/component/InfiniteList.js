@@ -334,7 +334,7 @@
                 // Clear or reassign focus since the row will get reused and the reused row will 
                 // likely not be the appropriate focus.
                 const currentFocus = GlobalFocus.focusedView;
-                if (GlobalFocus.focusedView?.isDescendantOf(row)) {
+                if (currentFocus?.isDescendantOf(row)) {
                     const focusTrap = this.getFocusTrap();
                     if (focusTrap) {
                         focusTrap.focus();
@@ -727,12 +727,11 @@
         
         /** @overrides myt.View */
         setWidth: function(v) {
-            const self = this;
-            self.callSuper(mathMax(self.minWidth, v));
-            if (self.inited) {
-                const width = self.width;
-                self.setGridWidth(width);
-                self.grid.setWidth(width);
+            this.callSuper(mathMax(this.minWidth, v));
+            if (this.inited) {
+                const width = this.width;
+                this.setGridWidth(width);
+                this.grid.setWidth(width);
             }
         },
         
