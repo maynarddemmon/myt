@@ -10016,24 +10016,32 @@ myt.Destructible = new JS.Module('Destructible', {
 (pkg => {
     let globalWindowResize,
         
-        /*  The clientWidth of the window.document.body. */
+        /*  The clientWidth of the window.document.documentElement. */
         clientWidth,
         
-        /*  The clientHeight of the window.document.body. */
-        clientHeight;
+        /*  The clientHeight of the window.document.documentElement. */
+        clientHeight,
+        
+        /*  The scrollSidth of the window.document.documentElement. */
+        scrollWidth,
+        
+        /*  The scrollHeight of the window.document.documentElement. */
+        scrollHeight;
     
     const G = pkg.global,
         globalIdle = G.idle,
-        doc = window.document;
+        docElem = window.document.documentElement;
     
-    /** Provides events when the window's body is resized. Registered with myt.global 
+    /** Provides events when the window's html is resized. Registered with myt.global 
         as 'windowResize'.
         
         Events:
-            resize:object Fired when the window.document.body is resized. The type is 'resize' and 
-                the value is an object containing:
-                    w:number the new window.document.body clientWidth.
-                    h:number the new window.document.body clientHeight.
+            resize:object Fired when the window.document.documentElement is resized. The type is 
+                'resize' and the value is an object containing:
+                    w:number the window.document.documentElement new clientWidth.
+                    h:number the window.document.documentElement new clientHeight.
+                    sw:number the window.document.documentElement new scrollWidth.
+                    sh:number the window.document.documentElement new scrollHeight.
         
         @class */
     new JS.Singleton('GlobalWindowResize', {
@@ -10044,31 +10052,43 @@ myt.Destructible = new JS.Module('Destructible', {
         initialize: function() {
             globalWindowResize = this;
             
-            // We need to wait for the body to exist.
+            // We need to wait for the html to exist.
             globalWindowResize.attachTo(globalIdle, '__setup', 'idle');
             G.register('windowResize', globalWindowResize);
         },
         
         /** @private */
-        __setup: ignoredEvent => {
-            const body = doc.body;
-            if (body) {
+        __setup: _event => {
+            if (docElem) {
                 globalWindowResize.detachFrom(globalIdle, '__setup', 'idle');
                 new ResizeObserver(() => {
-                    globalWindowResize.fireEvent('resize', {w:clientWidth = body.clientWidth, h:clientHeight = body.clientHeight});
-                }).observe(body);
+                    globalWindowResize.fireEvent('resize', {
+                        w:clientWidth = docElem.clientWidth, 
+                        h:clientHeight = docElem.clientHeight,
+                        sw:scrollWidth = docElem.scrollWidth, 
+                        sh:scrollHeight = docElem.scrollHeight
+                    });
+                }).observe(docElem);
             }
         },
         
         
         // Accessors ///////////////////////////////////////////////////////////
-        /** Gets the window.document.body's clientWidth.
-            @returns {number} - The current width of the window.document.body. */
-        getWidth: () => clientWidth ??= doc.body.clientWidth,
+        /** Gets the window.document.documentElement's clientWidth.
+            @returns {number} - The current width of the window.document.documentElement. */
+        getWidth: () => clientWidth ??= docElem.clientWidth,
         
-        /** Gets the window.document.body's clientHeight.
-            @returns {number} - The current height of the window.document.body. */
-        getHeight: () => clientHeight ??= doc.body.clientHeight
+        /** Gets the window.document.documentElement's clientHeight.
+            @returns {number} - The current height of the window.document.documentElement. */
+        getHeight: () => clientHeight ??= docElem.clientHeight,
+        
+        /** Gets the window.document.documentElement's scrollWidth.
+            @returns {number} - The current scrollable width of the window.document.documentElement. */
+        getScrollWidth: () => scrollWidth ??= docElem.scrollWidth,
+        
+        /** Gets the window.document.documentElement's scrollHeight.
+            @returns {number} - The current scrollable height of the window.document.documentElement. */
+        getScrollHeight: () => scrollHeight ??= docElem.scrollHeight
     });
 })(myt);
 
@@ -12787,6 +12807,51 @@ myt.Destructible = new JS.Module('Destructible', {
         
         getFloatingPanel = panelId => panelsByPanelId[panelId],
         
+        calculatePosition = (panel, panelAnchor, posAttr) => {
+            const isHorizontal = posAttr === 'x',
+                sizeAttr = isHorizontal ? 'width' : 'height',
+                panelSize = panel[sizeAttr],
+                alignAttrFudge = isHorizontal ? 'A' : 'Va',
+                alignment = panelAnchor['getFloating' + alignAttrFudge + 'lignForPanel'](panel), 
+                alignmentOffset = panelAnchor['getFloating' + alignAttrFudge + 'lignOffsetForPanel'](panel),
+                type = typeof alignment;
+            let v;
+            if (type === 'string') {
+                v = panelAnchor.getPagePosition()[posAttr] + alignmentOffset;
+                switch (alignment) {
+                    case 'outsideBottom':
+                    case 'outsideRight': v += panelAnchor[sizeAttr]; break;
+                    
+                    case 'insideBottom':
+                    case 'insideRight': v += panelAnchor[sizeAttr] - panelSize; break;
+                    
+                    case 'outsideTop':
+                    case 'outsideLeft': v -= panelSize; break;
+                    
+                    case 'insideTop':
+                    case 'insideLeft': break;
+                    
+                    default: consoleWarn('Invalid value', type, alignment);
+                }
+                
+                if (panelAnchor.keepInWindow) {
+                    const border = panelAnchor.keepInWindowBorder || 0;
+                    if (v < border) {
+                        v = border;
+                    } else {
+                        const maxV = windowResize['getScroll' + (isHorizontal ? 'Width' : 'Height')]() - border - panelSize;
+                        if (v > maxV) v = maxV;
+                    }
+                }
+            } else if (type === 'number') {
+                // Absolute position
+                v = alignment;
+            } else {
+                consoleWarn('Invalid type', type, alignment);
+            }
+            return v;
+        },
+        
         /** Enables a view to act as the anchor point for a FloatingPanel.
             
             Events:
@@ -13144,57 +13209,11 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         updateLocationX: function(panelAnchor) {
-            const align = panelAnchor.getFloatingAlignForPanel(this),
-                type = typeof align;
-            let x;
-            if (type === 'string') {
-                x = panelAnchor.getPagePosition().x + panelAnchor.getFloatingAlignOffsetForPanel(this);
-                switch (align) {
-                    case 'outsideRight': x += panelAnchor.width; break;
-                    case 'insideRight': x += panelAnchor.width - this.width; break;
-                    case 'outsideLeft': x -= this.width; break;
-                    case 'insideLeft': break;
-                    default: consoleWarn('Invalid align value', type, align);
-                }
-                
-                if (panelAnchor.keepInWindow) {
-                    const diff = x + this.width + (panelAnchor.keepInWindowBorder || 0) - windowResize.getWidth();
-                    if (diff > 0) x -= diff;
-                }
-            } else if (type === 'number') {
-                // Absolute position
-                x = align;
-            } else {
-                consoleWarn('Invalid align type', type, align);
-            }
-            this.setX(x);
+            this.setX(calculatePosition(this, panelAnchor, 'x'));
         },
         
         updateLocationY: function(panelAnchor) {
-            const valign = panelAnchor.getFloatingValignForPanel(this),
-                type = typeof valign;
-            let y;
-            if (type === 'string') {
-                y = panelAnchor.getPagePosition().y + panelAnchor.getFloatingValignOffsetForPanel(this);
-                switch (valign) {
-                    case 'outsideBottom': y += panelAnchor.height; break;
-                    case 'insideBottom': y += panelAnchor.height - this.height; break;
-                    case 'outsideTop': y -= this.height; break;
-                    case 'insideTop': break;
-                    default: consoleWarn('Invalid valign value', type, valign);
-                }
-                
-                if (panelAnchor.keepInWindow) {
-                    const diff = y + this.height + (panelAnchor.keepInWindowBorder || 0) - windowResize.getHeight();
-                    if (diff > 0) y -= diff;
-                }
-            } else if (type === 'number') {
-                // Absolute position
-                y = valign;
-            } else {
-                consoleWarn('Invalid valign type', type, valign);
-            }
-            this.setY(y);
+            this.setY(calculatePosition(this, panelAnchor, 'y'));
         }
     });
 })(myt);

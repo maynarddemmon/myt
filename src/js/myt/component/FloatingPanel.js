@@ -7,6 +7,51 @@
         
         getFloatingPanel = panelId => panelsByPanelId[panelId],
         
+        calculatePosition = (panel, panelAnchor, posAttr) => {
+            const isHorizontal = posAttr === 'x',
+                sizeAttr = isHorizontal ? 'width' : 'height',
+                panelSize = panel[sizeAttr],
+                alignAttrFudge = isHorizontal ? 'A' : 'Va',
+                alignment = panelAnchor['getFloating' + alignAttrFudge + 'lignForPanel'](panel), 
+                alignmentOffset = panelAnchor['getFloating' + alignAttrFudge + 'lignOffsetForPanel'](panel),
+                type = typeof alignment;
+            let v;
+            if (type === 'string') {
+                v = panelAnchor.getPagePosition()[posAttr] + alignmentOffset;
+                switch (alignment) {
+                    case 'outsideBottom':
+                    case 'outsideRight': v += panelAnchor[sizeAttr]; break;
+                    
+                    case 'insideBottom':
+                    case 'insideRight': v += panelAnchor[sizeAttr] - panelSize; break;
+                    
+                    case 'outsideTop':
+                    case 'outsideLeft': v -= panelSize; break;
+                    
+                    case 'insideTop':
+                    case 'insideLeft': break;
+                    
+                    default: consoleWarn('Invalid value', type, alignment);
+                }
+                
+                if (panelAnchor.keepInWindow) {
+                    const border = panelAnchor.keepInWindowBorder || 0;
+                    if (v < border) {
+                        v = border;
+                    } else {
+                        const maxV = windowResize['getScroll' + (isHorizontal ? 'Width' : 'Height')]() - border - panelSize;
+                        if (v > maxV) v = maxV;
+                    }
+                }
+            } else if (type === 'number') {
+                // Absolute position
+                v = alignment;
+            } else {
+                consoleWarn('Invalid type', type, alignment);
+            }
+            return v;
+        },
+        
         /** Enables a view to act as the anchor point for a FloatingPanel.
             
             Events:
@@ -364,57 +409,11 @@
         },
         
         updateLocationX: function(panelAnchor) {
-            const align = panelAnchor.getFloatingAlignForPanel(this),
-                type = typeof align;
-            let x;
-            if (type === 'string') {
-                x = panelAnchor.getPagePosition().x + panelAnchor.getFloatingAlignOffsetForPanel(this);
-                switch (align) {
-                    case 'outsideRight': x += panelAnchor.width; break;
-                    case 'insideRight': x += panelAnchor.width - this.width; break;
-                    case 'outsideLeft': x -= this.width; break;
-                    case 'insideLeft': break;
-                    default: consoleWarn('Invalid align value', type, align);
-                }
-                
-                if (panelAnchor.keepInWindow) {
-                    const diff = x + this.width + (panelAnchor.keepInWindowBorder || 0) - windowResize.getWidth();
-                    if (diff > 0) x -= diff;
-                }
-            } else if (type === 'number') {
-                // Absolute position
-                x = align;
-            } else {
-                consoleWarn('Invalid align type', type, align);
-            }
-            this.setX(x);
+            this.setX(calculatePosition(this, panelAnchor, 'x'));
         },
         
         updateLocationY: function(panelAnchor) {
-            const valign = panelAnchor.getFloatingValignForPanel(this),
-                type = typeof valign;
-            let y;
-            if (type === 'string') {
-                y = panelAnchor.getPagePosition().y + panelAnchor.getFloatingValignOffsetForPanel(this);
-                switch (valign) {
-                    case 'outsideBottom': y += panelAnchor.height; break;
-                    case 'insideBottom': y += panelAnchor.height - this.height; break;
-                    case 'outsideTop': y -= this.height; break;
-                    case 'insideTop': break;
-                    default: consoleWarn('Invalid valign value', type, valign);
-                }
-                
-                if (panelAnchor.keepInWindow) {
-                    const diff = y + this.height + (panelAnchor.keepInWindowBorder || 0) - windowResize.getHeight();
-                    if (diff > 0) y -= diff;
-                }
-            } else if (type === 'number') {
-                // Absolute position
-                y = valign;
-            } else {
-                consoleWarn('Invalid valign type', type, valign);
-            }
-            this.setY(y);
+            this.setY(calculatePosition(this, panelAnchor, 'y'));
         }
     });
 })(myt);
