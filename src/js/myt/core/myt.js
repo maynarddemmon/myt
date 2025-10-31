@@ -249,7 +249,7 @@
                     keysB = Object.keys(b);
                 if (keysA.length !== keysB.length) return false;
                 for (const key of keysA) {
-                    if (!Object.prototype.hasOwnProperty.call(b, key)) return false;
+                    if (!Object.hasOwn(b, key)) return false;
                     if (!deepEqual(a[key], b[key], seenA, seenB)) return false;
                 }
             }

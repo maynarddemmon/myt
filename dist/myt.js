@@ -703,7 +703,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     keysB = Object.keys(b);
                 if (keysA.length !== keysB.length) return false;
                 for (const key of keysA) {
-                    if (!Object.prototype.hasOwnProperty.call(b, key)) return false;
+                    if (!Object.hasOwn(b, key)) return false;
                     if (!deepEqual(a[key], b[key], seenA, seenB)) return false;
                 }
             }
@@ -2980,7 +2980,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 @param {!Object} v
                 @returns {void} */
             register: (key, v) => {
-                if (globalRegistry.hasOwnProperty(key)) {
+                if (Object.hasOwn(globalRegistry, key)) {
                     consoleWarn('Global key in use', key);
                     globalRegistry.unregister(key);
                 }
@@ -2993,7 +2993,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 @param {string} key
                 @returns {void} */
             unregister: key => {
-                if (globalRegistry.hasOwnProperty(key)) {
+                if (Object.hasOwn(globalRegistry, key)) {
                     const v = globalRegistry[key];
                     delete globalRegistry[key];
                     globalRegistry.fireEvent('unregister' + key, v);
@@ -23662,7 +23662,7 @@ myt.Destructible = new JS.Module('Destructible', {
             setDragGroups: function(v) {
                 const newDragGroups = this.__dgs = {};
                 for (const dragGroup in v) newDragGroups[dragGroup] = true;
-                this.__anyDG = newDragGroups.hasOwnProperty(ANY_GROUP);
+                this.__anyDG = Object.hasOwn(newDragGroups, ANY_GROUP);
             },
             
             getDragGroups: function() {
@@ -23672,7 +23672,7 @@ myt.Destructible = new JS.Module('Destructible', {
             setDropGroups: function(v) {
                 const newDropGroups = this.__drpgs = {};
                 for (const dropGroup in v) newDropGroups[dropGroup] = true;
-                this.__anyDRPG = newDropGroups.hasOwnProperty(ANY_GROUP);
+                this.__anyDRPG = Object.hasOwn(newDropGroups, ANY_GROUP);
             },
             
             getDropGroups: function() {

@@ -25,7 +25,7 @@
                 @param {!Object} v
                 @returns {void} */
             register: (key, v) => {
-                if (globalRegistry.hasOwnProperty(key)) {
+                if (Object.hasOwn(globalRegistry, key)) {
                     consoleWarn('Global key in use', key);
                     globalRegistry.unregister(key);
                 }
@@ -38,7 +38,7 @@
                 @param {string} key
                 @returns {void} */
             unregister: key => {
-                if (globalRegistry.hasOwnProperty(key)) {
+                if (Object.hasOwn(globalRegistry, key)) {
                     const v = globalRegistry[key];
                     delete globalRegistry[key];
                     globalRegistry.fireEvent('unregister' + key, v);

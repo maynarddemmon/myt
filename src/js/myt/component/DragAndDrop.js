@@ -53,7 +53,7 @@
             setDragGroups: function(v) {
                 const newDragGroups = this.__dgs = {};
                 for (const dragGroup in v) newDragGroups[dragGroup] = true;
-                this.__anyDG = newDragGroups.hasOwnProperty(ANY_GROUP);
+                this.__anyDG = Object.hasOwn(newDragGroups, ANY_GROUP);
             },
             
             getDragGroups: function() {
@@ -63,7 +63,7 @@
             setDropGroups: function(v) {
                 const newDropGroups = this.__drpgs = {};
                 for (const dropGroup in v) newDropGroups[dropGroup] = true;
-                this.__anyDRPG = newDropGroups.hasOwnProperty(ANY_GROUP);
+                this.__anyDRPG = Object.hasOwn(newDropGroups, ANY_GROUP);
             },
             
             getDropGroups: function() {
