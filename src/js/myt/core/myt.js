@@ -92,11 +92,11 @@
                 callback?.(false);
             } else if (isArray(loadedResourceState)) {
                 // Resource is currently loading so store callback for later resolution.
-                if (callback) loadedResourceState.push(callback);
+                if (typeof callback === 'function') loadedResourceState.push(callback);
             } else {
                 // Load the resource
                 loadedResourceState = loadedResources[src] = [];
-                if (callback) loadedResourceState.push(callback);
+                if (typeof callback === 'function') loadedResourceState.push(callback);
                 
                 let srcPropName;
                 switch (type) {
