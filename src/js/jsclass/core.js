@@ -203,7 +203,7 @@
         
         // The klass extends from this.
         for (const field in this) {
-            if (klass[field] !== this[field] && !klass.hasOwnProperty(field)) klass[field] = this[field];
+            if (klass[field] !== this[field] && !Object.hasOwn(klass, field)) klass[field] = this[field];
         }
         
         klass.prototype.constructor = klass.prototype.klass = klass;
@@ -229,7 +229,7 @@
         
         // The klass extends from Class.prototype.
         for (const field in classProto) {
-            if (klass[field] !== classProto[field] && !klass.hasOwnProperty(field)) klass[field] = classProto[field];
+            if (klass[field] !== classProto[field] && !Object.hasOwn(klass, field)) klass[field] = classProto[field];
         }
         
         klass.include(parent);
