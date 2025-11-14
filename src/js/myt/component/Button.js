@@ -326,7 +326,7 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        __updateContent: function(v) {
+        __updateContent: function(_v) {
             const self = this;
             if (!self.__updateContentLoopBlock && !self.destroyed) {
                 const {inset, outset, textView} = self;

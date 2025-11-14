@@ -59,18 +59,18 @@
         
         // Methods /////////////////////////////////////////////////////////////
         /** @private
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        __doMouseDown: function(event) {
+        __doMouseDown: function(_event) {
             this.__restorePointerEvents = this.pointerEvents;
             this.setPointerEvents('none');
             return true;
         },
         
         /** @private
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        __doMouseUp: function(event) {
+        __doMouseUp: function(_event) {
             this.setPointerEvents(this.__restorePointerEvents);
             return true;
         }

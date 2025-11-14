@@ -6,7 +6,7 @@
     "license": "MIT",
     "devDependencies": {
         "@eslint/js": "^9.39.1",
-        "eslint": "^9.39.1",
+        "eslint": "^8.57.1",
         "globals": "^16.5.0",
         "google-closure-compiler": "^20230802.0.0"
     },
@@ -14,6 +14,6 @@
         "build-loader": "./bin/build bin/loader-browser-manifest.js dist/loader-browser.js ./src true true JS && rm ./dist/loader-browser.js && stat -f%z ./dist/loader-browser.min.js",
         "build-myt": "./bin/build src/js/myt/manifest.js dist/myt.js ./src true true myt.all && stat -f%z ./dist/myt.min.js",
         "build-tym": "./bin/build src/js/tym/manifest.js dist/tym.js ./src true true tym.all && stat -f%z ./dist/tym.min.js",
-        "lint": "eslint ."
+        "lint": "eslint src"
     }
 }
