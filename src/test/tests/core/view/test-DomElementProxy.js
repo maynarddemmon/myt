@@ -180,10 +180,10 @@ test("getZIndexRelativeToAncestor", function() {
 
 test("getPagePosition", function() {
     const View = myt.View,
-        rootView = new View(null, {}, [myt.RootView]);
+        rootView = new View(null, {}, [myt.RootView]),
         sv1 = new View(rootView, {x:100, y:50, width:100, height:100}),
         sv2 = new View(rootView, {x:200, y:150, width:100, height:100}),
-        sv2sv1 = new View(sv2, {x:10, y:20, width:100, height:100});
+        sv2sv1 = new View(sv2, {x:10, y:20, width:100, height:100}),
         sv2sv1sv1 = new View(sv2sv1, {x:5, y:3, width:100, height:100});
     
     let pos = rootView.getPagePosition();
@@ -215,10 +215,10 @@ test("getPagePosition", function() {
 test("getPagePosition(true)", function() {
     const View = myt.View,
         TransformSupport = myt.TransformSupport,
-        rootView = new View(null, {}, [myt.RootView]);
+        rootView = new View(null, {}, [myt.RootView]),
         sv1 = new View(rootView, {x:100, y:50, width:100, height:100}),
         sv2 = new View(rootView, {x:100, y:50, width:100, height:100, transformOrigin:'top left', scale:2}, [TransformSupport]),
-        sv2sv1 = new View(sv2, {x:10, y:20, width:100, height:100, transformOrigin:'top left', scale:3}, [TransformSupport]);
+        sv2sv1 = new View(sv2, {x:10, y:20, width:100, height:100, transformOrigin:'top left', scale:3}, [TransformSupport]),
         sv2sv1sv1 = new View(sv2sv1, {x:5, y:3, width:100, height:100, transformOrigin:'top left'}, [TransformSupport]);
     
     let pos = rootView.getPagePosition(true);
