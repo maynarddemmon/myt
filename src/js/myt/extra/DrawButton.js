@@ -101,10 +101,10 @@ myt.DrawButton = new JS.Class('DrawButton', myt.Canvas, {
     },
     
     /** Used if no drawing method is found.
-        @param {!Object} canvas
-        @param {?Object} config
+        @param {!Object} _canvas
+        @param {?Object} _config
         @returns {void} */
-    draw: function(canvas, config) {
+    draw: function(_canvas, _config) {
         myt.dumpStack("No drawing method found");
     }
 });

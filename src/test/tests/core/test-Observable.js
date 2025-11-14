@@ -4,7 +4,7 @@ test("Attach and Remove event observers.", function() {
     var observable = new myt.Node();
     
     var observer = new myt.Node(null, null, [{
-        handleFooEvent: function(e) {}
+        handleFooEvent: function(_e) {}
     }]);
     
     // No observers yet
@@ -47,13 +47,13 @@ test("Test detachAllObservers.", function() {
     var observable = new myt.Node();
     
     var observer = new myt.Node(null, null, [{
-        handleFooEvent: function(e) {},
-        handleBarEvent: function(e) {}
+        handleFooEvent: function(_e) {},
+        handleBarEvent: function(_e) {}
     }]);
     
     var otherObserver = new myt.Node(null, null, [{
-        handleOtherFooEvent: function(e) {},
-        handleOtherBarEvent: function(e) {}
+        handleOtherFooEvent: function(_e) {},
+        handleOtherBarEvent: function(_e) {}
     }]);
     
     observable.attachObserver(observer, 'handleFooEvent', 'foo');
@@ -82,13 +82,13 @@ test("Node destruction should clean up observer for Observable.", function() {
     var observable = new myt.Node();
     
     var observer = new myt.Node(null, null, [{
-        handleFooEvent: function(e) {},
-        handleBarEvent: function(e) {}
+        handleFooEvent: function(_e) {},
+        handleBarEvent: function(_e) {}
     }]);
     
     var otherObserver = new myt.Node(null, null, [{
-        handleOtherFooEvent: function(e) {},
-        handleOtherBarEvent: function(e) {}
+        handleOtherFooEvent: function(_e) {},
+        handleOtherBarEvent: function(_e) {}
     }]);
     
     // No observers yet
@@ -292,7 +292,7 @@ test("Attach and Remove event observers where methodNames are functions.", funct
     var observable = new myt.Node();
     
     var observer = new myt.Node(null, null, [{
-        handleFooEvent: function(e) {}
+        handleFooEvent: function(_e) {}
     }]);
     
     var funcHandleFoo = function(event) {

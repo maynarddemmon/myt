@@ -101,9 +101,9 @@
             },
             
             /** Called when the tip will be hidden.
-                @param {!Object} event The event object.
+                @param {!Object} _event The event object.
                 @returns {boolean} */
-            hideTip: function(event) {
+            hideTip: function(_event) {
                 clearCheckTipTimer(this);
                 
                 const ttp = this.tooltip?.parent;

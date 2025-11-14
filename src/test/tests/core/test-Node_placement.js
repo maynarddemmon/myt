@@ -68,7 +68,7 @@ test("Test various placement options", function() {
     ok(n.bar.def.name === 'def', "Grandchild with name 'def' exists.");
     
     // Make another instance inside the existing one.
-    var inner = new DefaultPlacementTestClass(n, {name:'inner'});
+    // var inner = new DefaultPlacementTestClass(n, {name:'inner'});
     
     ok(n.bar.inner.bar.name === 'bar', "Inner instance has a bar.");
     
