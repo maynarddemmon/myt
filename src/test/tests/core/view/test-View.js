@@ -64,7 +64,7 @@ test("Create and destroy a view with keepDomElementWhenDestroyed set to true.", 
     ok(v.getIDE() == null, "The inner dom element reference should not exists anymore.");
     ok(v.getIDS() == null, "The inner dom style should not exists anymore.");
     
-    var divFromDocAgain = document.getElementById(divId);
+    // var divFromDocAgain = document.getElementById(divId);
     ok(div === divFromDoc, "Div obtained from document after destroy should still exist.");
     
     // Cleanup
@@ -246,8 +246,8 @@ test("Test getSubviews, getSiblingViews, getLayouts", function() {
     var child2 = new myt.View(v);
     var child3 = new myt.View(v);
     
-    var layout1 = new myt.ConstantLayout(v);
-    var layout2 = new myt.ConstantLayout(v);
+    // var layout1 = new myt.ConstantLayout(v);
+    // var layout2 = new myt.ConstantLayout(v);
     
     ok(v.getSubviews().length === 3, "Root view should have 3 subviews.");
     ok(v.getLayouts().length === 2, "Root view should have 2 layouts.");
@@ -278,7 +278,7 @@ test("Dom-Ordering: isBehind, isInFrontOf", function() {
     
     var sv31 = new myt.View(sv3);
     var sv32 = new myt.View(sv3);
-    var sv33 = new myt.View(sv3);
+    // var sv33 = new myt.View(sv3);
     
     // isBehind
     // Garbage arguments
