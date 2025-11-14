@@ -97,12 +97,12 @@ test("setStyleProperty and setZIndex", function() {
 test("getAncestorArray", function() {
     var v = new myt.View(null, {}, [myt.RootView]);
     
-    var sv1 = new myt.View(v);
+    // var sv1 = new myt.View(v);
     var sv2 = new myt.View(v);
     var sv3 = new myt.View(v);
     
-    var sv31 = new myt.View(sv3);
-    var sv32 = new myt.View(sv3);
+    // var sv31 = new myt.View(sv3);
+    // var sv32 = new myt.View(sv3);
     var sv33 = new myt.View(sv3);
     
     var sv331 = new myt.View(sv33);
@@ -143,15 +143,15 @@ test("getZIndexRelativeToAncestor", function() {
     var sv3 = new myt.View(v);
     
     var sv11 = new myt.View(sv1);
-    var sv12 = new myt.View(sv1);
+    // var sv12 = new myt.View(sv1);
     var sv13 = new myt.View(sv1, {zIndex:2});
     
     var sv21 = new myt.View(sv2, {zIndex:1});
-    var sv22 = new myt.View(sv2);
-    var sv23 = new myt.View(sv2);
+    // var sv22 = new myt.View(sv2);
+    // var sv23 = new myt.View(sv2);
     
-    var sv31 = new myt.View(sv3);
-    var sv32 = new myt.View(sv3);
+    // var sv31 = new myt.View(sv3);
+    // var sv32 = new myt.View(sv3);
     var sv33 = new myt.View(sv3, {zIndex:3});
     
     var sv331 = new myt.View(sv33);

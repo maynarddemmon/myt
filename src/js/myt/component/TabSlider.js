@@ -205,9 +205,9 @@
             notifyButtonRedraw: pkg.NOOP,
             
             /** @private
-                @param {!Object} event
+                @param {!Object} _event
                 @returns {void} */
-            __updateHeight: function(event) {
+            __updateHeight: function(_event) {
                 this.setHeight(this.wrapper.y + this.wrapper.height);
             },
             
@@ -230,7 +230,7 @@
                     } else {
                         wrapper.animate({
                             attribute:'height', to:to, duration:duration
-                        }).next(success => {self.setExpansionState(STATE_EXPANDED);});
+                        }).next(_success => {self.setExpansionState(STATE_EXPANDED);});
                     }
                 } else {
                     self.setExpansionState(STATE_EXPANDED);
@@ -255,7 +255,7 @@
                     } else {
                         wrapper.animate({
                             attribute:'height', to:0, duration:duration
-                        }).next(success => {self.setExpansionState(STATE_COLLAPSED);});
+                        }).next(_success => {self.setExpansionState(STATE_COLLAPSED);});
                     }
                 } else {
                     self.setExpansionState(STATE_COLLAPSED);
@@ -285,7 +285,7 @@
             }
         }),
         
-        updateLabelAttr = (textTabSlider, attrName, labelAttrname, v) => {
+        updateLabelAttr = (textTabSlider, attrName, labelAttrName, v) => {
             if (textTabSlider[attrName] !== v) {
                 textTabSlider[attrName] = v;
                 textTabSlider.button?.label?.set(labelAttrName, v);
@@ -300,7 +300,7 @@
                 text:string The text for the tab slider.
             
             @class */
-        TextTabSlider = pkg.TextTabSlider = new JSClass('TextTabSlider', TabSlider, {
+        _TextTabSlider = pkg.TextTabSlider = new JSClass('TextTabSlider', TabSlider, {
             // Life Cycle //////////////////////////////////////////////////////
             initNode: function(parent, attrs) {
                 this.labelTextColorChecked = '#fff';
@@ -368,7 +368,7 @@
                 duration:number The length of time for the animation.
             
             @class */
-        TabSliderContainer = pkg.TabSliderContainer = new JS.Module('TabSliderContainer', {
+        _TabSliderContainer = pkg.TabSliderContainer = new JS.Module('TabSliderContainer', {
             include: [pkg.SelectionManager],
             
             
