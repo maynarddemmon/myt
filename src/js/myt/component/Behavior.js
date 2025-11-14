@@ -189,9 +189,9 @@
         },
         
         /** @private
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        __doDomBlur: function(event) {
+        __doDomBlur: function(_event) {
             if (!this.disabled) {
                 const keyThatWasDown = this.activateKeyDown;
                 if (keyThatWasDown !== NO_KEY_DOWN) {
@@ -209,9 +209,9 @@
         
         /** Called when an activation key is release up. This executes the "doActivated" method 
             by default. 
-            @param code:string - The keycode that is up.
+            @param _code:string - The keycode that is up.
             @returns {void} */
-        doActivationKeyUp: function(code) {
+        doActivationKeyUp: function(_code) {
             this.doActivated();
         },
         
@@ -346,9 +346,9 @@
         },
         
         /** Called when the mouse is over this view. Subclasses must call super.
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        doMouseOver: function(event) {
+        doMouseOver: function(_event) {
             this.__disabledOver = true;
             
             if (!this.disabled) this.setMouseOver(true);
