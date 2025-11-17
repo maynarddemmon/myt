@@ -1,7 +1,7 @@
 (pkg => {
     const JSClass = JS.Class,
         
-        {View, SizeToParent, LocalStorage, debounce} = pkg,
+        {View, SizeToParent} = pkg,
         
         STATE_EXPANDED = 'expanded',
         STATE_EXPANDING = 'expanding',
@@ -32,7 +32,7 @@
                     to 'collapsed'.
             
             @class */
-        TabSlider = pkg.TabSlider = new JSClass('TabSlider', View, {
+        _TabSlider = pkg.TabSlider = new JSClass('TabSlider', View, {
             include: [pkg.Selectable, pkg.Disableable, SizeToParent],
             
             
@@ -285,248 +285,10 @@
             }
         }),
         
-        updateLabelAttr = (textTabSlider, attrName, labelAttrName, v) => {
+        _updateLabelAttr = (textTabSlider, attrName, labelAttrName, v) => {
             if (textTabSlider[attrName] !== v) {
                 textTabSlider[attrName] = v;
                 textTabSlider.button?.label?.set(labelAttrName, v);
             }
-        },
-        
-        /** A tab slider with a text label.
-            
-            Attributes:
-                labelTextColorChecked:color
-                labelTextColor:color
-                text:string The text for the tab slider.
-            
-            @class */
-        _TextTabSlider = pkg.TextTabSlider = new JSClass('TextTabSlider', TabSlider, {
-            // Life Cycle //////////////////////////////////////////////////////
-            initNode: function(parent, attrs) {
-                this.labelTextColorChecked = '#fff';
-                this.labelTextColor = '#333';
-                this.labelAlign = 'center';
-                this.labelValign = 'middle';
-                this.labelFontSize = '16px';
-                this.labelFontWeight = 'bold';
-                
-                attrs.labelTextColorChecked ??= '#fff';
-                attrs.labelTextColor ??= '#333';
-                attrs.labelAlign ??= 'center';
-                attrs.labelValign ??= 'middle';
-                attrs.labelFontSize ??= '16px';
-                attrs.labelFontWeight ??= 'bold';
-                
-                this.callSuper(parent, attrs);
-                
-                this.button.label = new pkg.Text(this.button, {
-                    ignorePlacement:true, fontSize:this.labelFontSize, fontWeight:this.labelFontWeight,
-                    text:this.text, align:this.labelAlign, valign:this.labelValign, 
-                    textColor:this.__getTextColor()
-                });
-            },
-            
-            
-            // Accessors ///////////////////////////////////////////////////////
-            setLabelTextColorChecked: function(v) {
-                if (this.labelTextColorChecked !== v) {
-                    this.labelTextColorChecked = v;
-                    this.notifyButtonRedraw();
-                }
-            },
-            setLabelTextColor: function(v) {
-                if (this.labelTextColor !== v) {
-                    this.labelTextColor = v;
-                    this.notifyButtonRedraw();
-                }
-            },
-            setLabelAlign: function(v) {updateLabelAttr(this, 'labelAlign', 'align', v);},
-            setLabelValign: function(v) {updateLabelAttr(this, 'labelValign', 'valign', v);},
-            setLabelFontSize: function(v) {updateLabelAttr(this, 'labelFontSize', 'fontSize', v);},
-            setLabelFontWeight: function(v) {updateLabelAttr(this, 'labelFontWeight', 'fontWeight', v);},
-            setText: function(v) {updateLabelAttr(this, 'text', 'text', v);},
-            
-            
-            // Methods /////////////////////////////////////////////////////////
-            /** @overrides myt.TabSlider */
-            notifyButtonRedraw: function() {
-                this.button?.label?.setTextColor(this.__getTextColor());
-            },
-            
-            /** @private
-                @returns {string} */
-            __getTextColor: function() {
-                return (this.selected && this.tabContainer.maxSelected !== -1) ? this.labelTextColorChecked : this.labelTextColor;
-            }
-        }),
-        
-        /** A mixin that allows myt.TabSliders to be added to a view.
-            
-            Attributes:
-                spacing:number The spacing between tab sliders. Defaults to
-                    myt.theme.TabSliderContainerSpacing which is 1.
-                duration:number The length of time for the animation.
-            
-            @class */
-        _TabSliderContainer = pkg.TabSliderContainer = new JS.Module('TabSliderContainer', {
-            include: [pkg.SelectionManager],
-            
-            
-            // Life Cycle //////////////////////////////////////////////////////
-            initNode: function(parent, attrs) {
-                const self = this;
-                
-                self._tabSliders = [];
-                
-                attrs.defaultPlacement = 'container';
-                
-                attrs.spacing ??= pkg.theme.TabSliderContainerSpacing;
-                attrs.overflow ??= 'autoy';
-                attrs.itemSelectionId ??= 'tabId';
-                attrs.maxSelected ??= 1;
-                attrs.duration ??= 500;
-                
-                self.updateLayout = debounce(self.updateLayout);
-                
-                self.callSuper(parent, attrs);
-                
-                const container = self.container = new View(self, {
-                    ignorePlacement:true, percentOfParentWidth:100
-                }, [SizeToParent, {
-                    /** @overrides myt.View */
-                    subnodeAdded: function(node) {
-                        this.callSuper(node);
-                        if (node instanceof TabSlider) {
-                            self._tabSliders.push(node);
-                            self.attachTo(node, 'updateLayout', 'selected');
-                        }
-                    },
-                    
-                    /** @overrides myt.View */
-                    subnodeRemoved: function(node) {
-                        if (node instanceof TabSlider) {
-                            const tabSliders = self._tabSliders,
-                                idx = tabSliders.indexOf(node);
-                            if (idx > -1) {
-                                self.detachFrom(node, 'updateLayout', 'selected');
-                                tabSliders.splice(idx, 1);
-                            }
-                        }
-                        this.callSuper(node);
-                    }
-                }]);
-                container.layout = new pkg.SpacedLayout(container, {axis:'y', spacing:self.spacing, collapseParent:true});
-                
-                self.attachTo(self, 'updateLayout', 'height');
-            },
-            
-            
-            // Accessors ///////////////////////////////////////////////////////
-            setPersistenceId: function(v) {this.persistenceId = v;},
-            getTabSliders: function() {return this._tabSliders;},
-            getTabSliderById: function(sliderId) {
-                for (const tabSlider of this._tabSliders) {
-                    if (tabSlider.tabId === sliderId) return tabSlider;
-                }
-            },
-            
-            setSpacing: function(v) {
-                if (this.spacing !== v) {
-                    this.spacing = v;
-                    this.layout?.setSpacing(v);
-                }
-            },
-            
-            setDuration: function(v) {this.duration = v;},
-            
-            
-            // Methods /////////////////////////////////////////////////////////
-            /** @param {!Object} ignoredEvent
-                @param {number} [temporaryDuration]
-                @returns {void} */
-            updateLayout: function(ignoredEvent, temporaryDuration) {
-                const tabSliders = this._tabSliders,
-                    tabSlidersLen = tabSliders.length;
-                let i = tabSlidersLen, 
-                    min = 0, 
-                    preferred = 0, 
-                    visCount = 0;
-                
-                while (i) {
-                    const tabSlider = tabSliders[--i];
-                    if (tabSlider.visible) {
-                        ++visCount;
-                        if (tabSlider.selected) {
-                            min += tabSlider.getMinimumExpandedHeight();
-                            preferred += tabSlider.getPreferredExpandedHeight();
-                        } else {
-                            const collapsedHeight = tabSlider.getCollapsedHeight();
-                            min += collapsedHeight;
-                            preferred += collapsedHeight;
-                        }
-                    }
-                }
-                
-                const layout = this.container.layout,
-                    layoutOverage = layout.inset + layout.outset + layout.spacing * (visCount - 1);
-                min += layoutOverage;
-                preferred += layoutOverage;
-                
-                const h = this.height,
-                    minIsOver = min > h,
-                    preferredIsOver = preferred > h,
-                    existingDuration = this.duration;
-                let overage = preferred - h;
-                
-                if (temporaryDuration > 0) this.setDuration(temporaryDuration);
-                
-                i = tabSlidersLen;
-                while (i) {
-                    const tabSlider = tabSliders[--i];
-                    if (tabSlider.visible) {
-                        if (tabSlider.selected) {
-                            let newVal;
-                            if (minIsOver) {
-                                newVal = tabSlider.getMinimumExpandedHeight();
-                            } else if (preferredIsOver) {
-                                const tabPreferred = tabSlider.getPreferredExpandedHeight(),
-                                    tabMin = tabSlider.getMinimumExpandedHeight();
-                                
-                                newVal = tabPreferred - overage;
-                                if (tabMin > newVal) {
-                                    overage -= tabPreferred - tabMin;
-                                    newVal = tabMin;
-                                } else {
-                                    overage = 0;
-                                }
-                            } else {
-                                newVal = tabSlider.getPreferredExpandedHeight();
-                            }
-                            tabSlider.expand(newVal);
-                        } else {
-                            tabSlider.collapse();
-                        }
-                    }
-                }
-                
-                // Restore duration
-                if (temporaryDuration > 0) this.setDuration(existingDuration);
-            },
-            
-            // Persistence
-            readState: persistenceId => LocalStorage.getDatum(persistenceId),
-            writeState: (persistenceId, componentState) => {LocalStorage.setDatum(persistenceId, componentState);},
-            saveState: debounce(function() {
-                const expandedTabIds = [];
-                for (const tabSlider of this.getTabSliders()) {
-                    if (tabSlider.expansionState === STATE_EXPANDED) expandedTabIds.push(tabSlider.tabId);
-                }
-                this.writeState(this.persistenceId, expandedTabIds);
-            }, 1000),
-            restoreState: function(defaultState) {
-                for (const expandedTabIds of (this.readState(this.persistenceId) || defaultState)) {
-                    this.select(this.getTabSliderById(expandedTabIds));
-                }
-            }
-        });
+        }
 })(myt);
