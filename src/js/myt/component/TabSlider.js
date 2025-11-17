@@ -290,5 +290,5 @@
                 textTabSlider[attrName] = v;
                 textTabSlider.button?.label?.set(labelAttrName, v);
             }
-        }
+        };
 })(myt);
