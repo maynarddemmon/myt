@@ -5,7 +5,8 @@
             // This is a quoted cookie as according to RFC2068, unescape
             if (s.startsWith('"')) s = s.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
             
-            try {return useJson ? JSON.parse(s) : s;} catch(ex) {}
+            try {return useJson ? JSON.parse(s) : s;} 
+            catch(ex) { console.log(ex); }
         },
         
         /** Browser cookie utility functions.

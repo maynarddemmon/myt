@@ -170,7 +170,7 @@
         
         // Methods /////////////////////////////////////////////////////////////
         /** @private */
-        __updateContentPosition: function(v) {
+        __updateContentPosition: function(_v) {
             const self = this;
             
             if (self.__updateContentPositionLoopBlock || self.destroyed) return;

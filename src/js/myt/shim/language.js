@@ -97,7 +97,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             i: date => zeroPad(date.getMinutes()),
             s: date => zeroPad(date.getSeconds()),
             // Timezone
-            e: date => /\((.*)\)/.exec(new Date().toString())[1],
+            e: _date => /\((.*)\)/.exec(new Date().toString())[1],
             I: date => {
                 let DST = null, i = 0;
                 for (; i < 12;) {
@@ -115,7 +115,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             },
             O: date => timezoneOffsetFunc(date, false),
             P: date => timezoneOffsetFunc(date, true),
-            T: date => Intl.DateTimeFormat().resolvedOptions().timeZone,
+            T: _date => Intl.DateTimeFormat().resolvedOptions().timeZone,
             Z: date => -date.getTimezoneOffset() * 60,
             // Full Date/Time
             c: date => date.format('Y-m-d\\TH:i:sP'),
