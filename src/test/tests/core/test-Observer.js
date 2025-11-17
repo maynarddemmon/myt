@@ -4,7 +4,7 @@ test("Attach and Remove event observers.", function() {
     var observable = new myt.Node();
     
     var observer = new myt.Node(null, null, [{
-        handleFooEvent: function(e) {}
+        handleFooEvent: function(_e) {}
     }]);
     
     // No observers yet
@@ -69,8 +69,8 @@ test("Test detachFromAllObservables.", function() {
     var otherSource = new myt.Node();
     
     var observer = new myt.Node(null, null, [{
-        handleFooEvent: function(e) {},
-        handleBarEvent: function(e) {}
+        handleFooEvent: function(_e) {},
+        handleBarEvent: function(_e) {}
     }]);
     
     observer.attachTo(observable, 'handleFooEvent', 'foo');
@@ -101,8 +101,8 @@ test("Node destruction should clean up observables for Observer.", function() {
     var otherSource = new myt.Node();
     
     var observer = new myt.Node(null, null, [{
-        handleFooEvent: function(e) {},
-        handleBarEvent: function(e) {}
+        handleFooEvent: function(_e) {},
+        handleBarEvent: function(_e) {}
     }]);
     
     // No observers yet

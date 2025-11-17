@@ -341,10 +341,10 @@
             Gives subclasses a change to change how the view is backed. This implementation also 
             looks for a this.tagName property which it will use as the name for the dom element 
             that gets created. If no this.tagName property is found "div" will be used.
-            @param {!Object} parent - The dom element that will be the parent of the newly created 
+            @param {!Object} _parent - The dom element that will be the parent of the newly created 
                 dom element.
             @returns {!Object} a dom element */
-        createOurDomElement: function(parent) {
+        createOurDomElement: function(_parent) {
             const elem = document.createElement(this.tagName ?? 'div');
             elem.style.position = 'absolute';
             
@@ -491,16 +491,16 @@
         },
         
         /** @private
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        __doAlignCenter: function(event) {
+        __doAlignCenter: function(_event) {
             this.setX(mathRound((this.parent.width - this.width) / 2) + (this.alignOffset || 0));
         },
         
         /** @private
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        __doAlignRight: function(event) {
+        __doAlignRight: function(_event) {
             this.setX(this.parent.width - this.width - (this.alignOffset || 0));
         },
         
@@ -524,16 +524,16 @@
         },
         
         /** @private
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        __doValignMiddle: function(event) {
+        __doValignMiddle: function(_event) {
             this.setY(mathRound((this.parent.height - this.height) / 2) + (this.valignOffset || 0));
         },
         
         /** @private
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        __doValignBottom: function(event) {
+        __doValignBottom: function(_event) {
             this.setY(this.parent.height - this.height - (this.valignOffset || 0));
         },
         

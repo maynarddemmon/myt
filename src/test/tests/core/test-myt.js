@@ -125,16 +125,16 @@ test("Test getRandomInt", function() {
         ok(r >= 3 && r <= 5, "Incorrect order should still work.");
     }
     
-    r = myt.getRandomInt(3, 5, function(v) {return 0;});
+    r = myt.getRandomInt(3, 5, function(_v) {return 0;});
     ok(r === 3, "Skew function acts like floor.");
     
-    r = myt.getRandomInt(3, 5, function(v) {return -1;});
+    r = myt.getRandomInt(3, 5, function(_v) {return -1;});
     ok(r === 3, "Bad skew function with too low of a value still works.");
     
-    r = myt.getRandomInt(3, 5, function(v) {return 0.99999999;});
+    r = myt.getRandomInt(3, 5, function(_v) {return 0.99999999;});
     ok(r === 5, "Skew function acts like ceil.");
     
-    r = myt.getRandomInt(3, 5, function(v) {return 1;});
+    r = myt.getRandomInt(3, 5, function(_v) {return 1;});
     ok(r === 5, "Bad skew function with too high of a value still works.");
 });
 
@@ -157,15 +157,15 @@ test("Test getRandomArbitrary", function() {
         ok(r >= 3.05 && r <= 5.7, "Incorrect order should still work.");
     }
     
-    r = myt.getRandomArbitrary(3.05, 5.7, function(v) {return 0;});
+    r = myt.getRandomArbitrary(3.05, 5.7, function(_v) {return 0;});
     ok(r === 3.05, "Skew function acts like floor.");
     
-    r = myt.getRandomArbitrary(3.05, 5.7, function(v) {return -1;});
+    r = myt.getRandomArbitrary(3.05, 5.7, function(_v) {return -1;});
     ok(r === 3.05, "Bad skew function with too low of a value still works.");
     
-    r = myt.getRandomArbitrary(3.05, 5.7, function(v) {return 0.9999999999;});
+    r = myt.getRandomArbitrary(3.05, 5.7, function(_v) {return 0.9999999999;});
     ok(myt.areFloatsEqual(r, 5.7), "Skew function acts like ceil.");
     
-    r = myt.getRandomArbitrary(3.05, 5.7, function(v) {return 1;});
+    r = myt.getRandomArbitrary(3.05, 5.7, function(_v) {return 1;});
     ok(myt.areFloatsEqual(r, 5.7), "Bad skew function with too high of a value still works.");
 });
