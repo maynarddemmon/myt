@@ -1,4 +1,5 @@
 /* eslint-disable no-cond-assign */ // if(a = b)
+/* eslint-disable no-unused-vars */
 (pkg => {
     /*
      * http://github.com/maynarddemmon/myt
@@ -534,4 +535,5 @@
         };
 })(global);
 
-const JS = global.JS;
+const JS = global.JS,
+      tym = global.tym;
