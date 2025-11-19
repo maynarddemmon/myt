@@ -74,7 +74,7 @@
         
         /*  Gets the animation pool if it exists, or lazy instantiates it 
             first if necessary. Returns a myt.TrackActivesPool */
-        getAnimPool = node => node.__animPool ??= new pkg.TrackActivesPool(pkg.Animator, node),
+        _getAnimPool = node => node.__animPool ??= new pkg.TrackActivesPool(pkg.Animator, node),
         
         /*  Lazy instantiate the references store on a scope object.
             @returns {!Object} */
@@ -428,16 +428,16 @@
         
         /** Called when a subnode is added to this node. Provides a hook for subclasses. No need for
             subclasses to call super. Do not call this method to add a subnode. Instead call setParent.
-            @param {!Object} node - The sub myt.Node that was added.
+            @param {!Object} _node - The sub myt.Node that was added.
             @returns {undefined} */
-        subnodeAdded: node => {},
+        subnodeAdded: _node => {},
         
         /** Called when a subnode is removed from this node. Provides a hook for subclasses. No need
             for subclasses to call super. Do not call this method to remove a subnode. Instead 
             call setParent.
-            @param {!Object} node - The sub myt.Node that was removed.
+            @param {!Object} _node - The sub myt.Node that was removed.
             @returns {undefined} */
-        subnodeRemoved: node => {},
+        subnodeRemoved: _node => {},
         
         
         // Reference Store //

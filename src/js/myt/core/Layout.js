@@ -961,7 +961,7 @@
         },
         
         /** @overrides myt.VariableLayout */
-        updateParent: function(setterName, value) {
+        updateParent: function(_setterName, _value) {
             // Collapse in the other direction
             this.parent[this.parentSetterName](this.linePos + this.lineSize + this.lineOutset);
         }

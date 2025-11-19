@@ -23481,10 +23481,10 @@ myt.Destructible = new JS.Module('Destructible', {
         
         // Methods /////////////////////////////////////////////////////////////
         to: function(panel) {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve, _reject) => {
                 panel.stopActiveAnimators('opacity');
                 panel.setVisible(true);
-                panel.animate({attribute:'opacity', to:1, duration:this.duration}).next(success => {
+                panel.animate({attribute:'opacity', to:1, duration:this.duration}).next(_success => {
                     panel.makeHighestZIndex();
                     resolve(panel);
                 });
@@ -23492,9 +23492,9 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         from: function(panel) {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve, _reject) => {
                 panel.stopActiveAnimators('opacity');
-                panel.animate({attribute:'opacity', to:0, duration:this.duration}).next(success => {
+                panel.animate({attribute:'opacity', to:0, duration:this.duration}).next(_success => {
                     panel.setVisible(false);
                     resolve(panel);
                 });
@@ -23550,8 +23550,8 @@ myt.Destructible = new JS.Module('Destructible', {
             panel.set(axis, toValue);
             panel.setVisible(true);
             
-            return new Promise((resolve, reject) => {
-                const nextFunc = success => {
+            return new Promise((resolve, _reject) => {
+                const nextFunc = _success => {
                     panel.makeHighestZIndex();
                     resolve(panel);
                 };
@@ -23590,8 +23590,8 @@ myt.Destructible = new JS.Module('Destructible', {
             
             panel.stopActiveAnimators(axis);
             
-            return new Promise((resolve, reject) => {
-                const nextFunc = success => {
+            return new Promise((resolve, _reject) => {
+                const nextFunc = _success => {
                     panel.setVisible(false);
                     resolve(panel);
                 };
@@ -23840,7 +23840,7 @@ myt.Destructible = new JS.Module('Destructible', {
             implementation returns true if the view is not disabled.
             @param dropable:myt.Dropable The dropable being dragged.
             @returns boolean: True if the drop will be allowed, false otherwise. */
-        willAcceptDrop: function(dropable) {
+        willAcceptDrop: function(_dropable) {
             // Components must be visible and not disabled to accept a drop.
             return !this.disabled && this.isVisible();
         },
@@ -23937,19 +23937,19 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** Called by myt.GlobalDragManager when this view is dragged out of a drop target.
-            @param dropTarget:myt.DropTarget The target that was dragged out of.
+            @param _dropTarget:myt.DropTarget The target that was dragged out of.
             @returns {void} */
-        notifyDragLeaving: function(dropTarget) {
+        notifyDragLeaving: function(_dropTarget) {
             this.setDropTarget();
         },
         
         /** Called by myt.GlobalDragManager when this view is dropped.
-            @param dropTarget:myt.DropTarget The target that was dropped on. Will be undefined if 
+            @param _dropTarget:myt.DropTarget The target that was dropped on. Will be undefined if 
                 this dropable was dropped on no drop target.
-            @param isAbort:boolean Indicates if the drop was the result of an abort or a 
+            @param _isAbort:boolean Indicates if the drop was the result of an abort or a 
                 normal drop.
             @returns {void} */
-        notifyDropped: function(dropTarget, isAbort) {
+        notifyDropped: function(_dropTarget, _isAbort) {
             this.setDropped(true);
             
             if (!this.dropTarget) this.setDropFailed(true);
@@ -24028,9 +24028,9 @@ myt.Destructible = new JS.Module('Destructible', {
         // Methods /////////////////////////////////////////////////////////////
         /** Called by myt.GlobalDragManager when a dropable starts being dragged that has a 
             matching drag group.
-            @param {!Object} dropable - The myt.Dropable being dragged.
+            @param {!Object} _dropable - The myt.Dropable being dragged.
             @returns {void} */
-        notifyAutoScrollerDragStart: function(dropable) {
+        notifyAutoScrollerDragStart: function(_dropable) {
             const ide = this.getIDE();
             if (ide.scrollHeight > ide.clientHeight || ide.scrollWidth > ide.clientWidth) {
                 this.attachToDom(globalMouse, '__hndlMove', 'mousemove', true);
@@ -24039,9 +24039,9 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Called by myt.GlobalDragManager when a dropable stops being dragged that has a 
             matching drag group.
-            @param {!Object} dropable - The myt.Dropable no longer being dragged.
+            @param {!Object} _dropable - The myt.Dropable no longer being dragged.
             @returns {void} */
-        notifyAutoScrollerDragStop: function(dropable) {
+        notifyAutoScrollerDragStop: function(_dropable) {
             this.detachFromDom(globalMouse, '__hndlMove', 'mousemove', true);
             
             resetVScroll(this);
@@ -24348,7 +24348,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 this.setTooltip(this.getTooltipByValue(value));
             },
             
-            getColorByValue: function(value, percent) {
+            getColorByValue: function(_value, _percent) {
                 return this.color;
             },
             getTooltipByValue: function(value) {
@@ -24483,9 +24483,9 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** Called when the tip will be hidden.
-                @param {!Object} event The event object.
+                @param {!Object} _event The event object.
                 @returns {boolean} */
-            hideTip: function(event) {
+            hideTip: function(_event) {
                 clearCheckTipTimer(this);
                 
                 const ttp = this.tooltip?.parent;
@@ -25546,7 +25546,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     self.animate({attribute:'opacity', to:1, duration:self.showDuration});
                     self.callSuper(v);
                 } else {
-                    self.animate({attribute:'opacity', to:0, duration:self.hideDuration}).next(success => {
+                    self.animate({attribute:'opacity', to:0, duration:self.hideDuration}).next(_success => {
                         self.parent.removeGrowl(self);
                     });
                 }
