@@ -339,9 +339,9 @@
         
         /** Called when mouseOver state changes. This method is called after an event filtering 
             process has reduced frequent over/out events originating from the dom.
-            @param {boolean} isOver
+            @param {boolean} _isOver
             @returns {void} */
-        doSmoothMouseOver: function(isOver) {
+        doSmoothMouseOver: function(_isOver) {
             if (this.inited) this.updateUI?.();
         },
         
@@ -355,9 +355,9 @@
         },
         
         /** Called when the mouse leaves this view. Subclasses must call super.
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        doMouseOut: function(event) {
+        doMouseOut: function(_event) {
             this.__disabledOver = false;
             
             if (!this.disabled) this.setMouseOver(false);
@@ -427,9 +427,9 @@
         },
         
         /** Called when the mouse is down on this view. Subclasses must call super.
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        doMouseDown: function(event) {
+        doMouseDown: function(_event) {
             if (this.disabled) {
                 this.doMouseDownWhenDisabled();
             } else {
@@ -462,9 +462,9 @@
         
         /** Called when the mouse is up and we are still over the view. Executes the "doActivated" 
             method by default.
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        doMouseUpInside: function(event) {
+        doMouseUpInside: function(_event) {
             this.doActivated?.();
         }
     });
@@ -681,24 +681,24 @@
         },
         
         /** @private
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        __updateDragInitX: function(event) {
+        __updateDragInitX: function(_event) {
             this.dragInitX = this.width / 2 * (this.scaleX || 1);
         },
         
         /** @private
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        __updateDragInitY: function(event) {
+        __updateDragInitY: function(_event) {
             this.dragInitY = this.height / 2 * (this.scaleY || 1);
         },
         
         /** Stop the drag. (see startDrag for more details)
-            @param {!Object} event - The event that ended the drag.
-            @param {boolean} isAbort - Indicates if the drag ended normally or was aborted.
+            @param {!Object} _event - The event that ended the drag.
+            @param {boolean} _isAbort - Indicates if the drag ended normally or was aborted.
             @returns {void} */
-        stopDrag: function(event, isAbort) {
+        stopDrag: function(_event, _isAbort) {
             const self = this;
             self.detachFromDom(GlobalMouse, '__doMouseUp', 'mouseup', true);
             self.detachFromDom(GlobalMouse, 'updateDrag', 'mousemove', true);
