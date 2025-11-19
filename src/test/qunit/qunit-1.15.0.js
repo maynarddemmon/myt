@@ -925,7 +925,7 @@ Test.prototype = {
 	},
 
 	pushFailure: function( message, source, actual ) {
-		if ( !this instanceof Test ) {
+		if ( !(this instanceof Test) ) {
 			throw new Error( "pushFailure() assertion outside test context, was " + sourceFromStacktrace( 2 ) );
 		}
 
@@ -1428,7 +1428,7 @@ QUnit.dump = (function() {
 					type = "date";
 				} else if ( QUnit.is( "function", obj ) ) {
 					type = "function";
-				} else if ( typeof obj.setInterval !== undefined && typeof obj.document !== "undefined" && typeof obj.nodeType === "undefined" ) {
+				} else if ( typeof obj.setInterval !== "undefined" && typeof obj.document !== "undefined" && typeof obj.nodeType === "undefined" ) {
 					type = "window";
 				} else if ( obj.nodeType === 9 ) {
 					type = "document";
@@ -2096,7 +2096,7 @@ function getModuleNames() {
 		moduleNames = [];
 
 	for ( i in config.modules ) {
-		if ( config.modules.hasOwnProperty( i ) ) {
+		if ( Object.modules.hasOwn( config, i ) ) {
 			moduleNames.push( i );
 		}
 	}

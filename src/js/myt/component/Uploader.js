@@ -3,7 +3,7 @@
         
         {NOOP, dumpStack} = pkg,
         
-        mathRound = Math.round,
+        // mathRound = Math.round,
         
         MIME_TYPES_BY_EXTENSION = {
             gif:'image/gif',
@@ -224,10 +224,10 @@
             
             
             // Accessors ///////////////////////////////////////////////////////
-            setAccept: function(v) {this.fileInput?.setAccept(this.accept);},
+            setAccept: function(_v) {this.fileInput?.setAccept(this.accept);},
             getAccept: function() {return this.fileInput?.accept;},
             
-            setMaxFiles: function(v) {this.fileInput?.setMaxFiles(this.maxFiles);},
+            setMaxFiles: function(_v) {this.fileInput?.setMaxFiles(this.maxFiles);},
             getMaxFiles: function() {return this.fileInput?.maxFiles;},
             
             /** Add a "remote" file when the value is set.
@@ -277,7 +277,7 @@
                 if (this.fileInput) this.bringSubviewToFront(this.fileInput);
             },
             
-            handleDroppedFile: function(file, event) {
+            handleDroppedFile: function(file, _event) {
                 this.addFile(file);
             },
             
@@ -325,10 +325,10 @@
             
             /** Subclasses must implement this to extract the uploaded file path from the response. 
                 By default this returns null.
-                @param {!Object} file
-                @param {!Object} data
+                @param {!Object} _file
+                @param {!Object} _data
                 @returns {void} */
-            parseServerPathFromResponse: (file, data) => null,
+            parseServerPathFromResponse: (_file, _data) => null,
             
             addFile: function(file) {
                 this.files.push(file);

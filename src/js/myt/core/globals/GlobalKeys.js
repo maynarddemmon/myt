@@ -48,7 +48,7 @@
         
         shouldPreventDefault = (code, targetElem) => {
             switch (code) {
-                case CODE_BACKSPACE: // Backspace
+                case CODE_BACKSPACE: {// Backspace
                     // Catch backspace since it navigates the history. Allow it to go through for 
                     // text input elements though.
                     const nodeName = targetElem.nodeName;
@@ -57,6 +57,7 @@
                         (nodeName === 'INPUT' && (targetElem.type === 'text' || targetElem.type === 'number' || targetElem.type === 'password')) ||
                         (nodeName === 'DIV' && targetElem.contentEditable === 'true' && targetElem.firstChild)
                     );
+                }
                 case CODE_TAB: // Tab
                     // Tab navigation is handled by the framework.
                     return true;
