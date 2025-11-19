@@ -115,11 +115,11 @@ test("Add and remove child nodes on a root node", function() {
 
 test("Create granchildren and do reparenting", function() {
     var r1 = new myt.Node();
-    var c1r1 = new myt.Node(r1);
-    var c2r1 = new myt.Node(r1);
+    var _c1r1 = new myt.Node(r1);
+    var _c2r1 = new myt.Node(r1);
     var c3r1 = new myt.Node(r1);
-    var c1c3r1 = new myt.Node(c3r1);
-    var c2c3r1 = new myt.Node(c3r1);
+    var _c1c3r1 = new myt.Node(c3r1);
+    var _c2c3r1 = new myt.Node(c3r1);
     var c3c3r1 = new myt.Node(c3r1);
     
     ok(c3c3r1.isDescendantOf(c3r1) === true, "Child descendant check");
@@ -127,12 +127,12 @@ test("Create granchildren and do reparenting", function() {
     ok(r1.isAncestorOf(c3c3r1) === true, "Grandchild ancestor check");
     
     var r2 = new myt.Node();
-    var c1r2 = new myt.Node(r2);
-    var c2r2 = new myt.Node(r2);
+    var _c1r2 = new myt.Node(r2);
+    var _c2r2 = new myt.Node(r2);
     
     var c3r2 = new myt.Node();
-    var c1c3r2 = new myt.Node(c3r2);
-    var c2c3r2 = new myt.Node(c3r2);
+    var _c1c3r2 = new myt.Node(c3r2);
+    var _c2c3r2 = new myt.Node(c3r2);
     var c3c3r2 = new myt.Node(c3r2);
     
     ok(c3c3r2.isDescendantOf(c3r2) === true, "Child descendant check");
@@ -281,8 +281,8 @@ test("Node: getLeastCommonAncestor", function() {
     var n12 = new myt.Node(n1);
     var n13 = new myt.Node(n1);
     
-    var n31 = new myt.Node(n3);
-    var n32 = new myt.Node(n3);
+    var _n31 = new myt.Node(n3);
+    var _n32 = new myt.Node(n3);
     var n33 = new myt.Node(n3);
     
     ok(root.getLeastCommonAncestor() === undefined, "Common ancestor of undefined is undefined.");

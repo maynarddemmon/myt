@@ -86,18 +86,18 @@ myt.HorizontalThreePanel = new JS.Module('HorizontalThreePanel', {
     
     // Methods /////////////////////////////////////////////////////////////////
     /** @private
-        @param {!Object} event
+        @param {!Object} _event
         @returns {void} */
-    __updateSize: function(event) {
+    __updateSize: function(_event) {
         const v = this.second;
         v.setHeight(v.naturalHeight);
         this.__updateImageSize();
     },
     
     /** @private
-        @param {!Object} event
+        @param {!Object} _event
         @returns {void} */
-    __updateImageSize: function(event) {
+    __updateImageSize: function(_event) {
         const v = this.second;
         v.setImageSize(this.repeat ? undefined : v.width + 'px ' + v.height + 'px');
     },
