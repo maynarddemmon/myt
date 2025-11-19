@@ -1,3 +1,4 @@
+/* eslint-disable no-cond-assign */ // if(a = b)
 var JS = (typeof this.JS === 'undefined') ? {} : this.JS;
 
 (function(factory) {
@@ -37,7 +38,7 @@ JS.extend = function(destination, source, overwrite) {
   if (!destination || !source) return destination;
   for (var field in source) {
     if (destination[field] === source[field]) continue;
-    if (overwrite === false && destination.hasOwnProperty(field)) continue;
+    if (overwrite === false && Object.hasOwn(destination, field)) continue;
     destination[field] = source[field];
   }
   return destination;
@@ -120,7 +121,7 @@ JS.extend(JS.Method.prototype, {
   },
 
   contains: function(word) {
-    return this._words.hasOwnProperty(word);
+    return Object.hasOwn(this._words, word);
   },
 
   call: function() {
@@ -158,7 +159,7 @@ JS.extend(JS.Method.prototype, {
 
         previous[keyword.name] = {
           _value: existing,
-          _own:   this.hasOwnProperty(keyword.name)
+          _own:   Object.hasOwn(this, keyword.name)
         };
         kwd = keyword.filter(method, environment, this, arguments);
         if (kwd) kwd.__kwd__ = true;
@@ -318,11 +319,11 @@ JS.extend(JS.Module.prototype, {
     if (resolve !== false) this.resolve();
   },
 
-  include: function(module, options) {
+  include: function(module, options = {}) {
     if (!module) return this;
 
-    var options = options || {},
-        resolve = options._resolve !== false,
+    var resolve = options._resolve !== false,
+        // options = options || {},
         extend  = module.extend,
         include = module.include,
         extended, field, value, mixins, i, n;
@@ -352,12 +353,12 @@ JS.extend(JS.Module.prototype, {
           this.include(mixins[i], {_resolve: false});
       }
       for (field in module) {
-        if (!module.hasOwnProperty(field)) continue;
+        if (!Object.hasOwn(module, field)) continue;
         value = module[field];
         if (this.shouldIgnore(field, value)) continue;
         this.define(field, value, {_resolve: false});
       }
-      if (module.hasOwnProperty('toString'))
+      if (Object.hasOwn(module, 'toString'))
         this.define('toString', module.toString, {_resolve: false});
     }
 
@@ -367,15 +368,15 @@ JS.extend(JS.Module.prototype, {
 
   alias: function(aliases) {
     for (var method in aliases) {
-      if (!aliases.hasOwnProperty(method)) continue;
+      if (!Object.hasOwn(aliases, method)) continue;
       this.define(method, this.instanceMethod(aliases[method]), {_resolve: false});
     }
     this.resolve();
   },
 
-  resolve: function(host) {
-    var host   = host || this,
-        target = host.__tgt__,
+  resolve: function(host = this) {
+    var target = host.__tgt__,
+        // host   = host || this,
         inc    = this.__inc__,
         fns    = this.__fns__,
         i, n, key, compiled;
@@ -396,7 +397,7 @@ JS.extend(JS.Module.prototype, {
       compiled = JS.Method.compile(fns[key], host);
       if (target[key] !== compiled) target[key] = compiled;
     }
-    if (fns.hasOwnProperty('toString'))
+    if (Object.hasOwn(fns, 'toString'))
       target.toString = JS.Method.compile(fns.toString, host);
   },
 
@@ -406,9 +407,9 @@ JS.extend(JS.Module.prototype, {
              (value.__fns__ && value.__inc__));
   },
 
-  ancestors: function(list) {
+  ancestors: function(list = []) {
     var cachable = !list,
-        list     = list || [],
+        // list     = list || [],
         inc      = this.__inc__;
 
     if (cachable && this.__anc__) return this.__anc__.slice();
@@ -433,7 +434,7 @@ JS.extend(JS.Module.prototype, {
 
     for (var i = 0, n = ancestors.length; i < n; i++) {
       fns = ancestors[i].__fns__;
-      if (fns.hasOwnProperty(name)) methods.push(fns[name]);
+      if (Object.hasOwn(fns, name)) methods.push(fns[name]);
     }
     this.__mct__[name] = methods.slice();
     return methods;
@@ -601,7 +602,7 @@ JS.extend(JS.Class.prototype, {
         proto   = klass.prototype;
 
     for (var field in proto) {
-      if (!proto.hasOwnProperty(field)) continue;
+      if (!Object.hasOwn(proto, field)) continue;
       methods[field] = JS.Method.create(klass, field, proto[field]);
     }
     return methods;

@@ -132,12 +132,18 @@
                         if (value.startsWith('#')) value = value.slice(1);
                         
                         switch (value.length) {
-                            case 0: value += '0'; // Append "0" to missing channels.
-                            case 1: value += '0'; // Append "0" to missing channels.
-                            case 2: value += '0'; // Append "0" to missing channels.
+                            case 0: 
+                                value += '0'; // Append "0" to missing channels.
+                                // fall through
+                            case 1: 
+                                value += '0'; // Append "0" to missing channels.
+                                // fall through
+                            case 2: 
+                                value += '0'; // Append "0" to missing channels.
+                                // fall through
                             case 3:
                             case 4:
-                            case 5:
+                            case 5: {
                                 // Process as: R G B ignored
                                 const [r, g, b] = value;
                                 return new Color(
@@ -145,6 +151,7 @@
                                     parseInt(g + g, 16),
                                     parseInt(b + b, 16)
                                 );
+                            }
                             case 6:
                                 // Process as RR GG BB
                                 return makeColorFromNumber(parseInt(value, 16));
