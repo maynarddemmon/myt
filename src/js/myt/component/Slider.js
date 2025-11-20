@@ -100,7 +100,7 @@
             },
             
             /** @overrides myt.ArrowKeyActivation. */
-            doKeyArrowLeftOrUp: function(isLeft, isRepeat) {
+            doKeyArrowLeftOrUp: function(isLeft, _isRepeat) {
                 if (isLeft) {
                     this.parent.nudgeValueLeft(this);
                 } else {
@@ -110,7 +110,7 @@
             },
             
             /** @overrides myt.ArrowKeyActivation. */
-            doKeyArrowRightOrDown: function(isRight, isRepeat) {
+            doKeyArrowRightOrDown: function(isRight, _isRepeat) {
                 if (isRight) {
                     this.parent.nudgeValueRight(this);
                 } else {
@@ -262,17 +262,17 @@
             
             /** Should only be called by SliderThumb.
                 @private
-                @param {!Object} thumb
+                @param {!Object} _thumb
                 @returns {number} */
-            getMinPixelValueForThumb: function(thumb) {
+            getMinPixelValueForThumb: function(_thumb) {
                 return this.convertValueToPixels(this.minValue);
             },
             
             /** Should only be called by SliderThumb.
                 @private
-                @param {!Object} thumb
+                @param {!Object} _thumb
                 @returns {number} */
-            getMaxPixelValueForThumb: function(thumb) {
+            getMaxPixelValueForThumb: function(_thumb) {
                 return this.convertValueToPixels(this.maxValue);
             }
         });

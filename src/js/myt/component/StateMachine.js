@@ -212,7 +212,7 @@
                 fireEvent = this.fireEvent.bind(this);
             
             switch (this.__transStage) {
-                case 'leaveState':
+                case 'leaveState': {
                     const result = this.doLeaveState(transitionName, current, to, args);
                     if (result === false) {
                         resetTransitionProgress(this);
@@ -226,14 +226,14 @@
                         fireEvent('leave', eventValue);
                         doDeferredTransitions(this); // FIXME: Is there a bug here if a transition starts in the middle of an async transition?
                         return PENDING;
-                    } else {
-                        fireEvent('start' + transitionName, eventValue);
-                        fireEvent('start', eventValue);
-                        fireEvent('leave' + current, eventValue);
-                        fireEvent('leave', eventValue);
-                        // Synchronous so fall through to 'enterState' case.
                     }
-                case 'enterState':
+                    
+                    fireEvent('start' + transitionName, eventValue);
+                    fireEvent('start', eventValue);
+                    fireEvent('leave' + current, eventValue);
+                    fireEvent('leave', eventValue);
+                    // Synchronous so fall through to 'enterState' case.
+                } case 'enterState':
                     this.current = to;
                     resetTransitionProgress(this);
                     this.doEnterState(transitionName, current, to, args);

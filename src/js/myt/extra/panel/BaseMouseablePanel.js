@@ -32,35 +32,35 @@ myt.BaseMouseablePanel = new JS.Module('BaseMouseablePanel', {
     setImageRoot: function(v) {
         if (this.imageRoot !== v) {
             this.imageRoot = v;
-            if (this.inited) updateUI();
+            if (this.inited) this.updateUI();
         }
     },
     
     setExtension: function(v) {
         if (this.extension !== v) {
             this.extension = v;
-            if (this.inited) updateUI();
+            if (this.inited) this.updateUI();
         }
     },
     
     setFirstPrefix: function(v) {
         if (this.firstPrefix !== v) {
             this.firstPrefix = v;
-            if (this.inited) updateUI();
+            if (this.inited) this.updateUI();
         }
     },
     
     setSecondPrefix: function(v) {
         if (this.secondPrefix !== v) {
             this.secondPrefix = v;
-            if (this.inited) updateUI();
+            if (this.inited) this.updateUI();
         }
     },
     
     setThirdPrefix: function(v) {
         if (this.thirdPrefix !== v) {
             this.thirdPrefix = v;
-            if (this.inited) updateUI();
+            if (this.inited) this.updateUI();
         }
     },
     

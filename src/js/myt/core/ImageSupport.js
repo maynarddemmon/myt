@@ -28,7 +28,7 @@
                         
                         // Start a size query
                         const img = new Image();
-                        img.onerror = err => {
+                        img.onerror = _err => {
                             // Notify all ImageSupport instances that are waiting for a natural 
                             // size that an error has occurred.
                             const openQueries = openQueryCache[imgUrl];

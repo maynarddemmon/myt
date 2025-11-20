@@ -23,8 +23,8 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     // Class Methods and Attributes ////////////////////////////////////////////
     extend: {
         createCircleTemplate: function(radius, color, opacity, strokeWidth, strokeColor, strokeOpacity) {
-            const strokeWidth = strokeWidth == null ? 0 : strokeWidth,
-                center = radius + strokeWidth + 1, // 1 is extra space for antialiasing
+            strokeWidth = strokeWidth == null ? 0 : strokeWidth;
+            const center = radius + strokeWidth + 1, // 1 is extra space for antialiasing
                 offscreen = new myt.Canvas(myt.global.roots.getRoots()[0], {
                     width:2 * center, height:2 * center, visible:false
                 });
@@ -270,9 +270,9 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     getMaxY: function() {return this.convertYPixelToValue(this.height);},
     
     /** @private
-        @param {!Object} event
+        @param {!Object} _event
         @returns {void} */
-    _doClick: function(event) {
+    _doClick: function(_event) {
         const hp = this.highlightedPoint, 
             isToggle = this.isToggleMode(), 
             isAdd = this.isAddMode();
@@ -426,11 +426,10 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
             will be returned.
         @returns array */
     getAllDataPoints: function(matchFunc, invert) {
-        const retval = [];
-        
         if (matchFunc) {
-            const data = this.data;
-            let i = data.length, 
+            const retval = [];
+            let data = this.data,
+                i = data.length, 
                 dataPoint;
             while (i) {
                 dataPoint = data[--i];
@@ -444,11 +443,10 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
                 dataPoint = data[--i];
                 if (matchFunc.call(this, dataPoint, i) === !invert) retval.push(dataPoint);
             }
+            return retval;
         } else {
-            retval = this.data.concat(this._animating);
+            return this.data.concat(this._animating);
         }
-        
-        return retval;
     },
     
     _getDataPoint: function(data, matchFunc, multiple) {
@@ -473,7 +471,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
             'both' types of points should be searched. Defaults to 'both'.
         @returns the data point or null if not found. */
     getDataPointById: function(id, type) {
-        return this._getDataPointsBy(function(p, i) {return p.id === id;}, type);
+        return this._getDataPointsBy(function(p, _i) {return p.id === id;}, type);
     },
     
     _getDataPointsBy: function(func, type, multiple) {
@@ -497,7 +495,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         
         if (!points) points = this.getAllDataPoints();
         
-        return this._getDataPoint(points, function(p, i) {
+        return this._getDataPoint(points, function(p, _i) {
             return func(p.y, p.x, centerY, centerX, radius);
         }, true);
     },
@@ -508,7 +506,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         
         if (!points) points = this.getAllDataPoints();
         
-        return this._getDataPoint(points, function(p, i) {
+        return this._getDataPoint(points, function(p, _i) {
             return myt.Geometry.isPointInPath(p.x, p.y, bounds, pathData);
         }, true);
     },
@@ -569,7 +567,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     },
     
     removeDataPointById: function(id, type) {
-        return this._removeDataPointBy(function(p, i) {return p.id === id;}, type);
+        return this._removeDataPointBy(function(p, _i) {return p.id === id;}, type);
     },
     
     /** Removes a list of data points that match the provided list of IDs.
@@ -586,7 +584,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
         this._lockDraw = this._lockRebuild = true;
         while (i) {
             id = idList[--i];
-            func = function(p, i) {return p.id === id;};
+            func = function(p, _i) {return p.id === id;};
             
             if (this.removeDataPoint(func)) {
                 atLeastOneRemoval = true;
@@ -610,7 +608,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     },
     
     removeDataPointByEquality: function(point, type) {
-        return this._removeDataPointBy(function(p, i) {return p === point;}, type);
+        return this._removeDataPointBy(function(p, _i) {return p === point;}, type);
     },
     
     _removeDataPointBy: function(func, type) {
@@ -625,7 +623,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     },
     
     removeDataPointInsideBounds: function(x, y, w, h, includeBounds) {
-        return this.removeDataPoint(function(p, i) {
+        return this.removeDataPoint(function(p, _i) {
             if (includeBounds) {
                 return (p.x >= x) && (p.x <= x + w) && (p.y >= y) && (p.y <= y + h);
             } else {
@@ -635,7 +633,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     },
     
     removeDataPointOutsideBounds: function(x, y, w, h, includeBounds) {
-        return this.removeDataPoint(function(p, i) {
+        return this.removeDataPoint(function(p, _i) {
             if (includeBounds) {
                 return (p.x <= x) || (p.x >= x + w) || (p.y <= y) || (p.y >= y + h);
             } else {
@@ -725,10 +723,7 @@ myt.ScatterGraph = new JS.Class('ScatterGraph', myt.Canvas, {
     drawPoints: function(data, context, skipConversion) {
         let drawnCount = 0;
         if (!this._lockDraw) {
-            const templates = this._pointTemplates, 
-                w = this.width, 
-                h = this.height,
-                BASE_FILTER = myt.ScatterGraph.BASE_FILTER;
+            const BASE_FILTER = myt.ScatterGraph.BASE_FILTER;
             let i = data.length, 
                 p, 
                 template;

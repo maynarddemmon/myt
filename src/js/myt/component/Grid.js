@@ -607,7 +607,7 @@
                     percentOfParentHeight:100, align:'right', alignOffset:-5,
                     draggableAllowBubble:false
                 }, [pkg.SizeToParent, pkg.Draggable, {
-                    requestDragPosition: function(x, y) {
+                    requestDragPosition: function(x, _y) {
                         let diff = x - this.x;
                         if (gc.fitToWidth) {
                             if (diff > 0) {
@@ -911,9 +911,9 @@
             },
             
             /** @private
-                @param {!Object} event
+                @param {!Object} _event
                 @returns {void} */
-            _updateContentHeight: function(event) {
+            _updateContentHeight: function(_event) {
                 const self = this,
                     {header, content} = self,
                     y = header.y + header.height;

@@ -214,10 +214,10 @@
         
         // Methods /////////////////////////////////////////////////////////////
         to: function(panel) {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve, _reject) => {
                 panel.stopActiveAnimators('opacity');
                 panel.setVisible(true);
-                panel.animate({attribute:'opacity', to:1, duration:this.duration}).next(success => {
+                panel.animate({attribute:'opacity', to:1, duration:this.duration}).next(_success => {
                     panel.makeHighestZIndex();
                     resolve(panel);
                 });
@@ -225,9 +225,9 @@
         },
         
         from: function(panel) {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve, _reject) => {
                 panel.stopActiveAnimators('opacity');
-                panel.animate({attribute:'opacity', to:0, duration:this.duration}).next(success => {
+                panel.animate({attribute:'opacity', to:0, duration:this.duration}).next(_success => {
                     panel.setVisible(false);
                     resolve(panel);
                 });
@@ -283,8 +283,8 @@
             panel.set(axis, toValue);
             panel.setVisible(true);
             
-            return new Promise((resolve, reject) => {
-                const nextFunc = success => {
+            return new Promise((resolve, _reject) => {
+                const nextFunc = _success => {
                     panel.makeHighestZIndex();
                     resolve(panel);
                 };
@@ -323,8 +323,8 @@
             
             panel.stopActiveAnimators(axis);
             
-            return new Promise((resolve, reject) => {
-                const nextFunc = success => {
+            return new Promise((resolve, _reject) => {
+                const nextFunc = _success => {
                     panel.setVisible(false);
                     resolve(panel);
                 };

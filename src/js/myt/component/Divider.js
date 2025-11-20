@@ -172,9 +172,9 @@
             // Methods /////////////////////////////////////////////////////////
             /** Do the limitToParent constraint.
                 @private
-                @param {!Object} event
+                @param {!Object} _event
                 @returns {void} */
-            __limitToParent: function(event) {
+            __limitToParent: function(_event) {
                 const self = this,
                     dim = self.axis === 'y' ? 'height' : 'width';
                 self.setMaxValue(self.parent[dim] - self.limitToParent - self[dim]);

@@ -301,7 +301,7 @@
     
     @class */
     pkg.TextTabSlider = new JSClass('TextTabSlider', TabSlider, {
-        // Life Cycle //////////////////////////////////////////////////////
+        // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
             this.labelTextColorChecked = '#fff';
             this.labelTextColor = '#333';
@@ -327,7 +327,7 @@
         },
 
 
-        // Accessors ///////////////////////////////////////////////////////
+        // Accessors ///////////////////////////////////////////////////////////
         setLabelTextColorChecked: function(v) {
             if (this.labelTextColorChecked !== v) {
                 this.labelTextColorChecked = v;
@@ -347,7 +347,7 @@
         setText: function(v) {updateLabelAttr(this, 'text', 'text', v);},
 
 
-        // Methods /////////////////////////////////////////////////////////
+        // Methods /////////////////////////////////////////////////////////////
         /** @overrides myt.TabSlider */
         notifyButtonRedraw: function() {
             this.button?.label?.setTextColor(this.__getTextColor());
@@ -358,7 +358,7 @@
         __getTextColor: function() {
             return (this.selected && this.tabContainer.maxSelected !== -1) ? this.labelTextColorChecked : this.labelTextColor;
         }
-    }),
+    });
     
     /** A mixin that allows myt.TabSliders to be added to a view.
         
@@ -372,7 +372,7 @@
         include: [pkg.SelectionManager],
 
 
-        // Life Cycle //////////////////////////////////////////////////////
+        // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
             const self = this;
 
@@ -421,7 +421,7 @@
         },
 
 
-        // Accessors ///////////////////////////////////////////////////////
+        // Accessors ///////////////////////////////////////////////////////////
         setPersistenceId: function(v) {this.persistenceId = v;},
         getTabSliders: function() {return this._tabSliders;},
         getTabSliderById: function(sliderId) {
@@ -440,7 +440,7 @@
         setDuration: function(v) {this.duration = v;},
 
 
-        // Methods /////////////////////////////////////////////////////////
+        // Methods /////////////////////////////////////////////////////////////
         /** @param {!Object} ignoredEvent
             @param {number} [temporaryDuration]
             @returns {void} */

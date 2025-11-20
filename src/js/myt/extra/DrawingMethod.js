@@ -47,5 +47,5 @@ myt.DrawingMethod = new JS.Class('DrawingMethod', {
         @param {?Object} [config] - A map of configuration parameters 
             that control how the DrawingMethod draws.
         @returns {void} */
-    draw: function(canvas, config) {}
+    draw: function(_canvas, _config) {}
 });

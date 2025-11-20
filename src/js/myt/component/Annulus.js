@@ -100,65 +100,65 @@
             const svgElem = document.createElementNS('http://www.w3.org/2000/svg', elementName);
             parentElem?.appendChild(svgElem);
             return svgElem;
+        };
+     
+    /** An annulus component.
+        
+        @class */
+    pkg.Annulus = new JS.Class('Annulus', pkg.BackView, {
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            const self = this;
+            
+            self.radius = self.thickness = self.startAngle = self.endAngle = 0;
+            self.startCapRounding = self.endCapRounding = false;
+            
+            self.callSuper(parent, attrs);
+            
+            updateSize(self);
         },
-         
-        /** An annulus component.
+        
+        /** @overrides myt.View */
+        createOurDomElement: function(parent) {
+            const elements = this.callSuper(parent),
+                innerElem = Array.isArray(elements) ? elements[1] : elements,
+                svg = this.__svg = makeSVG('svg', innerElem);
+            this.__path = makeSVG('path', svg);
             
-            @class */
-        Annulus = pkg.Annulus = new JS.Class('Annulus', pkg.BackView, {
-            // Life Cycle //////////////////////////////////////////////////////
-            initNode: function(parent, attrs) {
-                const self = this;
-                
-                self.radius = self.thickness = self.startAngle = self.endAngle = 0;
-                self.startCapRounding = self.endCapRounding = false;
-                
-                self.callSuper(parent, attrs);
-                
-                updateSize(self);
-            },
+            // Let the view handle mouse events
+            svg.style.pointerEvents = 'none';
             
-            /** @overrides myt.View */
-            createOurDomElement: function(parent) {
-                const elements = this.callSuper(parent),
-                    innerElem = Array.isArray(elements) ? elements[1] : elements,
-                    svg = this.__svg = makeSVG('svg', innerElem);
-                this.__path = makeSVG('path', svg);
-                
-                // Let the view handle mouse events
-                svg.style.pointerEvents = 'none';
-                
-                return elements;
-            },
-            
-            
-            // Accessors ///////////////////////////////////////////////////////
-            /** The outer radius of the Annulus. */
-            setRadius: function(v) {setAndUpdateSize(this, 'radius', v);},
-            
-            /** The difference between the inner and outer radius. */
-            setThickness: function(v) {setAndUpdateSize(this, 'thickness', v);},
-            
-            /** The start angle in degrees. */
-            setStartAngle: function(v) {setAndRedraw(this, 'startAngle', v);},
-            
-            /** The end angle in degrees. */
-            setEndAngle: function(v) {setAndRedraw(this, 'endAngle', v);},
-            
-            /** If true the starting cap will be drawn as a semicircle. */
-            setStartCapRounding: function(v) {setAndRedraw(this, 'startCapRounding', v);},
-            
-            /** If true the ending cap will be drawn as a semicircle. */
-            setEndCapRounding: function(v) {setAndRedraw(this, 'endCapRounding', v);},
-            
-            /** The hex color string to fill the Annulus with. */
-            setColor: function(v) {setAndRedraw(this, 'color', v);},
-            
-            
-            // Methods /////////////////////////////////////////////////////////
-            /** @overrides myt.View */
-            isColorAttr: function(attrName) {
-                return attrName === 'color' || this.callSuper(attrName);
-            }
-        });
+            return elements;
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** The outer radius of the Annulus. */
+        setRadius: function(v) {setAndUpdateSize(this, 'radius', v);},
+        
+        /** The difference between the inner and outer radius. */
+        setThickness: function(v) {setAndUpdateSize(this, 'thickness', v);},
+        
+        /** The start angle in degrees. */
+        setStartAngle: function(v) {setAndRedraw(this, 'startAngle', v);},
+        
+        /** The end angle in degrees. */
+        setEndAngle: function(v) {setAndRedraw(this, 'endAngle', v);},
+        
+        /** If true the starting cap will be drawn as a semicircle. */
+        setStartCapRounding: function(v) {setAndRedraw(this, 'startCapRounding', v);},
+        
+        /** If true the ending cap will be drawn as a semicircle. */
+        setEndCapRounding: function(v) {setAndRedraw(this, 'endCapRounding', v);},
+        
+        /** The hex color string to fill the Annulus with. */
+        setColor: function(v) {setAndRedraw(this, 'color', v);},
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides myt.View */
+        isColorAttr: function(attrName) {
+            return attrName === 'color' || this.callSuper(attrName);
+        }
+    });
 })(myt);

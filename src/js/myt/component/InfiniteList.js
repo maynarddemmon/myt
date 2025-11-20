@@ -347,7 +347,7 @@
                 this._itemPool.putInstance(row);
             },
             
-            refreshListUI: function(ignoredEvent) {
+            refreshListUI: function(_event) {
                 const self = this,
                     rowExtent = self._rowExtent,
                     rowInset = self.rowInset,
@@ -418,7 +418,7 @@
                 }
             },
             
-            getClassKey: model => DEFAULT_CLASS_KEY,
+            getClassKey: _model => DEFAULT_CLASS_KEY,
             
             updateRow:NOOP // row => {}
         }),
@@ -485,13 +485,13 @@
             },
             
             /** @overrides myt.ArrowKeyActivation. */
-            doKeyArrowLeftOrUp: function(isLeft, isRepeat) {
+            doKeyArrowLeftOrUp: function(_isLeft, _isRepeat) {
                 this.infiniteOwner.selectPrevRowForModel(this.model);
                 return true;
             },
             
             /** @overrides myt.ArrowKeyActivation. */
-            doKeyArrowRightOrDown: function(isRight, isRepeat) {
+            doKeyArrowRightOrDown: function(_isRight, _isRepeat) {
                 this.infiniteOwner.selectNextRowForModel(this.model);
                 return true;
             },
@@ -542,7 +542,7 @@
                 return this.getActiveRowForModel(this.selectedRowModel);
             },
             
-            selectRowForModel: function(model, focus, isNext) {
+            selectRowForModel: function(model, focus, _isNext) {
                 if (model) {
                     clearSelectedRow(this);
                     this.setSelectedRowModel(model);
@@ -582,7 +582,7 @@
             },
             
             /** @overrides */
-            refreshListUI: function(ignoredEvent) {
+            refreshListUI: function(_event) {
                 const currentFocus = GlobalFocus.focusedView;
                 
                 this.callSuper();

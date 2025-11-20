@@ -78,7 +78,7 @@
                 this.setTooltip(this.getTooltipByValue(value));
             },
             
-            getColorByValue: function(value, percent) {
+            getColorByValue: function(_value, _percent) {
                 return this.color;
             },
             getTooltipByValue: function(value) {

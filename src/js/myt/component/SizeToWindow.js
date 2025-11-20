@@ -61,9 +61,9 @@
             
             // Methods /////////////////////////////////////////////////////////
             /** @private
-                @param {!Object} ignoredEvent
+                @param {!Object} _event
                 @returns {void} */
-            __hndlResize: function(ignoredEvent) {
+            __hndlResize: function(_event) {
                 handleResize(this);
             }
         });

@@ -13,7 +13,7 @@
             initNode: function(parent, attrs) {
                 this.status = 'closed';
                 this.useJSON = true;
-                this.callSuper();
+                this.callSuper(parent, attrs);
             },
             
             destroy: function() {
@@ -103,7 +103,7 @@
                     return true;
                 } else if (!doNotTryToConnect) {
                     // Try to connect first and then send
-                    self.connect(event => {self.send(msg, true);});
+                    self.connect(_event => {self.send(msg, true);});
                 } else {
                     return false;
                 }
@@ -122,7 +122,7 @@
             /** Invoked when after the WebSocket is opened.
                 @param {!Object} event -  The open event fired by the WebSocket.
                 @returns {void} */
-            onOpen: function(event) {
+            onOpen: function(_event) {
                 this.setStatus('open');
             },
             
@@ -155,7 +155,7 @@
             /** Invoked when the WebSocket is closed.
                 @param {!Object} event - The close event fired by the WebSocket.
                 @returns {void} */
-            onClose: function(event) {
+            onClose: function(_event) {
                 if (this._ws) delete this._ws;
                 this.setStatus('closed');
             }
@@ -176,7 +176,7 @@
                 matcherFunc = matcher;
             } else if (matcher == null) {
                 // Use a unique match anything function
-                matcherFunc = pkg.TRUE_FUNC, // type => true;
+                matcherFunc = pkg.TRUE_FUNC; // type => true;
             } else {
                 // Invalid matcherFunc
             }

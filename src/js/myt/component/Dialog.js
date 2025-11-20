@@ -194,7 +194,7 @@
                         x:170, y:y, width:colorViewSize + 26 + 6,
                         minValue:0, maxValue:255, flipThreshold:55, labelColor:'#fff'
                     }, [{
-                        setText: function(event, noAnim) {
+                        setText: function(event, _noAnim) {
                             let v = event.value;
                             
                             if (v == null || isNaN(v)) v = 0;
@@ -453,8 +453,8 @@
                 todayFullYear = todayDateObj.getFullYear(),
                 todayMonth = todayDateObj.getMonth(),
                 todayDate = todayDateObj.getDate(),
-                todayHours = todayDateObj.getHours(),
-                todayMinutes = todayDateObj.getMinutes(),
+                //todayHours = todayDateObj.getHours(),
+                //todayMinutes = todayDateObj.getMinutes(),
                 dateFullYear = date.getFullYear(),
                 dateMonth = date.getMonth(),
                 dateDate = date.getDate(),
@@ -467,9 +467,9 @@
                 dateBeforeMonth = new Date(dateFullYear, dateMonth, 0),
                 dateNextMonth = new Date(dateFullYear, dateMonth + 2, 0),
                 isCurrentYear = todayFullYear == dateFullYear,
-                isCurrentMonth = isCurrentYear && todayMonth == dateMonth,
-                isCurrentDay = isCurrentMonth && todayDate == dateDate,
-                isPastMonth = dateFullYear < todayFullYear || (isCurrentYear && dateMonth < todayMonth);
+                isCurrentMonth = isCurrentYear && todayMonth == dateMonth;
+                //isCurrentDay = isCurrentMonth && todayDate == dateDate;
+                //isPastMonth = dateFullYear < todayFullYear || (isCurrentYear && dateMonth < todayMonth);
             
             let realDayObj;
             if (!timeOnly) {
@@ -581,11 +581,11 @@
                 let [hours, minutes] = minTime;
                 realDayObj = new Date(dateTime);
                 while (hours * 60 + minutes < maxTimeInMinutes) {
-                    const is_past_time = hours < todayHours || (hours == todayHours && minutes < todayMinutes),
-                        is_past = isCurrentDay && is_past_time,
-                        timeCell = new TimeBtn(timeListView, {
-                            text:('0' + hours).slice(-2) + ':' + ('0' + minutes).slice(-2)
-                        });
+                    //const is_past_time = hours < todayHours || (hours == todayHours && minutes < todayMinutes),
+                        //is_past = isCurrentDay && is_past_time,
+                    const timeCell = new TimeBtn(timeListView, {
+                        text:('0' + hours).slice(-2) + ':' + ('0' + minutes).slice(-2)
+                    });
                     if (hours === dateHours && minutes === dateMinutes) timeListView.select(timeCell);
                     
                     realDayObj.setHours(hours);
@@ -1106,11 +1106,12 @@
                         case 'cancelBtn':
                             callbackFunction.call(self, action);
                             break;
-                        case 'confirmBtn':
+                        case 'confirmBtn': {
                             const colorAsHex = colorPicker.getColor();
                             colorPicker.addToPalette(colorAsHex);
                             callbackFunction.call(self, action, colorAsHex);
                             break;
+                        }
                     }
                     colorPicker.destroy();
                 });

@@ -121,8 +121,11 @@
                     @param {!Object} event Event value is a dom event.
                     @returns object with an x and y key each containing a number. */
                 getScrollFromEvent: event => {
-                    const {scrollLeft, scrollTop} = getSourceViewFromEvent(event)?.getIDE();
-                    return {x:scrollLeft, y:scrollTop};
+                    const sourceView = getSourceViewFromEvent(event);
+                    if (sourceView) {
+                        const ide = sourceView.getIDE();
+                        return {x:ide.scrollLeft, y:ide.scrollTop};
+                    }
                 }
             },
             
@@ -309,17 +312,17 @@
             },
             
             /** @private
-                @param {!Object} event
+                @param {!Object} _event
                 @returns {void} */
-            __doFocus: function(event) {
+            __doFocus: function(_event) {
                 if (!this.focused) this.setFocused(true);
                 this.doFocus();
             },
             
             /** @private
-                @param {!Object} event
+                @param {!Object} _event
                 @returns {void} */
-            __doBlur: function(event) {
+            __doBlur: function(_event) {
                 this.doBlur();
                 if (this.focused) this.setFocused(false);
             },
@@ -505,19 +508,19 @@
             return false;
         },
         
-        getDomElementForDomObservable: function(type) {
+        getDomElementForDomObservable: function(_type) {
             return this.getIDE();
         },
         
         /** Creates a function that will handle the dom event when it is fired by the browser. 
             Must be implemented by the object this mixin is applied to.
-            @param {!Object} domObserver - The myt.DomObserver that must be notified when the dom 
+            @param {!Object} _domObserver - The myt.DomObserver that must be notified when the dom 
                 event fires.
-            @param {string} methodName - the name of the function to pass the event to.
-            @param {string} type - the type of the event to fire.
+            @param {string} _methodName - the name of the function to pass the event to.
+            @param {string} _type - the type of the event to fire.
             @returns {?Function} - A function to handle the dom event or null if the event is 
                 not supported. */
-        createDomHandler: (domObserver, methodName, type) => null,
+        createDomHandler: (_domObserver, _methodName, _type) => null,
         
         /** Used by the createDomHandler implementations of submixins of myt.DomObservable to 
             implement the standard methodRef.

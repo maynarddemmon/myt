@@ -109,7 +109,7 @@
             },
             
             /** @overrides myt.View */
-            sendBehind: function(otherRootView, ignoredLayout) {
+            sendBehind: function(otherRootView, _ignoredLayout) {
                 // Attempt to manipulate dom above root node.
                 const ide = this.getIDE(),
                     otherIde = otherRootView.getIDE(),

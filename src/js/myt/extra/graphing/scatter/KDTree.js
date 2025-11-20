@@ -127,12 +127,13 @@ myt.BinaryHeap = new JS.Class('BinaryHeap', {
             let child2N = (n + 1) * 2, 
                 child1N = child2N - 1;
             // This is used to store the new position of the element, if any.
-            let swap = null;
+            let swap = null,
+                child1Score;
             // If the first child exists (is inside the array)...
             if (child1N < length) {
                 // Look it up and compute its score.
-                const child1 = content[child1N],
-                    child1Score = this.scoreFunction(child1);
+                const child1 = content[child1N];
+                child1Score = this.scoreFunction(child1);
                 // If the score is less than our element's, we need to swap.
                 if (child1Score < elemScore) swap = child1N;
             }

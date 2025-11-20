@@ -167,7 +167,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             i: date => zeroPad(date.getMinutes()),
             s: date => zeroPad(date.getSeconds()),
             // Timezone
-            e: date => /\((.*)\)/.exec(new Date().toString())[1],
+            e: _date => /\((.*)\)/.exec(new Date().toString())[1],
             I: date => {
                 let DST = null, i = 0;
                 for (; i < 12;) {
@@ -185,7 +185,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             },
             O: date => timezoneOffsetFunc(date, false),
             P: date => timezoneOffsetFunc(date, true),
-            T: date => Intl.DateTimeFormat().resolvedOptions().timeZone,
+            T: _date => Intl.DateTimeFormat().resolvedOptions().timeZone,
             Z: date => -date.getTimezoneOffset() * 60,
             // Full Date/Time
             c: date => date.format('Y-m-d\\TH:i:sP'),
@@ -406,7 +406,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         // The klass extends from this.
         for (const field in this) {
-            if (klass[field] !== this[field] && !klass.hasOwnProperty(field)) klass[field] = this[field];
+            if (klass[field] !== this[field] && !Object.hasOwn(klass, field)) klass[field] = this[field];
         }
         
         klass.prototype.constructor = klass.prototype.klass = klass;
@@ -432,7 +432,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         // The klass extends from Class.prototype.
         for (const field in classProto) {
-            if (klass[field] !== classProto[field] && !klass.hasOwnProperty(field)) klass[field] = classProto[field];
+            if (klass[field] !== classProto[field] && !Object.hasOwn(klass, field)) klass[field] = classProto[field];
         }
         
         klass.include(parent);
@@ -1194,11 +1194,11 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 @returns {string} */
             formatAsPercentage: (num, fixed=2) => {
                 switch (typeof num) {
-                    case 'number':
+                    case 'number': {
                         fixed = mathMin(16, mathMax(0, fixed));
                         const percent = math.round(mathMax(0, mathMin(1, num)) * mathPow(10, 2+fixed)) / mathPow(10, fixed);
                         return (percent % 1 === 0 ? percent : percent.toFixed(fixed)) + '%';
-                    case 'string':
+                    } case 'string':
                         // Assume a string passed to this function is already correctly formatted 
                         // so pass it through unchanged.
                         return num;
@@ -1770,7 +1770,8 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             // This is a quoted cookie as according to RFC2068, unescape
             if (s.startsWith('"')) s = s.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
             
-            try {return useJson ? JSON.parse(s) : s;} catch(ex) {}
+            try {return useJson ? JSON.parse(s) : s;} 
+            catch(ex) { console.log(ex); }
         },
         
         /** Browser cookie utility functions.
@@ -3823,8 +3824,11 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     @param {!Object} event Event value is a dom event.
                     @returns object with an x and y key each containing a number. */
                 getScrollFromEvent: event => {
-                    const {scrollLeft, scrollTop} = getSourceViewFromEvent(event)?.getIDE();
-                    return {x:scrollLeft, y:scrollTop};
+                    const sourceView = getSourceViewFromEvent(event);
+                    if (sourceView) {
+                        const ide = sourceView.getIDE();
+                        return {x:ide.scrollLeft, y:ide.scrollTop};
+                    }
                 }
             },
             
@@ -4011,17 +4015,17 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             },
             
             /** @private
-                @param {!Object} event
+                @param {!Object} _event
                 @returns {void} */
-            __doFocus: function(event) {
+            __doFocus: function(_event) {
                 if (!this.focused) this.setFocused(true);
                 this.doFocus();
             },
             
             /** @private
-                @param {!Object} event
+                @param {!Object} _event
                 @returns {void} */
-            __doBlur: function(event) {
+            __doBlur: function(_event) {
                 this.doBlur();
                 if (this.focused) this.setFocused(false);
             },
@@ -4207,19 +4211,19 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             return false;
         },
         
-        getDomElementForDomObservable: function(type) {
+        getDomElementForDomObservable: function(_type) {
             return this.getIDE();
         },
         
         /** Creates a function that will handle the dom event when it is fired by the browser. 
             Must be implemented by the object this mixin is applied to.
-            @param {!Object} domObserver - The myt.DomObserver that must be notified when the dom 
+            @param {!Object} _domObserver - The myt.DomObserver that must be notified when the dom 
                 event fires.
-            @param {string} methodName - the name of the function to pass the event to.
-            @param {string} type - the type of the event to fire.
+            @param {string} _methodName - the name of the function to pass the event to.
+            @param {string} _type - the type of the event to fire.
             @returns {?Function} - A function to handle the dom event or null if the event is 
                 not supported. */
-        createDomHandler: (domObserver, methodName, type) => null,
+        createDomHandler: (_domObserver, _methodName, _type) => null,
         
         /** Used by the createDomHandler implementations of submixins of myt.DomObservable to 
             implement the standard methodRef.
@@ -4461,7 +4465,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         shouldPreventDefault = (code, targetElem) => {
             switch (code) {
-                case CODE_BACKSPACE: // Backspace
+                case CODE_BACKSPACE: { // Backspace
                     // Catch backspace since it navigates the history. Allow it to go through for 
                     // text input elements though.
                     const nodeName = targetElem.nodeName;
@@ -4470,7 +4474,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                         (nodeName === 'INPUT' && (targetElem.type === 'text' || targetElem.type === 'number' || targetElem.type === 'password')) ||
                         (nodeName === 'DIV' && targetElem.contentEditable === 'true' && targetElem.firstChild)
                     );
-                case CODE_TAB: // Tab
+                } case CODE_TAB: // Tab
                     // Tab navigation is handled by the framework.
                     return true;
             }
@@ -4671,447 +4675,448 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 if (flexbox.inited) flexbox.fireEvent(attrName, value);
                 flexbox.updateFlexboxLayout();
             }
+        };
+    
+    /** Adds support for flex box to a myt.View.
+        
+        Attributes:
+            direction:string
+                Supported values: "row", "rowReverse", "column", "columnReverse".
+            wrap:string
+                Supported values: "nowrap", "wrap", "wrapReverse".
+            justifyContent:string
+                Supported values: "start", "end", "center", "spaceBetween", "spaceAround", 
+                "spaceEvenly".
+            alignItems:string
+                Supported values: "start", "end", "center", "stretch".
+            alignContent:string
+                Supported values: "start", "end", "center", "spaceBetween", "spaceAround", 
+                "spaceEvenly", "stretch"
+            rowGap:number
+            columnGap:number
+            
+        Private Attributes:
+            __flexboxPaused:boolean - Used to prevent flexbox layout updates
+                from occuring.
+            __isUpdatingFlexboxLayout:boolean - Prevents infinite loops in the layout function.
+        
+        @class */
+    pkg.FlexboxSupport = new JSModule('FlexboxSupport', {
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides */
+        initNode: function(parent, attrs) {
+            this.__IS_FLEXBOX_SUPPORT = true; // Optimize FlexboxChildSupport.isChildOfFlexbox
+            
+            this.rowGap = this.columnGap = 0;
+            this.direction ??= 'row';
+            this.wrap = 'nowrap';
+            this.justifyContent = this.alignContent = 'start';
+            this.alignItems = 'stretch';
+            
+            this.callSuper(parent, attrs);
+            
+            this.updateFlexboxLayout();
         },
         
-        /** Adds support for flex box to a myt.View.
-            
-            Attributes:
-                direction:string
-                    Supported values: "row", "rowReverse", "column", "columnReverse".
-                wrap:string
-                    Supported values: "nowrap", "wrap", "wrapReverse".
-                justifyContent:string
-                    Supported values: "start", "end", "center", "spaceBetween", "spaceAround", 
-                    "spaceEvenly".
-                alignItems:string
-                    Supported values: "start", "end", "center", "stretch".
-                alignContent:string
-                    Supported values: "start", "end", "center", "spaceBetween", "spaceAround", 
-                    "spaceEvenly", "stretch"
-                rowGap:number
-                columnGap:number
-                
-            Private Attributes:
-                __flexboxPaused:boolean - Used to prevent flexbox layout updates
-                    from occuring.
-                __isUpdatingFlexboxLayout:boolean - Prevents infinite loops in the layout function.
-            
-            @class */
-        FlexboxSupport = pkg.FlexboxSupport = new JSModule('FlexboxSupport', {
-            // Life Cycle //////////////////////////////////////////////////////
-            /** @overrides */
-            initNode: function(parent, attrs) {
-                this.__IS_FLEXBOX_SUPPORT = true; // Optimize FlexboxChildSupport.isChildOfFlexbox
-                
-                this.rowGap = this.columnGap = 0;
-                this.direction ??= 'row';
-                this.wrap = 'nowrap';
-                this.justifyContent = this.alignContent = 'start';
-                this.alignItems = 'stretch';
-                
-                this.callSuper(parent, attrs);
-                
-                this.updateFlexboxLayout();
-            },
-            
-            
-            // Accessors ///////////////////////////////////////////////////////
-            /** @overrides */
-            setWidth: function(v) {
-                const existing = this.width;
-                this.callSuper(v);
-                if (existing !== this.width) this.updateFlexboxLayout();
-            },
-            
-            /** @overrides */
-            setHeight: function(v) {
-                const existing = this.height;
-                this.callSuper(v);
-                if (existing !== this.height) this.updateFlexboxLayout();
-            },
-            
-            setDirection: function(v) {setFlexboxAttr(this, 'direction', v);},
-            setWrap: function(v) {setFlexboxAttr(this, 'wrap', v);},
-            setJustifyContent: function(v) {setFlexboxAttr(this, 'justifyContent', v);},
-            setAlignItems: function(v) {setFlexboxAttr(this, 'alignItems', v);},
-            setAlignContent: function(v) {setFlexboxAttr(this, 'alignContent', v);},
-            setRowGap: function(v) {setFlexboxAttr(this, 'rowGap', mathMax(0, v));},
-            setColumnGap: function(v) {setFlexboxAttr(this, 'columnGap', mathMax(0, v));},
-            
-            getWidthForFlexboxLayout: function() {
-                return this.width;
-            },
-            
-            getHeightForFlexboxLayout: function() {
-                return this.height;
-            },
-            
-            setTotalBasisWidth: function(v) {this.set('totalBasisWidth', v, true);},
-            setTotalBasisHeight: function(v) {this.set('totalBasisHeight', v, true);},
-            
-            ignoreSubviewForFlex: function(sv) {
-                return sv && typeof sv.ignoreFlex === 'function' ? sv.ignoreFlex() : true;
-            },
-            
-            
-            // Methods /////////////////////////////////////////////////////////
-            setFlexboxPaused: function(v, noLayoutUpdate) {
-                if (this.__flexboxPaused !== v) {
-                    this.__flexboxPaused = v;
-                    if (!v && !noLayoutUpdate) this.updateFlexboxLayout();
-                }
-            },
-            isFlexboxPaused: function() {return !!this.__flexboxPaused;},
-            
-            /** @overrides */
-            subviewAdded: function(sv) {
-                this.callSuper(sv);
-                if (sv && !this.ignoreSubviewForFlex(sv)) this.updateFlexboxLayout();
-            },
-            
-            /** @overrides */
-            subviewRemoved: function(sv) {
-                this.callSuper(sv);
-                if (sv && !this.ignoreSubviewForFlex(sv) && !this.isBeingDestroyed) this.updateFlexboxLayout();
-            },
-            
-            /** @overrides */
-            doSubviewsReorderedInDom: function(sv) {
-                this.callSuper(sv);
-                if (!sv || !this.ignoreSubviewForFlex(sv)) this.updateFlexboxLayout();
-            },
-            
-            isOKToUpdateLayout: function() {
-                return this.inited && !this.__isUpdatingFlexboxLayout && !this.isFlexboxPaused();
-            },
-            
-            isCompactWidth: FALSE_FUNC,
-            isCompactHeight: FALSE_FUNC,
-            isCompactOnMainAxis: function(isRowDirection) {
-                return isRowDirection ? this.isCompactWidth() : this.isCompactHeight();
-            },
-            isCompactOnCrossAxis: function(isRowDirection) {
-                return isRowDirection ? this.isCompactHeight() : this.isCompactWidth();
-            },
-            isWrapNotAllowed: function() {
-                return this.wrap === 'nowrap';
-            },
-            
-            setUpdateAgain: function(v) {
-                this._updateAgain = v;
-            },
-            isUpdateAgain: function() {
-                return this._updateAgain;
-            },
-            
-            updateFlexboxLayout: function() {
-                const flexbox = this;
-                if (flexbox.isOKToUpdateLayout()) {
-                    const children = flexbox.getSubviewsInLexicalOrder().filter(sv => flexbox.ignoreSubviewForFlex(sv) !== true && sv.visible === true),
-                        len = children.length;
-                    if (len > 0) {
-                        flexbox.__isUpdatingFlexboxLayout = true;
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** @overrides */
+        setWidth: function(v) {
+            const existing = this.width;
+            this.callSuper(v);
+            if (existing !== this.width) this.updateFlexboxLayout();
+        },
+        
+        /** @overrides */
+        setHeight: function(v) {
+            const existing = this.height;
+            this.callSuper(v);
+            if (existing !== this.height) this.updateFlexboxLayout();
+        },
+        
+        setDirection: function(v) {setFlexboxAttr(this, 'direction', v);},
+        setWrap: function(v) {setFlexboxAttr(this, 'wrap', v);},
+        setJustifyContent: function(v) {setFlexboxAttr(this, 'justifyContent', v);},
+        setAlignItems: function(v) {setFlexboxAttr(this, 'alignItems', v);},
+        setAlignContent: function(v) {setFlexboxAttr(this, 'alignContent', v);},
+        setRowGap: function(v) {setFlexboxAttr(this, 'rowGap', mathMax(0, v));},
+        setColumnGap: function(v) {setFlexboxAttr(this, 'columnGap', mathMax(0, v));},
+        
+        getWidthForFlexboxLayout: function() {
+            return this.width;
+        },
+        
+        getHeightForFlexboxLayout: function() {
+            return this.height;
+        },
+        
+        setTotalBasisWidth: function(v) {this.set('totalBasisWidth', v, true);},
+        setTotalBasisHeight: function(v) {this.set('totalBasisHeight', v, true);},
+        
+        ignoreSubviewForFlex: function(sv) {
+            return sv && typeof sv.ignoreFlex === 'function' ? sv.ignoreFlex() : true;
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        setFlexboxPaused: function(v, noLayoutUpdate) {
+            if (this.__flexboxPaused !== v) {
+                this.__flexboxPaused = v;
+                if (!v && !noLayoutUpdate) this.updateFlexboxLayout();
+            }
+        },
+        isFlexboxPaused: function() {return !!this.__flexboxPaused;},
+        
+        /** @overrides */
+        subviewAdded: function(sv) {
+            this.callSuper(sv);
+            if (sv && !this.ignoreSubviewForFlex(sv)) this.updateFlexboxLayout();
+        },
+        
+        /** @overrides */
+        subviewRemoved: function(sv) {
+            this.callSuper(sv);
+            if (sv && !this.ignoreSubviewForFlex(sv) && !this.isBeingDestroyed) this.updateFlexboxLayout();
+        },
+        
+        /** @overrides */
+        doSubviewsReorderedInDom: function(sv) {
+            this.callSuper(sv);
+            if (!sv || !this.ignoreSubviewForFlex(sv)) this.updateFlexboxLayout();
+        },
+        
+        isOKToUpdateLayout: function() {
+            return this.inited && !this.__isUpdatingFlexboxLayout && !this.isFlexboxPaused();
+        },
+        
+        isCompactWidth: FALSE_FUNC,
+        isCompactHeight: FALSE_FUNC,
+        isCompactOnMainAxis: function(isRowDirection) {
+            return isRowDirection ? this.isCompactWidth() : this.isCompactHeight();
+        },
+        isCompactOnCrossAxis: function(isRowDirection) {
+            return isRowDirection ? this.isCompactHeight() : this.isCompactWidth();
+        },
+        isWrapNotAllowed: function() {
+            return this.wrap === 'nowrap';
+        },
+        
+        setUpdateAgain: function(v) {
+            this._updateAgain = v;
+        },
+        isUpdateAgain: function() {
+            return this._updateAgain;
+        },
+        
+        updateFlexboxLayout: function() {
+            const flexbox = this;
+            if (flexbox.isOKToUpdateLayout()) {
+                const children = flexbox.getSubviewsInLexicalOrder().filter(sv => flexbox.ignoreSubviewForFlex(sv) !== true && sv.visible === true),
+                    len = children.length;
+                if (len > 0) {
+                    flexbox.__isUpdatingFlexboxLayout = true;
+                    
+                    const direction = flexbox.direction,
+                        isRowDirection = direction.startsWith('row'),
+                        isNotRowDirection = !isRowDirection,
                         
-                        const direction = flexbox.direction,
-                            isRowDirection = direction.startsWith('row'),
-                            isNotRowDirection = !isRowDirection,
-                            
-                            flexboxWidth = flexbox.getWidthForFlexboxLayout(),
-                            flexboxHeight = flexbox.getHeightForFlexboxLayout(),
-                            
-                            mainPositionAttr = isRowDirection ? 'x' : 'y',
-                            mainGap = isRowDirection ? flexbox.columnGap : flexbox.rowGap,
-                            mainFlexboxSize = isRowDirection ? flexboxWidth : flexboxHeight,
-                            
-                            crossPositionAttr = isRowDirection ? 'y' : 'x',
-                            crossGap = isRowDirection ? flexbox.rowGap : flexbox.columnGap,
-                            crossFlexboxSize = isRowDirection ? flexboxHeight : flexboxWidth,
-                            
-                            noWrap = flexbox.isWrapNotAllowed(),
-                            
-                            justifyContent = flexbox.justifyContent,
-                            alignItems = flexbox.alignItems,
-                            alignContent = noWrap ? 'stretch' : flexbox.alignContent;
+                        flexboxWidth = flexbox.getWidthForFlexboxLayout(),
+                        flexboxHeight = flexbox.getHeightForFlexboxLayout(),
                         
-                        if (direction.endsWith('Reverse')) children.reverse();
+                        //mainPositionAttr = isRowDirection ? 'x' : 'y',
+                        mainGap = isRowDirection ? flexbox.columnGap : flexbox.rowGap,
+                        mainFlexboxSize = isRowDirection ? flexboxWidth : flexboxHeight,
                         
-                        // Basic Flow: break up the basic flow into an array of items that fit 
-                        // within the mainFlexboxSize.
-                        let pos = 0,
-                            maxPos = 0,
-                            crossPos = 0,
-                            itemCount = 0,
+                        //crossPositionAttr = isRowDirection ? 'y' : 'x',
+                        crossGap = isRowDirection ? flexbox.rowGap : flexbox.columnGap,
+                        crossFlexboxSize = isRowDirection ? flexboxHeight : flexboxWidth,
+                        
+                        noWrap = flexbox.isWrapNotAllowed(),
+                        
+                        justifyContent = flexbox.justifyContent,
+                        alignItems = flexbox.alignItems,
+                        alignContent = noWrap ? 'stretch' : flexbox.alignContent;
+                    
+                    if (direction.endsWith('Reverse')) children.reverse();
+                    
+                    // Basic Flow: break up the basic flow into an array of items that fit 
+                    // within the mainFlexboxSize.
+                    let pos = 0,
+                        maxPos = 0,
+                        crossPos = 0,
+                        itemCount = 0,
+                        currentFlow = {items:[], shrinkCount:0, shrinkBasis:0, growCount:0, extraSize:0, crossPos:crossPos, crossSize:0};
+                    const flows = [currentFlow];
+                    
+                    for (let i = 0; i < len;) {
+                        const child = children[i++],
+                            childBasisSize = getChildBasisSize(child, isRowDirection),
+                            childShrink = child.getShrink(),
+                            childGrow = child.getGrow();
+                        
+                        if (
+                            // We can only make new flows if we're wrapping
+                            !noWrap && 
+                            
+                            // The current flow must have at least 1 item before we will make 
+                            // a new flow.
+                            currentFlow.items.length > 0 &&
+                            
+                            // If the next child would overflow then make a new flow
+                            pos + (itemCount === 0 ? 0 : mainGap) + childBasisSize > mainFlexboxSize
+                        ) {
+                            currentFlow.extraSize = mainFlexboxSize - pos;
+                            crossPos += currentFlow.crossSize + crossGap;
+                            maxPos = mathMax(maxPos, pos);
+                            
+                            // Make next flow
+                            pos = 0;
+                            itemCount = 0;
                             currentFlow = {items:[], shrinkCount:0, shrinkBasis:0, growCount:0, extraSize:0, crossPos:crossPos, crossSize:0};
-                        const flows = [currentFlow];
-                        
-                        for (let i = 0; i < len;) {
-                            const child = children[i++],
-                                childBasisSize = getChildBasisSize(child, isRowDirection),
-                                childShrink = child.getShrink(),
-                                childGrow = child.getGrow();
-                            
-                            if (
-                                // We can only make new flows if we're wrapping
-                                !noWrap && 
-                                
-                                // The current flow must have at least 1 item before we will make 
-                                // a new flow.
-                                currentFlow.items.length > 0 &&
-                                
-                                // If the next child would overflow then make a new flow
-                                pos + (itemCount === 0 ? 0 : mainGap) + childBasisSize > mainFlexboxSize
-                            ) {
-                                currentFlow.extraSize = mainFlexboxSize - pos;
-                                crossPos += currentFlow.crossSize + crossGap;
-                                maxPos = mathMax(maxPos, pos);
-                                
-                                // Make next flow
-                                pos = 0;
-                                itemCount = 0;
-                                currentFlow = {items:[], shrinkCount:0, shrinkBasis:0, growCount:0, extraSize:0, crossPos:crossPos, crossSize:0};
-                                flows.push(currentFlow);
-                            }
-                            
-                            if (itemCount !== 0) pos += mainGap;
-                            
-                            if (childShrink > 0 && childBasisSize > 0) {
-                                currentFlow.shrinkCount += childShrink;
-                                currentFlow.shrinkBasis += childBasisSize * childShrink;
-                            }
-                            if (childGrow > 0) currentFlow.growCount += childGrow;
-                            currentFlow.crossSize = mathMax(currentFlow.crossSize, getChildBasisSize(child, isNotRowDirection));
-                            
-                            updatePositionAttrOnChild(child, isRowDirection, pos);
-                            updateSizeAttrOnChild(child, isRowDirection, childBasisSize);
-                            pos += childBasisSize;
-                            
-                            currentFlow.items.push(child);
-                            itemCount++;
-                        }
-                        currentFlow.extraSize = mainFlexboxSize - pos;
-                        crossPos += currentFlow.crossSize;
-                        maxPos = mathMax(maxPos, pos);
-                        
-                        // Limit extraSize on all flows if the main axis must be compact
-                        if (flexbox.isCompactOnMainAxis(isRowDirection)) {
-                            let minExtraSize = flows.reduce(
-                                (accumulator, currentValue) => {
-                                    if (accumulator == null) {
-                                        return currentValue.extraSize;
-                                    } else {
-                                        return Math.min(accumulator, currentValue.extraSize);
-                                    }
-                                },
-                                null
-                            );
-                            if (minExtraSize !== 0) {
-                                for (const flow of flows) flow.extraSize -= minExtraSize;
-                            }
+                            flows.push(currentFlow);
                         }
                         
-                        // Total Basis Sizes
-                        flexbox[isRowDirection ? 'setTotalBasisWidth' : 'setTotalBasisHeight'](maxPos);
-                        flexbox[isRowDirection ? 'setTotalBasisHeight' : 'setTotalBasisWidth'](crossPos);
+                        if (itemCount !== 0) pos += mainGap;
                         
-                        // Flip the order of the flows and shift the position of each so that it is
-                        // offset from the bottom/right
-                        const flowLen = flows.length;
-                        if (flowLen > 1 && flexbox.wrap === 'wrapReverse') {
-                            for (const flow of flows) flow.crossPos = crossPos - (flow.crossPos + flow.crossSize);
-                            flows.reverse();
+                        if (childShrink > 0 && childBasisSize > 0) {
+                            currentFlow.shrinkCount += childShrink;
+                            currentFlow.shrinkBasis += childBasisSize * childShrink;
                         }
+                        if (childGrow > 0) currentFlow.growCount += childGrow;
+                        currentFlow.crossSize = mathMax(currentFlow.crossSize, getChildBasisSize(child, isNotRowDirection));
                         
-                        // Update crossSize for each flow
-                        if (!flexbox.isCompactOnCrossAxis(isRowDirection)) {
-                            let extraCrossSize = crossFlexboxSize - crossPos;
-                            switch (alignContent) {
-                                default:
-                                case 'start':
-                                    // This is the default and requires no change.
-                                    break;
-                                case 'end':
-                                    // Shift every flow over to align with the end
-                                    adjustListOfFlows(flows, extraCrossSize, false);
-                                    break;
-                                case 'center':
-                                    // Shift every flow over to align with the center
-                                    adjustListOfFlows(flows, extraCrossSize / 2, false);
-                                    break;
-                                case 'spaceBetween':
-                                    // Equal space between each flow and flush to the edges. No need
-                                    // to adjust if there is only 1 flow.
-                                    if (flowLen > 1) adjustListOfFlows(flows, extraCrossSize / (flowLen - 1), true, 1);
-                                    break;
-                                case 'spaceAround':
-                                    // Equal Space between each flow and half space at the edges.
-                                    if (extraCrossSize <= crossGap) {
-                                        // Effectively just center it.
-                                        adjustListOfFlows(flows, extraCrossSize / 2, false);
-                                    } else {
-                                        adjustListOfFlows(flows, crossGap / 2, false);
-                                        extraCrossSize -= crossGap;
-                                        adjustListOfFlows(flows, extraCrossSize / (2*flowLen), true);
-                                        adjustListOfFlows(flows, extraCrossSize / (2*flowLen), true, 1);
-                                    }
-                                    break;
-                                case 'spaceEvenly':
-                                    // Equal Space between each flow and space at the edges.
-                                    if (extraCrossSize <= 2*crossGap) {
-                                        // Effectively just center it.
-                                        adjustListOfFlows(flows, extraCrossSize / 2, false);
-                                    } else {
-                                        adjustListOfFlows(flows, crossGap, false);
-                                        extraCrossSize -= 2*crossGap;
-                                        adjustListOfFlows(flows, extraCrossSize / (flowLen + 1), true);
-                                    }
-                                    break;
-                                case 'stretch':
-                                    // Stretch each row to fill the space.
-                                    const flowGrowAmount = extraCrossSize / flowLen;
-                                    let flowGrowAmountTotal = 0;
-                                    for (const flow of flows) {
-                                        flow.crossSize += flowGrowAmount;
-                                        flow.crossPos += flowGrowAmountTotal;
-                                        flowGrowAmountTotal += flowGrowAmount;
-                                    }
-                                    break;
-                            }
-                        }
+                        updatePositionAttrOnChild(child, isRowDirection, pos);
+                        updateSizeAttrOnChild(child, isRowDirection, childBasisSize);
+                        pos += childBasisSize;
                         
-                        for (const flow of flows) {
-                            const items = flow.items;
-                            let extraSize = flow.extraSize;
-                            if (extraSize > 0) {
-                                if (flow.growCount > 0) {
-                                    // Distribute extraSize using grow.
-                                    const amountPerGrow = extraSize / flow.growCount;
-                                    let growAmountTotal = 0;
-                                    for (const item of items) {
-                                        // Shift items as we go so we don't have to loop over the 
-                                        // items again.
-                                        if (growAmountTotal > 0) adjustPositionAttrOnChild(item, isRowDirection, growAmountTotal);
-                                        
-                                        const growAmount = item.getGrow() * amountPerGrow;
-                                        if (growAmount > 0) {
-                                            updateSizeAttrOnChild(item, isRowDirection, growAmount, true);
-                                            growAmountTotal += growAmount;
-                                        }
-                                    }
+                        currentFlow.items.push(child);
+                        itemCount++;
+                    }
+                    currentFlow.extraSize = mainFlexboxSize - pos;
+                    crossPos += currentFlow.crossSize;
+                    maxPos = mathMax(maxPos, pos);
+                    
+                    // Limit extraSize on all flows if the main axis must be compact
+                    if (flexbox.isCompactOnMainAxis(isRowDirection)) {
+                        let minExtraSize = flows.reduce(
+                            (accumulator, currentValue) => {
+                                if (accumulator == null) {
+                                    return currentValue.extraSize;
                                 } else {
-                                    // Distribute extraSize using justifyContent
-                                    const itemLen = items.length;
-                                    switch (justifyContent) {
-                                        default:
-                                        case 'start':
-                                            // This is the default and requires no change.
-                                            break;
-                                        case 'end':
-                                            // Shift every item over to align with the end
-                                            adjustListOfViews(items, isRowDirection, extraSize, false);
-                                            break;
-                                        case 'center':
-                                            // Shift every item over to align with the center
-                                            adjustListOfViews(items, isRowDirection, extraSize / 2, false);
-                                            break;
-                                        case 'spaceBetween':
-                                            // Equal space between each item and flush to the edges. 
-                                            // No need to adjust if there is only 1 item.
-                                            if (itemLen > 1) adjustListOfViews(items, isRowDirection, extraSize / (itemLen - 1), true, 1);
-                                            break;
-                                        case 'spaceAround':
-                                            // Equal Space between each item and half space at 
-                                            // the edges.
-                                            if (extraSize <= mainGap) {
-                                                // Effectively just center it.
-                                                adjustListOfViews(items, isRowDirection, extraSize / 2, false);
-                                            } else {
-                                                adjustListOfViews(items, isRowDirection, mainGap / 2, false);
-                                                extraSize -= mainGap;
-                                                adjustListOfViews(items, isRowDirection, extraSize / (2*itemLen), true);
-                                                adjustListOfViews(items, isRowDirection, extraSize / (2*itemLen), true, 1);
-                                            }
-                                            break;
-                                        case 'spaceEvenly':
-                                            // Equal Space between each item and space at the edges.
-                                            if (extraSize <= 2*mainGap) {
-                                                // Effectively just center it.
-                                                adjustListOfViews(items, isRowDirection, extraSize / 2, false);
-                                            } else {
-                                                adjustListOfViews(items, isRowDirection, mainGap, false);
-                                                extraSize -= 2*mainGap;
-                                                adjustListOfViews(items, isRowDirection, extraSize / (itemLen + 1), true);
-                                            }
-                                            break;
-                                    }
+                                    return Math.min(accumulator, currentValue.extraSize);
                                 }
-                            } else if (extraSize < 0 && flow.shrinkCount > 0) {
-                                // Try to zero out extraSize using shrink.
-                                const shrinkBasis = flow.shrinkBasis;
-                                let shrinkAmountTotal = 0;
-                                // See: https://www.madebymike.com.au/writing/understanding-flexbox/ for math
+                            },
+                            null
+                        );
+                        if (minExtraSize !== 0) {
+                            for (const flow of flows) flow.extraSize -= minExtraSize;
+                        }
+                    }
+                    
+                    // Total Basis Sizes
+                    flexbox[isRowDirection ? 'setTotalBasisWidth' : 'setTotalBasisHeight'](maxPos);
+                    flexbox[isRowDirection ? 'setTotalBasisHeight' : 'setTotalBasisWidth'](crossPos);
+                    
+                    // Flip the order of the flows and shift the position of each so that it is
+                    // offset from the bottom/right
+                    const flowLen = flows.length;
+                    if (flowLen > 1 && flexbox.wrap === 'wrapReverse') {
+                        for (const flow of flows) flow.crossPos = crossPos - (flow.crossPos + flow.crossSize);
+                        flows.reverse();
+                    }
+                    
+                    // Update crossSize for each flow
+                    if (!flexbox.isCompactOnCrossAxis(isRowDirection)) {
+                        let extraCrossSize = crossFlexboxSize - crossPos;
+                        switch (alignContent) {
+                            default:
+                            case 'start':
+                                // This is the default and requires no change.
+                                break;
+                            case 'end':
+                                // Shift every flow over to align with the end
+                                adjustListOfFlows(flows, extraCrossSize, false);
+                                break;
+                            case 'center':
+                                // Shift every flow over to align with the center
+                                adjustListOfFlows(flows, extraCrossSize / 2, false);
+                                break;
+                            case 'spaceBetween':
+                                // Equal space between each flow and flush to the edges. No need
+                                // to adjust if there is only 1 flow.
+                                if (flowLen > 1) adjustListOfFlows(flows, extraCrossSize / (flowLen - 1), true, 1);
+                                break;
+                            case 'spaceAround':
+                                // Equal Space between each flow and half space at the edges.
+                                if (extraCrossSize <= crossGap) {
+                                    // Effectively just center it.
+                                    adjustListOfFlows(flows, extraCrossSize / 2, false);
+                                } else {
+                                    adjustListOfFlows(flows, crossGap / 2, false);
+                                    extraCrossSize -= crossGap;
+                                    adjustListOfFlows(flows, extraCrossSize / (2*flowLen), true);
+                                    adjustListOfFlows(flows, extraCrossSize / (2*flowLen), true, 1);
+                                }
+                                break;
+                            case 'spaceEvenly':
+                                // Equal Space between each flow and space at the edges.
+                                if (extraCrossSize <= 2*crossGap) {
+                                    // Effectively just center it.
+                                    adjustListOfFlows(flows, extraCrossSize / 2, false);
+                                } else {
+                                    adjustListOfFlows(flows, crossGap, false);
+                                    extraCrossSize -= 2*crossGap;
+                                    adjustListOfFlows(flows, extraCrossSize / (flowLen + 1), true);
+                                }
+                                break;
+                            case 'stretch': {
+                                // Stretch each row to fill the space.
+                                const flowGrowAmount = extraCrossSize / flowLen;
+                                let flowGrowAmountTotal = 0;
+                                for (const flow of flows) {
+                                    flow.crossSize += flowGrowAmount;
+                                    flow.crossPos += flowGrowAmountTotal;
+                                    flowGrowAmountTotal += flowGrowAmount;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    
+                    for (const flow of flows) {
+                        const items = flow.items;
+                        let extraSize = flow.extraSize;
+                        if (extraSize > 0) {
+                            if (flow.growCount > 0) {
+                                // Distribute extraSize using grow.
+                                const amountPerGrow = extraSize / flow.growCount;
+                                let growAmountTotal = 0;
                                 for (const item of items) {
                                     // Shift items as we go so we don't have to loop over the 
                                     // items again.
-                                    if (shrinkAmountTotal < 0) adjustPositionAttrOnChild(item, isRowDirection, shrinkAmountTotal);
+                                    if (growAmountTotal > 0) adjustPositionAttrOnChild(item, isRowDirection, growAmountTotal);
                                     
-                                    const shrinkAmount = (item.getShrink() * getChildBasisSize(item, isRowDirection) / shrinkBasis) * mathMax(extraSize, -shrinkBasis);
-                                    if (shrinkAmount < 0) {
-                                        updateSizeAttrOnChild(item, isRowDirection, shrinkAmount, true);
-                                        shrinkAmountTotal += shrinkAmount;
+                                    const growAmount = item.getGrow() * amountPerGrow;
+                                    if (growAmount > 0) {
+                                        updateSizeAttrOnChild(item, isRowDirection, growAmount, true);
+                                        growAmountTotal += growAmount;
                                     }
                                 }
-                            }
-                            
-                            // Align Items along cross-axis. */
-                            let baselineOccurred = false;
-                            const {crossSize, crossPos:crossPositionOffset} = flow;
-                            for (const item of items) {
-                                switch (item.getAlignSelf() || alignItems) {
+                            } else {
+                                // Distribute extraSize using justifyContent
+                                const itemLen = items.length;
+                                switch (justifyContent) {
+                                    default:
                                     case 'start':
-                                        updatePositionAttrOnChild(item, isNotRowDirection, crossPositionOffset);
-                                        updateSizeAttrOnChild(item, isNotRowDirection, getChildBasisSize(item, isNotRowDirection), false);
+                                        // This is the default and requires no change.
                                         break;
                                     case 'end':
-                                        updatePositionAttrOnChild(item, isNotRowDirection, crossPositionOffset + crossSize - getChildBasisSize(item, isNotRowDirection));
-                                        updateSizeAttrOnChild(item, isNotRowDirection, getChildBasisSize(item, isNotRowDirection), false);
+                                        // Shift every item over to align with the end
+                                        adjustListOfViews(items, isRowDirection, extraSize, false);
                                         break;
                                     case 'center':
-                                        updatePositionAttrOnChild(item, isNotRowDirection, crossPositionOffset + (crossSize - getChildBasisSize(item, isNotRowDirection)) / 2);
-                                        updateSizeAttrOnChild(item, isNotRowDirection, getChildBasisSize(item, isNotRowDirection), false);
+                                        // Shift every item over to align with the center
+                                        adjustListOfViews(items, isRowDirection, extraSize / 2, false);
                                         break;
-                                    case 'baseline':
-                                        baselineOccurred = true;
-                                        updatePositionAttrOnChild(item, isNotRowDirection, crossPositionOffset + (crossSize - getChildBasisSize(item, isNotRowDirection)) / 2 + item.getFlexBaselineOffset(isRowDirection));
-                                        updateSizeAttrOnChild(item, isNotRowDirection, getChildBasisSize(item, isNotRowDirection), false);
+                                    case 'spaceBetween':
+                                        // Equal space between each item and flush to the edges. 
+                                        // No need to adjust if there is only 1 item.
+                                        if (itemLen > 1) adjustListOfViews(items, isRowDirection, extraSize / (itemLen - 1), true, 1);
                                         break;
-                                    case 'stretch':
-                                    default:
-                                        updatePositionAttrOnChild(item, isNotRowDirection, crossPositionOffset);
-                                        updateSizeAttrOnChild(item, isNotRowDirection, crossSize, false);
+                                    case 'spaceAround':
+                                        // Equal Space between each item and half space at 
+                                        // the edges.
+                                        if (extraSize <= mainGap) {
+                                            // Effectively just center it.
+                                            adjustListOfViews(items, isRowDirection, extraSize / 2, false);
+                                        } else {
+                                            adjustListOfViews(items, isRowDirection, mainGap / 2, false);
+                                            extraSize -= mainGap;
+                                            adjustListOfViews(items, isRowDirection, extraSize / (2*itemLen), true);
+                                            adjustListOfViews(items, isRowDirection, extraSize / (2*itemLen), true, 1);
+                                        }
+                                        break;
+                                    case 'spaceEvenly':
+                                        // Equal Space between each item and space at the edges.
+                                        if (extraSize <= 2*mainGap) {
+                                            // Effectively just center it.
+                                            adjustListOfViews(items, isRowDirection, extraSize / 2, false);
+                                        } else {
+                                            adjustListOfViews(items, isRowDirection, mainGap, false);
+                                            extraSize -= 2*mainGap;
+                                            adjustListOfViews(items, isRowDirection, extraSize / (itemLen + 1), true);
+                                        }
                                         break;
                                 }
                             }
-                            
-                            if (baselineOccurred) flexbox.updateFlexboxLayoutBaselineAdjustment(items, isRowDirection, crossPositionOffset);
+                        } else if (extraSize < 0 && flow.shrinkCount > 0) {
+                            // Try to zero out extraSize using shrink.
+                            const shrinkBasis = flow.shrinkBasis;
+                            let shrinkAmountTotal = 0;
+                            // See: https://www.madebymike.com.au/writing/understanding-flexbox/ for math
+                            for (const item of items) {
+                                // Shift items as we go so we don't have to loop over the 
+                                // items again.
+                                if (shrinkAmountTotal < 0) adjustPositionAttrOnChild(item, isRowDirection, shrinkAmountTotal);
+                                
+                                const shrinkAmount = (item.getShrink() * getChildBasisSize(item, isRowDirection) / shrinkBasis) * mathMax(extraSize, -shrinkBasis);
+                                if (shrinkAmount < 0) {
+                                    updateSizeAttrOnChild(item, isRowDirection, shrinkAmount, true);
+                                    shrinkAmountTotal += shrinkAmount;
+                                }
+                            }
                         }
                         
-                        flexbox.__isUpdatingFlexboxLayout = false;
-                        
-                        if (flexbox.isUpdateAgain() && !flexbox.__UPDATE_AGAIN_LOOP_PROTECTION) {
-                            flexbox.setUpdateAgain(false);
-                            flexbox.__UPDATE_AGAIN_LOOP_PROTECTION = true;
-                            flexbox.updateFlexboxLayout();
-                            flexbox.__UPDATE_AGAIN_LOOP_PROTECTION = false;
+                        // Align Items along cross-axis. */
+                        let baselineOccurred = false;
+                        const {crossSize, crossPos:crossPositionOffset} = flow;
+                        for (const item of items) {
+                            switch (item.getAlignSelf() || alignItems) {
+                                case 'start':
+                                    updatePositionAttrOnChild(item, isNotRowDirection, crossPositionOffset);
+                                    updateSizeAttrOnChild(item, isNotRowDirection, getChildBasisSize(item, isNotRowDirection), false);
+                                    break;
+                                case 'end':
+                                    updatePositionAttrOnChild(item, isNotRowDirection, crossPositionOffset + crossSize - getChildBasisSize(item, isNotRowDirection));
+                                    updateSizeAttrOnChild(item, isNotRowDirection, getChildBasisSize(item, isNotRowDirection), false);
+                                    break;
+                                case 'center':
+                                    updatePositionAttrOnChild(item, isNotRowDirection, crossPositionOffset + (crossSize - getChildBasisSize(item, isNotRowDirection)) / 2);
+                                    updateSizeAttrOnChild(item, isNotRowDirection, getChildBasisSize(item, isNotRowDirection), false);
+                                    break;
+                                case 'baseline':
+                                    baselineOccurred = true;
+                                    updatePositionAttrOnChild(item, isNotRowDirection, crossPositionOffset + (crossSize - getChildBasisSize(item, isNotRowDirection)) / 2 + item.getFlexBaselineOffset(isRowDirection));
+                                    updateSizeAttrOnChild(item, isNotRowDirection, getChildBasisSize(item, isNotRowDirection), false);
+                                    break;
+                                case 'stretch':
+                                default:
+                                    updatePositionAttrOnChild(item, isNotRowDirection, crossPositionOffset);
+                                    updateSizeAttrOnChild(item, isNotRowDirection, crossSize, false);
+                                    break;
+                            }
                         }
-                    } else {
-                        flexbox.setTotalBasisWidth(0);
-                        flexbox.setTotalBasisHeight(0);
+                        
+                        if (baselineOccurred) flexbox.updateFlexboxLayoutBaselineAdjustment(items, isRowDirection, crossPositionOffset);
                     }
+                    
+                    flexbox.__isUpdatingFlexboxLayout = false;
+                    
+                    if (flexbox.isUpdateAgain() && !flexbox.__UPDATE_AGAIN_LOOP_PROTECTION) {
+                        flexbox.setUpdateAgain(false);
+                        flexbox.__UPDATE_AGAIN_LOOP_PROTECTION = true;
+                        flexbox.updateFlexboxLayout();
+                        flexbox.__UPDATE_AGAIN_LOOP_PROTECTION = false;
+                    }
+                } else {
+                    flexbox.setTotalBasisWidth(0);
+                    flexbox.setTotalBasisHeight(0);
                 }
-            },
-            
-            updateFlexboxLayoutBaselineAdjustment: pkg.NOOP // (items, isRowDirection, crossPositionOffset) => {}
-        });
+            }
+        },
+        
+        updateFlexboxLayoutBaselineAdjustment: pkg.NOOP // (items, isRowDirection, crossPositionOffset) => {}
+    });
     
     /** Adds support for flex box child behavior to a myt.View.
         
@@ -5209,7 +5214,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         /** Subclasses should override this to provide a more appropriate baseline offset 
             as needed. */
-        getFlexBaselineOffset: isRowDirection => 0,
+        getFlexBaselineOffset: _isRowDirection => 0,
         
         setIgnoreFlex: function(v) {
             if (this.__ignoreFlex !== v) {
@@ -6279,7 +6284,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 anim.callSetters(attrs);
                 
                 // Release the animation when it completes.
-                anim.next(success => {animPool.putInstance(anim);});
+                anim.next(_success => {animPool.putInstance(anim);});
                 if (callback) anim.next(callback);
                 
                 anim.setRunning(true);
@@ -7327,7 +7332,7 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** @overrides myt.VariableLayout */
-        updateParent: function(setterName, value) {
+        updateParent: function(_setterName, _value) {
             // Collapse in the other direction
             this.parent[this.parentSetterName](this.linePos + this.lineSize + this.lineOutset);
         }
@@ -7681,10 +7686,10 @@ myt.Destructible = new JS.Module('Destructible', {
             Gives subclasses a change to change how the view is backed. This implementation also 
             looks for a this.tagName property which it will use as the name for the dom element 
             that gets created. If no this.tagName property is found "div" will be used.
-            @param {!Object} parent - The dom element that will be the parent of the newly created 
+            @param {!Object} _parent - The dom element that will be the parent of the newly created 
                 dom element.
             @returns {!Object} a dom element */
-        createOurDomElement: function(parent) {
+        createOurDomElement: function(_parent) {
             const elem = document.createElement(this.tagName ?? 'div');
             elem.style.position = 'absolute';
             
@@ -7831,16 +7836,16 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** @private
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        __doAlignCenter: function(event) {
+        __doAlignCenter: function(_event) {
             this.setX(mathRound((this.parent.width - this.width) / 2) + (this.alignOffset || 0));
         },
         
         /** @private
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        __doAlignRight: function(event) {
+        __doAlignRight: function(_event) {
             this.setX(this.parent.width - this.width - (this.alignOffset || 0));
         },
         
@@ -7864,16 +7869,16 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** @private
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        __doValignMiddle: function(event) {
+        __doValignMiddle: function(_event) {
             this.setY(mathRound((this.parent.height - this.height) / 2) + (this.valignOffset || 0));
         },
         
         /** @private
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        __doValignBottom: function(event) {
+        __doValignBottom: function(_event) {
             this.setY(this.parent.height - this.height - (this.valignOffset || 0));
         },
         
@@ -9245,7 +9250,7 @@ myt.Destructible = new JS.Module('Destructible', {
                         
                         // Start a size query
                         const img = new Image();
-                        img.onerror = err => {
+                        img.onerror = _err => {
                             // Notify all ImageSupport instances that are waiting for a natural 
                             // size that an error has occurred.
                             const openQueries = openQueryCache[imgUrl];
@@ -9497,18 +9502,18 @@ myt.Destructible = new JS.Module('Destructible', {
         
         // Methods /////////////////////////////////////////////////////////////
         /** @private
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        __doMouseDown: function(event) {
+        __doMouseDown: function(_event) {
             this.__restorePointerEvents = this.pointerEvents;
             this.setPointerEvents('none');
             return true;
         },
         
         /** @private
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        __doMouseUp: function(event) {
+        __doMouseUp: function(_event) {
             this.setPointerEvents(this.__restorePointerEvents);
             return true;
         }
@@ -9728,18 +9733,18 @@ myt.Destructible = new JS.Module('Destructible', {
         
         // Methods /////////////////////////////////////////////////////////////
         /** @private
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        __doPOPW: function(event) {
+        __doPOPW: function(_event) {
             this.setWidth((this.percentOfParentWidthOffset || 0) + mathRound(this.parent.width * (this.percentOfParentWidth / 100)));
             // Force width event if not inited yet so that align constraint in myt.View will work.
             if (!this.inited) this.fireEvent('width', this.width);
         },
         
         /** @private
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        __doPOPH: function(event) {
+        __doPOPH: function(_event) {
             this.setHeight((this.percentOfParentHeightOffset || 0) + mathRound(this.parent.height * (this.percentOfParentHeight / 100)));
             // Force height event if not inited yet so that valign constraint in myt.View will work.
             if (!this.inited) this.fireEvent('height', this.height);
@@ -9912,7 +9917,7 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** @overrides myt.View */
-            sendBehind: function(otherRootView, ignoredLayout) {
+            sendBehind: function(otherRootView, _ignoredLayout) {
                 // Attempt to manipulate dom above root node.
                 const ide = this.getIDE(),
                     otherIde = otherRootView.getIDE(),
@@ -10156,9 +10161,9 @@ myt.Destructible = new JS.Module('Destructible', {
             
             // Methods /////////////////////////////////////////////////////////
             /** @private
-                @param {!Object} ignoredEvent
+                @param {!Object} _event
                 @returns {void} */
-            __hndlResize: function(ignoredEvent) {
+            __hndlResize: function(_event) {
                 handleResize(this);
             }
         });
@@ -10329,20 +10334,20 @@ myt.Destructible = new JS.Module('Destructible', {
                         if (value.startsWith('#')) value = value.slice(1);
                         
                         switch (value.length) {
-                            case 0: value += '0'; // Append "0" to missing channels.
-                            case 1: value += '0'; // Append "0" to missing channels.
-                            case 2: value += '0'; // Append "0" to missing channels.
-                            case 3:
-                            case 4:
-                            case 5:
-                                // Process as: R G B ignored
+                            case 0: value += '0'; // Append "0" to missing channels then fallthrough.
+                            case 1: value += '0'; // Append "0" to missing channels then fallthrough.
+                            case 2: value += '0'; // Append "0" to missing channels then fallthrough.
+                            case 3: // Fallthrough
+                            case 4: // Fallthrough
+                            case 5: {
+                                // Process as: [R, G, B, ...ignored]
                                 const [r, g, b] = value;
                                 return new Color(
                                     parseInt(r + r, 16),
                                     parseInt(g + g, 16),
                                     parseInt(b + b, 16)
                                 );
-                            case 6:
+                            } case 6:
                                 // Process as RR GG BB
                                 return makeColorFromNumber(parseInt(value, 16));
                             default:
@@ -11159,7 +11164,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 fireEvent = this.fireEvent.bind(this);
             
             switch (this.__transStage) {
-                case 'leaveState':
+                case 'leaveState': {
                     const result = this.doLeaveState(transitionName, current, to, args);
                     if (result === false) {
                         resetTransitionProgress(this);
@@ -11173,14 +11178,14 @@ myt.Destructible = new JS.Module('Destructible', {
                         fireEvent('leave', eventValue);
                         doDeferredTransitions(this); // FIXME: Is there a bug here if a transition starts in the middle of an async transition?
                         return PENDING;
-                    } else {
-                        fireEvent('start' + transitionName, eventValue);
-                        fireEvent('start', eventValue);
-                        fireEvent('leave' + current, eventValue);
-                        fireEvent('leave', eventValue);
-                        // Synchronous so fall through to 'enterState' case.
                     }
-                case 'enterState':
+                    
+                    fireEvent('start' + transitionName, eventValue);
+                    fireEvent('start', eventValue);
+                    fireEvent('leave' + current, eventValue);
+                    fireEvent('leave', eventValue);
+                    // Synchronous so fall through to 'enterState' case.
+                } case 'enterState':
                     this.current = to;
                     resetTransitionProgress(this);
                     this.doEnterState(transitionName, current, to, args);
@@ -11885,9 +11890,9 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** @private
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        __doDomBlur: function(event) {
+        __doDomBlur: function(_event) {
             if (!this.disabled) {
                 const keyThatWasDown = this.activateKeyDown;
                 if (keyThatWasDown !== NO_KEY_DOWN) {
@@ -11905,9 +11910,9 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Called when an activation key is release up. This executes the "doActivated" method 
             by default. 
-            @param code:string - The keycode that is up.
+            @param _code:string - The keycode that is up.
             @returns {void} */
-        doActivationKeyUp: function(code) {
+        doActivationKeyUp: function(_code) {
             this.doActivated();
         },
         
@@ -12035,25 +12040,25 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Called when mouseOver state changes. This method is called after an event filtering 
             process has reduced frequent over/out events originating from the dom.
-            @param {boolean} isOver
+            @param {boolean} _isOver
             @returns {void} */
-        doSmoothMouseOver: function(isOver) {
+        doSmoothMouseOver: function(_isOver) {
             if (this.inited) this.updateUI?.();
         },
         
         /** Called when the mouse is over this view. Subclasses must call super.
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        doMouseOver: function(event) {
+        doMouseOver: function(_event) {
             this.__disabledOver = true;
             
             if (!this.disabled) this.setMouseOver(true);
         },
         
         /** Called when the mouse leaves this view. Subclasses must call super.
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        doMouseOut: function(event) {
+        doMouseOut: function(_event) {
             this.__disabledOver = false;
             
             if (!this.disabled) this.setMouseOver(false);
@@ -12123,9 +12128,9 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** Called when the mouse is down on this view. Subclasses must call super.
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        doMouseDown: function(event) {
+        doMouseDown: function(_event) {
             if (this.disabled) {
                 this.doMouseDownWhenDisabled();
             } else {
@@ -12158,9 +12163,9 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Called when the mouse is up and we are still over the view. Executes the "doActivated" 
             method by default.
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        doMouseUpInside: function(event) {
+        doMouseUpInside: function(_event) {
             this.doActivated?.();
         }
     });
@@ -12377,24 +12382,24 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** @private
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        __updateDragInitX: function(event) {
+        __updateDragInitX: function(_event) {
             this.dragInitX = this.width / 2 * (this.scaleX || 1);
         },
         
         /** @private
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        __updateDragInitY: function(event) {
+        __updateDragInitY: function(_event) {
             this.dragInitY = this.height / 2 * (this.scaleY || 1);
         },
         
         /** Stop the drag. (see startDrag for more details)
-            @param {!Object} event - The event that ended the drag.
-            @param {boolean} isAbort - Indicates if the drag ended normally or was aborted.
+            @param {!Object} _event - The event that ended the drag.
+            @param {boolean} _isAbort - Indicates if the drag ended normally or was aborted.
             @returns {void} */
-        stopDrag: function(event, isAbort) {
+        stopDrag: function(_event, _isAbort) {
             const self = this;
             self.detachFromDom(GlobalMouse, '__doMouseUp', 'mouseup', true);
             self.detachFromDom(GlobalMouse, 'updateDrag', 'mousemove', true);
@@ -12759,7 +12764,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         
         // Methods /////////////////////////////////////////////////////////////
-        __updateContent: function(v) {
+        __updateContent: function(_v) {
             const self = this;
             if (!self.__updateContentLoopBlock && !self.destroyed) {
                 const {inset, outset, textView} = self;
@@ -12850,184 +12855,184 @@ myt.Destructible = new JS.Module('Destructible', {
                 consoleWarn('Invalid type', type, alignment);
             }
             return v;
+        };
+    
+    /** Enables a view to act as the anchor point for a FloatingPanel.
+        
+        Events:
+            floatingAlign:string
+            floatingValign:string
+            floatingAlignOffset:number
+            floatingValignOffset:number
+        
+        Attributes:
+            floatingPanelId:string If defined this is the panel ID that will be used by default 
+                in the various methods that require a panel ID.
+            floatingAlign:string:number The horizontal alignment for panels shown by this 
+                anchor. If the value is a string it is an alignment identifier relative to this 
+                anchor. If the value is a number it is an absolute position in pixels. Allowed 
+                values: 'outsideLeft', 'insideLeft', 'insideRight', 'outsideRight' or a number.
+            floatingValign:string:number The vertical alignment for panels shown by this anchor.
+                If the value is a string it is an alignment identifier relative to this anchor.
+                If the value is a number it is an absolute position in pixels. Allowed values: 
+                'outsideTop', 'insideTop', 'insideBottom', 'outsideBottom' or a number.
+            floatingAlignOffset:number The number of pixels to offset the panel position 
+                by horizontally.
+            floatingValignOffset:number The number of pixels to offset the panel position 
+                by vertically.
+            lastFloatingPanelShown:myt.FloatingPanel A reference to the last floating panel 
+                shown by this anchor.
+            keepInWindow:boolean - Indicates if the floating panel must be kept within the
+                bounds of the HTML document. Defaults to false.
+            keepInWindowBorder:number - Extra space to take into account when checking if the
+                FloatingPanel would not be kept within the window.
+        
+        @class */
+    pkg.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
+        // Class Methods and Attributes ////////////////////////////////////
+        extend: {
+            getFloatingPanel:getFloatingPanel
         },
         
-        /** Enables a view to act as the anchor point for a FloatingPanel.
+        
+        // Life Cycle //////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            this.floatingAlign = 'insideLeft';
+            this.floatingValign = 'outsideBottom';
+            this.keepInWindow = false;
+            this.floatingAlignOffset = this.floatingValignOffset = this.keepInWindowBorder = 0;
             
-            Events:
-                floatingAlign:string
-                floatingValign:string
-                floatingAlignOffset:number
-                floatingValignOffset:number
-            
-            Attributes:
-                floatingPanelId:string If defined this is the panel ID that will be used by default 
-                    in the various methods that require a panel ID.
-                floatingAlign:string:number The horizontal alignment for panels shown by this 
-                    anchor. If the value is a string it is an alignment identifier relative to this 
-                    anchor. If the value is a number it is an absolute position in pixels. Allowed 
-                    values: 'outsideLeft', 'insideLeft', 'insideRight', 'outsideRight' or a number.
-                floatingValign:string:number The vertical alignment for panels shown by this anchor.
-                    If the value is a string it is an alignment identifier relative to this anchor.
-                    If the value is a number it is an absolute position in pixels. Allowed values: 
-                    'outsideTop', 'insideTop', 'insideBottom', 'outsideBottom' or a number.
-                floatingAlignOffset:number The number of pixels to offset the panel position 
-                    by horizontally.
-                floatingValignOffset:number The number of pixels to offset the panel position 
-                    by vertically.
-                lastFloatingPanelShown:myt.FloatingPanel A reference to the last floating panel 
-                    shown by this anchor.
-                keepInWindow:boolean - Indicates if the floating panel must be kept within the
-                    bounds of the HTML document. Defaults to false.
-                keepInWindowBorder:number - Extra space to take into account when checking if the
-                    FloatingPanel would not be kept within the window.
-            
-            @class */
-        FloatingPanelAnchor = pkg.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
-            // Class Methods and Attributes ////////////////////////////////////
-            extend: {
-                getFloatingPanel:getFloatingPanel
-            },
-            
-            
-            // Life Cycle //////////////////////////////////////////////////////
-            initNode: function(parent, attrs) {
-                this.floatingAlign = 'insideLeft';
-                this.floatingValign = 'outsideBottom';
-                this.keepInWindow = false;
-                this.floatingAlignOffset = this.floatingValignOffset = this.keepInWindowBorder = 0;
-                
-                this.callSuper(parent, attrs);
-            },
-            
-            
-            // Accessors ///////////////////////////////////////////////////////
-            setLastFloatingPanelShown: function(v) {this.lastFloatingPanelShown = v;},
-            setLastFloatingPanelId: function(v) {this.floatingPanelId = v;},
-            
-            setFloatingAlign: function(v) {this.set('floatingAlign', v, true);},
-            setFloatingValign: function(v) {this.set('floatingValign', v, true);},
-            setFloatingAlignOffset: function(v) {this.set('floatingAlignOffset', v, true);},
-            setFloatingValignOffset: function(v) {this.set('floatingValignOffset', v, true);},
-            
-            setKeepInWindow: function(v) {this.set('keepInWindow', v, true);},
-            setKeepInWindowBorder: function(v) {this.set('keepInWindowBorder', v, true);},
-            
-            
-            // Methods /////////////////////////////////////////////////////////
-            createFloatingPanel: function(panelId, panelClass, panelInitAttrs) {
-                panelId = panelId ?? this.floatingPanelId;
-                panelInitAttrs = panelInitAttrs ?? {};
-                panelInitAttrs.panelId = panelId;
-                return panelsByPanelId[panelId] = new panelClass(null, panelInitAttrs);
-            },
-            
-            getFloatingPanel: function(panelId) {
-                return getFloatingPanel(panelId ?? this.floatingPanelId);
-            },
-            
-            toggleFloatingPanel: function(panelId) {
-                const fp = this.getFloatingPanel(panelId ??= this.floatingPanelId);
-                if (fp?.isShown()) {
-                    this.hideFloatingPanel(panelId);
-                } else {
-                    this.showFloatingPanel(panelId);
-                }
-            },
-            
-            showFloatingPanel: function(panelId) {
-                const fp = this.getFloatingPanel(panelId ?? this.floatingPanelId);
-                if (fp) {
-                    fp.show(this);
-                    this.setLastFloatingPanelShown(fp);
-                }
-            },
-            
-            hideFloatingPanel: function(panelId) {
-                const fp = this.getFloatingPanel(panelId ?? this.floatingPanelId);
-                if (fp) {
-                    fp.hide();
-                    this.setLastFloatingPanelShown();
-                }
-            },
-            
-            /** Called when a floating panel has been shown for this anchor.
-                @param {!Object} panel - The myt.FloatingPanel that is now shown.
-                @returns {void} */
-            notifyPanelShown: function(panel) {
-                // Subclasses to implement as needed.
-                this.callSuper?.();
-            },
-            
-            /** Called when a floating panel has been hidden for this anchor.
-                @param {!Object} panel - The myt.FloatingPanel that is now hidden.
-                @returns {void} */
-            notifyPanelHidden: function(panel) {
-                // Subclasses to implement as needed.
-                this.callSuper?.();
-            },
-            
-            /** Called by the FloatingPanel to determine where to position itself horizontally. By 
-                default this returns the floatingAlign attribute. Subclasses and instances should 
-                override this if panel specific behavior is needed.
-                @param {?Object} panel - The panel being positioned.
-                @returns {string|number} - An alignment identifer or absolute position. */
-            getFloatingAlignForPanel: function(panel) {
-                return this.floatingAlign;
-            },
-            
-            /** Called by the FloatingPanel to determine where to position itself vertically. By 
-                default this returns the floatingAlign attribute. Subclasses and instances should 
-                override this if panel specific behavior is needed.
-                @param {?Object} panel - The panel being positioned.
-                @returns {string|number} - An alignment identifer or absolute position. */
-            getFloatingValignForPanel: function(panel) {
-                return this.floatingValign;
-            },
-            
-            /** Called by the FloatingPanel to determine where to position itself horizontally. By 
-                default this returns the floatingAlignOffset attribute. Subclasses and instances 
-                should override this if panel specific behavior is needed.
-                @param {?Object} panel - The panel being positioned.
-                @returns {number} the offset to use. */
-            getFloatingAlignOffsetForPanel: function(panel) {
-                return this.floatingAlignOffset;
-            },
-            
-            /** Called by the FloatingPanel to determine where to position itself vertically. By 
-                default this returns the floatingValignOffset attribute. Subclasses and instances 
-                should override this if panel specific behavior is needed.
-                @param {?Object} panel - The panel being positioned.
-                @returns {number} the offset to use. */
-            getFloatingValignOffsetForPanel: function(panel) {
-                return this.floatingValignOffset;
-            },
-            
-            /** @overrides myt.FocusObservable
-                @returns {!Object} The last floating panel shown if it exists and can be shown. 
-                    Otherwise it returns the default. */
-            getNextFocus: function() {
-                const last = this.lastFloatingPanelShown;
-                if (last?.isShown()) return last;
-                return this.callSuper?.();
-            },
-            
-            /** Called by the floating panel owned by this anchor to determine where to go to next 
-                after leaving the panel in the forward direction.
-                @param {string} panelId
-                @returns {!Object} */
-            getNextFocusAfterPanel: function(panelId) {
-                return this;
-            },
-            
-            /** Called by the floating panel owned by this anchor to determine where to go to next 
-                after leaving the panel in the backward direction.
-                @param {string} panelId
-                @returns {!Object} */
-            getPrevFocusAfterPanel: function(panelId) {
-                return this;
+            this.callSuper(parent, attrs);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////
+        setLastFloatingPanelShown: function(v) {this.lastFloatingPanelShown = v;},
+        setLastFloatingPanelId: function(v) {this.floatingPanelId = v;},
+        
+        setFloatingAlign: function(v) {this.set('floatingAlign', v, true);},
+        setFloatingValign: function(v) {this.set('floatingValign', v, true);},
+        setFloatingAlignOffset: function(v) {this.set('floatingAlignOffset', v, true);},
+        setFloatingValignOffset: function(v) {this.set('floatingValignOffset', v, true);},
+        
+        setKeepInWindow: function(v) {this.set('keepInWindow', v, true);},
+        setKeepInWindowBorder: function(v) {this.set('keepInWindowBorder', v, true);},
+        
+        
+        // Methods /////////////////////////////////////////////////////////
+        createFloatingPanel: function(panelId, panelClass, panelInitAttrs) {
+            panelId = panelId ?? this.floatingPanelId;
+            panelInitAttrs = panelInitAttrs ?? {};
+            panelInitAttrs.panelId = panelId;
+            return panelsByPanelId[panelId] = new panelClass(null, panelInitAttrs);
+        },
+        
+        getFloatingPanel: function(panelId) {
+            return getFloatingPanel(panelId ?? this.floatingPanelId);
+        },
+        
+        toggleFloatingPanel: function(panelId) {
+            const fp = this.getFloatingPanel(panelId ??= this.floatingPanelId);
+            if (fp?.isShown()) {
+                this.hideFloatingPanel(panelId);
+            } else {
+                this.showFloatingPanel(panelId);
             }
-        });
+        },
+        
+        showFloatingPanel: function(panelId) {
+            const fp = this.getFloatingPanel(panelId ?? this.floatingPanelId);
+            if (fp) {
+                fp.show(this);
+                this.setLastFloatingPanelShown(fp);
+            }
+        },
+        
+        hideFloatingPanel: function(panelId) {
+            const fp = this.getFloatingPanel(panelId ?? this.floatingPanelId);
+            if (fp) {
+                fp.hide();
+                this.setLastFloatingPanelShown();
+            }
+        },
+        
+        /** Called when a floating panel has been shown for this anchor.
+            @param {!Object} _panel - The myt.FloatingPanel that is now shown.
+            @returns {void} */
+        notifyPanelShown: function(_panel) {
+            // Subclasses to implement as needed.
+            this.callSuper?.();
+        },
+        
+        /** Called when a floating panel has been hidden for this anchor.
+            @param {!Object} _panel - The myt.FloatingPanel that is now hidden.
+            @returns {void} */
+        notifyPanelHidden: function(_panel) {
+            // Subclasses to implement as needed.
+            this.callSuper?.();
+        },
+        
+        /** Called by the FloatingPanel to determine where to position itself horizontally. By 
+            default this returns the floatingAlign attribute. Subclasses and instances should 
+            override this if panel specific behavior is needed.
+            @param {?Object} _panel - The panel being positioned.
+            @returns {string|number} - An alignment identifer or absolute position. */
+        getFloatingAlignForPanel: function(_panel) {
+            return this.floatingAlign;
+        },
+        
+        /** Called by the FloatingPanel to determine where to position itself vertically. By 
+            default this returns the floatingAlign attribute. Subclasses and instances should 
+            override this if panel specific behavior is needed.
+            @param {?Object} _panel - The panel being positioned.
+            @returns {string|number} - An alignment identifer or absolute position. */
+        getFloatingValignForPanel: function(_panel) {
+            return this.floatingValign;
+        },
+        
+        /** Called by the FloatingPanel to determine where to position itself horizontally. By 
+            default this returns the floatingAlignOffset attribute. Subclasses and instances 
+            should override this if panel specific behavior is needed.
+            @param {?Object} _panel - The panel being positioned.
+            @returns {number} the offset to use. */
+        getFloatingAlignOffsetForPanel: function(_panel) {
+            return this.floatingAlignOffset;
+        },
+        
+        /** Called by the FloatingPanel to determine where to position itself vertically. By 
+            default this returns the floatingValignOffset attribute. Subclasses and instances 
+            should override this if panel specific behavior is needed.
+            @param {?Object} _panel - The panel being positioned.
+            @returns {number} the offset to use. */
+        getFloatingValignOffsetForPanel: function(_panel) {
+            return this.floatingValignOffset;
+        },
+        
+        /** @overrides myt.FocusObservable
+            @returns {!Object} The last floating panel shown if it exists and can be shown. 
+                Otherwise it returns the default. */
+        getNextFocus: function() {
+            const last = this.lastFloatingPanelShown;
+            if (last?.isShown()) return last;
+            return this.callSuper?.();
+        },
+        
+        /** Called by the floating panel owned by this anchor to determine where to go to next 
+            after leaving the panel in the forward direction.
+            @param {string} _panelId
+            @returns {!Object} */
+        getNextFocusAfterPanel: function(_panelId) {
+            return this;
+        },
+        
+        /** Called by the floating panel owned by this anchor to determine where to go to next 
+            after leaving the panel in the backward direction.
+            @param {string} _panelId
+            @returns {!Object} */
+        getPrevFocusAfterPanel: function(_panelId) {
+            return this;
+        }
+    });
     
     /** A panel that floats above everything else.
         
@@ -13513,9 +13518,9 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** Called by the list view when an item is activated. By default it hides the list view.
-            @param {!Object} itemView
+            @param {!Object} _itemView
             @returns {void} */
-        doItemActivated: function(itemView) {
+        doItemActivated: function(_itemView) {
             this.hideFloatingPanel();
         },
         
@@ -13545,12 +13550,12 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** @overrides myt.ArrowKeyActivation. */
-        doKeyArrowLeftOrUp: function(isLeft, isRepeat) {
+        doKeyArrowLeftOrUp: function(_isLeft, _isRepeat) {
             this.focusToLastItem();
         },
         
         /** @overrides myt.ArrowKeyActivation. */
-        doKeyArrowRightOrDown: function(isRight, isRepeat) {
+        doKeyArrowRightOrDown: function(_isRight, _isRepeat) {
             this.focusToFirstItem();
         },
         
@@ -13666,12 +13671,12 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** @overrides myt.ArrowKeyActivation. */
-        doKeyArrowLeftOrUp: function(isLeft, isRepeat) {
+        doKeyArrowLeftOrUp: function(_isLeft, _isRepeat) {
             GlobalFocus.prev();
         },
         
         /** @overrides myt.ArrowKeyActivation. */
-        doKeyArrowRightOrDown: function(isRight, isRepeat) {
+        doKeyArrowRightOrDown: function(_isRight, _isRepeat) {
             GlobalFocus.next();
         }
     });
@@ -14565,9 +14570,9 @@ myt.Destructible = new JS.Module('Destructible', {
             notifyButtonRedraw: pkg.NOOP,
             
             /** @private
-                @param {!Object} event
+                @param {!Object} _event
                 @returns {void} */
-            __updateHeight: function(event) {
+            __updateHeight: function(_event) {
                 this.setHeight(this.wrapper.y + this.wrapper.height);
             },
             
@@ -14590,7 +14595,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     } else {
                         wrapper.animate({
                             attribute:'height', to:to, duration:duration
-                        }).next(success => {self.setExpansionState(STATE_EXPANDED);});
+                        }).next(_success => {self.setExpansionState(STATE_EXPANDED);});
                     }
                 } else {
                     self.setExpansionState(STATE_EXPANDED);
@@ -14615,7 +14620,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     } else {
                         wrapper.animate({
                             attribute:'height', to:0, duration:duration
-                        }).next(success => {self.setExpansionState(STATE_COLLAPSED);});
+                        }).next(_success => {self.setExpansionState(STATE_COLLAPSED);});
                     }
                 } else {
                     self.setExpansionState(STATE_COLLAPSED);
@@ -14645,250 +14650,250 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         }),
         
-        updateLabelAttr = (textTabSlider, attrName, labelAttrname, v) => {
+        updateLabelAttr = (textTabSlider, attrName, labelAttrName, v) => {
             if (textTabSlider[attrName] !== v) {
                 textTabSlider[attrName] = v;
                 textTabSlider.button?.label?.set(labelAttrName, v);
             }
+        };
+    
+    /** A tab slider with a text label.
+        
+    Attributes:
+        labelTextColorChecked:color
+        labelTextColor:color
+        text:string The text for the tab slider.
+    
+    @class */
+    pkg.TextTabSlider = new JSClass('TextTabSlider', TabSlider, {
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            this.labelTextColorChecked = '#fff';
+            this.labelTextColor = '#333';
+            this.labelAlign = 'center';
+            this.labelValign = 'middle';
+            this.labelFontSize = '16px';
+            this.labelFontWeight = 'bold';
+
+            attrs.labelTextColorChecked ??= '#fff';
+            attrs.labelTextColor ??= '#333';
+            attrs.labelAlign ??= 'center';
+            attrs.labelValign ??= 'middle';
+            attrs.labelFontSize ??= '16px';
+            attrs.labelFontWeight ??= 'bold';
+
+            this.callSuper(parent, attrs);
+
+            this.button.label = new pkg.Text(this.button, {
+                ignorePlacement:true, fontSize:this.labelFontSize, fontWeight:this.labelFontWeight,
+                text:this.text, align:this.labelAlign, valign:this.labelValign, 
+                textColor:this.__getTextColor()
+            });
         },
-        
-        /** A tab slider with a text label.
-            
-            Attributes:
-                labelTextColorChecked:color
-                labelTextColor:color
-                text:string The text for the tab slider.
-            
-            @class */
-        TextTabSlider = pkg.TextTabSlider = new JSClass('TextTabSlider', TabSlider, {
-            // Life Cycle //////////////////////////////////////////////////////
-            initNode: function(parent, attrs) {
-                this.labelTextColorChecked = '#fff';
-                this.labelTextColor = '#333';
-                this.labelAlign = 'center';
-                this.labelValign = 'middle';
-                this.labelFontSize = '16px';
-                this.labelFontWeight = 'bold';
-                
-                attrs.labelTextColorChecked ??= '#fff';
-                attrs.labelTextColor ??= '#333';
-                attrs.labelAlign ??= 'center';
-                attrs.labelValign ??= 'middle';
-                attrs.labelFontSize ??= '16px';
-                attrs.labelFontWeight ??= 'bold';
-                
-                this.callSuper(parent, attrs);
-                
-                this.button.label = new pkg.Text(this.button, {
-                    ignorePlacement:true, fontSize:this.labelFontSize, fontWeight:this.labelFontWeight,
-                    text:this.text, align:this.labelAlign, valign:this.labelValign, 
-                    textColor:this.__getTextColor()
-                });
-            },
-            
-            
-            // Accessors ///////////////////////////////////////////////////////
-            setLabelTextColorChecked: function(v) {
-                if (this.labelTextColorChecked !== v) {
-                    this.labelTextColorChecked = v;
-                    this.notifyButtonRedraw();
-                }
-            },
-            setLabelTextColor: function(v) {
-                if (this.labelTextColor !== v) {
-                    this.labelTextColor = v;
-                    this.notifyButtonRedraw();
-                }
-            },
-            setLabelAlign: function(v) {updateLabelAttr(this, 'labelAlign', 'align', v);},
-            setLabelValign: function(v) {updateLabelAttr(this, 'labelValign', 'valign', v);},
-            setLabelFontSize: function(v) {updateLabelAttr(this, 'labelFontSize', 'fontSize', v);},
-            setLabelFontWeight: function(v) {updateLabelAttr(this, 'labelFontWeight', 'fontWeight', v);},
-            setText: function(v) {updateLabelAttr(this, 'text', 'text', v);},
-            
-            
-            // Methods /////////////////////////////////////////////////////////
-            /** @overrides myt.TabSlider */
-            notifyButtonRedraw: function() {
-                this.button?.label?.setTextColor(this.__getTextColor());
-            },
-            
-            /** @private
-                @returns {string} */
-            __getTextColor: function() {
-                return (this.selected && this.tabContainer.maxSelected !== -1) ? this.labelTextColorChecked : this.labelTextColor;
+
+
+        // Accessors ///////////////////////////////////////////////////////////
+        setLabelTextColorChecked: function(v) {
+            if (this.labelTextColorChecked !== v) {
+                this.labelTextColorChecked = v;
+                this.notifyButtonRedraw();
             }
-        }),
+        },
+        setLabelTextColor: function(v) {
+            if (this.labelTextColor !== v) {
+                this.labelTextColor = v;
+                this.notifyButtonRedraw();
+            }
+        },
+        setLabelAlign: function(v) {updateLabelAttr(this, 'labelAlign', 'align', v);},
+        setLabelValign: function(v) {updateLabelAttr(this, 'labelValign', 'valign', v);},
+        setLabelFontSize: function(v) {updateLabelAttr(this, 'labelFontSize', 'fontSize', v);},
+        setLabelFontWeight: function(v) {updateLabelAttr(this, 'labelFontWeight', 'fontWeight', v);},
+        setText: function(v) {updateLabelAttr(this, 'text', 'text', v);},
+
+
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides myt.TabSlider */
+        notifyButtonRedraw: function() {
+            this.button?.label?.setTextColor(this.__getTextColor());
+        },
+
+        /** @private
+            @returns {string} */
+        __getTextColor: function() {
+            return (this.selected && this.tabContainer.maxSelected !== -1) ? this.labelTextColorChecked : this.labelTextColor;
+        }
+    });
+    
+    /** A mixin that allows myt.TabSliders to be added to a view.
         
-        /** A mixin that allows myt.TabSliders to be added to a view.
-            
-            Attributes:
-                spacing:number The spacing between tab sliders. Defaults to
-                    myt.theme.TabSliderContainerSpacing which is 1.
-                duration:number The length of time for the animation.
-            
-            @class */
-        TabSliderContainer = pkg.TabSliderContainer = new JS.Module('TabSliderContainer', {
-            include: [pkg.SelectionManager],
-            
-            
-            // Life Cycle //////////////////////////////////////////////////////
-            initNode: function(parent, attrs) {
-                const self = this;
-                
-                self._tabSliders = [];
-                
-                attrs.defaultPlacement = 'container';
-                
-                attrs.spacing ??= pkg.theme.TabSliderContainerSpacing;
-                attrs.overflow ??= 'autoy';
-                attrs.itemSelectionId ??= 'tabId';
-                attrs.maxSelected ??= 1;
-                attrs.duration ??= 500;
-                
-                self.updateLayout = debounce(self.updateLayout);
-                
-                self.callSuper(parent, attrs);
-                
-                const container = self.container = new View(self, {
-                    ignorePlacement:true, percentOfParentWidth:100
-                }, [SizeToParent, {
-                    /** @overrides myt.View */
-                    subnodeAdded: function(node) {
-                        this.callSuper(node);
-                        if (node instanceof TabSlider) {
-                            self._tabSliders.push(node);
-                            self.attachTo(node, 'updateLayout', 'selected');
-                        }
-                    },
-                    
-                    /** @overrides myt.View */
-                    subnodeRemoved: function(node) {
-                        if (node instanceof TabSlider) {
-                            const tabSliders = self._tabSliders,
-                                idx = tabSliders.indexOf(node);
-                            if (idx > -1) {
-                                self.detachFrom(node, 'updateLayout', 'selected');
-                                tabSliders.splice(idx, 1);
-                            }
-                        }
-                        this.callSuper(node);
+        Attributes:
+            spacing:number The spacing between tab sliders. Defaults to
+                myt.theme.TabSliderContainerSpacing which is 1.
+            duration:number The length of time for the animation.
+        
+        @class */
+    pkg.TabSliderContainer = new JS.Module('TabSliderContainer', {
+        include: [pkg.SelectionManager],
+
+
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            const self = this;
+
+            self._tabSliders = [];
+
+            attrs.defaultPlacement = 'container';
+
+            attrs.spacing ??= pkg.theme.TabSliderContainerSpacing;
+            attrs.overflow ??= 'autoy';
+            attrs.itemSelectionId ??= 'tabId';
+            attrs.maxSelected ??= 1;
+            attrs.duration ??= 500;
+
+            self.updateLayout = debounce(self.updateLayout);
+
+            self.callSuper(parent, attrs);
+
+            const container = self.container = new View(self, {
+                ignorePlacement:true, percentOfParentWidth:100
+            }, [SizeToParent, {
+                /** @overrides myt.View */
+                subnodeAdded: function(node) {
+                    this.callSuper(node);
+                    if (node instanceof TabSlider) {
+                        self._tabSliders.push(node);
+                        self.attachTo(node, 'updateLayout', 'selected');
                     }
-                }]);
-                container.layout = new pkg.SpacedLayout(container, {axis:'y', spacing:self.spacing, collapseParent:true});
-                
-                self.attachTo(self, 'updateLayout', 'height');
-            },
-            
-            
-            // Accessors ///////////////////////////////////////////////////////
-            setPersistenceId: function(v) {this.persistenceId = v;},
-            getTabSliders: function() {return this._tabSliders;},
-            getTabSliderById: function(sliderId) {
-                for (const tabSlider of this._tabSliders) {
-                    if (tabSlider.tabId === sliderId) return tabSlider;
-                }
-            },
-            
-            setSpacing: function(v) {
-                if (this.spacing !== v) {
-                    this.spacing = v;
-                    this.layout?.setSpacing(v);
-                }
-            },
-            
-            setDuration: function(v) {this.duration = v;},
-            
-            
-            // Methods /////////////////////////////////////////////////////////
-            /** @param {!Object} ignoredEvent
-                @param {number} [temporaryDuration]
-                @returns {void} */
-            updateLayout: function(ignoredEvent, temporaryDuration) {
-                const tabSliders = this._tabSliders,
-                    tabSlidersLen = tabSliders.length;
-                let i = tabSlidersLen, 
-                    min = 0, 
-                    preferred = 0, 
-                    visCount = 0;
-                
-                while (i) {
-                    const tabSlider = tabSliders[--i];
-                    if (tabSlider.visible) {
-                        ++visCount;
-                        if (tabSlider.selected) {
-                            min += tabSlider.getMinimumExpandedHeight();
-                            preferred += tabSlider.getPreferredExpandedHeight();
-                        } else {
-                            const collapsedHeight = tabSlider.getCollapsedHeight();
-                            min += collapsedHeight;
-                            preferred += collapsedHeight;
+                },
+
+                /** @overrides myt.View */
+                subnodeRemoved: function(node) {
+                    if (node instanceof TabSlider) {
+                        const tabSliders = self._tabSliders,
+                            idx = tabSliders.indexOf(node);
+                        if (idx > -1) {
+                            self.detachFrom(node, 'updateLayout', 'selected');
+                            tabSliders.splice(idx, 1);
                         }
                     }
+                    this.callSuper(node);
                 }
-                
-                const layout = this.container.layout,
-                    layoutOverage = layout.inset + layout.outset + layout.spacing * (visCount - 1);
-                min += layoutOverage;
-                preferred += layoutOverage;
-                
-                const h = this.height,
-                    minIsOver = min > h,
-                    preferredIsOver = preferred > h,
-                    existingDuration = this.duration;
-                let overage = preferred - h;
-                
-                if (temporaryDuration > 0) this.setDuration(temporaryDuration);
-                
-                i = tabSlidersLen;
-                while (i) {
-                    const tabSlider = tabSliders[--i];
-                    if (tabSlider.visible) {
-                        if (tabSlider.selected) {
-                            let newVal;
-                            if (minIsOver) {
-                                newVal = tabSlider.getMinimumExpandedHeight();
-                            } else if (preferredIsOver) {
-                                const tabPreferred = tabSlider.getPreferredExpandedHeight(),
-                                    tabMin = tabSlider.getMinimumExpandedHeight();
-                                
-                                newVal = tabPreferred - overage;
-                                if (tabMin > newVal) {
-                                    overage -= tabPreferred - tabMin;
-                                    newVal = tabMin;
-                                } else {
-                                    overage = 0;
-                                }
+            }]);
+            container.layout = new pkg.SpacedLayout(container, {axis:'y', spacing:self.spacing, collapseParent:true});
+
+            self.attachTo(self, 'updateLayout', 'height');
+        },
+
+
+        // Accessors ///////////////////////////////////////////////////////////
+        setPersistenceId: function(v) {this.persistenceId = v;},
+        getTabSliders: function() {return this._tabSliders;},
+        getTabSliderById: function(sliderId) {
+            for (const tabSlider of this._tabSliders) {
+                if (tabSlider.tabId === sliderId) return tabSlider;
+            }
+        },
+
+        setSpacing: function(v) {
+            if (this.spacing !== v) {
+                this.spacing = v;
+                this.layout?.setSpacing(v);
+            }
+        },
+
+        setDuration: function(v) {this.duration = v;},
+
+
+        // Methods /////////////////////////////////////////////////////////////
+        /** @param {!Object} ignoredEvent
+            @param {number} [temporaryDuration]
+            @returns {void} */
+        updateLayout: function(ignoredEvent, temporaryDuration) {
+            const tabSliders = this._tabSliders,
+                tabSlidersLen = tabSliders.length;
+            let i = tabSlidersLen, 
+                min = 0, 
+                preferred = 0, 
+                visCount = 0;
+
+            while (i) {
+                const tabSlider = tabSliders[--i];
+                if (tabSlider.visible) {
+                    ++visCount;
+                    if (tabSlider.selected) {
+                        min += tabSlider.getMinimumExpandedHeight();
+                        preferred += tabSlider.getPreferredExpandedHeight();
+                    } else {
+                        const collapsedHeight = tabSlider.getCollapsedHeight();
+                        min += collapsedHeight;
+                        preferred += collapsedHeight;
+                    }
+                }
+            }
+
+            const layout = this.container.layout,
+                layoutOverage = layout.inset + layout.outset + layout.spacing * (visCount - 1);
+            min += layoutOverage;
+            preferred += layoutOverage;
+
+            const h = this.height,
+                minIsOver = min > h,
+                preferredIsOver = preferred > h,
+                existingDuration = this.duration;
+            let overage = preferred - h;
+
+            if (temporaryDuration > 0) this.setDuration(temporaryDuration);
+
+            i = tabSlidersLen;
+            while (i) {
+                const tabSlider = tabSliders[--i];
+                if (tabSlider.visible) {
+                    if (tabSlider.selected) {
+                        let newVal;
+                        if (minIsOver) {
+                            newVal = tabSlider.getMinimumExpandedHeight();
+                        } else if (preferredIsOver) {
+                            const tabPreferred = tabSlider.getPreferredExpandedHeight(),
+                                tabMin = tabSlider.getMinimumExpandedHeight();
+
+                            newVal = tabPreferred - overage;
+                            if (tabMin > newVal) {
+                                overage -= tabPreferred - tabMin;
+                                newVal = tabMin;
                             } else {
-                                newVal = tabSlider.getPreferredExpandedHeight();
+                                overage = 0;
                             }
-                            tabSlider.expand(newVal);
                         } else {
-                            tabSlider.collapse();
+                            newVal = tabSlider.getPreferredExpandedHeight();
                         }
+                        tabSlider.expand(newVal);
+                    } else {
+                        tabSlider.collapse();
                     }
                 }
-                
-                // Restore duration
-                if (temporaryDuration > 0) this.setDuration(existingDuration);
-            },
-            
-            // Persistence
-            readState: persistenceId => LocalStorage.getDatum(persistenceId),
-            writeState: (persistenceId, componentState) => {LocalStorage.setDatum(persistenceId, componentState);},
-            saveState: debounce(function() {
-                const expandedTabIds = [];
-                for (const tabSlider of this.getTabSliders()) {
-                    if (tabSlider.expansionState === STATE_EXPANDED) expandedTabIds.push(tabSlider.tabId);
-                }
-                this.writeState(this.persistenceId, expandedTabIds);
-            }, 1000),
-            restoreState: function(defaultState) {
-                for (const expandedTabIds of (this.readState(this.persistenceId) || defaultState)) {
-                    this.select(this.getTabSliderById(expandedTabIds));
-                }
             }
-        });
+
+            // Restore duration
+            if (temporaryDuration > 0) this.setDuration(existingDuration);
+        },
+
+        // Persistence
+        readState: persistenceId => LocalStorage.getDatum(persistenceId),
+        writeState: (persistenceId, componentState) => {LocalStorage.setDatum(persistenceId, componentState);},
+        saveState: debounce(function() {
+            const expandedTabIds = [];
+            for (const tabSlider of this.getTabSliders()) {
+                if (tabSlider.expansionState === STATE_EXPANDED) expandedTabIds.push(tabSlider.tabId);
+            }
+            this.writeState(this.persistenceId, expandedTabIds);
+        }, 1000),
+        restoreState: function(defaultState) {
+            for (const expandedTabIds of (this.readState(this.persistenceId) || defaultState)) {
+                this.select(this.getTabSliderById(expandedTabIds));
+            }
+        }
+    });
 })(myt);
 
 
@@ -15005,108 +15010,108 @@ myt.Destructible = new JS.Module('Destructible', {
             doActivated: function() {
                 if (!this.selected) this.tabContainer.select(this);
             }
-        }),
-        
-        /** A mixin that allows myt.Tabs to be added to a view.
-            
-            Attributes:
-                layout:myt.SpacedLayout The layout for the tabs.
-                location:string The location of the tabs relative to the container. Supported 
-                    values are: 'top', 'bottom', 'left' and 'right'. Defaults to 'top'.
-                spacing:number The spacing between tabs. Defaults to 1.
-                inset:number The inset for the layout. Defaults to 0.
-            
-            @class */
-        TabContainer = pkg.TabContainer = new JS.Module('TabContainer', {
-            include: [pkg.SelectionManager],
-            
-            
-            // Life Cycle //////////////////////////////////////////////////////
-            initNode: function(parent, attrs) {
-                this.__tabs = [];
-                
-                attrs.spacing ??= theme.TabContainerSpacing;
-                attrs.inset ??= theme.TabContainerInset;
-                attrs.location ??= 'top';
-                attrs.itemSelectionId ??= 'tabId';
-                attrs.maxSelected ??= 1;
-                
-                const collapse = attrs.collapse ?? true;
-                delete attrs.collapse;
-                
-                this.callSuper(parent, attrs);
-                
-                this.layout = new pkg.SpacedLayout(this, {
-                    axis:this.location === 'left' || this.location === 'right' ? 'y' : 'x',
-                    spacing:this.spacing,
-                    inset:this.inset,
-                    collapseParent:collapse
-                });
-            },
-            
-            
-            // Accessors ///////////////////////////////////////////////////////
-            setLocation: function(v) {this.location = v;},
-            
-            setSpacing: function(v) {
-                if (this.spacing !== v) {
-                    this.spacing = v;
-                    this.layout?.setSpacing(v);
-                }
-            },
-            
-            setInset: function(v) {
-                if (this.inset !== v) {
-                    this.inset = v;
-                    this.layout?.setInset(v);
-                }
-            },
-            
-            
-            // Methods /////////////////////////////////////////////////////////
-            getFirstTab: function() {
-                return this.__tabs[0];
-            },
-            
-            /** Gets the currently selected tab.
-                @returns myt.Tab or undefined if no tab is selected. */
-            getSelectedTab: function() {
-                return this.getSelected()[0];
-            },
-            
-            /** @overrides myt.View */
-            subnodeAdded: function(node) {
-                this.callSuper(node);
-                if (node.isA(Tab)) {
-                    this.__tabs.push(node);
-                    
-                    switch (this.location) {
-                        case 'top':
-                            node.setValign('bottom');
-                            break;
-                        case 'bottom':
-                            node.setValign('top');
-                            break;
-                        case 'left':
-                            node.setAlign('right');
-                            break;
-                        case 'right':
-                            node.setAlign('left');
-                            break;
-                    }
-                }
-            },
-            
-            /** @overrides myt.View */
-            subnodeRemoved: function(node) {
-                if (node.isA(Tab)) {
-                    const tabs = this.__tabs,
-                        idx = tabs.indexOf(node);
-                    if (idx > -1) tabs.splice(idx, 1);
-                }
-                this.callSuper(node);
-            }
         });
+    
+    /** A mixin that allows myt.Tabs to be added to a view.
+        
+        Attributes:
+            layout:myt.SpacedLayout The layout for the tabs.
+            location:string The location of the tabs relative to the container. Supported 
+                values are: 'top', 'bottom', 'left' and 'right'. Defaults to 'top'.
+            spacing:number The spacing between tabs. Defaults to 1.
+            inset:number The inset for the layout. Defaults to 0.
+        
+        @class */
+    pkg.TabContainer = new JS.Module('TabContainer', {
+        include: [pkg.SelectionManager],
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            this.__tabs = [];
+            
+            attrs.spacing ??= theme.TabContainerSpacing;
+            attrs.inset ??= theme.TabContainerInset;
+            attrs.location ??= 'top';
+            attrs.itemSelectionId ??= 'tabId';
+            attrs.maxSelected ??= 1;
+            
+            const collapse = attrs.collapse ?? true;
+            delete attrs.collapse;
+            
+            this.callSuper(parent, attrs);
+            
+            this.layout = new pkg.SpacedLayout(this, {
+                axis:this.location === 'left' || this.location === 'right' ? 'y' : 'x',
+                spacing:this.spacing,
+                inset:this.inset,
+                collapseParent:collapse
+            });
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setLocation: function(v) {this.location = v;},
+        
+        setSpacing: function(v) {
+            if (this.spacing !== v) {
+                this.spacing = v;
+                this.layout?.setSpacing(v);
+            }
+        },
+        
+        setInset: function(v) {
+            if (this.inset !== v) {
+                this.inset = v;
+                this.layout?.setInset(v);
+            }
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        getFirstTab: function() {
+            return this.__tabs[0];
+        },
+        
+        /** Gets the currently selected tab.
+            @returns myt.Tab or undefined if no tab is selected. */
+        getSelectedTab: function() {
+            return this.getSelected()[0];
+        },
+        
+        /** @overrides myt.View */
+        subnodeAdded: function(node) {
+            this.callSuper(node);
+            if (node.isA(Tab)) {
+                this.__tabs.push(node);
+                
+                switch (this.location) {
+                    case 'top':
+                        node.setValign('bottom');
+                        break;
+                    case 'bottom':
+                        node.setValign('top');
+                        break;
+                    case 'left':
+                        node.setAlign('right');
+                        break;
+                    case 'right':
+                        node.setAlign('left');
+                        break;
+                }
+            }
+        },
+        
+        /** @overrides myt.View */
+        subnodeRemoved: function(node) {
+            if (node.isA(Tab)) {
+                const tabs = this.__tabs,
+                    idx = tabs.indexOf(node);
+                if (idx > -1) tabs.splice(idx, 1);
+            }
+            this.callSuper(node);
+        }
+    });
 })(myt);
 
 
@@ -15228,7 +15233,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides myt.Input */
-            createOurDomElement: parent => document.createElement('option'),
+            createOurDomElement: _parent => document.createElement('option'),
             
             
             // Accessors ///////////////////////////////////////////////////////
@@ -15344,9 +15349,9 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** @private
-                @param {!Object} event
+                @param {!Object} _event
                 @returns {void} */
-            __filterInput: function(event) {
+            __filterInput: function(_event) {
                 this.setDomValue(this.filterInput(this.getDomValue()));
             },
             
@@ -15375,9 +15380,9 @@ myt.Destructible = new JS.Module('Destructible', {
             filterInputPress: NOOP, // domEvent => {/* Subclasses to implement as needed. */},
             
             /** @private
-                @param {!Object} event
+                @param {!Object} _event
                 @returns {void} */
-            __syncToDom: function(event) {
+            __syncToDom: function(_event) {
                 this.setValue(this.getDomValue());
             },
             
@@ -15654,9 +15659,9 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** @private
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        __userInteraction: function(event) {
+        __userInteraction: function(_event) {
             this.saveSelection();
             return true;
         },
@@ -16046,9 +16051,9 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** @private
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        __doChanged: function(event) {
+        __doChanged: function(_event) {
             this.__syncToDom();
             this.doChanged();
         },
@@ -17305,22 +17310,22 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** @overrides myt.Form */
-            addSubForm: subform => {
+            addSubForm: _subform => {
                 dumpStack('addSubForm unsupported on FormElement');
             },
             
             /** @overrides myt.Form */
-            getSubForm: id => {
+            getSubForm: _id => {
                 dumpStack('getSubForm unsupported on FormElement');
             },
             
             /** @overrides myt.Form */
-            removeSubForm: id => {
+            removeSubForm: _id => {
                 dumpStack('removeSubForm unsupported on FormElement');
             },
             
             /** @overrides myt.Form */
-            verifyChangedState: function(subformToIgnore) {
+            verifyChangedState: function(_subform) {
                 const isChanged = this.getValue() !== this.getRollbackValue();
                 this.setIsChanged(isChanged);
                 return isChanged;
@@ -17690,11 +17695,11 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         },
         
-        notifyPanelShown: function(panel) {
+        notifyPanelShown: function(_panel) {
             this._isShown = true;
         },
         
-        notifyPanelHidden: function(panel) {
+        notifyPanelHidden: function(_panel) {
             this._isShown = false;
         },
         
@@ -17925,8 +17930,6 @@ myt.Destructible = new JS.Module('Destructible', {
         
         {NOOP, dumpStack} = pkg,
         
-        mathRound = Math.round,
-        
         MIME_TYPES_BY_EXTENSION = {
             gif:'image/gif',
             png:'image/png',
@@ -18146,10 +18149,10 @@ myt.Destructible = new JS.Module('Destructible', {
             
             
             // Accessors ///////////////////////////////////////////////////////
-            setAccept: function(v) {this.fileInput?.setAccept(this.accept);},
+            setAccept: function(_v) {this.fileInput?.setAccept(this.accept);},
             getAccept: function() {return this.fileInput?.accept;},
             
-            setMaxFiles: function(v) {this.fileInput?.setMaxFiles(this.maxFiles);},
+            setMaxFiles: function(_v) {this.fileInput?.setMaxFiles(this.maxFiles);},
             getMaxFiles: function() {return this.fileInput?.maxFiles;},
             
             /** Add a "remote" file when the value is set.
@@ -18199,7 +18202,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 if (this.fileInput) this.bringSubviewToFront(this.fileInput);
             },
             
-            handleDroppedFile: function(file, event) {
+            handleDroppedFile: function(file, _event) {
                 this.addFile(file);
             },
             
@@ -18247,10 +18250,10 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Subclasses must implement this to extract the uploaded file path from the response. 
                 By default this returns null.
-                @param {!Object} file
-                @param {!Object} data
+                @param {!Object} _file
+                @param {!Object} _data
                 @returns {void} */
-            parseServerPathFromResponse: (file, data) => null,
+            parseServerPathFromResponse: (_file, _data) => null,
             
             addFile: function(file) {
                 this.files.push(file);
@@ -18632,120 +18635,120 @@ myt.Destructible = new JS.Module('Destructible', {
                     if (!ignoreRestoreFocus && self.restoreFocus) self.prevFocus?.focus();
                 }
             }
-        }),
-        
-        /** An myt.Dimmer that also provides a content panel.
-            
-            Attributes:
-                content:myt.View The content view placed inside the dimmer.
-                sizingStrategy:string Determines how the content view is positioned relative to the 
-                    bounds of the dimmer. Supported values are:
-                        children: The content will be sized to fit the children it contains. The 
-                            content will be positioned in the center and middle of the dimmer. This 
-                            is the default sizingStrategy
-                        parent: The content will be sized to the bounds of the dimmer.
-                        basic: The content will not be sized in any way. It will be positioned in 
-                            the center and middle of the dimmer.
-                        none: The content will not be sized or positioned in any way.
-                marginTop:number The margin above the content when the sizingStrategy is "parent". 
-                    Defaults to 40 if not provided.
-                marginLeft:number The margin on the left side of the content when the 
-                    sizingStrategy is "parent". Defaults to 40 if not provided.
-                marginBottom:number The margin below the content when the sizingStrategy is 
-                    "parent". Defaults to 40 if not provided.
-                marginRight:number The margin on the right side of the content when the 
-                    sizingStrategy is "parent". Defaults to 40 if not provided.
-                paddingX:number The internal horizontal padding when the sizingStrategy is 
-                    "children". Defaults to 20 if not provided.
-                paddingY:number The internal vertical padding when the sizingStrategy is 
-                    "children". Defaults to 15 if not provided.
-                
-            @class */
-        ModalPanel = pkg.ModalPanel = new JSClass('ModalPanel', Dimmer, {
-            // Class Methods and Attributes ////////////////////////////////////
-            extend: {
-                getOpenModalPanelCount: () => openModalPanelCount,
-                
-                hasOpenModalPanels: () => openModalPanelCount > 0
-            },
-            
-            
-            // Life Cycle //////////////////////////////////////////////////////
-            initNode: function(parent, attrs) {
-                const self = this,
-                    viewAttrs = {name:'content', ignorePlacement:true},
-                    centeredViewAttrs = {...viewAttrs, align:'center', valign:'middle'};
-                
-                self.defaultPlacement = 'content';
-                
-                attrs.sizingStrategy ??= 'children';
-                
-                // Used for parent sizing strategy
-                attrs.marginTop ??= theme.ModalPanelMarginTop;
-                attrs.marginLeft ??= theme.ModalPanelMarginLeft;
-                attrs.marginBottom ??= theme.ModalPanelMarginBottom;
-                attrs.marginRight ??= theme.ModalPanelMarginRight;
-                
-                // Used for "children" sizing strategy
-                attrs.paddingX ??= theme.ModalPanelPaddingX;
-                attrs.paddingY ??= theme.ModalPanelPaddingY;
-                
-                self.callSuper(parent, attrs);
-                
-                switch (self.sizingStrategy) {
-                    case 'children':
-                        new pkg.SizeToChildren(new View(self, centeredViewAttrs), {
-                            name:'sizeToChildren', axis:'both',
-                            paddingX:self.paddingX, 
-                            paddingY:self.paddingY
-                        });
-                        break;
-                    case 'parent':
-                        new View(self, {
-                            ...viewAttrs, 
-                            x:self.marginLeft,
-                            y:self.marginTop,
-                            percentOfParentWidthOffset:-self.marginLeft - self.marginRight,
-                            percentOfParentHeightOffset:-self.marginTop - self.marginBottom,
-                            percentOfParentWidth:100,
-                            percentOfParentHeight:100
-                        }, [SizeToParent]);
-                        break;
-                    case 'basic':
-                        new View(self, centeredViewAttrs);
-                        break;
-                    case 'none':
-                    default:
-                        new View(self, viewAttrs);
-                }
-            },
-            
-            
-            // Accessors ///////////////////////////////////////////////////////
-            setSizingStrategy: function(v) {this.sizingStrategy = v;},
-            
-            setMarginTop: function(v) {this.marginTop = v;},
-            setMarginLeft: function(v) {this.marginLeft = v;},
-            setMarginBottom: function(v) {this.marginBottom = v;},
-            setMarginRight: function(v) {this.marginRight = v;},
-            
-            setPaddingX: function(v) {this.paddingX = v;},
-            setPaddingY: function(v) {this.paddingY = v;},
-            
-            
-            // Methods /////////////////////////////////////////////////////////
-            /** @overrides myt.Dimmer */
-            show: function() {
-                this.callSuper();
-                openModalPanelCount++;
-            },
-            
-            /** @overrides myt.Dimmer */
-            hide: function(ignoreRestoreFocus) {
-                this.callSuper(ignoreRestoreFocus);
-                openModalPanelCount = Math.max(0, openModalPanelCount - 1);
-            }
         });
+    
+    /** An myt.Dimmer that also provides a content panel.
+        
+        Attributes:
+            content:myt.View The content view placed inside the dimmer.
+            sizingStrategy:string Determines how the content view is positioned relative to the 
+                bounds of the dimmer. Supported values are:
+                    children: The content will be sized to fit the children it contains. The 
+                        content will be positioned in the center and middle of the dimmer. This is 
+                        the default sizingStrategy
+                    parent: The content will be sized to the bounds of the dimmer.
+                    basic: The content will not be sized in any way. It will be positioned in the 
+                        center and middle of the dimmer.
+                    none: The content will not be sized or positioned in any way.
+            marginTop:number The margin above the content when the sizingStrategy is "parent". 
+                Defaults to 40 if not provided.
+            marginLeft:number The margin on the left side of the content when the sizingStrategy is 
+                "parent". Defaults to 40 if not provided.
+            marginBottom:number The margin below the content when the sizingStrategy is "parent". 
+                Defaults to 40 if not provided.
+            marginRight:number The margin on the right side of the content when the sizingStrategy 
+                is "parent". Defaults to 40 if not provided.
+            paddingX:number The internal horizontal padding when the sizingStrategy is "children". 
+                Defaults to 20 if not provided.
+            paddingY:number The internal vertical padding when the sizingStrategy is "children". 
+                Defaults to 15 if not provided.
+            
+        @class */
+    pkg.ModalPanel = new JSClass('ModalPanel', Dimmer, {
+        // Class Methods and Attributes ////////////////////////////////////////
+        extend: {
+            getOpenModalPanelCount: () => openModalPanelCount,
+            
+            hasOpenModalPanels: () => openModalPanelCount > 0
+        },
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            const self = this,
+                viewAttrs = {name:'content', ignorePlacement:true},
+                centeredViewAttrs = {...viewAttrs, align:'center', valign:'middle'};
+            
+            self.defaultPlacement = 'content';
+            
+            attrs.sizingStrategy ??= 'children';
+            
+            // Used for parent sizing strategy
+            attrs.marginTop ??= theme.ModalPanelMarginTop;
+            attrs.marginLeft ??= theme.ModalPanelMarginLeft;
+            attrs.marginBottom ??= theme.ModalPanelMarginBottom;
+            attrs.marginRight ??= theme.ModalPanelMarginRight;
+            
+            // Used for "children" sizing strategy
+            attrs.paddingX ??= theme.ModalPanelPaddingX;
+            attrs.paddingY ??= theme.ModalPanelPaddingY;
+            
+            self.callSuper(parent, attrs);
+            
+            switch (self.sizingStrategy) {
+                case 'children':
+                    new pkg.SizeToChildren(new View(self, centeredViewAttrs), {
+                        name:'sizeToChildren', axis:'both',
+                        paddingX:self.paddingX, 
+                        paddingY:self.paddingY
+                    });
+                    break;
+                case 'parent':
+                    new View(self, {
+                        ...viewAttrs, 
+                        x:self.marginLeft,
+                        y:self.marginTop,
+                        percentOfParentWidthOffset:-self.marginLeft - self.marginRight,
+                        percentOfParentHeightOffset:-self.marginTop - self.marginBottom,
+                        percentOfParentWidth:100,
+                        percentOfParentHeight:100
+                    }, [SizeToParent]);
+                    break;
+                case 'basic':
+                    new View(self, centeredViewAttrs);
+                    break;
+                case 'none':
+                default:
+                    new View(self, viewAttrs);
+            }
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setSizingStrategy: function(v) {this.sizingStrategy = v;},
+        
+        setMarginTop: function(v) {this.marginTop = v;},
+        setMarginLeft: function(v) {this.marginLeft = v;},
+        setMarginBottom: function(v) {this.marginBottom = v;},
+        setMarginRight: function(v) {this.marginRight = v;},
+        
+        setPaddingX: function(v) {this.paddingX = v;},
+        setPaddingY: function(v) {this.paddingY = v;},
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides myt.Dimmer */
+        show: function() {
+            this.callSuper();
+            openModalPanelCount++;
+        },
+        
+        /** @overrides myt.Dimmer */
+        hide: function(ignoreRestoreFocus) {
+            this.callSuper(ignoreRestoreFocus);
+            openModalPanelCount = Math.max(0, openModalPanelCount - 1);
+        }
+    });
 })(myt);
 
 
@@ -19133,7 +19136,7 @@ myt.Destructible = new JS.Module('Destructible', {
                         x:170, y:y, width:colorViewSize + 26 + 6,
                         minValue:0, maxValue:255, flipThreshold:55, labelColor:'#fff'
                     }, [{
-                        setText: function(event, noAnim) {
+                        setText: function(event, _noAnim) {
                             let v = event.value;
                             
                             if (v == null || isNaN(v)) v = 0;
@@ -19392,8 +19395,8 @@ myt.Destructible = new JS.Module('Destructible', {
                 todayFullYear = todayDateObj.getFullYear(),
                 todayMonth = todayDateObj.getMonth(),
                 todayDate = todayDateObj.getDate(),
-                todayHours = todayDateObj.getHours(),
-                todayMinutes = todayDateObj.getMinutes(),
+                //todayHours = todayDateObj.getHours(),
+                //todayMinutes = todayDateObj.getMinutes(),
                 dateFullYear = date.getFullYear(),
                 dateMonth = date.getMonth(),
                 dateDate = date.getDate(),
@@ -19406,9 +19409,9 @@ myt.Destructible = new JS.Module('Destructible', {
                 dateBeforeMonth = new Date(dateFullYear, dateMonth, 0),
                 dateNextMonth = new Date(dateFullYear, dateMonth + 2, 0),
                 isCurrentYear = todayFullYear == dateFullYear,
-                isCurrentMonth = isCurrentYear && todayMonth == dateMonth,
-                isCurrentDay = isCurrentMonth && todayDate == dateDate,
-                isPastMonth = dateFullYear < todayFullYear || (isCurrentYear && dateMonth < todayMonth);
+                isCurrentMonth = isCurrentYear && todayMonth == dateMonth;
+                //isCurrentDay = isCurrentMonth && todayDate == dateDate;
+                //isPastMonth = dateFullYear < todayFullYear || (isCurrentYear && dateMonth < todayMonth);
             
             let realDayObj;
             if (!timeOnly) {
@@ -19520,11 +19523,11 @@ myt.Destructible = new JS.Module('Destructible', {
                 let [hours, minutes] = minTime;
                 realDayObj = new Date(dateTime);
                 while (hours * 60 + minutes < maxTimeInMinutes) {
-                    const is_past_time = hours < todayHours || (hours == todayHours && minutes < todayMinutes),
-                        is_past = isCurrentDay && is_past_time,
-                        timeCell = new TimeBtn(timeListView, {
-                            text:('0' + hours).slice(-2) + ':' + ('0' + minutes).slice(-2)
-                        });
+                    //const is_past_time = hours < todayHours || (hours == todayHours && minutes < todayMinutes),
+                        //is_past = isCurrentDay && is_past_time,
+                    const timeCell = new TimeBtn(timeListView, {
+                        text:('0' + hours).slice(-2) + ':' + ('0' + minutes).slice(-2)
+                    });
                     if (hours === dateHours && minutes === dateMinutes) timeListView.select(timeCell);
                     
                     realDayObj.setHours(hours);
@@ -20045,11 +20048,12 @@ myt.Destructible = new JS.Module('Destructible', {
                         case 'cancelBtn':
                             callbackFunction.call(self, action);
                             break;
-                        case 'confirmBtn':
+                        case 'confirmBtn': {
                             const colorAsHex = colorPicker.getColor();
                             colorPicker.addToPalette(colorAsHex);
                             callbackFunction.call(self, action, colorAsHex);
                             break;
+                        }
                     }
                     colorPicker.destroy();
                 });
@@ -20650,7 +20654,7 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** @overrides myt.ArrowKeyActivation. */
-            doKeyArrowLeftOrUp: function(isLeft, isRepeat) {
+            doKeyArrowLeftOrUp: function(isLeft, _isRepeat) {
                 if (isLeft) {
                     this.parent.nudgeValueLeft(this);
                 } else {
@@ -20660,7 +20664,7 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** @overrides myt.ArrowKeyActivation. */
-            doKeyArrowRightOrDown: function(isRight, isRepeat) {
+            doKeyArrowRightOrDown: function(isRight, _isRepeat) {
                 if (isRight) {
                     this.parent.nudgeValueRight(this);
                 } else {
@@ -20812,17 +20816,17 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** Should only be called by SliderThumb.
                 @private
-                @param {!Object} thumb
+                @param {!Object} _thumb
                 @returns {number} */
-            getMinPixelValueForThumb: function(thumb) {
+            getMinPixelValueForThumb: function(_thumb) {
                 return this.convertValueToPixels(this.minValue);
             },
             
             /** Should only be called by SliderThumb.
                 @private
-                @param {!Object} thumb
+                @param {!Object} _thumb
                 @returns {number} */
-            getMaxPixelValueForThumb: function(thumb) {
+            getMaxPixelValueForThumb: function(_thumb) {
                 return this.convertValueToPixels(this.maxValue);
             }
         });
@@ -21261,9 +21265,9 @@ myt.Destructible = new JS.Module('Destructible', {
             // Methods /////////////////////////////////////////////////////////
             /** Do the limitToParent constraint.
                 @private
-                @param {!Object} event
+                @param {!Object} _event
                 @returns {void} */
-            __limitToParent: function(event) {
+            __limitToParent: function(_event) {
                 const self = this,
                     dim = self.axis === 'y' ? 'height' : 'width';
                 self.setMaxValue(self.parent[dim] - self.limitToParent - self[dim]);
@@ -22010,7 +22014,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     percentOfParentHeight:100, align:'right', alignOffset:-5,
                     draggableAllowBubble:false
                 }, [pkg.SizeToParent, pkg.Draggable, {
-                    requestDragPosition: function(x, y) {
+                    requestDragPosition: function(x, _y) {
                         let diff = x - this.x;
                         if (gc.fitToWidth) {
                             if (diff > 0) {
@@ -22314,9 +22318,9 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** @private
-                @param {!Object} event
+                @param {!Object} _event
                 @returns {void} */
-            _updateContentHeight: function(event) {
+            _updateContentHeight: function(_event) {
                 const self = this,
                     {header, content} = self,
                     y = header.y + header.height;
@@ -22826,7 +22830,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 this._itemPool.putInstance(row);
             },
             
-            refreshListUI: function(ignoredEvent) {
+            refreshListUI: function(_event) {
                 const self = this,
                     rowExtent = self._rowExtent,
                     rowInset = self.rowInset,
@@ -22897,7 +22901,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 }
             },
             
-            getClassKey: model => DEFAULT_CLASS_KEY,
+            getClassKey: _model => DEFAULT_CLASS_KEY,
             
             updateRow:NOOP // row => {}
         }),
@@ -22964,13 +22968,13 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** @overrides myt.ArrowKeyActivation. */
-            doKeyArrowLeftOrUp: function(isLeft, isRepeat) {
+            doKeyArrowLeftOrUp: function(_isLeft, _isRepeat) {
                 this.infiniteOwner.selectPrevRowForModel(this.model);
                 return true;
             },
             
             /** @overrides myt.ArrowKeyActivation. */
-            doKeyArrowRightOrDown: function(isRight, isRepeat) {
+            doKeyArrowRightOrDown: function(_isRight, _isRepeat) {
                 this.infiniteOwner.selectNextRowForModel(this.model);
                 return true;
             },
@@ -23021,7 +23025,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 return this.getActiveRowForModel(this.selectedRowModel);
             },
             
-            selectRowForModel: function(model, focus, isNext) {
+            selectRowForModel: function(model, focus, _isNext) {
                 if (model) {
                     clearSelectedRow(this);
                     this.setSelectedRowModel(model);
@@ -23061,7 +23065,7 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** @overrides */
-            refreshListUI: function(ignoredEvent) {
+            refreshListUI: function(_event) {
                 const currentFocus = GlobalFocus.focusedView;
                 
                 this.callSuper();
@@ -23481,10 +23485,10 @@ myt.Destructible = new JS.Module('Destructible', {
         
         // Methods /////////////////////////////////////////////////////////////
         to: function(panel) {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve, _reject) => {
                 panel.stopActiveAnimators('opacity');
                 panel.setVisible(true);
-                panel.animate({attribute:'opacity', to:1, duration:this.duration}).next(success => {
+                panel.animate({attribute:'opacity', to:1, duration:this.duration}).next(_success => {
                     panel.makeHighestZIndex();
                     resolve(panel);
                 });
@@ -23492,9 +23496,9 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         from: function(panel) {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve, _reject) => {
                 panel.stopActiveAnimators('opacity');
-                panel.animate({attribute:'opacity', to:0, duration:this.duration}).next(success => {
+                panel.animate({attribute:'opacity', to:0, duration:this.duration}).next(_success => {
                     panel.setVisible(false);
                     resolve(panel);
                 });
@@ -23550,8 +23554,8 @@ myt.Destructible = new JS.Module('Destructible', {
             panel.set(axis, toValue);
             panel.setVisible(true);
             
-            return new Promise((resolve, reject) => {
-                const nextFunc = success => {
+            return new Promise((resolve, _reject) => {
+                const nextFunc = _success => {
                     panel.makeHighestZIndex();
                     resolve(panel);
                 };
@@ -23590,8 +23594,8 @@ myt.Destructible = new JS.Module('Destructible', {
             
             panel.stopActiveAnimators(axis);
             
-            return new Promise((resolve, reject) => {
-                const nextFunc = success => {
+            return new Promise((resolve, _reject) => {
+                const nextFunc = _success => {
                     panel.setVisible(false);
                     resolve(panel);
                 };
@@ -23838,9 +23842,9 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Called by myt.GlobalDragManager when a dropable is dragged over this target. Gives this 
             drop target a chance to reject a drop regardless of drag group. The default 
             implementation returns true if the view is not disabled.
-            @param dropable:myt.Dropable The dropable being dragged.
+            @param _dropable:myt.Dropable The dropable being dragged.
             @returns boolean: True if the drop will be allowed, false otherwise. */
-        willAcceptDrop: function(dropable) {
+        willAcceptDrop: function(_dropable) {
             // Components must be visible and not disabled to accept a drop.
             return !this.disabled && this.isVisible();
         },
@@ -23937,19 +23941,19 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** Called by myt.GlobalDragManager when this view is dragged out of a drop target.
-            @param dropTarget:myt.DropTarget The target that was dragged out of.
+            @param _dropTarget:myt.DropTarget The target that was dragged out of.
             @returns {void} */
-        notifyDragLeaving: function(dropTarget) {
+        notifyDragLeaving: function(_dropTarget) {
             this.setDropTarget();
         },
         
         /** Called by myt.GlobalDragManager when this view is dropped.
-            @param dropTarget:myt.DropTarget The target that was dropped on. Will be undefined if 
+            @param _dropTarget:myt.DropTarget The target that was dropped on. Will be undefined if 
                 this dropable was dropped on no drop target.
-            @param isAbort:boolean Indicates if the drop was the result of an abort or a 
+            @param _isAbort:boolean Indicates if the drop was the result of an abort or a 
                 normal drop.
             @returns {void} */
-        notifyDropped: function(dropTarget, isAbort) {
+        notifyDropped: function(_dropTarget, _isAbort) {
             this.setDropped(true);
             
             if (!this.dropTarget) this.setDropFailed(true);
@@ -24028,9 +24032,9 @@ myt.Destructible = new JS.Module('Destructible', {
         // Methods /////////////////////////////////////////////////////////////
         /** Called by myt.GlobalDragManager when a dropable starts being dragged that has a 
             matching drag group.
-            @param {!Object} dropable - The myt.Dropable being dragged.
+            @param {!Object} _dropable - The myt.Dropable being dragged.
             @returns {void} */
-        notifyAutoScrollerDragStart: function(dropable) {
+        notifyAutoScrollerDragStart: function(_dropable) {
             const ide = this.getIDE();
             if (ide.scrollHeight > ide.clientHeight || ide.scrollWidth > ide.clientWidth) {
                 this.attachToDom(globalMouse, '__hndlMove', 'mousemove', true);
@@ -24039,9 +24043,9 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** Called by myt.GlobalDragManager when a dropable stops being dragged that has a 
             matching drag group.
-            @param {!Object} dropable - The myt.Dropable no longer being dragged.
+            @param {!Object} _dropable - The myt.Dropable no longer being dragged.
             @returns {void} */
-        notifyAutoScrollerDragStop: function(dropable) {
+        notifyAutoScrollerDragStop: function(_dropable) {
             this.detachFromDom(globalMouse, '__hndlMove', 'mousemove', true);
             
             resetVScroll(this);
@@ -24204,67 +24208,67 @@ myt.Destructible = new JS.Module('Destructible', {
             const svgElem = document.createElementNS('http://www.w3.org/2000/svg', elementName);
             parentElem?.appendChild(svgElem);
             return svgElem;
+        };
+     
+    /** An annulus component.
+        
+        @class */
+    pkg.Annulus = new JS.Class('Annulus', pkg.BackView, {
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            const self = this;
+            
+            self.radius = self.thickness = self.startAngle = self.endAngle = 0;
+            self.startCapRounding = self.endCapRounding = false;
+            
+            self.callSuper(parent, attrs);
+            
+            updateSize(self);
         },
-         
-        /** An annulus component.
+        
+        /** @overrides myt.View */
+        createOurDomElement: function(parent) {
+            const elements = this.callSuper(parent),
+                innerElem = Array.isArray(elements) ? elements[1] : elements,
+                svg = this.__svg = makeSVG('svg', innerElem);
+            this.__path = makeSVG('path', svg);
             
-            @class */
-        Annulus = pkg.Annulus = new JS.Class('Annulus', pkg.BackView, {
-            // Life Cycle //////////////////////////////////////////////////////
-            initNode: function(parent, attrs) {
-                const self = this;
-                
-                self.radius = self.thickness = self.startAngle = self.endAngle = 0;
-                self.startCapRounding = self.endCapRounding = false;
-                
-                self.callSuper(parent, attrs);
-                
-                updateSize(self);
-            },
+            // Let the view handle mouse events
+            svg.style.pointerEvents = 'none';
             
-            /** @overrides myt.View */
-            createOurDomElement: function(parent) {
-                const elements = this.callSuper(parent),
-                    innerElem = Array.isArray(elements) ? elements[1] : elements,
-                    svg = this.__svg = makeSVG('svg', innerElem);
-                this.__path = makeSVG('path', svg);
-                
-                // Let the view handle mouse events
-                svg.style.pointerEvents = 'none';
-                
-                return elements;
-            },
-            
-            
-            // Accessors ///////////////////////////////////////////////////////
-            /** The outer radius of the Annulus. */
-            setRadius: function(v) {setAndUpdateSize(this, 'radius', v);},
-            
-            /** The difference between the inner and outer radius. */
-            setThickness: function(v) {setAndUpdateSize(this, 'thickness', v);},
-            
-            /** The start angle in degrees. */
-            setStartAngle: function(v) {setAndRedraw(this, 'startAngle', v);},
-            
-            /** The end angle in degrees. */
-            setEndAngle: function(v) {setAndRedraw(this, 'endAngle', v);},
-            
-            /** If true the starting cap will be drawn as a semicircle. */
-            setStartCapRounding: function(v) {setAndRedraw(this, 'startCapRounding', v);},
-            
-            /** If true the ending cap will be drawn as a semicircle. */
-            setEndCapRounding: function(v) {setAndRedraw(this, 'endCapRounding', v);},
-            
-            /** The hex color string to fill the Annulus with. */
-            setColor: function(v) {setAndRedraw(this, 'color', v);},
-            
-            
-            // Methods /////////////////////////////////////////////////////////
-            /** @overrides myt.View */
-            isColorAttr: function(attrName) {
-                return attrName === 'color' || this.callSuper(attrName);
-            }
-        });
+            return elements;
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** The outer radius of the Annulus. */
+        setRadius: function(v) {setAndUpdateSize(this, 'radius', v);},
+        
+        /** The difference between the inner and outer radius. */
+        setThickness: function(v) {setAndUpdateSize(this, 'thickness', v);},
+        
+        /** The start angle in degrees. */
+        setStartAngle: function(v) {setAndRedraw(this, 'startAngle', v);},
+        
+        /** The end angle in degrees. */
+        setEndAngle: function(v) {setAndRedraw(this, 'endAngle', v);},
+        
+        /** If true the starting cap will be drawn as a semicircle. */
+        setStartCapRounding: function(v) {setAndRedraw(this, 'startCapRounding', v);},
+        
+        /** If true the ending cap will be drawn as a semicircle. */
+        setEndCapRounding: function(v) {setAndRedraw(this, 'endCapRounding', v);},
+        
+        /** The hex color string to fill the Annulus with. */
+        setColor: function(v) {setAndRedraw(this, 'color', v);},
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides myt.View */
+        isColorAttr: function(attrName) {
+            return attrName === 'color' || this.callSuper(attrName);
+        }
+    });
 })(myt);
 
 
@@ -24348,7 +24352,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 this.setTooltip(this.getTooltipByValue(value));
             },
             
-            getColorByValue: function(value, percent) {
+            getColorByValue: function(_value, _percent) {
                 return this.color;
             },
             getTooltipByValue: function(value) {
@@ -24483,9 +24487,9 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             /** Called when the tip will be hidden.
-                @param {!Object} event The event object.
+                @param {!Object} _event The event object.
                 @returns {boolean} */
-            hideTip: function(event) {
+            hideTip: function(_event) {
                 clearCheckTipTimer(this);
                 
                 const ttp = this.tooltip?.parent;
@@ -25546,7 +25550,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     self.animate({attribute:'opacity', to:1, duration:self.showDuration});
                     self.callSuper(v);
                 } else {
-                    self.animate({attribute:'opacity', to:0, duration:self.hideDuration}).next(success => {
+                    self.animate({attribute:'opacity', to:0, duration:self.hideDuration}).next(_success => {
                         self.parent.removeGrowl(self);
                     });
                 }

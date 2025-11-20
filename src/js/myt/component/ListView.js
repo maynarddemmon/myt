@@ -292,9 +292,9 @@
         },
         
         /** Called by the list view when an item is activated. By default it hides the list view.
-            @param {!Object} itemView
+            @param {!Object} _itemView
             @returns {void} */
-        doItemActivated: function(itemView) {
+        doItemActivated: function(_itemView) {
             this.hideFloatingPanel();
         },
         
@@ -324,12 +324,12 @@
         },
         
         /** @overrides myt.ArrowKeyActivation. */
-        doKeyArrowLeftOrUp: function(isLeft, isRepeat) {
+        doKeyArrowLeftOrUp: function(_isLeft, _isRepeat) {
             this.focusToLastItem();
         },
         
         /** @overrides myt.ArrowKeyActivation. */
-        doKeyArrowRightOrDown: function(isRight, isRepeat) {
+        doKeyArrowRightOrDown: function(_isRight, _isRepeat) {
             this.focusToFirstItem();
         },
         
@@ -445,12 +445,12 @@
         },
         
         /** @overrides myt.ArrowKeyActivation. */
-        doKeyArrowLeftOrUp: function(isLeft, isRepeat) {
+        doKeyArrowLeftOrUp: function(_isLeft, _isRepeat) {
             GlobalFocus.prev();
         },
         
         /** @overrides myt.ArrowKeyActivation. */
-        doKeyArrowRightOrDown: function(isRight, isRepeat) {
+        doKeyArrowRightOrDown: function(_isRight, _isRepeat) {
             GlobalFocus.next();
         }
     });

@@ -94,118 +94,118 @@
                     if (!ignoreRestoreFocus && self.restoreFocus) self.prevFocus?.focus();
                 }
             }
-        }),
-        
-        /** An myt.Dimmer that also provides a content panel.
-            
-            Attributes:
-                content:myt.View The content view placed inside the dimmer.
-                sizingStrategy:string Determines how the content view is positioned relative to the 
-                    bounds of the dimmer. Supported values are:
-                        children: The content will be sized to fit the children it contains. The 
-                            content will be positioned in the center and middle of the dimmer. This 
-                            is the default sizingStrategy
-                        parent: The content will be sized to the bounds of the dimmer.
-                        basic: The content will not be sized in any way. It will be positioned in 
-                            the center and middle of the dimmer.
-                        none: The content will not be sized or positioned in any way.
-                marginTop:number The margin above the content when the sizingStrategy is "parent". 
-                    Defaults to 40 if not provided.
-                marginLeft:number The margin on the left side of the content when the 
-                    sizingStrategy is "parent". Defaults to 40 if not provided.
-                marginBottom:number The margin below the content when the sizingStrategy is 
-                    "parent". Defaults to 40 if not provided.
-                marginRight:number The margin on the right side of the content when the 
-                    sizingStrategy is "parent". Defaults to 40 if not provided.
-                paddingX:number The internal horizontal padding when the sizingStrategy is 
-                    "children". Defaults to 20 if not provided.
-                paddingY:number The internal vertical padding when the sizingStrategy is 
-                    "children". Defaults to 15 if not provided.
-                
-            @class */
-        ModalPanel = pkg.ModalPanel = new JSClass('ModalPanel', Dimmer, {
-            // Class Methods and Attributes ////////////////////////////////////
-            extend: {
-                getOpenModalPanelCount: () => openModalPanelCount,
-                
-                hasOpenModalPanels: () => openModalPanelCount > 0
-            },
-            
-            
-            // Life Cycle //////////////////////////////////////////////////////
-            initNode: function(parent, attrs) {
-                const self = this,
-                    viewAttrs = {name:'content', ignorePlacement:true},
-                    centeredViewAttrs = {...viewAttrs, align:'center', valign:'middle'};
-                
-                self.defaultPlacement = 'content';
-                
-                attrs.sizingStrategy ??= 'children';
-                
-                // Used for parent sizing strategy
-                attrs.marginTop ??= theme.ModalPanelMarginTop;
-                attrs.marginLeft ??= theme.ModalPanelMarginLeft;
-                attrs.marginBottom ??= theme.ModalPanelMarginBottom;
-                attrs.marginRight ??= theme.ModalPanelMarginRight;
-                
-                // Used for "children" sizing strategy
-                attrs.paddingX ??= theme.ModalPanelPaddingX;
-                attrs.paddingY ??= theme.ModalPanelPaddingY;
-                
-                self.callSuper(parent, attrs);
-                
-                switch (self.sizingStrategy) {
-                    case 'children':
-                        new pkg.SizeToChildren(new View(self, centeredViewAttrs), {
-                            name:'sizeToChildren', axis:'both',
-                            paddingX:self.paddingX, 
-                            paddingY:self.paddingY
-                        });
-                        break;
-                    case 'parent':
-                        new View(self, {
-                            ...viewAttrs, 
-                            x:self.marginLeft,
-                            y:self.marginTop,
-                            percentOfParentWidthOffset:-self.marginLeft - self.marginRight,
-                            percentOfParentHeightOffset:-self.marginTop - self.marginBottom,
-                            percentOfParentWidth:100,
-                            percentOfParentHeight:100
-                        }, [SizeToParent]);
-                        break;
-                    case 'basic':
-                        new View(self, centeredViewAttrs);
-                        break;
-                    case 'none':
-                    default:
-                        new View(self, viewAttrs);
-                }
-            },
-            
-            
-            // Accessors ///////////////////////////////////////////////////////
-            setSizingStrategy: function(v) {this.sizingStrategy = v;},
-            
-            setMarginTop: function(v) {this.marginTop = v;},
-            setMarginLeft: function(v) {this.marginLeft = v;},
-            setMarginBottom: function(v) {this.marginBottom = v;},
-            setMarginRight: function(v) {this.marginRight = v;},
-            
-            setPaddingX: function(v) {this.paddingX = v;},
-            setPaddingY: function(v) {this.paddingY = v;},
-            
-            
-            // Methods /////////////////////////////////////////////////////////
-            /** @overrides myt.Dimmer */
-            show: function() {
-                this.callSuper();
-                openModalPanelCount++;
-            },
-            
-            /** @overrides myt.Dimmer */
-            hide: function(ignoreRestoreFocus) {
-                this.callSuper(ignoreRestoreFocus);
-                openModalPanelCount = Math.max(0, openModalPanelCount - 1);
-            }
         });
+    
+    /** An myt.Dimmer that also provides a content panel.
+        
+        Attributes:
+            content:myt.View The content view placed inside the dimmer.
+            sizingStrategy:string Determines how the content view is positioned relative to the 
+                bounds of the dimmer. Supported values are:
+                    children: The content will be sized to fit the children it contains. The 
+                        content will be positioned in the center and middle of the dimmer. This is 
+                        the default sizingStrategy
+                    parent: The content will be sized to the bounds of the dimmer.
+                    basic: The content will not be sized in any way. It will be positioned in the 
+                        center and middle of the dimmer.
+                    none: The content will not be sized or positioned in any way.
+            marginTop:number The margin above the content when the sizingStrategy is "parent". 
+                Defaults to 40 if not provided.
+            marginLeft:number The margin on the left side of the content when the sizingStrategy is 
+                "parent". Defaults to 40 if not provided.
+            marginBottom:number The margin below the content when the sizingStrategy is "parent". 
+                Defaults to 40 if not provided.
+            marginRight:number The margin on the right side of the content when the sizingStrategy 
+                is "parent". Defaults to 40 if not provided.
+            paddingX:number The internal horizontal padding when the sizingStrategy is "children". 
+                Defaults to 20 if not provided.
+            paddingY:number The internal vertical padding when the sizingStrategy is "children". 
+                Defaults to 15 if not provided.
+            
+        @class */
+    pkg.ModalPanel = new JSClass('ModalPanel', Dimmer, {
+        // Class Methods and Attributes ////////////////////////////////////////
+        extend: {
+            getOpenModalPanelCount: () => openModalPanelCount,
+            
+            hasOpenModalPanels: () => openModalPanelCount > 0
+        },
+        
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            const self = this,
+                viewAttrs = {name:'content', ignorePlacement:true},
+                centeredViewAttrs = {...viewAttrs, align:'center', valign:'middle'};
+            
+            self.defaultPlacement = 'content';
+            
+            attrs.sizingStrategy ??= 'children';
+            
+            // Used for parent sizing strategy
+            attrs.marginTop ??= theme.ModalPanelMarginTop;
+            attrs.marginLeft ??= theme.ModalPanelMarginLeft;
+            attrs.marginBottom ??= theme.ModalPanelMarginBottom;
+            attrs.marginRight ??= theme.ModalPanelMarginRight;
+            
+            // Used for "children" sizing strategy
+            attrs.paddingX ??= theme.ModalPanelPaddingX;
+            attrs.paddingY ??= theme.ModalPanelPaddingY;
+            
+            self.callSuper(parent, attrs);
+            
+            switch (self.sizingStrategy) {
+                case 'children':
+                    new pkg.SizeToChildren(new View(self, centeredViewAttrs), {
+                        name:'sizeToChildren', axis:'both',
+                        paddingX:self.paddingX, 
+                        paddingY:self.paddingY
+                    });
+                    break;
+                case 'parent':
+                    new View(self, {
+                        ...viewAttrs, 
+                        x:self.marginLeft,
+                        y:self.marginTop,
+                        percentOfParentWidthOffset:-self.marginLeft - self.marginRight,
+                        percentOfParentHeightOffset:-self.marginTop - self.marginBottom,
+                        percentOfParentWidth:100,
+                        percentOfParentHeight:100
+                    }, [SizeToParent]);
+                    break;
+                case 'basic':
+                    new View(self, centeredViewAttrs);
+                    break;
+                case 'none':
+                default:
+                    new View(self, viewAttrs);
+            }
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        setSizingStrategy: function(v) {this.sizingStrategy = v;},
+        
+        setMarginTop: function(v) {this.marginTop = v;},
+        setMarginLeft: function(v) {this.marginLeft = v;},
+        setMarginBottom: function(v) {this.marginBottom = v;},
+        setMarginRight: function(v) {this.marginRight = v;},
+        
+        setPaddingX: function(v) {this.paddingX = v;},
+        setPaddingY: function(v) {this.paddingY = v;},
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides myt.Dimmer */
+        show: function() {
+            this.callSuper();
+            openModalPanelCount++;
+        },
+        
+        /** @overrides myt.Dimmer */
+        hide: function(ignoreRestoreFocus) {
+            this.callSuper(ignoreRestoreFocus);
+            openModalPanelCount = Math.max(0, openModalPanelCount - 1);
+        }
+    });
 })(myt);

@@ -101,18 +101,18 @@
         
         // Methods /////////////////////////////////////////////////////////////
         /** @private
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        __doPOPW: function(event) {
+        __doPOPW: function(_event) {
             this.setWidth((this.percentOfParentWidthOffset || 0) + mathRound(this.parent.width * (this.percentOfParentWidth / 100)));
             // Force width event if not inited yet so that align constraint in myt.View will work.
             if (!this.inited) this.fireEvent('width', this.width);
         },
         
         /** @private
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        __doPOPH: function(event) {
+        __doPOPH: function(_event) {
             this.setHeight((this.percentOfParentHeightOffset || 0) + mathRound(this.parent.height * (this.percentOfParentHeight / 100)));
             // Force height event if not inited yet so that valign constraint in myt.View will work.
             if (!this.inited) this.fireEvent('height', this.height);

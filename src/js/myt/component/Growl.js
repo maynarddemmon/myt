@@ -280,7 +280,7 @@
                     self.animate({attribute:'opacity', to:1, duration:self.showDuration});
                     self.callSuper(v);
                 } else {
-                    self.animate({attribute:'opacity', to:0, duration:self.hideDuration}).next(success => {
+                    self.animate({attribute:'opacity', to:0, duration:self.hideDuration}).next(_success => {
                         self.parent.removeGrowl(self);
                     });
                 }

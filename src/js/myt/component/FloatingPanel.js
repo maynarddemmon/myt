@@ -50,184 +50,184 @@
                 consoleWarn('Invalid type', type, alignment);
             }
             return v;
+        };
+    
+    /** Enables a view to act as the anchor point for a FloatingPanel.
+        
+        Events:
+            floatingAlign:string
+            floatingValign:string
+            floatingAlignOffset:number
+            floatingValignOffset:number
+        
+        Attributes:
+            floatingPanelId:string If defined this is the panel ID that will be used by default 
+                in the various methods that require a panel ID.
+            floatingAlign:string:number The horizontal alignment for panels shown by this 
+                anchor. If the value is a string it is an alignment identifier relative to this 
+                anchor. If the value is a number it is an absolute position in pixels. Allowed 
+                values: 'outsideLeft', 'insideLeft', 'insideRight', 'outsideRight' or a number.
+            floatingValign:string:number The vertical alignment for panels shown by this anchor.
+                If the value is a string it is an alignment identifier relative to this anchor.
+                If the value is a number it is an absolute position in pixels. Allowed values: 
+                'outsideTop', 'insideTop', 'insideBottom', 'outsideBottom' or a number.
+            floatingAlignOffset:number The number of pixels to offset the panel position 
+                by horizontally.
+            floatingValignOffset:number The number of pixels to offset the panel position 
+                by vertically.
+            lastFloatingPanelShown:myt.FloatingPanel A reference to the last floating panel 
+                shown by this anchor.
+            keepInWindow:boolean - Indicates if the floating panel must be kept within the
+                bounds of the HTML document. Defaults to false.
+            keepInWindowBorder:number - Extra space to take into account when checking if the
+                FloatingPanel would not be kept within the window.
+        
+        @class */
+    pkg.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
+        // Class Methods and Attributes ////////////////////////////////////
+        extend: {
+            getFloatingPanel:getFloatingPanel
         },
         
-        /** Enables a view to act as the anchor point for a FloatingPanel.
+        
+        // Life Cycle //////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            this.floatingAlign = 'insideLeft';
+            this.floatingValign = 'outsideBottom';
+            this.keepInWindow = false;
+            this.floatingAlignOffset = this.floatingValignOffset = this.keepInWindowBorder = 0;
             
-            Events:
-                floatingAlign:string
-                floatingValign:string
-                floatingAlignOffset:number
-                floatingValignOffset:number
-            
-            Attributes:
-                floatingPanelId:string If defined this is the panel ID that will be used by default 
-                    in the various methods that require a panel ID.
-                floatingAlign:string:number The horizontal alignment for panels shown by this 
-                    anchor. If the value is a string it is an alignment identifier relative to this 
-                    anchor. If the value is a number it is an absolute position in pixels. Allowed 
-                    values: 'outsideLeft', 'insideLeft', 'insideRight', 'outsideRight' or a number.
-                floatingValign:string:number The vertical alignment for panels shown by this anchor.
-                    If the value is a string it is an alignment identifier relative to this anchor.
-                    If the value is a number it is an absolute position in pixels. Allowed values: 
-                    'outsideTop', 'insideTop', 'insideBottom', 'outsideBottom' or a number.
-                floatingAlignOffset:number The number of pixels to offset the panel position 
-                    by horizontally.
-                floatingValignOffset:number The number of pixels to offset the panel position 
-                    by vertically.
-                lastFloatingPanelShown:myt.FloatingPanel A reference to the last floating panel 
-                    shown by this anchor.
-                keepInWindow:boolean - Indicates if the floating panel must be kept within the
-                    bounds of the HTML document. Defaults to false.
-                keepInWindowBorder:number - Extra space to take into account when checking if the
-                    FloatingPanel would not be kept within the window.
-            
-            @class */
-        FloatingPanelAnchor = pkg.FloatingPanelAnchor = new JS.Module('FloatingPanelAnchor', {
-            // Class Methods and Attributes ////////////////////////////////////
-            extend: {
-                getFloatingPanel:getFloatingPanel
-            },
-            
-            
-            // Life Cycle //////////////////////////////////////////////////////
-            initNode: function(parent, attrs) {
-                this.floatingAlign = 'insideLeft';
-                this.floatingValign = 'outsideBottom';
-                this.keepInWindow = false;
-                this.floatingAlignOffset = this.floatingValignOffset = this.keepInWindowBorder = 0;
-                
-                this.callSuper(parent, attrs);
-            },
-            
-            
-            // Accessors ///////////////////////////////////////////////////////
-            setLastFloatingPanelShown: function(v) {this.lastFloatingPanelShown = v;},
-            setLastFloatingPanelId: function(v) {this.floatingPanelId = v;},
-            
-            setFloatingAlign: function(v) {this.set('floatingAlign', v, true);},
-            setFloatingValign: function(v) {this.set('floatingValign', v, true);},
-            setFloatingAlignOffset: function(v) {this.set('floatingAlignOffset', v, true);},
-            setFloatingValignOffset: function(v) {this.set('floatingValignOffset', v, true);},
-            
-            setKeepInWindow: function(v) {this.set('keepInWindow', v, true);},
-            setKeepInWindowBorder: function(v) {this.set('keepInWindowBorder', v, true);},
-            
-            
-            // Methods /////////////////////////////////////////////////////////
-            createFloatingPanel: function(panelId, panelClass, panelInitAttrs) {
-                panelId = panelId ?? this.floatingPanelId;
-                panelInitAttrs = panelInitAttrs ?? {};
-                panelInitAttrs.panelId = panelId;
-                return panelsByPanelId[panelId] = new panelClass(null, panelInitAttrs);
-            },
-            
-            getFloatingPanel: function(panelId) {
-                return getFloatingPanel(panelId ?? this.floatingPanelId);
-            },
-            
-            toggleFloatingPanel: function(panelId) {
-                const fp = this.getFloatingPanel(panelId ??= this.floatingPanelId);
-                if (fp?.isShown()) {
-                    this.hideFloatingPanel(panelId);
-                } else {
-                    this.showFloatingPanel(panelId);
-                }
-            },
-            
-            showFloatingPanel: function(panelId) {
-                const fp = this.getFloatingPanel(panelId ?? this.floatingPanelId);
-                if (fp) {
-                    fp.show(this);
-                    this.setLastFloatingPanelShown(fp);
-                }
-            },
-            
-            hideFloatingPanel: function(panelId) {
-                const fp = this.getFloatingPanel(panelId ?? this.floatingPanelId);
-                if (fp) {
-                    fp.hide();
-                    this.setLastFloatingPanelShown();
-                }
-            },
-            
-            /** Called when a floating panel has been shown for this anchor.
-                @param {!Object} panel - The myt.FloatingPanel that is now shown.
-                @returns {void} */
-            notifyPanelShown: function(panel) {
-                // Subclasses to implement as needed.
-                this.callSuper?.();
-            },
-            
-            /** Called when a floating panel has been hidden for this anchor.
-                @param {!Object} panel - The myt.FloatingPanel that is now hidden.
-                @returns {void} */
-            notifyPanelHidden: function(panel) {
-                // Subclasses to implement as needed.
-                this.callSuper?.();
-            },
-            
-            /** Called by the FloatingPanel to determine where to position itself horizontally. By 
-                default this returns the floatingAlign attribute. Subclasses and instances should 
-                override this if panel specific behavior is needed.
-                @param {?Object} panel - The panel being positioned.
-                @returns {string|number} - An alignment identifer or absolute position. */
-            getFloatingAlignForPanel: function(panel) {
-                return this.floatingAlign;
-            },
-            
-            /** Called by the FloatingPanel to determine where to position itself vertically. By 
-                default this returns the floatingAlign attribute. Subclasses and instances should 
-                override this if panel specific behavior is needed.
-                @param {?Object} panel - The panel being positioned.
-                @returns {string|number} - An alignment identifer or absolute position. */
-            getFloatingValignForPanel: function(panel) {
-                return this.floatingValign;
-            },
-            
-            /** Called by the FloatingPanel to determine where to position itself horizontally. By 
-                default this returns the floatingAlignOffset attribute. Subclasses and instances 
-                should override this if panel specific behavior is needed.
-                @param {?Object} panel - The panel being positioned.
-                @returns {number} the offset to use. */
-            getFloatingAlignOffsetForPanel: function(panel) {
-                return this.floatingAlignOffset;
-            },
-            
-            /** Called by the FloatingPanel to determine where to position itself vertically. By 
-                default this returns the floatingValignOffset attribute. Subclasses and instances 
-                should override this if panel specific behavior is needed.
-                @param {?Object} panel - The panel being positioned.
-                @returns {number} the offset to use. */
-            getFloatingValignOffsetForPanel: function(panel) {
-                return this.floatingValignOffset;
-            },
-            
-            /** @overrides myt.FocusObservable
-                @returns {!Object} The last floating panel shown if it exists and can be shown. 
-                    Otherwise it returns the default. */
-            getNextFocus: function() {
-                const last = this.lastFloatingPanelShown;
-                if (last?.isShown()) return last;
-                return this.callSuper?.();
-            },
-            
-            /** Called by the floating panel owned by this anchor to determine where to go to next 
-                after leaving the panel in the forward direction.
-                @param {string} panelId
-                @returns {!Object} */
-            getNextFocusAfterPanel: function(panelId) {
-                return this;
-            },
-            
-            /** Called by the floating panel owned by this anchor to determine where to go to next 
-                after leaving the panel in the backward direction.
-                @param {string} panelId
-                @returns {!Object} */
-            getPrevFocusAfterPanel: function(panelId) {
-                return this;
+            this.callSuper(parent, attrs);
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////
+        setLastFloatingPanelShown: function(v) {this.lastFloatingPanelShown = v;},
+        setLastFloatingPanelId: function(v) {this.floatingPanelId = v;},
+        
+        setFloatingAlign: function(v) {this.set('floatingAlign', v, true);},
+        setFloatingValign: function(v) {this.set('floatingValign', v, true);},
+        setFloatingAlignOffset: function(v) {this.set('floatingAlignOffset', v, true);},
+        setFloatingValignOffset: function(v) {this.set('floatingValignOffset', v, true);},
+        
+        setKeepInWindow: function(v) {this.set('keepInWindow', v, true);},
+        setKeepInWindowBorder: function(v) {this.set('keepInWindowBorder', v, true);},
+        
+        
+        // Methods /////////////////////////////////////////////////////////
+        createFloatingPanel: function(panelId, panelClass, panelInitAttrs) {
+            panelId = panelId ?? this.floatingPanelId;
+            panelInitAttrs = panelInitAttrs ?? {};
+            panelInitAttrs.panelId = panelId;
+            return panelsByPanelId[panelId] = new panelClass(null, panelInitAttrs);
+        },
+        
+        getFloatingPanel: function(panelId) {
+            return getFloatingPanel(panelId ?? this.floatingPanelId);
+        },
+        
+        toggleFloatingPanel: function(panelId) {
+            const fp = this.getFloatingPanel(panelId ??= this.floatingPanelId);
+            if (fp?.isShown()) {
+                this.hideFloatingPanel(panelId);
+            } else {
+                this.showFloatingPanel(panelId);
             }
-        });
+        },
+        
+        showFloatingPanel: function(panelId) {
+            const fp = this.getFloatingPanel(panelId ?? this.floatingPanelId);
+            if (fp) {
+                fp.show(this);
+                this.setLastFloatingPanelShown(fp);
+            }
+        },
+        
+        hideFloatingPanel: function(panelId) {
+            const fp = this.getFloatingPanel(panelId ?? this.floatingPanelId);
+            if (fp) {
+                fp.hide();
+                this.setLastFloatingPanelShown();
+            }
+        },
+        
+        /** Called when a floating panel has been shown for this anchor.
+            @param {!Object} _panel - The myt.FloatingPanel that is now shown.
+            @returns {void} */
+        notifyPanelShown: function(_panel) {
+            // Subclasses to implement as needed.
+            this.callSuper?.();
+        },
+        
+        /** Called when a floating panel has been hidden for this anchor.
+            @param {!Object} _panel - The myt.FloatingPanel that is now hidden.
+            @returns {void} */
+        notifyPanelHidden: function(_panel) {
+            // Subclasses to implement as needed.
+            this.callSuper?.();
+        },
+        
+        /** Called by the FloatingPanel to determine where to position itself horizontally. By 
+            default this returns the floatingAlign attribute. Subclasses and instances should 
+            override this if panel specific behavior is needed.
+            @param {?Object} _panel - The panel being positioned.
+            @returns {string|number} - An alignment identifer or absolute position. */
+        getFloatingAlignForPanel: function(_panel) {
+            return this.floatingAlign;
+        },
+        
+        /** Called by the FloatingPanel to determine where to position itself vertically. By 
+            default this returns the floatingAlign attribute. Subclasses and instances should 
+            override this if panel specific behavior is needed.
+            @param {?Object} _panel - The panel being positioned.
+            @returns {string|number} - An alignment identifer or absolute position. */
+        getFloatingValignForPanel: function(_panel) {
+            return this.floatingValign;
+        },
+        
+        /** Called by the FloatingPanel to determine where to position itself horizontally. By 
+            default this returns the floatingAlignOffset attribute. Subclasses and instances 
+            should override this if panel specific behavior is needed.
+            @param {?Object} _panel - The panel being positioned.
+            @returns {number} the offset to use. */
+        getFloatingAlignOffsetForPanel: function(_panel) {
+            return this.floatingAlignOffset;
+        },
+        
+        /** Called by the FloatingPanel to determine where to position itself vertically. By 
+            default this returns the floatingValignOffset attribute. Subclasses and instances 
+            should override this if panel specific behavior is needed.
+            @param {?Object} _panel - The panel being positioned.
+            @returns {number} the offset to use. */
+        getFloatingValignOffsetForPanel: function(_panel) {
+            return this.floatingValignOffset;
+        },
+        
+        /** @overrides myt.FocusObservable
+            @returns {!Object} The last floating panel shown if it exists and can be shown. 
+                Otherwise it returns the default. */
+        getNextFocus: function() {
+            const last = this.lastFloatingPanelShown;
+            if (last?.isShown()) return last;
+            return this.callSuper?.();
+        },
+        
+        /** Called by the floating panel owned by this anchor to determine where to go to next 
+            after leaving the panel in the forward direction.
+            @param {string} _panelId
+            @returns {!Object} */
+        getNextFocusAfterPanel: function(_panelId) {
+            return this;
+        },
+        
+        /** Called by the floating panel owned by this anchor to determine where to go to next 
+            after leaving the panel in the backward direction.
+            @param {string} _panelId
+            @returns {!Object} */
+        getPrevFocusAfterPanel: function(_panelId) {
+            return this;
+        }
+    });
     
     /** A panel that floats above everything else.
         

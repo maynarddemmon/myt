@@ -116,7 +116,7 @@
             
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides myt.Input */
-            createOurDomElement: parent => document.createElement('option'),
+            createOurDomElement: _parent => document.createElement('option'),
             
             
             // Accessors ///////////////////////////////////////////////////////
@@ -232,9 +232,9 @@
             },
             
             /** @private
-                @param {!Object} event
+                @param {!Object} _event
                 @returns {void} */
-            __filterInput: function(event) {
+            __filterInput: function(_event) {
                 this.setDomValue(this.filterInput(this.getDomValue()));
             },
             
@@ -263,9 +263,9 @@
             filterInputPress: NOOP, // domEvent => {/* Subclasses to implement as needed. */},
             
             /** @private
-                @param {!Object} event
+                @param {!Object} _event
                 @returns {void} */
-            __syncToDom: function(event) {
+            __syncToDom: function(_event) {
                 this.setValue(this.getDomValue());
             },
             
@@ -542,9 +542,9 @@
         },
         
         /** @private
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        __userInteraction: function(event) {
+        __userInteraction: function(_event) {
             this.saveSelection();
             return true;
         },
@@ -934,9 +934,9 @@
         },
         
         /** @private
-            @param {!Object} event
+            @param {!Object} _event
             @returns {void} */
-        __doChanged: function(event) {
+        __doChanged: function(_event) {
             this.__syncToDom();
             this.doChanged();
         },

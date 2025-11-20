@@ -464,7 +464,7 @@
                 anim.callSetters(attrs);
                 
                 // Release the animation when it completes.
-                anim.next(success => {animPool.putInstance(anim);});
+                anim.next(_success => {animPool.putInstance(anim);});
                 if (callback) anim.next(callback);
                 
                 anim.setRunning(true);

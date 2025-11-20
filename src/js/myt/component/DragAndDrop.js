@@ -229,9 +229,9 @@
         /** Called by myt.GlobalDragManager when a dropable is dragged over this target. Gives this 
             drop target a chance to reject a drop regardless of drag group. The default 
             implementation returns true if the view is not disabled.
-            @param dropable:myt.Dropable The dropable being dragged.
+            @param _dropable:myt.Dropable The dropable being dragged.
             @returns boolean: True if the drop will be allowed, false otherwise. */
-        willAcceptDrop: function(dropable) {
+        willAcceptDrop: function(_dropable) {
             // Components must be visible and not disabled to accept a drop.
             return !this.disabled && this.isVisible();
         },
@@ -328,19 +328,19 @@
         },
         
         /** Called by myt.GlobalDragManager when this view is dragged out of a drop target.
-            @param dropTarget:myt.DropTarget The target that was dragged out of.
+            @param _dropTarget:myt.DropTarget The target that was dragged out of.
             @returns {void} */
-        notifyDragLeaving: function(dropTarget) {
+        notifyDragLeaving: function(_dropTarget) {
             this.setDropTarget();
         },
         
         /** Called by myt.GlobalDragManager when this view is dropped.
-            @param dropTarget:myt.DropTarget The target that was dropped on. Will be undefined if 
+            @param _dropTarget:myt.DropTarget The target that was dropped on. Will be undefined if 
                 this dropable was dropped on no drop target.
-            @param isAbort:boolean Indicates if the drop was the result of an abort or a 
+            @param _isAbort:boolean Indicates if the drop was the result of an abort or a 
                 normal drop.
             @returns {void} */
-        notifyDropped: function(dropTarget, isAbort) {
+        notifyDropped: function(_dropTarget, _isAbort) {
             this.setDropped(true);
             
             if (!this.dropTarget) this.setDropFailed(true);
@@ -419,9 +419,9 @@
         // Methods /////////////////////////////////////////////////////////////
         /** Called by myt.GlobalDragManager when a dropable starts being dragged that has a 
             matching drag group.
-            @param {!Object} dropable - The myt.Dropable being dragged.
+            @param {!Object} _dropable - The myt.Dropable being dragged.
             @returns {void} */
-        notifyAutoScrollerDragStart: function(dropable) {
+        notifyAutoScrollerDragStart: function(_dropable) {
             const ide = this.getIDE();
             if (ide.scrollHeight > ide.clientHeight || ide.scrollWidth > ide.clientWidth) {
                 this.attachToDom(globalMouse, '__hndlMove', 'mousemove', true);
@@ -430,9 +430,9 @@
         
         /** Called by myt.GlobalDragManager when a dropable stops being dragged that has a 
             matching drag group.
-            @param {!Object} dropable - The myt.Dropable no longer being dragged.
+            @param {!Object} _dropable - The myt.Dropable no longer being dragged.
             @returns {void} */
-        notifyAutoScrollerDragStop: function(dropable) {
+        notifyAutoScrollerDragStop: function(_dropable) {
             this.detachFromDom(globalMouse, '__hndlMove', 'mousemove', true);
             
             resetVScroll(this);
