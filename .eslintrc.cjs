@@ -36,5 +36,6 @@ module.exports = {
     "no-extra-boolean-cast": "off", // if (!!someVar) {   // }
     "no-constant-condition": ["warn", { "checkLoops": false }], // while (true) {}
     "no-useless-escape": "off",
+    "no-cond-assign": "off", // if(a = b)
   },
 };
