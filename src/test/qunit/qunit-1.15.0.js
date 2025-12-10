@@ -8,6 +8,7 @@
  *
  * Date: 2014-08-08T16:00Z
  */
+/* eslint-disable */
 
 (function( window ) {
 

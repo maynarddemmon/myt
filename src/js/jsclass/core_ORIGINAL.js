@@ -1,3 +1,4 @@
+/* eslint-disable */
 var JS = (typeof this.JS === 'undefined') ? {} : this.JS;
 
 (function(factory) {

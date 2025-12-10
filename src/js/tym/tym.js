@@ -1,4 +1,3 @@
-/* eslint-disable no-cond-assign */ // if(a = b)
 /* eslint-disable no-unused-vars */
 (pkg => {
     /*
