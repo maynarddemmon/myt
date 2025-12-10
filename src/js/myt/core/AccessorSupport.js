@@ -1,3 +1,5 @@
+/* eslint-disable no-cond-assign */ // if(a = b)
+
 (pkg => {
     const consoleLog = console.log,
         
