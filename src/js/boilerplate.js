@@ -1,1 +1,1 @@
-const global = window;
+export const global = window;

@@ -1,1 +1,1 @@
-const global = module.exports = {};
+export const global = module.exports = {};

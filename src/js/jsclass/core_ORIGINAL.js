@@ -1,4 +1,3 @@
-/* eslint-disable no-cond-assign */ // if(a = b)
 var JS = (typeof this.JS === 'undefined') ? {} : this.JS;
 
 (function(factory) {

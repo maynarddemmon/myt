@@ -1,5 +1,3 @@
-/* eslint-disable no-cond-assign */ // if(a = b)
-
 ((global, exports) => {
     const pkgByName = {}, // Each entry will be: <name>:{pkg:<Package>, obj:Object}
         getPkgByName = name => pkgByName[name] ??= {},
