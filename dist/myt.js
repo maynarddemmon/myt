@@ -13277,6 +13277,7 @@ myt.Destructible = new JS.Module('Destructible', {
                         
                         // Apply config to item
                         if (item) {
+                            if (item.disabled && cfgAttrs.disabled == null) item.setDisabled(false);
                             item.callSetters(cfgAttrs);
                             
                             // Create an item index to sort the layout subviews on. This is necessary when 
