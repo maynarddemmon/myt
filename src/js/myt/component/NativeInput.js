@@ -9,6 +9,12 @@
             global:{keys:GlobalKeys}
         } = pkg,
         
+        getRegexForFilter = pkg.memoize(
+            permitted => new RegExp('[^' + permitted.replace(/[-\]\\^]/g, '\\$&') + ']', 'g')
+        ),
+        
+        filterChars = (str='', permitted='') => str.replace(getRegexForFilter(permitted), ''),
+        
         setEditableTextAttr = (editableText, v, propName) => {
             if (editableText[propName] !== v) {
                 editableText[propName] = v;
@@ -201,6 +207,7 @@
                 // Allow filtering of input
                 self.attachToDom(self, '__filterInputPress', 'keypress');
                 self.attachToDom(self, '__filterInput', 'keyup');
+                self.attachToDom(self, '__filterPaste', 'paste');
             },
             
             
@@ -248,6 +255,18 @@
                 if (allowedChars && !allowedChars.includes(KeyObservable.getKeyFromEvent(event))) domEvent.preventDefault();
                 
                 this.filterInputPress(domEvent);
+            },
+            
+            /** @private
+                @param {!Object} event
+                @returns {void} */
+            __filterPaste: function(event) {
+                const allowedChars = this.allowedChars;
+                if (allowedChars) {
+                    const domEvent = event.value;
+                    domEvent.preventDefault();
+                    document.execCommand('insertText', false, filterChars(domEvent.clipboardData.getData('text'), allowedChars));
+                }
             },
             
             /** A hook for subclasses/instances to do input filtering. The default implementation 
