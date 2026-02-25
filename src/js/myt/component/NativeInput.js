@@ -191,6 +191,11 @@
         BaseInputText = pkg.BaseInputText = new JSClass('BaseInputText', NativeInputWrapper, {
             include: [pkg.TextSupport],
             
+            // Class Methods and Attributes ////////////////////////////////////
+            extend:{
+                filterChars:filterChars
+            },
+            
             
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides myt.NativeInputWrapper */
@@ -261,12 +266,18 @@
                 @param {!Object} event
                 @returns {void} */
             __filterPaste: function(event) {
+                const domEvent = event.value;
+                domEvent.preventDefault();
+                document.execCommand('insertText', false, this.filterPaste(domEvent.clipboardData.getData('text')));
+            },
+            
+            /** A hook for subclasses/instances to do paste event filtering. The default implementation 
+                returns the value unchanged.
+                @param {string} v - the value of the paste event.
+                @returns {string} The new value of the paste. */
+            filterPaste: function(v) {
                 const allowedChars = this.allowedChars;
-                if (allowedChars) {
-                    const domEvent = event.value;
-                    domEvent.preventDefault();
-                    document.execCommand('insertText', false, filterChars(domEvent.clipboardData.getData('text'), allowedChars));
-                }
+                return allowedChars ? filterChars(v, allowedChars) : v;
             },
             
             /** A hook for subclasses/instances to do input filtering. The default implementation 
