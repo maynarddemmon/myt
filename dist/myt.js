@@ -808,12 +808,13 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 
                 scope = scope ?? global;
                 
-                const parts = isArray(objName) ? objName : objName.split('.'), 
+                const origScope = scope,
+                    parts = isArray(objName) ? objName : objName.split('.'), 
                     len = parts.length;
                 for (let i = 0; i < len; i++) {
                     scope = scope[parts[i]];
-                    if (scope == null) {
-                        consoleWarn('resolveName failed for', objName, 'at part', i, parts[i]);
+                    if (scope == null && i < len - 1) {
+                        consoleWarn('resolveName failed for', objName, 'at part', i, parts[i], origScope);
                         return undefined;
                     }
                 }
