@@ -81,22 +81,24 @@
         loadResource = (type, src, callback, noCacheBust, integrity) => {
             if (!src) return;
             
+            const callbackIsFunc = typeof callback === 'function';
+            
             // Prevent reloading the same resource
             let loadedResourceState = loadedResources[src],
                 elem = resourceElemsByHref[src];
             if (loadedResourceState === true) {
                 // Resource already loaded successfully
-                callback?.(true);
+                if (callbackIsFunc) callback(true);
             } else if (loadedResourceState === false) {
                 // Resource already loaded unsuccessfully
-                callback?.(false);
+                if (callbackIsFunc) callback(false);
             } else if (isArray(loadedResourceState)) {
                 // Resource is currently loading so store callback for later resolution.
-                if (typeof callback === 'function') loadedResourceState.push(callback);
+                if (callbackIsFunc) loadedResourceState.push(callback);
             } else {
                 // Load the resource
                 loadedResourceState = loadedResources[src] = [];
-                if (typeof callback === 'function') loadedResourceState.push(callback);
+                if (callbackIsFunc) loadedResourceState.push(callback);
                 
                 let srcPropName;
                 switch (type) {
@@ -595,7 +597,7 @@
             /** @param {?Array} fontUrls
                 @returns {void} */
             loadCSSFonts: fontUrls => {
-                fontUrls?.forEach(myt.loadCSS);
+                fontUrls?.forEach(url => {myt.loadCSS(url);});
             },
             
             
