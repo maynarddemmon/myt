@@ -23050,7 +23050,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 this.set('selectedRowModel', v, true);
                 
                 // Scroll the selected row into view
-                this.scrollModelIntoView(this.selectedRowModel, false);
+                if (this.selectedRowModel) this.scrollModelIntoView(this.selectedRowModel, false);
             },
             
             
