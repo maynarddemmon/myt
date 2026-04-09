@@ -22931,6 +22931,10 @@ myt.Destructible = new JS.Module('Destructible', {
                             row.focus();
                             self._focusToModel = null;
                         }
+                        
+                        // Works around a bizarre bug that started in early 2026 where the 
+                        // mouseOver state is not being cleared during scroll.
+                        if (row.mouseOver) row.setMouseOver(false);
                     }
                 }
             },
