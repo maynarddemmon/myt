@@ -8,6 +8,7 @@
             png:'image/png',
             jpg:'image/jpeg',
             jpeg:'image/jpeg',
+            avif:'image/avif',
             svg:'image/svg+xml',
             webp:'image/webp',
             ico:'image/vnd.microsoft.icon'

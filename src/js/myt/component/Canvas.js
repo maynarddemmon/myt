@@ -133,6 +133,7 @@
                     // opt should be a quality number between 0.0 (worst) and 1.0 (best)
                     opt ??= 0.5;
                     break;
+                // Note:Browsers don't seem to be planning to support avif.
                 default:
                     consoleWarn('Unexpected image type', imageType);
                     extension = imageType.toLowerCase();
