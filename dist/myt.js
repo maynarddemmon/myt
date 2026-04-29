@@ -14212,7 +14212,7 @@ myt.Destructible = new JS.Module('Destructible', {
             /** Gets the currently selected items.
                 @returns {!Array} The selected items. */
             getSelected: function() {
-                return Object.values(this.__selected);
+                return this.__selected ? Object.values(this.__selected) : [];
             },
             
             /** Selects the provided item.
