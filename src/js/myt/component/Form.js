@@ -687,12 +687,16 @@
                 this.setErrorMessages([]);
                 this.setIsValid(true);
                 this._lockCascade = false;
-                
-                defaultValue ??= {};
-                rollbackValue ??= {};
-                value ??= {};
-                
-                const subForms = this.__sf;
+                this.doSetupOnSubforms(defaultValue ?? {}, rollbackValue ?? {}, value ?? {});
+            },
+            
+            /** Cascades the setup function call down to all the subforms.
+                @param defaultValue:object The default value.
+                @param rollbackValue:object The rollback value.
+                @param value:object The current value.
+                @returns {void} */
+            doSetupOnSubforms: function(defaultValue, rollbackValue, value) {
+                const subForms = this.getSubForms();
                 for (const id in subForms) subForms[id].setup(defaultValue[id], rollbackValue[id], value[id]);
             },
             
