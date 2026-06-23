@@ -2176,10 +2176,6 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             return v == null ? undefined : this.decodeQueryParam(v);
         },
         
-        setQueryParam: function(name, value) {
-            this.queryPairs[encodeURIComponent(name)] = encodeURIComponent(value);
-        },
-        
         removeQueryParam: function(name) {
             delete this.queryPairs[name];
         },
@@ -20330,23 +20326,15 @@ myt.Destructible = new JS.Module('Destructible', {
         
             @class */
         URLValidator = pkg.URLValidator = new JSClass('URLValidator', Validator, {
-            /** @overrides myt.Validator
-                @param {string} id
-                @param originalRawQuery:boolean if true this prevents the query from 
-                    being normalized. */
-            initialize: function(id, originalRawQuery) {
-                this.callSuper(id);
-                this.originalRawQuery = originalRawQuery;
-            },
-            
             /** @overrides myt.Validator */
             isValid: function(value, config, errorMessages) {
-                const uri = new pkg.URI(value);
-                if (uri.toString(this.originalRawQuery) !== value) {
+                try {
+                    new URL(value);
+                    return true;
+                } catch(e) {
                     errorMessages?.push('Invalid URL.');
                     return false;
                 }
-                return true;
             }
         }),
         

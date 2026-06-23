@@ -87,10 +87,6 @@
             return v == null ? undefined : this.decodeQueryParam(v);
         },
         
-        setQueryParam: function(name, value) {
-            this.queryPairs[encodeURIComponent(name)] = encodeURIComponent(value);
-        },
-        
         removeQueryParam: function(name) {
             delete this.queryPairs[name];
         },
