@@ -84,25 +84,18 @@
                     model = elem.model;
                     if (model && model instanceof pkg.View) {
                         if (model.isFocusable()) return model;
-                    } else {
-                        const nodeName = elem.nodeName;
-                        if (nodeName === 'A' || nodeName === 'AREA' || 
-                            nodeName === 'INPUT' || nodeName === 'TEXTAREA' || 
-                            nodeName === 'SELECT' || nodeName === 'BUTTON'
-                        ) {
-                            if (!elem.disabled && !isNaN(elem.tabIndex) && 
-                                pkg.DomElementProxy.isDomElementVisible(elem)
-                            ) {
-                                // Make sure the dom element isn't inside a maskFocus
-                                model = globalFocus.findModelForDomElement(elem);
-                                if (model?.searchAncestorsOrSelf(n => n.maskFocus === true)) {
-                                    // Is a masked dom element so ignore.
-                                } else {
-                                    elem.focus();
-                                    globalFocus.focusedDom = elem;
-                                    return;
-                                }
-                            }
+                    } else if (
+                        !elem.disabled && elem.tabIndex >= 0 && 
+                        pkg.DomElementProxy.isDomElementVisible(elem)
+                    ) {
+                        // Make sure the dom element isn't inside a maskFocus
+                        model = globalFocus.findModelForDomElement(elem);
+                        if (model?.searchAncestorsOrSelf(n => n.maskFocus === true)) {
+                            // Is a masked dom element so ignore.
+                        } else {
+                            elem.focus();
+                            globalFocus.focusedDom = elem;
+                            return;
                         }
                     }
                 }
