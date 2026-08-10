@@ -688,7 +688,7 @@
     /** A base class for selectable infinite scrolling grids
         
         @class */
-    pkg.SelectableInfiniteGrid = new JSClass('InfiniteGrid', SelectableInfiniteList, {
+    pkg.SelectableInfiniteGrid = new JSClass('SelectableInfiniteGrid', SelectableInfiniteList, {
         include: [InfiniteGridMixin]
     });
     

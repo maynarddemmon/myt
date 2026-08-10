@@ -222,7 +222,7 @@
         doActivationKeyAborted: NOOP // code => {/* Subclasses to implement as needed. */}
     });
     
-    pkg.ArrowKeyActivation = new JSModule('KeyActivation', {
+    pkg.ArrowKeyActivation = new JSModule('ArrowKeyActivation', {
         /** @overrides myt.KeyActivation. */
         doActivationKeyDown: function(code, isRepeat) {
             switch (code) {

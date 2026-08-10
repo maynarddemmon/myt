@@ -11915,7 +11915,7 @@ myt.Destructible = new JS.Module('Destructible', {
         doActivationKeyAborted: NOOP // code => {/* Subclasses to implement as needed. */}
     });
     
-    pkg.ArrowKeyActivation = new JSModule('KeyActivation', {
+    pkg.ArrowKeyActivation = new JSModule('ArrowKeyActivation', {
         /** @overrides myt.KeyActivation. */
         doActivationKeyDown: function(code, isRepeat) {
             switch (code) {
@@ -23191,7 +23191,7 @@ myt.Destructible = new JS.Module('Destructible', {
     /** A base class for selectable infinite scrolling grids
         
         @class */
-    pkg.SelectableInfiniteGrid = new JSClass('InfiniteGrid', SelectableInfiniteList, {
+    pkg.SelectableInfiniteGrid = new JSClass('SelectableInfiniteGrid', SelectableInfiniteList, {
         include: [InfiniteGridMixin]
     });
     
