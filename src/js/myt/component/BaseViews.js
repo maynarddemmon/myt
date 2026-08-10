@@ -1,7 +1,7 @@
 (pkg => {
     const JSClass = JS.Class,
         
-        {View, SizeToDom} = pkg;
+        {View, SizeToDom, PlainTextSupport} = pkg;
     
     /** A base class for flexbox views.
         
@@ -102,7 +102,7 @@
     /** Displays text content.
         
         @class */
-    pkg.Text = new JSClass('Text', View, {
+    const Text = pkg.Text = new JSClass('Text', View, {
         include: [SizeToDom, pkg.TextSupport],
         
         
@@ -142,8 +142,24 @@
     /** Displays padded text content.
         
         @class */
-    pkg.PaddedText = new JSClass('PaddedText', pkg.Text, {
+    pkg.PaddedText = new JSClass('PaddedText', Text, {
         include: [pkg.PaddedTextSupport]
+    });
+    
+    /** Displays plain text content that explicitly doesn't support markup. This class is
+        more secure against XSS attacks than Text.
+        
+        @class */
+    pkg.PlainText = new JSClass('PlainText', Text, {
+        include: [pkg.PlainTextSupport]
+    });
+    
+    /** Displays plain padded text content that explicitly doesn't support markup. This class is
+        more secure against XSS attacks than PaddedText.
+        
+        @class */
+    pkg.PlainPaddedText = new JSClass('PlainPaddedText', pkg.PaddedText, {
+        include: [pkg.PlainTextSupport]
     });
     
     /** A view that displays an image. By default useNaturalSize is set to true so the Image will 

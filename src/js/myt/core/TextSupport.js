@@ -61,6 +61,11 @@
                 'none' thus making text selection not work. Furthermore, the cursor will be set to 
                 the default so it no longer appears as an i-beam.
         
+        Private Attributes:
+            __noMarkup:boolean Determines if text will be set via innerHTML or textContent.
+                Defaults to false which corresponds to innerHTML. The PlainTextSupport mixin will
+                set this to true and should be used where you know markup isn't needed.
+        
         @class */
     pkg.TextSupport = new JSModule('TextSupport', {
         // Accessors ///////////////////////////////////////////////////////////
@@ -82,9 +87,8 @@
             v = this.valueFromEvent(v);
             
             if (this.text !== v) {
-                // Use innerHTML rather than textContent since this allows us to embed 
-                // formatting markup.
-                this.getIDE().innerHTML = this.text = v;
+                // Use innerHTML or textContent depending on the need for markup support or not.
+                this.getIDE()[this.__noMarkup ? 'textContent' : 'innerHTML'] = this.text = v;
                 if (this.inited) {
                     this.fireEvent('text', v);
                     this.sizeViewToDom();
@@ -175,6 +179,20 @@
             @returns {void} */
         hideTextShadow: function() {
             this.getIDS().textShadow = 'none';
+        }
+    });
+    
+    /** A mixin that disables markup support in instances of TextSupport mixin by setting
+        __noMarkup to true.
+        
+        @class */
+    pkg.PlainTextSupport = new JSModule('PlainTextSupport', {
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides */
+        initNode: function(parent, attrs) {
+            delete attrs.__noMarkup; // Prevent accidental re-enabling of markup.
+            this.__noMarkup = true;
+            this.callSuper(parent, attrs);
         }
     });
     
