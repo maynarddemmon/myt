@@ -158,7 +158,7 @@
         more secure against XSS attacks than PaddedText.
         
         @class */
-    pkg.PlainPaddedText = new JSClass('PlainPaddedText', pkg.PaddedText, {
+    pkg.PaddedPlainText = new JSClass('PaddedPlainText', pkg.PaddedText, {
         include: [pkg.PlainTextSupport]
     });
     
