@@ -87,6 +87,17 @@
         
         @class */
     pkg.TextSupport = new JSModule('TextSupport', {
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides */
+        initNode: function(parent, attrs) {
+            if (typeof attrs.noMarkup === 'boolean') {
+                this.__noMarkup = attrs.noMarkup;
+                delete attrs.noMarkup;
+            }
+            this.callSuper(parent, attrs);
+        },
+        
+        
         // Accessors ///////////////////////////////////////////////////////////
         /** @overrides myt.View */
         setWidth: function(v) {
@@ -110,8 +121,11 @@
                 
                 // Use innerHTML or textContent depending on the need for markup support or not.
                 const ide = this.getIDE();
-                if (this.__noMarkup) {
+                if (this.__noMarkup === true) {
                     ide.textContent = v;
+                } else if (this.__noMarkup === false) {
+                    // Specifically allow setting arbitrary markup if so indicated.
+                    ide.innerHTML = v;
                 } else {
                     if (ide.setHTML) {
                         // Sanitize text by default when the API is available.
@@ -224,7 +238,10 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** @overrides */
         initNode: function(parent, attrs) {
-            delete attrs.__noMarkup; // Prevent accidental re-enabling of markup.
+            // Prevent accidental re-enabling of markup.
+            delete attrs.__noMarkup;
+            delete attrs.noMarkup;
+            
             this.__noMarkup = true;
             this.callSuper(parent, attrs);
         }
