@@ -8947,6 +8947,25 @@ myt.Destructible = new JS.Module('Destructible', {
 (pkg => {
     const JSModule = JS.Module,
         
+        SANITIZER = (() => {
+            if (Sanitizer) {
+                return {
+                    sanitizer:new Sanitizer({
+                        elements:[
+                            'b','strong','i','em','u','s','strike','del','small','sub','sup',
+                            'code','pre',
+                            'br','hr',
+                            'p','div','span','blockquote','q','address',
+                            'h1','h2','h3','h4','h5','h6',
+                            'ul','ol','li','dl','dt','dd',
+                            'table','caption','thead','tbody','tfoot','th','tr','td',
+                            'a' // Allow links but not img tags for now.
+                        ]
+                    })
+                };
+            }
+        })(),
+        
         /*  A private setter function that provides a common implementation for most of this 
             setters in the TextSupport mixin.
             @param {string|number} v
@@ -9033,8 +9052,23 @@ myt.Destructible = new JS.Module('Destructible', {
             v = this.valueFromEvent(v);
             
             if (this.text !== v) {
+                this.text = v;
+                
                 // Use innerHTML or textContent depending on the need for markup support or not.
-                this.getIDE()[this.__noMarkup ? 'textContent' : 'innerHTML'] = this.text = v;
+                const ide = this.getIDE();
+                if (this.__noMarkup) {
+                    ide.textContent = v;
+                } else {
+                    if (ide.setHTML) {
+                        // Sanitize text by default when the API is available.
+                        ide.setHTML(v, SANITIZER);
+                    } else {
+                        // Unsafe on those browsers (Safari specifically) that do not yet support 
+                        // the Sanitizer API.
+                        ide.innerHTML = v;
+                    }
+                }
+                
                 if (this.inited) {
                     this.fireEvent('text', v);
                     this.sizeViewToDom();
