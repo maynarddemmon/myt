@@ -8,7 +8,8 @@
         "@eslint/js": "^9.39.1",
         "eslint": "^8.57.1",
         "globals": "^16.5.0",
-        "google-closure-compiler": "^20230802.0.0"
+        "google-closure-compiler": "^20230802.0.0",
+        "google-closure-compiler-osx": "^20240317.0.0"
     },
     "scripts": {
         "build-loader": "./bin/build bin/loader-browser-manifest.js dist/loader-browser.js ./src true true JS && rm ./dist/loader-browser.js && stat -f%z ./dist/loader-browser.min.js",
