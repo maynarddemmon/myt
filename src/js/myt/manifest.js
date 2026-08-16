@@ -54,7 +54,9 @@ JS.Packages(file => {
     
     // Component
     const MYT_COMPONENT_ROOT = MYT_ROOT + 'component/';
-    file(MYT_COMPONENT_ROOT + 'Annulus.js'         ).provides('myt.Annulus').requires('myt.BackView');
+    file(MYT_COMPONENT_ROOT + 'SVG.js'             ).provides('myt.SVG').requires('myt.BackView');
+    file(MYT_COMPONENT_ROOT + 'Annulus.js'         ).provides('myt.Annulus').requires('myt.SVG');
+    file(MYT_COMPONENT_ROOT + 'SplineBox.js'       ).provides('myt.Spline','myt.SplineBox').requires('myt.SVG');
     file(MYT_COMPONENT_ROOT + 'BAG.js'             ).provides('myt.BAG','myt.BAGMembership').requires('myt.Node');
     file(MYT_COMPONENT_ROOT + 'BaseViews.js'       ).provides('myt.Flexbox','myt.Frame','myt.Markup','myt.Text','myt.PaddedText','myt.Image','myt.BackView')
         .requires('myt.View','myt.FlexboxSupport','myt.TextSupport','myt.PaddedTextSupport','myt.ImageSupport','myt.SizeToDom');
@@ -146,6 +148,6 @@ JS.Packages(file => {
         'myt.Grid','myt.SimpleGridColHdr','myt.InfiniteGrid',
         'myt.SelectableInfiniteList','myt.SimpleSelectableInfiniteListRow',
         'myt.PanelStack','myt.AutoScroller','myt.Eventable','myt.ColorThresholdRadialGuage',
-        'myt.TooltipMixin','myt.Canvas','myt.GrowlManager'
+        'myt.TooltipMixin','myt.Canvas','myt.GrowlManager','myt.SplineBox'
     );
 });

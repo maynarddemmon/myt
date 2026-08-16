@@ -15,6 +15,7 @@ module.exports = {
     console: "readonly",
     exports: "readonly",
     fetch: "readonly",
+    Sanitizer: "readonly",
     JS: "readonly",
     myt: "readonly",
     atob: "readonly",

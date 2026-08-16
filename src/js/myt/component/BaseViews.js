@@ -151,7 +151,7 @@
         
         @class */
     pkg.PlainText = new JSClass('PlainText', Text, {
-        include: [pkg.PlainTextSupport]
+        include: [PlainTextSupport]
     });
     
     /** Displays plain padded text content that explicitly doesn't support markup. This class is
@@ -159,7 +159,7 @@
         
         @class */
     pkg.PaddedPlainText = new JSClass('PaddedPlainText', pkg.PaddedText, {
-        include: [pkg.PlainTextSupport]
+        include: [PlainTextSupport]
     });
     
     /** A view that displays an image. By default useNaturalSize is set to true so the Image will 

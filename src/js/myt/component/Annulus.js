@@ -65,7 +65,7 @@
             @returns {void} */
         updateSize = annulus => {
             const size = 2*(annulus.radius + annulus.thickness),
-                svg = annulus.__svg;
+                svg = annulus.getSVG();
             annulus.setWidth(size);
             annulus.setHeight(size);
             
@@ -94,18 +94,12 @@
                     annulus.fireEvent(attrName, value);
                 }
             }
-        },
-        
-        makeSVG = (elementName, parentElem) => {
-            const svgElem = document.createElementNS('http://www.w3.org/2000/svg', elementName);
-            parentElem?.appendChild(svgElem);
-            return svgElem;
         };
      
     /** An annulus component.
         
         @class */
-    pkg.Annulus = new JS.Class('Annulus', pkg.BackView, {
+    pkg.Annulus = new JS.Class('Annulus', pkg.SVG, {
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
             const self = this;
@@ -120,14 +114,8 @@
         
         /** @overrides myt.View */
         createOurDomElement: function(parent) {
-            const elements = this.callSuper(parent),
-                innerElem = Array.isArray(elements) ? elements[1] : elements,
-                svg = this.__svg = makeSVG('svg', innerElem);
-            this.__path = makeSVG('path', svg);
-            
-            // Let the view handle mouse events
-            svg.style.pointerEvents = 'none';
-            
+            const elements = this.callSuper(parent);
+            this.__path = pkg.SVG.makeSVG('path', this.getSVG());
             return elements;
         },
         
