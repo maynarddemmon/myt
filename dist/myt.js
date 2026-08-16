@@ -25860,7 +25860,38 @@ myt.Destructible = new JS.Module('Destructible', {
             // Optional pixel clamps applied to the calculated control point distance. Useful for 
             // keeping very short lines from looking limp and very long ones from ballooning.
             minCurveDistance:0,
-            maxCurveDistance:Infinity
+            maxCurveDistance:Infinity,
+            
+            // An arrowhead shape name, or null for none. One of "triangle", "open" or "dot".
+            startArrow:null,
+            endArrow:null,
+            
+            // A short straight run in pixels at each end before the curve begins. Gives 
+            // arrowheads a straight segment to sit on and makes the line leave the endpoint 
+            // cleanly.
+            startStub:0,
+            endStub:0,
+            
+            // A gap in pixels between the endpoint and where the line actually starts. Lets the 
+            // line stop short of the view it connects to.
+            startGap:0,
+            endGap:0
+        },
+        
+        /*  Arrowhead marker definitions. All dimensions are in stroke-width units since the 
+            markers use markerUnits="strokeWidth", so an arrowhead always scales with the layer 
+            that draws it. */
+        ARROW_SHAPES = {
+            triangle:{width:4, height:4, refX:4, refY:2, elem:'path', attrs:{
+                d:'M0,0 L4,2 L0,4 z', fill:'context-stroke', stroke:'none'
+            }},
+            open:{width:4, height:4, refX:3.6, refY:2, elem:'path', attrs:{
+                d:'M0.5,0.5 L3.5,2 L0.5,3.5', fill:'none', stroke:'context-stroke',
+                'stroke-width':1, 'stroke-linecap':'round', 'stroke-linejoin':'round'
+            }},
+            dot:{width:3, height:3, refX:1.5, refY:1.5, elem:'circle', attrs:{
+                cx:1.5, cy:1.5, r:1.2, fill:'context-stroke', stroke:'none'
+            }}
         },
         
         /*  Sets an attribute on a dom element only if the value differs from the last value set 
@@ -25928,7 +25959,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /*  The style properties that affect the shape of the curve. Two layers that agree on all of 
             them produce identical path data, so it only needs to be built once. Note that offsetX and 
             offsetY are deliberately absent — an offset layer is a translate of the same curve. */
-        GEOMETRY_KEYS = ['startAngle', 'endAngle', 'startCurvature', 'endCurvature', 'minCurveDistance', 'maxCurveDistance'],
+        GEOMETRY_KEYS = ['startAngle', 'endAngle', 'startCurvature', 'endCurvature', 'minCurveDistance', 'maxCurveDistance', 'startStub', 'endStub', 'startGap', 'endGap'],
         
         sameGeometry = (a, b) => {
             if (a) {
@@ -25946,21 +25977,53 @@ myt.Destructible = new JS.Module('Destructible', {
             const {startX:sx, startY:sy, endX:ex, endY:ey} = spline,
                 dx = ex - sx,
                 dy = ey - sy,
-                {startCurvature, endCurvature} = style;
+                {startCurvature, endCurvature} = style,
+                
+                // Cap each stub at a fraction of the endpoint separation.
+                budget = mathSqrt(dx * dx + dy * dy) * 0.4,
+                startStub = mathMin(style.startStub, budget),
+                endStub = mathMin(style.endStub, budget),
+                
+                startGap = mathMin(style.startGap, budget),
+                endGap = mathMin(style.endGap, budget);
             
-            // Fast path for straight lines.
-            if (!startCurvature && !endCurvature) return 'M' + round2(sx) + ',' + round2(sy) + 'L' + round2(ex) + ',' + round2(ey);
+            // Fast path for a plain straight line.
+            if (!startCurvature && !endCurvature && !startStub && !endStub && !startGap && !endGap) return 'M' + round2(sx) + ',' + round2(sy) + 'L' + round2(ex) + ',' + round2(ey);
             
-            const distance = mathSqrt(dx * dx + dy * dy),
-                startAngle = degreesToRadians(resolveAngle(spline.startAngle ?? style.startAngle, true, dx, dy)),
+            // Angles are resolved from the original endpoints so the relative position of the two views 
+            // governs the "horizontal", "vertical" and "auto" keywords rather than the stub geometry.
+            const startAngle = degreesToRadians(resolveAngle(spline.startAngle ?? style.startAngle, true, dx, dy)),
                 endAngle = degreesToRadians(resolveAngle(spline.endAngle ?? style.endAngle, false, dx, dy)),
+                startCos = mathCos(startAngle),
+                startSin = mathSin(startAngle),
+                endCos = mathCos(endAngle),
+                endSin = mathSin(endAngle),
+                
+                // The gap moves where the line actually begins. Nothing is drawn between the endpoint 
+                // and here.
+                gsx = sx + startCos * startGap,
+                gsy = sy + startSin * startGap,
+                gex = ex + endCos * endGap,
+                gey = ey + endSin * endGap,
+                
+                // The stub then runs from there before the curve takes over.
+                csx = gsx + startCos * startStub,
+                csy = gsy + startSin * startStub,
+                cex = gex + endCos * endStub,
+                cey = gey + endSin * endStub,
+                
+                curveDx = cex - csx,
+                curveDy = cey - csy,
+                distance = mathSqrt(curveDx * curveDx + curveDy * curveDy),
                 startDistance = resolveCurveDistance(startCurvature, distance, style),
                 endDistance = resolveCurveDistance(endCurvature, distance, style);
             
-            return 'M' + round2(sx) + ',' + round2(sy) +
-                'C' + round2(sx + mathCos(startAngle) * startDistance) + ',' + round2(sy + mathSin(startAngle) * startDistance) +
-                ' ' + round2(ex + mathCos(endAngle) * endDistance) + ',' + round2(ey + mathSin(endAngle) * endDistance) +
-                ' ' + round2(ex) + ',' + round2(ey);
+            return 'M' + round2(gsx) + ',' + round2(gsy) +
+                (startStub ? 'L' + round2(csx) + ',' + round2(csy) : '') +
+                'C' + round2(csx + startCos * startDistance) + ',' + round2(csy + startSin * startDistance) +
+                ' ' + round2(cex + endCos * endDistance) + ',' + round2(cey + endSin * endDistance) +
+                ' ' + round2(cex) + ',' + round2(cey) +
+                (endStub ? 'L' + round2(gex) + ',' + round2(gey) : '');
         },
         
         /*  A common setter implementation for the geometry attributes of a Spline.
@@ -26126,7 +26189,8 @@ myt.Destructible = new JS.Module('Destructible', {
                     paths = self.__paths;
                 if (paths) {
                     // Resolve styles
-                    const style = self.style ?? self.parent?.defaultStyle ?? DEFAULT_STYLE,
+                    const box = self.parent,
+                        style = self.style ?? box?.defaultStyle ?? DEFAULT_STYLE,
                         layers = isArray(style) ? style : [style],
                         styles = layers.map(layer => ({...DEFAULT_STYLE, ...layer})),
                         stylesLen = styles.length;
@@ -26141,7 +26205,7 @@ myt.Destructible = new JS.Module('Destructible', {
                         // Apply style
                         const style = styles[i],
                             pathElem = paths[i],
-                            {dash, opacity, offsetX, offsetY} = style;
+                            {dash, opacity, offsetX, offsetY, startArrow, endArrow} = style;
                         setAttr(pathElem, 'fill', 'none');
                         setAttr(pathElem, 'stroke', style.color);
                         setAttr(pathElem, 'stroke-width', style.thickness);
@@ -26150,6 +26214,8 @@ myt.Destructible = new JS.Module('Destructible', {
                         setAttr(pathElem, 'stroke-opacity', opacity === 1 ? null : opacity);
                         setAttr(pathElem, 'stroke-dasharray', dash == null ? null : (isArray(dash) ? dash.join(' ') : dash));
                         setAttr(pathElem, 'stroke-dashoffset', style.dashOffset || null);
+                        setAttr(pathElem, 'marker-start', startArrow ? box?.getArrowMarker(startArrow) : null);
+                        setAttr(pathElem, 'marker-end', endArrow ? box?.getArrowMarker(endArrow) : null);
                         setAttr(pathElem, 'transform', (offsetX || offsetY) ? 'translate(' + offsetX + ',' + offsetY + ')' : null);
                         
                         // Reuse the path data when this layer has the same shape as the one below it.
@@ -26306,6 +26372,52 @@ myt.Destructible = new JS.Module('Destructible', {
             clear: function() {
                 // Iterate over a copy since destroying a Spline modifies the subnodes array.
                 for (const spline of this.getSplines()) spline.destroy();
+            },
+            
+            /** Gets a url reference to an arrowhead marker, creating the marker if this is the 
+                first use of that shape in this SplineBox.
+                @param {string} shape - One of the keys of ARROW_SHAPES.
+                @returns {?string} - A url() reference for a marker-start or marker-end attribute. */
+            getArrowMarker: function(shape) {
+                const self = this,
+                    markers = self.__markers ??= {};
+                let markerUrl = markers[shape];
+                
+                if (!markerUrl) {
+                    const def = ARROW_SHAPES[shape];
+                    if (!def) {
+                        consoleWarn('Unknown spline arrow shape', shape);
+                        return null;
+                    }
+                    
+                    let defs = self.__defs;
+                    if (!defs) {
+                        const svg = self.getSVG();
+                        defs = self.__defs = makeSVG('defs');
+                        svg.insertBefore(defs, svg.firstChild);
+                    }
+                    
+                    const id = 'splinearrow_' + shape + '_' + generateGuid(),
+                        marker = makeSVG('marker', defs);
+                    marker.setAttribute('id', id);
+                    marker.setAttribute('viewBox', '0 0 ' + def.width + ' ' + def.height);
+                    marker.setAttribute('markerWidth', def.width);
+                    marker.setAttribute('markerHeight', def.height);
+                    marker.setAttribute('refX', def.refX);
+                    marker.setAttribute('refY', def.refY);
+                    marker.setAttribute('markerUnits', 'strokeWidth');
+                    
+                    // auto-start-reverse flips the marker for marker-start so a start arrow points out of 
+                    // the start view rather than along the direction of travel.
+                    marker.setAttribute('orient', 'auto-start-reverse');
+                    
+                    const shapeElem = makeSVG(def.elem, marker);
+                    for (const attrName in def.attrs) shapeElem.setAttribute(attrName, def.attrs[attrName]);
+                    
+                    markerUrl = markers[shape] = 'url(#' + id + ')';
+                }
+                
+                return markerUrl;
             }
         }),
         
