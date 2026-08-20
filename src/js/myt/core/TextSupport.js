@@ -2,9 +2,10 @@
     const JSModule = JS.Module,
         
         SANITIZER = (() => {
-            if (Sanitizer) {
+            const sanitizer = global.Sanitizer;
+            if (sanitizer) {
                 return {
-                    sanitizer:new Sanitizer({
+                    sanitizer:new sanitizer({
                         elements:[
                             'b','strong','i','em','u','s','strike','del','small','sub','sup',
                             'code','pre',
