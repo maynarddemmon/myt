@@ -9578,7 +9578,7 @@ myt.Destructible = new JS.Module('Destructible', {
 (pkg => {
     const JSClass = JS.Class,
         
-        {View, SizeToDom, PlainTextSupport} = pkg;
+        {View, SizeToDom, PlainTextSupport, NOOP} = pkg;
     
     /** A base class for flexbox views.
         
@@ -9776,6 +9776,60 @@ myt.Destructible = new JS.Module('Destructible', {
                 }
             }
         }
+    });
+    
+    /** A base class for building Tree UIs.
+        
+        @class */
+    pkg.BaseTreeItem = new JSClass('BaseTreeItem', View, {
+        initNode: function(parent, attrs) {
+            const self = this,
+                parentItem = self.parentItem = attrs.parentItem,
+                lineColor = self.lineColor = attrs.lineColor ?? parentItem?.lineColor,
+                containerInset = self.containerInset = attrs.containerInset ?? parentItem?.containerInset,
+                vSpacing = self.vSpacing = attrs.vSpacing ?? parentItem?.vSpacing;
+            delete attrs.lineColor;
+            delete attrs.containerInset;
+            delete attrs.parentItem;
+            
+            self.callSuper(parent, attrs);
+            
+            const item = self.makeItem(),
+                container = self.container = new View(self, {
+                    x:containerInset, y:item.height + vSpacing, width:self.width - containerInset
+                }, [{
+                    setHeight:function(v) {
+                        this.callSuper(v);
+                        self.setHeight(this.y + this.height);
+                    }
+                }]);
+            new pkg.SpacedLayout(container, {axis:'y', collapseParent:true});
+            const lastChild = self.makeChildren(container);
+            
+            // Lines
+            const vLineX = 8;
+            if (lastChild) {
+                const vAdj = -vSpacing;
+                new View(self, {
+                    x:vLineX, y:container.y + vAdj, width:2, bgColor:lineColor,
+                    height:lastChild.y - vAdj + 12
+                });
+            }
+            if (self.parentItem) {
+                const lineFromParentX = vLineX - containerInset,
+                    lineW = -lineFromParentX - 3;
+                new View(self, {x:lineFromParentX, y:10, width:lineW, height:2, bgColor:lineColor});
+            }
+        },
+        
+        getContainer: function() {return this.container;},
+        
+        /** Subclasses must implement. Takes no arguments. Must return the item. */
+        makeItem: NOOP, 
+        
+        /** Subclasses must implement. The container is provided as the first argument. Must 
+            return the last child created. */
+        makeChildren: NOOP
     });
 })(myt);
 
