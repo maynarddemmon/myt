@@ -456,7 +456,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
     /*
      * http://github.com/maynarddemmon/myt
      * Maynard Demmon <maynarddemmon@gmail.com>
-     * @copyright Copyright (c) 2012-2025 Maynard Demmon and contributors
+     * @copyright Copyright (c) 2012-2026 Maynard Demmon and contributors
      * Myt: A simple javascript UI framework
      * Version: 20250119.1526
      * MIT License
@@ -484,7 +484,6 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             this.url = url;
         }
     }
-    
     
     let 
         // Used to generate globally unique IDs.
@@ -1189,6 +1188,49 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 }
             },
             
+            /** Truncates the beginning of a string, replacing everything before a matched substring 
+                (and the substring itself) with an ellipsis string. Checks each entry in matches, in 
+                order, against str and truncates at the first one found.
+                @param {string} str - The string to truncate.
+                @param {string|?Array} [matches] - A substring, or array of substrings, to search for 
+                    within str. The array is checked in order; the first entry that is found in str 
+                    (via indexOf) determines where the string is cut. Defaults to an empty array, 
+                    in which case no match is possible.
+                @param {string} [ellipsisStr] - The string prepended to the truncated result. 
+                    Defaults to '…'.
+                @returns {string} - The portion of str after the matched substring, prefixed with 
+                    ellipsisStr, or the original str unchanged if none of the matches were found. */
+            leftTruncate: (str, matches=[], ellipsisStr='…') => {
+                for (const match of isArray(matches) ? matches : [matches]) {
+                    const idx = str.indexOf(match);
+                    if (idx !== -1) return ellipsisStr + str.slice(idx + match.length);
+                }
+                return str;
+            },
+            
+            /** Truncates the middle of a string, keeping a fixed number of characters from the start 
+                and end and replacing the removed middle portion with an ellipsis string. If text is 
+                already short enough to fit within the prefix/suffix/ellipsis budget, it is returned 
+                unchanged.
+                @param {string} text - The string to truncate. If not a string, an empty string is 
+                    returned.
+                @param {number} [prefixCharCount] - The number of characters to keep from the start 
+                    of text. Defaults to 10.
+                @param {number} [suffixCharCount] - The number of characters to keep from the end of 
+                    text. Defaults to 10.
+                @param {string} [ellipsisStr] - The string inserted between the kept prefix and suffix 
+                    in place of the removed middle. Defaults to '…', which is treated as taking up 3 
+                    characters when checking whether truncation is needed (rather than its actual 
+                    length of 1).
+                @returns {string} - The truncated string, or the original text if it is short enough 
+                    to not require truncation, or '' if text is not a string. */
+            middleTruncate: (text, prefixCharCount=10, suffixCharCount=10, ellipsisStr='…') => {
+                if (typeof text !== 'string') return '';
+                const ellipsisLen = ellipsisStr === '…' ? 3 : ellipsisStr.length;
+                if (text.length <= prefixCharCount + suffixCharCount + ellipsisLen) return text;
+                return text.slice(0, prefixCharCount) + ellipsisStr + text.slice(text.length - suffixCharCount);
+            },
+            
             /** Format a number between 0 and 1 as a percentage.
                 @param {number} num The number to convert.
                 @param {number} [fixed] The number of decimal places to use during formatting. If 
@@ -1217,8 +1259,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 @param {string} template - The template to do replacements on and return. If not
                     provided or falsy, empty string will be returned.
                 @param {!Object= data - The data to use for replacements in the template.
-                @returns {string} - The interpolated string.
-                */
+                @returns {string} - The interpolated string. */
             interpolateString: (template, data={}) => {
                 return template ? template.replace(
                     CURLY_BRACES_WITH_ESCAPES_REGEX,
@@ -1233,9 +1274,8 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 ) : '';
             },
             
-            /** Convert a number to a string of a minimum length. Zero or more
-                of a padding character are prepended to achieve the minimum
-                length.
+            /** Convert a number to a string of a minimum length. Zero or more of a padding 
+                character are prepended to achieve the minimum length.
                 @param {number} num - The number to format.
                 @param {number} length - The minimum length of the formatted
                     return string.
