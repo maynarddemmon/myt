@@ -2779,6 +2779,38 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             return observablesByType[eventType] ??= [];
         },
         
+        /** Gets all the Observables this Observer is attached to regardless of event type.
+            @param filterFunc:function (optional) If provided it will be called for each 
+                methodName/observable/eventType attachment and only those for which it returns a 
+                truthy value will be included. Called as filterFunc(observable, methodName, 
+                eventType).
+            @param accumulator:Set|Array (optional) If provided, Observables will be added to it 
+                and it will be returned rather than a new Set. Anything with an "add" function is 
+                filled using that, otherwise "push" is used. Note that a Set accumulator will 
+                contain each Observable only once while an Array accumulator will contain one entry 
+                per matching attachment, so an Observable attached to for several event types will 
+                appear more than once.
+            @returns {!Set|!Array} the accumulator if one was provided, otherwise a new Set of 
+                myt.Observable instances. */
+        getAllObservables: function(filterFunc, accumulator) {
+            const retval = accumulator ?? new Set(),
+                // Duck type the accumulator so Sets, Arrays, subclasses and custom collectors all work.
+                add = typeof retval.add === 'function' ? retval.add : retval.push,
+                observablesByType = this.__obt;
+            if (observablesByType) {
+                for (const [eventType, observables] of Object.entries(observablesByType)) {
+                    for (let i = 0, len = observables.length; i < len;) {
+                        const methodName = observables[i++],
+                            observable = observables[i++];
+                        if (!filterFunc || filterFunc(observable, methodName, eventType)) {
+                            add.call(retval, observable);
+                        }
+                    }
+                }
+            }
+            return retval;
+        },
+        
         /** Checks if any observables exist for the provided event type.
             @param eventType:string the event type to check for.
             @returns true if any exist, false otherwise. */

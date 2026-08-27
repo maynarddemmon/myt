@@ -2,9 +2,9 @@
 const fs = require('fs'),
     PEGGY_VESION = '5.1.0',
     peggy = require('./peggy-' + PEGGY_VESION + '.min.js'),
-    arguments = process.argv.splice(2),
-    grammarFile = arguments[0],
-    runTests = arguments[1] === 'true';
+    args = process.argv.splice(2),
+    grammarFile = args[0],
+    runTests = args[1] === 'true';
 
 let indentLevel = 0;
 const indent = (txt, adj = 0) => {
@@ -12,7 +12,10 @@ const indent = (txt, adj = 0) => {
     return '  '.repeat(indentLevel) + txt;
 };
 
-if (!grammarFile) return console.error('No grammar file argument provided. Expected this as the first argument.');
+if (!grammarFile) {
+    console.error('No grammar file argument provided. Expected this as the first argument.');
+    process.exit();
+}
 
 console.info('Build Constraint Parser:');
 const path = grammarFile + '.pegjs',
