@@ -876,6 +876,39 @@
             self.bgColor = undefined;
         },
         
+        /** Sets a repeating gradient background made of alternating color bands, useful for things 
+            like faking a grid's row striping so scrolling an infinite list looks instantly painted 
+            before the real rows load in. Setting this property will take the place of any bgColor 
+            used in the view.
+            @param {?Array} [bands] - A flat array of alternating [color, thickness, color, 
+                thickness, ...] pairs, in stacking order from the start of the repeating unit. Each 
+                color is a valid CSS color and is followed by its band's thickness in pixels. The 
+                bands are stacked in order and then repeat as a unit for the full length of the 
+                view. If not provided, the background falls back to the view's current bgColor, or 
+                'none' if bgColor is not set.
+            @param {string} [angle] - The direction the bands repeat in, passed directly into the 
+                repeating-linear-gradient as its first argument. Must be a valid CSS gradient 
+                direction, e.g. 'to bottom', 'to right', or a value in degrees like '45deg'. 
+                Defaults to 'to bottom'.
+            @returns {void} */
+        setBandedBg: function(bands, angle='to bottom') {
+            let background = null;
+            if (bands) {
+                const stops = ['repeating-linear-gradient(' + angle],
+                    len = bands.length;
+                for (let i = 0, offset = 0; i < len;) {
+                    const color = bands[i++];
+                    stops.push(color + ' ' + offset + 'px');
+                    stops.push(color + ' ' + (offset += bands[i++]) + 'px');
+                }
+                background = stops.join(', ') + ')';
+            } else {
+                // Defaults to the View's current bgColor if bands is not provided.
+                background = this.bgColor ?? 'none';
+            }
+            this.getODS().background = background;
+        },
+        
         /** Sets the tooltip.
             @param {string} v
             @returns {void} */
