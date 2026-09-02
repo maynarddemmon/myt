@@ -650,7 +650,7 @@
         
         /** @overrides */
         destroy: function() {
-            this.__resizeObserver?.unobserve(this.getIDE());
+            this.__rszObs?.disconnect();
             this.callSuper();
         },
         
@@ -658,12 +658,15 @@
         // Accessors ///////////////////////////////////////////////////////////
         setResize: function(v) {
             const self = this;
+            v = v || 'none';
             if (self.resize !== v) {
-                v = self.resize = self.getIDS().resize = v || 'none';
+                self.getIDS().resize = self.resize = v;
                 if (self.inited) self.fireEvent('resize', v);
                 
-                if (v !== 'none') {
-                    (self.__resizeObserver ??= new ResizeObserver(() => {self.doResize();})).observe(self.getIDE());
+                if (v === 'none') {
+                    self.__rszObs?.disconnect();
+                } else {
+                    (self.__rszObs ??= new ResizeObserver(() => {self.doResize();})).observe(self.getIDE());
                 }
             }
         },

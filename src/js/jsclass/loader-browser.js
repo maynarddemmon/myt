@@ -183,4 +183,4 @@
         while (typeof args[i] === 'string') files.push(args[i++]);
         when({complete:files}, args[i]);
     };
-})(global, global.JS = global.JS ?? {});
+})(globalThis, globalThis.JS = globalThis.JS ?? {});

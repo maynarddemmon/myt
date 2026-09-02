@@ -2,7 +2,7 @@
     const JSModule = JS.Module,
         
         SANITIZER = (() => {
-            const sanitizer = global.Sanitizer;
+            const sanitizer = globalThis.Sanitizer;
             if (sanitizer) {
                 return {
                     sanitizer:new sanitizer({
@@ -127,15 +127,15 @@
                 } else if (this.__noMarkup === false) {
                     // Specifically allow setting arbitrary markup if so indicated.
                     ide.innerHTML = v;
+                } else if (ide.setHTML) {
+                    // Sanitize text by default when the API is available.
+                    ide.setHTML(v, SANITIZER);
                 } else {
-                    if (ide.setHTML) {
-                        // Sanitize text by default when the API is available.
-                        ide.setHTML(v, SANITIZER);
-                    } else {
-                        // Unsafe on those browsers (Safari specifically) that do not yet support 
-                        // the Sanitizer API.
-                        ide.innerHTML = v;
-                    }
+                    // NOTE: unsanitized. Reached on browsers without Element.setHTML (Safari,
+                    // Chrome/Edge < 146, Firefox < 148) AND on any non-secure context, since
+                    // setHTML requires HTTPS. Callers passing untrusted markup here are
+                    // responsible for their own sanitization.
+                    ide.innerHTML = v;
                 }
                 
                 if (this.inited) {

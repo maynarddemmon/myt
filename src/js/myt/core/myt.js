@@ -353,7 +353,7 @@
             resolveName: (objName, scope) => {
                 if (!objName || objName.length === 0) return undefined;
                 
-                scope = scope ?? global;
+                scope = scope ?? globalThis;
                 
                 const origScope = scope,
                     parts = isArray(objName) ? objName : objName.split('.'), 
@@ -1349,4 +1349,4 @@
             for (const fontFace of fontFaceSetEvent.fontfaces) notifyFontLoaded(fontFace);
         };
     }
-})(global);
+})(globalThis);

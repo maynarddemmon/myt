@@ -128,7 +128,7 @@
             // Clear keys down when the window loses focus. This is necessary when using keyboard 
             // shortcusts to switch apps since that will leave a key in the down state even though 
             // it may no longer be when the focus is returned to the page.
-            global.onblur = () => {keysDown.clear();};
+            globalThis.onblur = () => {keysDown.clear();};
         },
         
         

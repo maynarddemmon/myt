@@ -247,4 +247,4 @@
     exports.Singleton = new Class('Singleton', {
         initialize: (name, parent, methods) => new (new Class(name, parent, methods))
     });
-})(global.JS = {});
+})(globalThis.JS = {});

@@ -3,7 +3,7 @@
         
         JSONParse = JSON.parse,
         
-        localStorage = global.localStorage,
+        localStorage = globalThis.localStorage,
         
         /*  @param {string} key - The name of the storage entry to return.
             @returns {*} - The value of the storage entry or null if not found. */

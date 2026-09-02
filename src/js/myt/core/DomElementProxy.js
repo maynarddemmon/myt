@@ -1,6 +1,5 @@
 (pkg => {
-    const GLOBAL = global,
-        getComputedStyle = GLOBAL.getComputedStyle,
+    const getComputedStyle = globalThis.getComputedStyle,
         DOCUMENT_ELEMENT = document,
         
         assign = Object.assign,
@@ -151,8 +150,8 @@
             getTruePosition: elem => {
                 if (elem) {
                     const pos = elem.getBoundingClientRect();
-                    pos.left += GLOBAL.scrollX;
-                    pos.top += GLOBAL.scrollY;
+                    pos.left += globalThis.scrollX;
+                    pos.top += globalThis.scrollY;
                     return pos;
                 }
             },

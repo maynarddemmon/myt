@@ -65,7 +65,7 @@
         css:'-' + pre + '-',
         js:pre[0].toUpperCase() + pre.substr(1)
     };
-})(global);
+})(globalThis);
 
 
 /** Formats a date using a pattern.
@@ -450,7 +450,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
     exports.Singleton = new Class('Singleton', {
         initialize: (name, parent, methods) => new (new Class(name, parent, methods))
     });
-})(global.JS = {});
+})(globalThis.JS = {});
 
 (pkg => {
     /*
@@ -807,7 +807,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             resolveName: (objName, scope) => {
                 if (!objName || objName.length === 0) return undefined;
                 
-                scope = scope ?? global;
+                scope = scope ?? globalThis;
                 
                 const origScope = scope,
                     parts = isArray(objName) ? objName : objName.split('.'), 
@@ -1803,7 +1803,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             for (const fontFace of fontFaceSetEvent.fontfaces) notifyFontLoaded(fontFace);
         };
     }
-})(global);
+})(globalThis);
 
 
 (pkg => {
@@ -1925,7 +1925,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         JSONParse = JSON.parse,
         
-        localStorage = global.localStorage,
+        localStorage = globalThis.localStorage,
         
         /*  @param {string} key - The name of the storage entry to return.
             @returns {*} - The value of the storage entry or null if not found. */
@@ -3135,8 +3135,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
 
 
 (pkg => {
-    const GLOBAL = global,
-        getComputedStyle = GLOBAL.getComputedStyle,
+    const getComputedStyle = globalThis.getComputedStyle,
         DOCUMENT_ELEMENT = document,
         
         assign = Object.assign,
@@ -3287,8 +3286,8 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             getTruePosition: elem => {
                 if (elem) {
                     const pos = elem.getBoundingClientRect();
-                    pos.left += GLOBAL.scrollX;
-                    pos.top += GLOBAL.scrollY;
+                    pos.left += globalThis.scrollX;
+                    pos.top += globalThis.scrollY;
                     return pos;
                 }
             },
@@ -4609,7 +4608,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             // Clear keys down when the window loses focus. This is necessary when using keyboard 
             // shortcusts to switch apps since that will leave a key in the down state even though 
             // it may no longer be when the focus is returned to the page.
-            global.onblur = () => {keysDown.clear();};
+            globalThis.onblur = () => {keysDown.clear();};
         },
         
         
@@ -9053,7 +9052,7 @@ myt.Destructible = new JS.Module('Destructible', {
     const JSModule = JS.Module,
         
         SANITIZER = (() => {
-            const sanitizer = global.Sanitizer;
+            const sanitizer = globalThis.Sanitizer;
             if (sanitizer) {
                 return {
                     sanitizer:new sanitizer({
@@ -9178,15 +9177,15 @@ myt.Destructible = new JS.Module('Destructible', {
                 } else if (this.__noMarkup === false) {
                     // Specifically allow setting arbitrary markup if so indicated.
                     ide.innerHTML = v;
+                } else if (ide.setHTML) {
+                    // Sanitize text by default when the API is available.
+                    ide.setHTML(v, SANITIZER);
                 } else {
-                    if (ide.setHTML) {
-                        // Sanitize text by default when the API is available.
-                        ide.setHTML(v, SANITIZER);
-                    } else {
-                        // Unsafe on those browsers (Safari specifically) that do not yet support 
-                        // the Sanitizer API.
-                        ide.innerHTML = v;
-                    }
+                    // NOTE: unsanitized. Reached on browsers without Element.setHTML (Safari,
+                    // Chrome/Edge < 146, Firefox < 148) AND on any non-secure context, since
+                    // setHTML requires HTTPS. Callers passing untrusted markup here are
+                    // responsible for their own sanitization.
+                    ide.innerHTML = v;
                 }
                 
                 if (this.inited) {
@@ -16005,7 +16004,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** @overrides */
         destroy: function() {
-            this.__resizeObserver?.unobserve(this.getIDE());
+            this.__rszObs?.disconnect();
             this.callSuper();
         },
         
@@ -16013,12 +16012,15 @@ myt.Destructible = new JS.Module('Destructible', {
         // Accessors ///////////////////////////////////////////////////////////
         setResize: function(v) {
             const self = this;
+            v = v || 'none';
             if (self.resize !== v) {
-                v = self.resize = self.getIDS().resize = v || 'none';
+                self.getIDS().resize = self.resize = v;
                 if (self.inited) self.fireEvent('resize', v);
                 
-                if (v !== 'none') {
-                    (self.__resizeObserver ??= new ResizeObserver(() => {self.doResize();})).observe(self.getIDE());
+                if (v === 'none') {
+                    self.__rszObs?.disconnect();
+                } else {
+                    (self.__rszObs ??= new ResizeObserver(() => {self.doResize();})).observe(self.getIDE());
                 }
             }
         },
@@ -26069,7 +26071,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 activeColor:params.activeColor, hoverColor:params.hoverColor, readyColor:params.readyColor
             }, [{
                 doActivated: () => {
-                    if (global.isSecureContext) {
+                    if (globalThis.isSecureContext) {
                         navigator.clipboard.writeText(pkg.removeMarkup(self.msgTxt.text, {brToLineFeed:true}));
                     } else {
                         console.warn('access to clipboard blocked because of insecure context.');

@@ -396,7 +396,7 @@
                 activeColor:params.activeColor, hoverColor:params.hoverColor, readyColor:params.readyColor
             }, [{
                 doActivated: () => {
-                    if (global.isSecureContext) {
+                    if (globalThis.isSecureContext) {
                         navigator.clipboard.writeText(pkg.removeMarkup(self.msgTxt.text, {brToLineFeed:true}));
                     } else {
                         console.warn('access to clipboard blocked because of insecure context.');
