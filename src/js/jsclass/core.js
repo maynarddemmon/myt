@@ -210,7 +210,7 @@
         eigenFunc(klass).include(parent.__meta__);
         klass.__tgt__ = klass.prototype;
         
-        const parentModule = parent === Object ? {} : (parent.__fns__ ? parent : new Module(parent.prototype, true));
+        const parentModule = parent === Object ? {} : (parent.__fns__ ? parent : new Module(null, parent.prototype));
         klass.include(Kernel, true).include(parentModule, true).include(methods, true);
         
         resolveModule(klass);
@@ -247,4 +247,4 @@
     exports.Singleton = new Class('Singleton', {
         initialize: (name, parent, methods) => new (new Class(name, parent, methods))
     });
-})(globalThis.JS = {});
+})(globalThis.JS ?? (globalThis.JS = {}));

@@ -112,7 +112,7 @@ jsBuild(manifestFile, rootPath, requiredFiles, concatenatedData => {
     const opts = {
           js: targetFile,
           js_output_file: minifiedFilePath,
-          language_out: 'ECMASCRIPT_2021'
+          language_out: 'ECMASCRIPT_NEXT'
         };
     if (doLintChecks === 'true') opts.jscomp_warning = 'lintChecks';
     if (outputSourceMap === 'true') {
