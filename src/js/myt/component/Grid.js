@@ -400,14 +400,14 @@
             notifyHdrXChange: function(columnHeader) {
                 if (!this.isLocked()) {
                     for (const row of this.rows) row.notifyHdrXChange(columnHeader);
-                    this._notifyHdrChange('X', columnHeader);
+                    this.__ntfyHdrChng('X', columnHeader);
                 }
             },
             
             notifyHdrWidthChange: function(columnHeader) {
                 if (!this.isLocked()) {
                     for (const row of this.rows) row.notifyHdrWidthChange(columnHeader);
-                    this._notifyHdrChange('Width', columnHeader);
+                    this.__ntfyHdrChng('Width', columnHeader);
                 }
             },
             
@@ -426,12 +426,12 @@
                     this.fitHeadersToWidth();
                     this.fixupResizerCursors();
                     
-                    this._notifyHdrChange('Visibility', columnHeader);
+                    this.__ntfyHdrChng('Visibility', columnHeader);
                 }
             },
             
             /** @private */
-            _notifyHdrChange: function(propFuncname, columnHeader) {
+            __ntfyHdrChng: function(propFuncname, columnHeader) {
                 const hdrChangeListener = this.hdrChangeListener;
                 if (hdrChangeListener) hdrChangeListener['notifyHdr' + propFuncname + 'Change'](columnHeader);
             },

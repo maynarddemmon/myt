@@ -7,7 +7,7 @@
         Attributes:
             vectors:array The data is stored in a single array with the x coordinate first and 
                 the y coordinate second.
-            _boundingBox:object the cached bounding box if it has been calculated.
+            __bndBx:object the cached bounding box if it has been calculated.
         
         @class */
     pkg.Path = new JS.Class('Path', {
@@ -22,7 +22,7 @@
         
         // Accessors ///////////////////////////////////////////////////////////
         setVectors: function(v) {
-            this._boundingBox = null;
+            this.__bndBx = null;
             this.vectors = v;
         },
         
@@ -33,7 +33,7 @@
             @returns {void} */
         copyFrom: function(path) {
             this.vectors = path.vectors.slice();
-            this._boundingBox = null;
+            this.__bndBx = null;
         },
         
         /** Draws this path into the provided drawview.
@@ -60,7 +60,7 @@
                 vecs[--i] += dy;
                 vecs[--i] += dx;
             }
-            this._boundingBox = null;
+            this.__bndBx = null;
         },
         
         /** Scales the path by the provided amount.
@@ -73,7 +73,7 @@
                 vecs[--i] *= magnitude;
                 vecs[--i] *= magnitude;
             }
-            this._boundingBox = null;
+            this.__bndBx = null;
         },
         
         /** Rotates this path around 0,0 by the provided angle in radians.
@@ -90,7 +90,7 @@
                 vecs[i++] = xNew;
                 vecs[i++] = yNew;
             }
-            this._boundingBox = null;
+            this.__bndBx = null;
         },
         
         /** Rotates this path around the provided origin by the provided angle in radians.
@@ -108,7 +108,7 @@
             @returns {!Object} with properties x, y, width and height or null if no bounding box 
                 could be calculated. */
         getBoundingBox: function() {
-            if (this._boundingBox) return this._boundingBox;
+            if (this.__bndBx) return this.__bndBx;
             
             const vecs = this.vectors;
             let i = vecs.length, minX, maxX, minY, maxY;
@@ -123,10 +123,10 @@
                     minX = mathMin(x, minX);
                     maxX = mathMax(x, maxX);
                 }
-                return this._boundingBox = {x:minX, y:minY, width:maxX - minX, height:maxY - minY};
+                return this.__bndBx = {x:minX, y:minY, width:maxX - minX, height:maxY - minY};
             }
             
-            return this._boundingBox = null;
+            return this.__bndBx = null;
         },
         
         /** Gets the center point of the bounding box for the path.

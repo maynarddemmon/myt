@@ -257,7 +257,7 @@
                     rollback value or not.
             
             Private Attributes:
-                _lockCascade:boolean Prevents changes to "isChanged" and "isValid" from cascading 
+                __lkCscd:boolean Prevents changes to "isChanged" and "isValid" from cascading 
                     upwards to the parent form. Used during reset and rollback.
                 __sf:object A map of child forms/elements by ID.
                 __acc:object A map of method references by accelerator identifier. The values will 
@@ -279,7 +279,7 @@
             initNode: function(parent, attrs) {
                 const self = this;
                 
-                self.isChanged = self._lockCascade = false;
+                self.isChanged = self.__lkCscd = false;
                 self.isValid = true;
                 
                 self.__sf = {};
@@ -300,6 +300,16 @@
             
             
             // Accessors ///////////////////////////////////////////////////////
+            /** Allow external control of cascade locking without exposing the
+                internal variable.
+                @returns {void} */
+            lockCascade: function() {this.__lkCscd = true;},
+            
+            /** Allow external control of cascade locking without exposing the
+                internal variable.
+                @returns {void} */
+            unlockCascade: function() {this.__lkCscd = false;},
+            
             setErrorMessages: function(v) {
                 this.set('errorMessages', v, true);
             },
@@ -343,7 +353,7 @@
                 if (this.inited) this.fireEvent('isValid', v);
                 
                 const form = this.form;
-                if (form && !this._lockCascade) {
+                if (form && !this.__lkCscd) {
                     if (v) {
                         form.verifyValidState(this);
                     } else {
@@ -358,7 +368,7 @@
                     if (this.inited) this.fireEvent('isChanged', v);
                     
                     const form = this.form;
-                    if (form && !this._lockCascade) {
+                    if (form && !this.__lkCscd) {
                         if (v) {
                             form.notifySubFormChanged();
                         } else {
@@ -640,9 +650,9 @@
                 let isValid = true;
                 for (const id in subForms) isValid = subForms[id].doValidation() && isValid;
                 
-                this._lockCascade = true;
+                this.__lkCscd = true;
                 isValid = applyValidation(this, isValid);
-                this._lockCascade = false;
+                this.__lkCscd = false;
                 
                 return isValid;
             },
@@ -682,11 +692,11 @@
                 @param value:object The current value.
                 @returns {void} */
             setup: function(defaultValue, rollbackValue, value) {
-                this._lockCascade = true;
+                this.__lkCscd = true;
                 this.setIsChanged(false);
                 this.setErrorMessages([]);
                 this.setIsValid(true);
-                this._lockCascade = false;
+                this.__lkCscd = false;
                 this.doSetupOnSubforms(defaultValue ?? {}, rollbackValue ?? {}, value ?? {});
             },
             
@@ -703,7 +713,7 @@
             /** Resets this form to the default values.
                 @returns {void} */
             resetForm: function() {
-                this._lockCascade = true;
+                this.__lkCscd = true;
                 
                 const subForms = this.__sf;
                 for (const id in subForms) subForms[id].resetForm();
@@ -712,13 +722,13 @@
                 this.setErrorMessages([]);
                 this.setIsValid(true);
                 
-                this._lockCascade = false;
+                this.__lkCscd = false;
             },
             
             /** Rolls back this form to the rollback values.
                 @returns {void} */
             rollbackForm: function() {
-                this._lockCascade = true;
+                this.__lkCscd = true;
                 
                 const subForms = this.__sf;
                 for (const id in subForms) subForms[id].rollbackForm();
@@ -727,7 +737,7 @@
                 this.setErrorMessages([]);
                 this.setIsValid(true);
                 
-                this._lockCascade = false;
+                this.__lkCscd = false;
             },
             
             /** Gets the changed values of this form. For a form this will be a map of all the 
@@ -888,7 +898,7 @@
             
             /** @overrides myt.Form */
             setup: function(defaultValue, rollbackValue, value) {
-                this._lockCascade = true;
+                this.__lkCscd = true;
                 
                 // Reset values to uninitialized state to make repeated calls to setup behave 
                 // identically. Otherwise values could bleed through.
@@ -903,14 +913,14 @@
                 this.setErrorMessages([]);
                 this.setIsValid(true);
                 
-                this._lockCascade = false;
+                this.__lkCscd = false;
                 
                 this.setValue(value);
             },
             
             /** @overrides myt.Form */
             resetForm: function() {
-                this._lockCascade = true;
+                this.__lkCscd = true;
                 
                 const defaultValue = this.getDefaultValue();
                 this.setRollbackValue(defaultValue);
@@ -920,12 +930,12 @@
                 this.setErrorMessages([]);
                 this.setIsValid(true);
                 
-                this._lockCascade = false;
+                this.__lkCscd = false;
             },
             
             /** @overrides myt.Form */
             rollbackForm: function() {
-                this._lockCascade = true;
+                this.__lkCscd = true;
                 
                 this.setValue(this.getRollbackValue());
                 
@@ -933,7 +943,7 @@
                 this.setErrorMessages([]);
                 this.setIsValid(true);
                 
-                this._lockCascade = false;
+                this.__lkCscd = false;
             },
             
             /** @overrides myt.Form
@@ -1251,16 +1261,18 @@
         },
         
         notifyPanelShown: function(_panel) {
-            this._isShown = true;
+            this.__isShwn = true;
         },
         
         notifyPanelHidden: function(_panel) {
-            this._isShown = false;
+            this.__isShwn = false;
         },
+        
+        isShown: function() {return this.__isShwn;},
         
         /** @overrides myt.ListViewAnchor. */
         doActivationKeyDown: function(code, isRepeat) {
-            if (code === GlobalKeys.CODE_ESC && !this._isShown) {
+            if (code === GlobalKeys.CODE_ESC && !this.__isShwn) {
                 this.invokeAccelerator(ACCELERATOR_REJECT);
             } else {
                 this.callSuper(code, isRepeat);
@@ -1269,7 +1281,7 @@
         
         /** @overrides myt.ListViewAnchor. */
         doActivationKeyUp: function(code) {
-            if (code === GlobalKeys.CODE_ENTER && !this._isShown) {
+            if (code === GlobalKeys.CODE_ENTER && !this.__isShwn) {
                 this.invokeAccelerator(ACCELERATOR_ACCEPT);
             } else {
                 this.callSuper(code);

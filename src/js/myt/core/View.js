@@ -14,7 +14,7 @@
             const restoreFocus = pkg.global.focus.focusedView, 
                 elem = viewBeingRemoved.getIDE();
             if (restoreFocus === viewBeingRemoved || restoreFocus?.isDescendantOf(viewBeingRemoved)) {
-                restoreFocus._ignoreFocus = true;
+                restoreFocus.__ignrFcs = true;
             }
             
             // Also maintain scrollTop/scrollLeft since those also get reset when a dom element is 
@@ -24,7 +24,7 @@
             wrappedFunc();
             
             if (restoreFocus) {
-                restoreFocus._ignoreFocus = false;
+                restoreFocus.__ignrFcs = false;
                 restoreFocus.focus(true);
             }
             

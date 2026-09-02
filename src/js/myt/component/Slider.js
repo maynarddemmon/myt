@@ -27,7 +27,7 @@
                 
                 this.syncTo(parent, 'setDisabled', 'disabled');
                 
-                parent._syncThumbToValue(this, parent.getValue());
+                parent.__syncThmb2Val(this, parent.getValue());
             },
             
             
@@ -218,24 +218,24 @@
             },
             
             nudgeValueLeft: function(thumb) {
-                this._nudge(thumb, false);
+                this.__nudge(thumb, false);
             },
             
             nudgeValueUp: function(thumb) {
-                this._nudge(thumb, false);
+                this.__nudge(thumb, false);
             },
             
             nudgeValueRight: function(thumb) {
-                this._nudge(thumb, true);
+                this.__nudge(thumb, true);
             },
             
             nudgeValueDown: function(thumb) {
-                this._nudge(thumb, true);
+                this.__nudge(thumb, true);
             },
             
-            _nudge: NOOP, // (thumb, up) => {/* Subclasses to implement */},
+            __nudge: NOOP, // (thumb, up) => {/* Subclasses to implement */},
             
-            _syncThumbToValue: function(thumb, value) {
+            __syncThmb2Val: function(thumb, value) {
                 value = this.convertValueToPixels(value);
                 if (this.axis === 'x') {
                     thumb.setX(value - thumb.width / 2);
@@ -251,14 +251,14 @@
             syncValueToThumb: function(thumb) {
                 if (this.inited && !this.__lockSync) {
                     this.__lockSync = true;
-                    this._syncValueToThumb(thumb, this.convertPixelsToValue(
+                    this.__syncVal2Thmb(thumb, this.convertPixelsToValue(
                         this.axis === 'x' ? thumb.x + thumb.width / 2 : thumb.y + thumb.height / 2
                     ));
                     this.__lockSync = false;
                 }
             },
             
-            _syncValueToThumb: NOOP, // (thumb, converted) => {/* Subclasses to implement */},
+            __syncVal2Thmb: NOOP, // (thumb, converted) => {/* Subclasses to implement */},
             
             /** Should only be called by SliderThumb.
                 @private
@@ -312,7 +312,7 @@
             this.thumbLower = new SliderThumb(this);
             this.thumbUpper = new SliderThumb(this);
             
-            this._syncRangeFillToValue();
+            this.__syncRngFill2Val();
         },
         
         
@@ -325,10 +325,10 @@
                 // Sync position of thumb
                 if (!this.__lockSync) {
                     v = this.getValue();
-                    this._syncThumbToValue(this.thumbLower, v);
-                    this._syncThumbToValue(this.thumbUpper, v);
+                    this.__syncThmb2Val(this.thumbLower, v);
+                    this.__syncThmb2Val(this.thumbUpper, v);
                 }
-                this._syncRangeFillToValue();
+                this.__syncRngFill2Val();
             }
         },
         
@@ -339,8 +339,8 @@
             this.callSuper(v);
             if (this.inited && this.axis === 'x' && this.width !== existing) {
                 const value = this.getValue();
-                this._syncThumbToValue(this.thumbLower, value);
-                this._syncThumbToValue(this.thumbUpper, value);
+                this.__syncThmb2Val(this.thumbLower, value);
+                this.__syncThmb2Val(this.thumbUpper, value);
             }
         },
         
@@ -351,8 +351,8 @@
             this.callSuper(v);
             if (this.inited && this.axis === 'y' && this.height !== existing) {
                 const value = this.getValue();
-                this._syncThumbToValue(this.thumbLower, value);
-                this._syncThumbToValue(this.thumbUpper, value);
+                this.__syncThmb2Val(this.thumbLower, value);
+                this.__syncThmb2Val(this.thumbUpper, value);
             }
         },
         
@@ -361,7 +361,7 @@
         /** Should only be called by this and the rangeFill View.
             @private
             @returns {void} */
-        _syncRangeFillToValue: function() {
+        __syncRngFill2Val: function() {
             const rangeFill = this.rangeFill,
                 value = this.getValue(),
                 lowerPx = this.convertValueToPixels(value.lower),
@@ -376,12 +376,12 @@
         },
         
         /** @overrides myt.BaseSlider */
-        _syncThumbToValue: function(thumb, value) {
+        __syncThmb2Val: function(thumb, value) {
             this.callSuper(thumb, thumb === this.thumbLower ? value.lower : value.upper);
         },
         
         /** @overrides myt.BaseSlider */
-        _syncValueToThumb: function(thumb, converted) {
+        __syncVal2Thmb: function(thumb, converted) {
             let value = this.getValueCopy();
             value[thumb === this.thumbLower ? 'lower' : 'upper'] = converted;
             
@@ -389,12 +389,12 @@
             
             // Update thumb position since value may have been adjusted
             value = this.getValue();
-            if (this.thumbLower) this._syncThumbToValue(this.thumbLower, value);
-            if (this.thumbUpper) this._syncThumbToValue(this.thumbUpper, value);
+            if (this.thumbLower) this.__syncThmb2Val(this.thumbLower, value);
+            if (this.thumbUpper) this.__syncThmb2Val(this.thumbUpper, value);
         },
         
         /** @overrides myt.BaseSlider */
-        _nudge: function(thumb, up) {
+        __nudge: function(thumb, up) {
             const value = this.getValueCopy(),
                 adj = this.nudgeAmount * (up ? 1 : -1);
             if (thumb === this.thumbLower) {
@@ -442,7 +442,7 @@
             this.callSuper(v);
             
             // Sync position of thumb
-            if (this.inited && !this.__lockSync) this._syncThumbToValue(this.thumb, this.getValue());
+            if (this.inited && !this.__lockSync) this.__syncThmb2Val(this.thumb, this.getValue());
         },
         
         /** @overrides
@@ -450,7 +450,7 @@
         setWidth: function(v) {
             const existing = this.width;
             this.callSuper(v);
-            if (this.inited && this.axis === 'x' && this.width !== existing) this._syncThumbToValue(this.thumb, this.getValue());
+            if (this.inited && this.axis === 'x' && this.width !== existing) this.__syncThmb2Val(this.thumb, this.getValue());
         },
         
         /** @overrides
@@ -458,21 +458,21 @@
         setHeight: function(v) {
             const existing = this.height;
             this.callSuper(v);
-            if (this.inited && this.axis === 'y' && this.height !== existing) this._syncThumbToValue(this.thumb, this.getValue());
+            if (this.inited && this.axis === 'y' && this.height !== existing) this.__syncThmb2Val(this.thumb, this.getValue());
         },
         
         
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides myt.BaseSlider */
-        _syncValueToThumb: function(thumb, converted) {
+        __syncVal2Thmb: function(thumb, converted) {
             this.setValue(converted);
             
             // Update thumb position since value may have been adjusted
-            this._syncThumbToValue(thumb, this.getValue());
+            this.__syncThmb2Val(thumb, this.getValue());
         },
         
         /** @overrides myt.BaseSlider */
-        _nudge: function(thumb, up) {
+        __nudge: function(thumb, up) {
             this.setValue(this.getValue() + this.nudgeAmount * (up ? 1 : -1));
         }
     });

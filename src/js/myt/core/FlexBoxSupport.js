@@ -168,10 +168,10 @@
         },
         
         setUpdateAgain: function(v) {
-            this._updateAgain = v;
+            this.__updtAgn = v;
         },
         isUpdateAgain: function() {
-            return this._updateAgain;
+            return this.__updtAgn;
         },
         
         updateFlexboxLayout: function() {

@@ -378,7 +378,7 @@
                         
                         // OPTIMIZATION: prevent extra focus events under special circumstances. 
                         // See myt.VariableLayout for more detail.
-                        if (self._ignoreFocus) {
+                        if (self.__ignrFcs) {
                             domEvent.cancelBubble = true;
                             domEvent.stopPropagation?.();
                             domEvent.preventDefault();

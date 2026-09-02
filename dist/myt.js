@@ -4144,7 +4144,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                         
                         // OPTIMIZATION: prevent extra focus events under special circumstances. 
                         // See myt.VariableLayout for more detail.
-                        if (self._ignoreFocus) {
+                        if (self.__ignrFcs) {
                             domEvent.cancelBubble = true;
                             domEvent.stopPropagation?.();
                             domEvent.preventDefault();
@@ -4865,10 +4865,10 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         },
         
         setUpdateAgain: function(v) {
-            this._updateAgain = v;
+            this.__updtAgn = v;
         },
         isUpdateAgain: function() {
-            return this._updateAgain;
+            return this.__updtAgn;
         },
         
         updateFlexboxLayout: function() {
@@ -7422,7 +7422,7 @@ myt.Destructible = new JS.Module('Destructible', {
             const restoreFocus = pkg.global.focus.focusedView, 
                 elem = viewBeingRemoved.getIDE();
             if (restoreFocus === viewBeingRemoved || restoreFocus?.isDescendantOf(viewBeingRemoved)) {
-                restoreFocus._ignoreFocus = true;
+                restoreFocus.__ignrFcs = true;
             }
             
             // Also maintain scrollTop/scrollLeft since those also get reset when a dom element is 
@@ -7432,7 +7432,7 @@ myt.Destructible = new JS.Module('Destructible', {
             wrappedFunc();
             
             if (restoreFocus) {
-                restoreFocus._ignoreFocus = false;
+                restoreFocus.__ignrFcs = false;
                 restoreFocus.focus(true);
             }
             
@@ -14725,7 +14725,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 }]);
                 
                 if (!noWrapperContainer) {
-                    self._wrapperLayout = new pkg.SizeToChildren(wrapper.container = new View(wrapper), {axis:'y', paddingY:self.layoutPaddingY});
+                    self.__wrapperLayout = new pkg.SizeToChildren(wrapper.container = new View(wrapper), {axis:'y', paddingY:self.layoutPaddingY});
                 }
                 
                 self.constrain('__updateHeight', [wrapper, 'y', wrapper, 'height']);
@@ -14749,7 +14749,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             setLayoutPaddingY: function(v) {
                 this.layoutPaddingY = v;
-                if (this.inited) this._wrapperLayout?.setPaddingY(v);
+                if (this.inited) this.__wrapperLayout?.setPaddingY(v);
             },
             
             setMinContainerHeight: function(v) {this.minContainerHeight = v;},
@@ -14911,24 +14911,24 @@ myt.Destructible = new JS.Module('Destructible', {
             this.labelValign = 'middle';
             this.labelFontSize = '16px';
             this.labelFontWeight = 'bold';
-
+            
             attrs.labelTextColorChecked ??= '#fff';
             attrs.labelTextColor ??= '#333';
             attrs.labelAlign ??= 'center';
             attrs.labelValign ??= 'middle';
             attrs.labelFontSize ??= '16px';
             attrs.labelFontWeight ??= 'bold';
-
+            
             this.callSuper(parent, attrs);
-
+            
             this.button.label = new pkg.Text(this.button, {
                 ignorePlacement:true, fontSize:this.labelFontSize, fontWeight:this.labelFontWeight,
                 text:this.text, align:this.labelAlign, valign:this.labelValign, 
                 textColor:this.__getTextColor()
             });
         },
-
-
+        
+        
         // Accessors ///////////////////////////////////////////////////////////
         setLabelTextColorChecked: function(v) {
             if (this.labelTextColorChecked !== v) {
@@ -14947,14 +14947,14 @@ myt.Destructible = new JS.Module('Destructible', {
         setLabelFontSize: function(v) {updateLabelAttr(this, 'labelFontSize', 'fontSize', v);},
         setLabelFontWeight: function(v) {updateLabelAttr(this, 'labelFontWeight', 'fontWeight', v);},
         setText: function(v) {updateLabelAttr(this, 'text', 'text', v);},
-
-
+        
+        
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides myt.TabSlider */
         notifyButtonRedraw: function() {
             this.button?.label?.setTextColor(this.__getTextColor());
         },
-
+        
         /** @private
             @returns {string} */
         __getTextColor: function() {
@@ -14972,26 +14972,26 @@ myt.Destructible = new JS.Module('Destructible', {
         @class */
     pkg.TabSliderContainer = new JS.Module('TabSliderContainer', {
         include: [pkg.SelectionManager],
-
-
+        
+        
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
             const self = this;
-
-            self._tabSliders = [];
-
+            
+            self.__tabSliders = [];
+            
             attrs.defaultPlacement = 'container';
-
+            
             attrs.spacing ??= pkg.theme.TabSliderContainerSpacing;
             attrs.overflow ??= 'autoy';
             attrs.itemSelectionId ??= 'tabId';
             attrs.maxSelected ??= 1;
             attrs.duration ??= 500;
-
+            
             self.updateLayout = debounce(self.updateLayout);
-
+            
             self.callSuper(parent, attrs);
-
+            
             const container = self.container = new View(self, {
                 ignorePlacement:true, percentOfParentWidth:100
             }, [SizeToParent, {
@@ -14999,15 +14999,15 @@ myt.Destructible = new JS.Module('Destructible', {
                 subnodeAdded: function(node) {
                     this.callSuper(node);
                     if (node instanceof TabSlider) {
-                        self._tabSliders.push(node);
+                        self.__tabSliders.push(node);
                         self.attachTo(node, 'updateLayout', 'selected');
                     }
                 },
-
+                
                 /** @overrides myt.View */
                 subnodeRemoved: function(node) {
                     if (node instanceof TabSlider) {
-                        const tabSliders = self._tabSliders,
+                        const tabSliders = self.__tabSliders,
                             idx = tabSliders.indexOf(node);
                         if (idx > -1) {
                             self.detachFrom(node, 'updateLayout', 'selected');
@@ -15018,42 +15018,42 @@ myt.Destructible = new JS.Module('Destructible', {
                 }
             }]);
             container.layout = new pkg.SpacedLayout(container, {axis:'y', spacing:self.spacing, collapseParent:true});
-
+            
             self.attachTo(self, 'updateLayout', 'height');
         },
-
-
+        
+        
         // Accessors ///////////////////////////////////////////////////////////
         setPersistenceId: function(v) {this.persistenceId = v;},
-        getTabSliders: function() {return this._tabSliders;},
+        getTabSliders: function() {return this.__tabSliders;},
         getTabSliderById: function(sliderId) {
-            for (const tabSlider of this._tabSliders) {
+            for (const tabSlider of this.__tabSliders) {
                 if (tabSlider.tabId === sliderId) return tabSlider;
             }
         },
-
+        
         setSpacing: function(v) {
             if (this.spacing !== v) {
                 this.spacing = v;
                 this.layout?.setSpacing(v);
             }
         },
-
+        
         setDuration: function(v) {this.duration = v;},
-
-
+        
+        
         // Methods /////////////////////////////////////////////////////////////
         /** @param {!Object} ignoredEvent
             @param {number} [temporaryDuration]
             @returns {void} */
         updateLayout: function(ignoredEvent, temporaryDuration) {
-            const tabSliders = this._tabSliders,
+            const tabSliders = this.__tabSliders,
                 tabSlidersLen = tabSliders.length;
             let i = tabSlidersLen, 
                 min = 0, 
                 preferred = 0, 
                 visCount = 0;
-
+            
             while (i) {
                 const tabSlider = tabSliders[--i];
                 if (tabSlider.visible) {
@@ -15068,20 +15068,20 @@ myt.Destructible = new JS.Module('Destructible', {
                     }
                 }
             }
-
+            
             const layout = this.container.layout,
                 layoutOverage = layout.inset + layout.outset + layout.spacing * (visCount - 1);
             min += layoutOverage;
             preferred += layoutOverage;
-
+            
             const h = this.height,
                 minIsOver = min > h,
                 preferredIsOver = preferred > h,
                 existingDuration = this.duration;
             let overage = preferred - h;
-
+            
             if (temporaryDuration > 0) this.setDuration(temporaryDuration);
-
+            
             i = tabSlidersLen;
             while (i) {
                 const tabSlider = tabSliders[--i];
@@ -15093,7 +15093,7 @@ myt.Destructible = new JS.Module('Destructible', {
                         } else if (preferredIsOver) {
                             const tabPreferred = tabSlider.getPreferredExpandedHeight(),
                                 tabMin = tabSlider.getMinimumExpandedHeight();
-
+                            
                             newVal = tabPreferred - overage;
                             if (tabMin > newVal) {
                                 overage -= tabPreferred - tabMin;
@@ -15110,11 +15110,11 @@ myt.Destructible = new JS.Module('Destructible', {
                     }
                 }
             }
-
+            
             // Restore duration
             if (temporaryDuration > 0) this.setDuration(existingDuration);
         },
-
+        
         // Persistence
         readState: persistenceId => LocalStorage.getDatum(persistenceId),
         writeState: (persistenceId, componentState) => {LocalStorage.setDatum(persistenceId, componentState);},
@@ -15539,7 +15539,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 placeholder:string Text that will be shown if the value is empty.
             
             Private Attributes:
-                _selRange:object Stores the start and end of the selection.
+                __selRng:object Stores the start and end of the selection.
             
             @class */
         BaseInputText = pkg.BaseInputText = new JSClass('BaseInputText', NativeInputWrapper, {
@@ -15725,11 +15725,11 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             saveSelection: function(selection) {
-                this._selRange = selection || this.getSelection() || this._selRange;
+                this.__selRng = selection || this.getSelection() || this.__selRng;
             },
             
             restoreSelection: function() {
-                this.setSelection(this._selRange);
+                this.setSelection(this.__selRng);
             }
         }),
         
@@ -16976,7 +16976,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     rollback value or not.
             
             Private Attributes:
-                _lockCascade:boolean Prevents changes to "isChanged" and "isValid" from cascading 
+                __lkCscd:boolean Prevents changes to "isChanged" and "isValid" from cascading 
                     upwards to the parent form. Used during reset and rollback.
                 __sf:object A map of child forms/elements by ID.
                 __acc:object A map of method references by accelerator identifier. The values will 
@@ -16998,7 +16998,7 @@ myt.Destructible = new JS.Module('Destructible', {
             initNode: function(parent, attrs) {
                 const self = this;
                 
-                self.isChanged = self._lockCascade = false;
+                self.isChanged = self.__lkCscd = false;
                 self.isValid = true;
                 
                 self.__sf = {};
@@ -17019,6 +17019,16 @@ myt.Destructible = new JS.Module('Destructible', {
             
             
             // Accessors ///////////////////////////////////////////////////////
+            /** Allow external control of cascade locking without exposing the
+                internal variable.
+                @returns {void} */
+            lockCascade: function() {this.__lkCscd = true;},
+            
+            /** Allow external control of cascade locking without exposing the
+                internal variable.
+                @returns {void} */
+            unlockCascade: function() {this.__lkCscd = false;},
+            
             setErrorMessages: function(v) {
                 this.set('errorMessages', v, true);
             },
@@ -17062,7 +17072,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 if (this.inited) this.fireEvent('isValid', v);
                 
                 const form = this.form;
-                if (form && !this._lockCascade) {
+                if (form && !this.__lkCscd) {
                     if (v) {
                         form.verifyValidState(this);
                     } else {
@@ -17077,7 +17087,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     if (this.inited) this.fireEvent('isChanged', v);
                     
                     const form = this.form;
-                    if (form && !this._lockCascade) {
+                    if (form && !this.__lkCscd) {
                         if (v) {
                             form.notifySubFormChanged();
                         } else {
@@ -17359,9 +17369,9 @@ myt.Destructible = new JS.Module('Destructible', {
                 let isValid = true;
                 for (const id in subForms) isValid = subForms[id].doValidation() && isValid;
                 
-                this._lockCascade = true;
+                this.__lkCscd = true;
                 isValid = applyValidation(this, isValid);
-                this._lockCascade = false;
+                this.__lkCscd = false;
                 
                 return isValid;
             },
@@ -17401,11 +17411,11 @@ myt.Destructible = new JS.Module('Destructible', {
                 @param value:object The current value.
                 @returns {void} */
             setup: function(defaultValue, rollbackValue, value) {
-                this._lockCascade = true;
+                this.__lkCscd = true;
                 this.setIsChanged(false);
                 this.setErrorMessages([]);
                 this.setIsValid(true);
-                this._lockCascade = false;
+                this.__lkCscd = false;
                 this.doSetupOnSubforms(defaultValue ?? {}, rollbackValue ?? {}, value ?? {});
             },
             
@@ -17422,7 +17432,7 @@ myt.Destructible = new JS.Module('Destructible', {
             /** Resets this form to the default values.
                 @returns {void} */
             resetForm: function() {
-                this._lockCascade = true;
+                this.__lkCscd = true;
                 
                 const subForms = this.__sf;
                 for (const id in subForms) subForms[id].resetForm();
@@ -17431,13 +17441,13 @@ myt.Destructible = new JS.Module('Destructible', {
                 this.setErrorMessages([]);
                 this.setIsValid(true);
                 
-                this._lockCascade = false;
+                this.__lkCscd = false;
             },
             
             /** Rolls back this form to the rollback values.
                 @returns {void} */
             rollbackForm: function() {
-                this._lockCascade = true;
+                this.__lkCscd = true;
                 
                 const subForms = this.__sf;
                 for (const id in subForms) subForms[id].rollbackForm();
@@ -17446,7 +17456,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 this.setErrorMessages([]);
                 this.setIsValid(true);
                 
-                this._lockCascade = false;
+                this.__lkCscd = false;
             },
             
             /** Gets the changed values of this form. For a form this will be a map of all the 
@@ -17607,7 +17617,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             /** @overrides myt.Form */
             setup: function(defaultValue, rollbackValue, value) {
-                this._lockCascade = true;
+                this.__lkCscd = true;
                 
                 // Reset values to uninitialized state to make repeated calls to setup behave 
                 // identically. Otherwise values could bleed through.
@@ -17622,14 +17632,14 @@ myt.Destructible = new JS.Module('Destructible', {
                 this.setErrorMessages([]);
                 this.setIsValid(true);
                 
-                this._lockCascade = false;
+                this.__lkCscd = false;
                 
                 this.setValue(value);
             },
             
             /** @overrides myt.Form */
             resetForm: function() {
-                this._lockCascade = true;
+                this.__lkCscd = true;
                 
                 const defaultValue = this.getDefaultValue();
                 this.setRollbackValue(defaultValue);
@@ -17639,12 +17649,12 @@ myt.Destructible = new JS.Module('Destructible', {
                 this.setErrorMessages([]);
                 this.setIsValid(true);
                 
-                this._lockCascade = false;
+                this.__lkCscd = false;
             },
             
             /** @overrides myt.Form */
             rollbackForm: function() {
-                this._lockCascade = true;
+                this.__lkCscd = true;
                 
                 this.setValue(this.getRollbackValue());
                 
@@ -17652,7 +17662,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 this.setErrorMessages([]);
                 this.setIsValid(true);
                 
-                this._lockCascade = false;
+                this.__lkCscd = false;
             },
             
             /** @overrides myt.Form
@@ -17970,16 +17980,18 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         notifyPanelShown: function(_panel) {
-            this._isShown = true;
+            this.__isShwn = true;
         },
         
         notifyPanelHidden: function(_panel) {
-            this._isShown = false;
+            this.__isShwn = false;
         },
+        
+        isShown: function() {return this.__isShwn;},
         
         /** @overrides myt.ListViewAnchor. */
         doActivationKeyDown: function(code, isRepeat) {
-            if (code === GlobalKeys.CODE_ESC && !this._isShown) {
+            if (code === GlobalKeys.CODE_ESC && !this.__isShwn) {
                 this.invokeAccelerator(ACCELERATOR_REJECT);
             } else {
                 this.callSuper(code, isRepeat);
@@ -17988,7 +18000,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         /** @overrides myt.ListViewAnchor. */
         doActivationKeyUp: function(code) {
-            if (code === GlobalKeys.CODE_ENTER && !this._isShown) {
+            if (code === GlobalKeys.CODE_ENTER && !this.__isShwn) {
                 this.invokeAccelerator(ACCELERATOR_ACCEPT);
             } else {
                 this.callSuper(code);
@@ -20848,7 +20860,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 
                 this.syncTo(parent, 'setDisabled', 'disabled');
                 
-                parent._syncThumbToValue(this, parent.getValue());
+                parent.__syncThmb2Val(this, parent.getValue());
             },
             
             
@@ -21039,24 +21051,24 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             nudgeValueLeft: function(thumb) {
-                this._nudge(thumb, false);
+                this.__nudge(thumb, false);
             },
             
             nudgeValueUp: function(thumb) {
-                this._nudge(thumb, false);
+                this.__nudge(thumb, false);
             },
             
             nudgeValueRight: function(thumb) {
-                this._nudge(thumb, true);
+                this.__nudge(thumb, true);
             },
             
             nudgeValueDown: function(thumb) {
-                this._nudge(thumb, true);
+                this.__nudge(thumb, true);
             },
             
-            _nudge: NOOP, // (thumb, up) => {/* Subclasses to implement */},
+            __nudge: NOOP, // (thumb, up) => {/* Subclasses to implement */},
             
-            _syncThumbToValue: function(thumb, value) {
+            __syncThmb2Val: function(thumb, value) {
                 value = this.convertValueToPixels(value);
                 if (this.axis === 'x') {
                     thumb.setX(value - thumb.width / 2);
@@ -21072,14 +21084,14 @@ myt.Destructible = new JS.Module('Destructible', {
             syncValueToThumb: function(thumb) {
                 if (this.inited && !this.__lockSync) {
                     this.__lockSync = true;
-                    this._syncValueToThumb(thumb, this.convertPixelsToValue(
+                    this.__syncVal2Thmb(thumb, this.convertPixelsToValue(
                         this.axis === 'x' ? thumb.x + thumb.width / 2 : thumb.y + thumb.height / 2
                     ));
                     this.__lockSync = false;
                 }
             },
             
-            _syncValueToThumb: NOOP, // (thumb, converted) => {/* Subclasses to implement */},
+            __syncVal2Thmb: NOOP, // (thumb, converted) => {/* Subclasses to implement */},
             
             /** Should only be called by SliderThumb.
                 @private
@@ -21133,7 +21145,7 @@ myt.Destructible = new JS.Module('Destructible', {
             this.thumbLower = new SliderThumb(this);
             this.thumbUpper = new SliderThumb(this);
             
-            this._syncRangeFillToValue();
+            this.__syncRngFill2Val();
         },
         
         
@@ -21146,10 +21158,10 @@ myt.Destructible = new JS.Module('Destructible', {
                 // Sync position of thumb
                 if (!this.__lockSync) {
                     v = this.getValue();
-                    this._syncThumbToValue(this.thumbLower, v);
-                    this._syncThumbToValue(this.thumbUpper, v);
+                    this.__syncThmb2Val(this.thumbLower, v);
+                    this.__syncThmb2Val(this.thumbUpper, v);
                 }
-                this._syncRangeFillToValue();
+                this.__syncRngFill2Val();
             }
         },
         
@@ -21160,8 +21172,8 @@ myt.Destructible = new JS.Module('Destructible', {
             this.callSuper(v);
             if (this.inited && this.axis === 'x' && this.width !== existing) {
                 const value = this.getValue();
-                this._syncThumbToValue(this.thumbLower, value);
-                this._syncThumbToValue(this.thumbUpper, value);
+                this.__syncThmb2Val(this.thumbLower, value);
+                this.__syncThmb2Val(this.thumbUpper, value);
             }
         },
         
@@ -21172,8 +21184,8 @@ myt.Destructible = new JS.Module('Destructible', {
             this.callSuper(v);
             if (this.inited && this.axis === 'y' && this.height !== existing) {
                 const value = this.getValue();
-                this._syncThumbToValue(this.thumbLower, value);
-                this._syncThumbToValue(this.thumbUpper, value);
+                this.__syncThmb2Val(this.thumbLower, value);
+                this.__syncThmb2Val(this.thumbUpper, value);
             }
         },
         
@@ -21182,7 +21194,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Should only be called by this and the rangeFill View.
             @private
             @returns {void} */
-        _syncRangeFillToValue: function() {
+        __syncRngFill2Val: function() {
             const rangeFill = this.rangeFill,
                 value = this.getValue(),
                 lowerPx = this.convertValueToPixels(value.lower),
@@ -21197,12 +21209,12 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         /** @overrides myt.BaseSlider */
-        _syncThumbToValue: function(thumb, value) {
+        __syncThmb2Val: function(thumb, value) {
             this.callSuper(thumb, thumb === this.thumbLower ? value.lower : value.upper);
         },
         
         /** @overrides myt.BaseSlider */
-        _syncValueToThumb: function(thumb, converted) {
+        __syncVal2Thmb: function(thumb, converted) {
             let value = this.getValueCopy();
             value[thumb === this.thumbLower ? 'lower' : 'upper'] = converted;
             
@@ -21210,12 +21222,12 @@ myt.Destructible = new JS.Module('Destructible', {
             
             // Update thumb position since value may have been adjusted
             value = this.getValue();
-            if (this.thumbLower) this._syncThumbToValue(this.thumbLower, value);
-            if (this.thumbUpper) this._syncThumbToValue(this.thumbUpper, value);
+            if (this.thumbLower) this.__syncThmb2Val(this.thumbLower, value);
+            if (this.thumbUpper) this.__syncThmb2Val(this.thumbUpper, value);
         },
         
         /** @overrides myt.BaseSlider */
-        _nudge: function(thumb, up) {
+        __nudge: function(thumb, up) {
             const value = this.getValueCopy(),
                 adj = this.nudgeAmount * (up ? 1 : -1);
             if (thumb === this.thumbLower) {
@@ -21263,7 +21275,7 @@ myt.Destructible = new JS.Module('Destructible', {
             this.callSuper(v);
             
             // Sync position of thumb
-            if (this.inited && !this.__lockSync) this._syncThumbToValue(this.thumb, this.getValue());
+            if (this.inited && !this.__lockSync) this.__syncThmb2Val(this.thumb, this.getValue());
         },
         
         /** @overrides
@@ -21271,7 +21283,7 @@ myt.Destructible = new JS.Module('Destructible', {
         setWidth: function(v) {
             const existing = this.width;
             this.callSuper(v);
-            if (this.inited && this.axis === 'x' && this.width !== existing) this._syncThumbToValue(this.thumb, this.getValue());
+            if (this.inited && this.axis === 'x' && this.width !== existing) this.__syncThmb2Val(this.thumb, this.getValue());
         },
         
         /** @overrides
@@ -21279,21 +21291,21 @@ myt.Destructible = new JS.Module('Destructible', {
         setHeight: function(v) {
             const existing = this.height;
             this.callSuper(v);
-            if (this.inited && this.axis === 'y' && this.height !== existing) this._syncThumbToValue(this.thumb, this.getValue());
+            if (this.inited && this.axis === 'y' && this.height !== existing) this.__syncThmb2Val(this.thumb, this.getValue());
         },
         
         
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides myt.BaseSlider */
-        _syncValueToThumb: function(thumb, converted) {
+        __syncVal2Thmb: function(thumb, converted) {
             this.setValue(converted);
             
             // Update thumb position since value may have been adjusted
-            this._syncThumbToValue(thumb, this.getValue());
+            this.__syncThmb2Val(thumb, this.getValue());
         },
         
         /** @overrides myt.BaseSlider */
-        _nudge: function(thumb, up) {
+        __nudge: function(thumb, up) {
             this.setValue(this.getValue() + this.nudgeAmount * (up ? 1 : -1));
         }
     });
@@ -22074,14 +22086,14 @@ myt.Destructible = new JS.Module('Destructible', {
             notifyHdrXChange: function(columnHeader) {
                 if (!this.isLocked()) {
                     for (const row of this.rows) row.notifyHdrXChange(columnHeader);
-                    this._notifyHdrChange('X', columnHeader);
+                    this.__ntfyHdrChng('X', columnHeader);
                 }
             },
             
             notifyHdrWidthChange: function(columnHeader) {
                 if (!this.isLocked()) {
                     for (const row of this.rows) row.notifyHdrWidthChange(columnHeader);
-                    this._notifyHdrChange('Width', columnHeader);
+                    this.__ntfyHdrChng('Width', columnHeader);
                 }
             },
             
@@ -22100,12 +22112,12 @@ myt.Destructible = new JS.Module('Destructible', {
                     this.fitHeadersToWidth();
                     this.fixupResizerCursors();
                     
-                    this._notifyHdrChange('Visibility', columnHeader);
+                    this.__ntfyHdrChng('Visibility', columnHeader);
                 }
             },
             
             /** @private */
-            _notifyHdrChange: function(propFuncname, columnHeader) {
+            __ntfyHdrChng: function(propFuncname, columnHeader) {
                 const hdrChangeListener = this.hdrChangeListener;
                 if (hdrChangeListener) hdrChangeListener['notifyHdr' + propFuncname + 'Change'](columnHeader);
             },
@@ -22877,7 +22889,7 @@ myt.Destructible = new JS.Module('Destructible', {
         },
         
         updateRowExtent = infiniteList => {
-            infiniteList._rowExtent = infiniteList.rowSpacing + infiniteList.rowHeight;
+            infiniteList.__rwExt = infiniteList.rowSpacing + infiniteList.rowHeight;
         },
         
         getDomScrollTop = infiniteList => infiniteList.getIDE().scrollTop,
@@ -22888,7 +22900,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         getSubview = (gridRow, columnHeader) => gridRow.getRef(columnHeader.columnId),
         
-        getVisibleRowsIterator = infiniteList => infiniteList._visibleRowsByIdx.values(),
+        getVisibleRowsIterator = infiniteList => infiniteList.__visRowsByIdx.values(),
         
         /*  Build a sort storage key from a hash of the grid header's columnIds sorted
             and comma joined. */
@@ -22945,13 +22957,13 @@ myt.Destructible = new JS.Module('Destructible', {
                 rowSpacing
             
             Private Attributes:
-                _listData:array The data for the rows in the list.
-                _startIdx:int The index into the data of the first row shown
-                _endIdx:int The index into the data of the last row shown
-                _visibleRowsByIdx:Map - A cache of what rows are currently shown by the index of 
+                __listData:array The data for the rows in the list.
+                __startIdx:int The index into the data of the first row shown
+                __endIdx:int The index into the data of the last row shown
+                __visRowsByIdx:Map - A cache of what rows are currently shown by the index of 
                     the data for the row. This provides faster performance when refreshing the list.
-                _listView:myt.View The view that contains the rows in the list.
-                _itemPool:myt.TrackActivesPool The pool for row views.
+                __listView:myt.View The view that contains the rows in the list.
+                __itemPool:myt.TrackActivesPool The pool for row views.
             
             @class */
         InfiniteList = pkg.InfiniteList = new JSClass('InfiniteList', View, {
@@ -22978,15 +22990,15 @@ myt.Destructible = new JS.Module('Destructible', {
                 attrs.rowHeight ??= 30;
                 attrs.overscrollBehavior ??= 'auto contain';
                 
-                self._rowExtent = self.rowSpacing = self.rowHeight = 0;
-                self._startIdx = self._endIdx = -1;
-                self._visibleRowsByIdx = new Map();
+                self.__rwExt = self.rowSpacing = self.rowHeight = 0;
+                self.__startIdx = self.__endIdx = -1;
+                self.__visRowsByIdx = new Map();
                 
                 self.callSuper(parent, attrs);
                 
                 // Build UI
-                const listView = self._listView = new View(self);
-                self._itemPool = self.makePool(rowClasses, listView);
+                const listView = self.__listView = new View(self);
+                self.__itemPool = self.makePool(rowClasses, listView);
                 
                 self.attachTo(self, 'refreshListUI', 'height');
                 self.attachToDom(self, 'refreshListUI', 'scroll');
@@ -23012,13 +23024,16 @@ myt.Destructible = new JS.Module('Destructible', {
                 updateRowExtent(this);
             },
             
-            getListData: function() {return this._listData;},
+            getListData: function() {return this.__listData;},
+            setListData: function(data) {this.__listData = data;},
+            
+            getListView: function() {return this.__listView;},
             
             setWidth: function(v) {
                 if (v > 0) {
                     this.callSuper(v);
                     if (this.inited) {
-                        const listView = this._listView,
+                        const listView = this.__listView,
                             w = this.width;
                         listView.setWidth(w);
                         for (const sv of listView.getSubviews()) sv.setWidth(w);
@@ -23031,18 +23046,21 @@ myt.Destructible = new JS.Module('Destructible', {
             },*/
             
             getVisibleRowForModel: function(model) {
-                for (const row of this._visibleRowsByIdx.values()) {
+                for (const row of this.__visRowsByIdx.values()) {
                     if (row.model === model) return row;
                 }
             },
             
-            getListViewHeight: function() {return this._listView.height;},
+            getListViewHeight: function() {return this.__listView.height;},
             
             
             // Methods /////////////////////////////////////////////////////////
             /** @returns {void} */
+            destroyPooledInstances: function() {this.__itemPool.destroyPooledInstances();},
+            
+            /** @returns {void} */
             isScrolledToEnd: function() {
-                return getDomScrollTop(this) + this.height === this._listView.height;
+                return getDomScrollTop(this) + this.height === this.__listView.height;
             },
             
             getSortFunction: function() {
@@ -23064,11 +23082,11 @@ myt.Destructible = new JS.Module('Destructible', {
                     idx = self.getIndexOfModelInData(model);
                 let retval = false;
                 if (idx >= 0) {
-                    const rowExtent = self._rowExtent,
+                    const __rwExt = self.__rwExt,
                         viewportTop = getDomScrollTop(self),
                         viewportBottom = viewportTop + self.height,
-                        rowTop = self.rowInset + idx * rowExtent,
-                        rowBottom = rowTop + rowExtent;
+                        rowTop = self.rowInset + idx * __rwExt,
+                        rowBottom = rowTop + __rwExt;
                     
                     // Only scroll if not overlapping visible area.
                     if (rowTop <= viewportTop) {
@@ -23084,7 +23102,7 @@ myt.Destructible = new JS.Module('Destructible', {
                         if (row) {
                             row.focus();
                         } else {
-                            self._focusToModel = model;
+                            self.__fcs2Model = model;
                         }
                     }
                 }
@@ -23147,7 +23165,7 @@ myt.Destructible = new JS.Module('Destructible', {
             
             getActiveRowForModel: function(model) {
                 if (model) {
-                    const activeRows = this._itemPool.getActives(),
+                    const activeRows = this.__itemPool.getActives(),
                         areModelsEqual = this.areModelsEqual.bind(this);
                     let i = activeRows.length;
                     while (i) {
@@ -23158,7 +23176,7 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             refreshListData: function(preserveScroll, forceFullReset) {
-                this._listData = this.collectionModel.getAsSortedList(this.getSortFunction(), this.getFilterFunction());
+                this.setListData(this.collectionModel.getAsSortedList(this.getSortFunction(), this.getFilterFunction()));
                 this.resetListUI(preserveScroll, forceFullReset);
             },
             
@@ -23166,13 +23184,13 @@ myt.Destructible = new JS.Module('Destructible', {
                 const self = this,
                     data = self.getListData(),
                     len = data.length,
-                    listView = self._listView;
+                    listView = self.__listView;
                 
                 // Resize the listView to the height to accomodate all rows
-                listView.setHeight(len * self._rowExtent - (len > 0 ? self.rowSpacing : 0) + self.rowInset + self.rowOutset);
+                listView.setHeight(len * self.__rwExt - (len > 0 ? self.rowSpacing : 0) + self.rowInset + self.rowOutset);
                 
                 // Ensure the next refreshListUI actually refreshes
-                self._startIdx = self._endIdx = -1;
+                self.__startIdx = self.__endIdx = -1;
                 
                 // Reset scroll position
                 self.forceFullResetOnNextRefresh = forceFullReset;
@@ -23200,41 +23218,36 @@ myt.Destructible = new JS.Module('Destructible', {
                 }
                 
                 row.setVisible(false);
-                this._itemPool.putInstance(row);
+                this.__itemPool.putInstance(row);
             },
             
             refreshListUI: function(_event) {
                 const self = this,
-                    rowExtent = self._rowExtent,
-                    rowInset = self.rowInset,
-                    forceFullReset = self.forceFullResetOnNextRefresh,
+                    {rowInset, __rwExt, forceFullResetOnNextRefresh:forceFullReset} = self,
                     scrollY = getDomScrollTop(self),
                     data = self.getListData() ?? [],
-                    startIdx = mathMax(0, mathFloor((scrollY - rowInset) / rowExtent)),
-                    endIdx = mathMin(data.length, mathCeil((scrollY - rowInset + self.height) / rowExtent));
+                    startIdx = mathMax(0, mathFloor((scrollY - rowInset) / __rwExt)),
+                    endIdx = mathMin(data.length, mathCeil((scrollY - rowInset + self.height) / __rwExt));
                 
                 if (self.forceFullResetOnNextRefresh) self.forceFullResetOnNextRefresh = false;
                 
-                if (self._startIdx !== startIdx || self._endIdx !== endIdx || forceFullReset) {
-                    const rowWidth = self.width,
-                        rowHeight = self.rowHeight,
-                        visibleRowsByIdx = self._visibleRowsByIdx,
-                        focusToModel = self._focusToModel,
+                if (self.__startIdx !== startIdx || self.__endIdx !== endIdx || forceFullReset) {
+                    const {width, rowHeight, __visRowsByIdx, __fcs2Model} = self,
                         areModelsEqual = self.areModelsEqual.bind(self);
                     
-                    self._startIdx = startIdx;
-                    self._endIdx = endIdx;
+                    self.__startIdx = startIdx;
+                    self.__endIdx = endIdx;
                     
                     // Put all visible rows that are not within the idx range back into the pool
-                    for (const [idx, row] of visibleRowsByIdx) {
+                    for (const [idx, row] of __visRowsByIdx) {
                         if (idx < startIdx || idx >= endIdx) {
                             self.putRowBackInPool(row);
-                            visibleRowsByIdx.delete(idx);
+                            __visRowsByIdx.delete(idx);
                         }
                     }
                     
                     for (let i = startIdx; i < endIdx; i++) {
-                        let row = visibleRowsByIdx.get(i);
+                        let row = __visRowsByIdx.get(i);
                         
                         const model = data[i],
                             classKey = self.getClassKey(model);
@@ -23242,13 +23255,13 @@ myt.Destructible = new JS.Module('Destructible', {
                         if (!row || row.classKey !== classKey) {
                             if (row) self.putRowBackInPool(row);
                             
-                            visibleRowsByIdx.set(i, row = self._itemPool.getInstance(classKey));
+                            __visRowsByIdx.set(i, row = self.__itemPool.getInstance(classKey));
                             
                             row.setInfiniteOwner(self);
                             row.setClassKey(classKey);
-                            row.setWidth(rowWidth);
+                            row.setWidth(width);
                             row.setHeight(rowHeight);
-                            row.setY(rowInset + i * rowExtent);
+                            row.setY(rowInset + i * __rwExt);
                             row.setVisible(true);
                             
                             mustUpdateRow = true;
@@ -23266,9 +23279,9 @@ myt.Destructible = new JS.Module('Destructible', {
                         // Maintain tab ordering by updating the underlying dom order.
                         row.bringToFront();
                         
-                        if (focusToModel && areModelsEqual(focusToModel, model)) {
+                        if (__fcs2Model && areModelsEqual(__fcs2Model, model)) {
                             row.focus();
-                            self._focusToModel = null;
+                            self.__fcs2Model = null;
                         }
                         
                         // Works around a bizarre bug that started in early 2026 where the 
@@ -23623,7 +23636,7 @@ myt.Destructible = new JS.Module('Destructible', {
         notifyHdrXChange: function(columnHeader) {
             if (!this.isLocked()) {
                 this.grid.notifyXChange(columnHeader);
-                this._notifyHdrChange('X', columnHeader);
+                this.__ntfyHdrChng('X', columnHeader);
             }
         },
         
@@ -23631,7 +23644,7 @@ myt.Destructible = new JS.Module('Destructible', {
         notifyHdrWidthChange: function(columnHeader) {
             if (!this.isLocked()) {
                 this.grid.notifyWidthChange(columnHeader);
-                this._notifyHdrChange('Width', columnHeader);
+                this.__ntfyHdrChng('Width', columnHeader);
             }
         },
         
@@ -23639,7 +23652,7 @@ myt.Destructible = new JS.Module('Destructible', {
         updateRowsForVisibilityChange: function(columnHeader) {
             this.grid.notifyVisibilityChange(columnHeader);
             if (!this.isLocked()) {
-                this._notifyHdrChange('Visibility', columnHeader);
+                this.__ntfyHdrChng('Visibility', columnHeader);
             }
         }
     });
@@ -24713,12 +24726,12 @@ myt.Destructible = new JS.Module('Destructible', {
                 
                 self.callSuper(parent, attrs);
                 
-                self._progressView = new pkg.Annulus(self, {
+                self.__prgsVw = new pkg.Annulus(self, {
                     x:-thickness, y:-thickness,
                     radius:radius, thickness:thickness, startAngle:self.startAngle
                 });
                 
-                self._valueView = new pkg.Text(self, {
+                self.__valVw = new pkg.Text(self, {
                     fontSize:fontSize + 'px', align:'center', valign:'middle'
                 });
                 
@@ -24744,15 +24757,13 @@ myt.Destructible = new JS.Module('Destructible', {
             
             // Methods /////////////////////////////////////////////////////////
             redraw: function() {
-                const progressView = this._progressView,
-                    valueView = this._valueView,
-                    value = this.value,
+                const {__prgsVw, __valVw, value} = this,
                     percent = value / (this.maxValue - this.minValue),
                     color = this.getColorByValue(value, percent);
-                progressView.setEndAngle(this.startAngle + 360 * percent);
-                progressView.setColor(color);
-                valueView.setText(this.getTextByValue(value));
-                valueView.setTextColor(color);
+                __prgsVw.setEndAngle(this.startAngle + 360 * percent);
+                __prgsVw.setColor(color);
+                __valVw.setText(this.getTextByValue(value));
+                __valVw.setTextColor(color);
                 this.setTooltip(this.getTooltipByValue(value));
             },
             
@@ -24815,7 +24826,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @returns {boolean} false if the tip got hidden, true otherwise. */
         checkInTooltip = ttView => {
             if (ttView.tooltip) {
-                const pos = ttView._lastPos;
+                const pos = ttView.__lastPos;
                 if (ttView.tooltip.parent.containsPoint(pos.x, pos.y)) return true;
             }
             ttView.hideTip();
@@ -24875,7 +24886,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 @returns {void} */
             __hndl_mousemove: function(event) {
                 const self = this;
-                self._lastPos = pkg.MouseObservable.getMouseFromEvent(event);
+                self.__lastPos = pkg.MouseObservable.getMouseFromEvent(event);
                 if (checkInTooltip(self)) {
                     clearCheckTipTimer(self);
                     self.__checkTID = setTimeout(
@@ -24952,7 +24963,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 
                 this.callSuper(parent, attrs);
                 
-                this._tipText = new pkg.Text(this, {
+                this.__tipTxt = new pkg.Text(this, {
                     fontSize:'12px', x:this.insetH, y:this.insetV,
                     textColor:this.tipTextColor, whiteSpace:'inherit'
                 });
@@ -24974,29 +24985,26 @@ myt.Destructible = new JS.Module('Destructible', {
             /** @override myt.BaseTooltip. */
             showTip: function() {
                 const self = this,
-                    tt = self.tooltip,
-                    txt = tt.text,
-                    ttp = tt.parent,
-                    tipText = self._tipText,
-                    edgeSize = self.edgeSize,
-                    shadowSize = self.shadowSize;
+                    {tooltip, __tipTxt, edgeSize, shadowSize} = self,
+                    txt = tooltip.text,
+                    ttp = tooltip.parent;
                 
                 // Size tip text and size it to fit within the maximum text width.
-                if (tipText.text !== txt) tipText.setText(txt);
-                tipText.setWidth('auto');
-                const tipTextWidth = mathMin(tipText.measureNoWrapWidth(), tt.maxTextWidth),
-                    tipWidth = tipTextWidth + 2*tipText.x,
+                if (__tipTxt.text !== txt) __tipTxt.setText(txt);
+                __tipTxt.setWidth('auto');
+                const tipTextWidth = mathMin(__tipTxt.measureNoWrapWidth(), tooltip.maxTextWidth),
+                    tipWidth = tipTextWidth + 2*__tipTxt.x,
                     tipExtentX = tipWidth + 2*edgeSize;
-                tipText.setWidth(tipTextWidth);
-                tipText.sizeViewToDom();
+                __tipTxt.setWidth(tipTextWidth);
+                __tipTxt.sizeViewToDom();
                 
                 // Determine position
                 const parentPos = ttp.getPagePosition(),
-                    tipHeight = tipText.height + 2*tipText.y,
+                    tipHeight = __tipTxt.height + 2*__tipTxt.y,
                     tipExtentY = tipHeight + 2*edgeSize,
-                    tipY = parentPos.y - tipExtentY + (tt.tipvalign === 'below' ? ttp.height + tipExtentY : 0);
+                    tipY = parentPos.y - tipExtentY + (tooltip.tipvalign === 'below' ? ttp.height + tipExtentY : 0);
                 let tipX = parentPos.x;
-                switch (tt.tipalign) {
+                switch (tooltip.tipalign) {
                     case 'right':
                         tipX -= tipExtentX;
                         // Fall through
@@ -25123,7 +25131,7 @@ myt.Destructible = new JS.Module('Destructible', {
         Attributes:
             vectors:array The data is stored in a single array with the x coordinate first and 
                 the y coordinate second.
-            _boundingBox:object the cached bounding box if it has been calculated.
+            __bndBx:object the cached bounding box if it has been calculated.
         
         @class */
     pkg.Path = new JS.Class('Path', {
@@ -25138,7 +25146,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         // Accessors ///////////////////////////////////////////////////////////
         setVectors: function(v) {
-            this._boundingBox = null;
+            this.__bndBx = null;
             this.vectors = v;
         },
         
@@ -25149,7 +25157,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @returns {void} */
         copyFrom: function(path) {
             this.vectors = path.vectors.slice();
-            this._boundingBox = null;
+            this.__bndBx = null;
         },
         
         /** Draws this path into the provided drawview.
@@ -25176,7 +25184,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 vecs[--i] += dy;
                 vecs[--i] += dx;
             }
-            this._boundingBox = null;
+            this.__bndBx = null;
         },
         
         /** Scales the path by the provided amount.
@@ -25189,7 +25197,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 vecs[--i] *= magnitude;
                 vecs[--i] *= magnitude;
             }
-            this._boundingBox = null;
+            this.__bndBx = null;
         },
         
         /** Rotates this path around 0,0 by the provided angle in radians.
@@ -25206,7 +25214,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 vecs[i++] = xNew;
                 vecs[i++] = yNew;
             }
-            this._boundingBox = null;
+            this.__bndBx = null;
         },
         
         /** Rotates this path around the provided origin by the provided angle in radians.
@@ -25224,7 +25232,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @returns {!Object} with properties x, y, width and height or null if no bounding box 
                 could be calculated. */
         getBoundingBox: function() {
-            if (this._boundingBox) return this._boundingBox;
+            if (this.__bndBx) return this.__bndBx;
             
             const vecs = this.vectors;
             let i = vecs.length, minX, maxX, minY, maxY;
@@ -25239,10 +25247,10 @@ myt.Destructible = new JS.Module('Destructible', {
                     minX = mathMin(x, minX);
                     maxX = mathMax(x, maxX);
                 }
-                return this._boundingBox = {x:minX, y:minY, width:maxX - minX, height:maxY - minY};
+                return this.__bndBx = {x:minX, y:minY, width:maxX - minX, height:maxY - minY};
             }
             
-            return this._boundingBox = null;
+            return this.__bndBx = null;
         },
         
         /** Gets the center point of the bounding box for the path.
@@ -25815,10 +25823,10 @@ myt.Destructible = new JS.Module('Destructible', {
             const self = this,
                 clearAllThreshold = self.clearAllThreshold;
             if (clearAllThreshold > 0 && self.growlCount >= clearAllThreshold) {
-                self._clearAllBtn ??= self.makeClearAll();
-                self._clearAllBtn.setVisible(true);
+                self.__clrAllBtn ??= self.makeClearAll();
+                self.__clrAllBtn.setVisible(true);
             } else {
-                self._clearAllBtn?.setVisible(false);
+                self.__clrAllBtn?.setVisible(false);
             }
         },
         
@@ -25837,7 +25845,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     const layout = self.getFirstLayout();
                     layout.incrementLockedCounter();
                     self.growlCount = 0;
-                    delete self._clearAllBtn;
+                    delete self.__clrAllBtn;
                     layout.setInset(0);
                     self.destroyAllSubviews();
                     layout.decrementLockedCounter();

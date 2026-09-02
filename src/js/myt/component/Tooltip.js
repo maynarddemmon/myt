@@ -25,7 +25,7 @@
             @returns {boolean} false if the tip got hidden, true otherwise. */
         checkInTooltip = ttView => {
             if (ttView.tooltip) {
-                const pos = ttView._lastPos;
+                const pos = ttView.__lastPos;
                 if (ttView.tooltip.parent.containsPoint(pos.x, pos.y)) return true;
             }
             ttView.hideTip();
@@ -85,7 +85,7 @@
                 @returns {void} */
             __hndl_mousemove: function(event) {
                 const self = this;
-                self._lastPos = pkg.MouseObservable.getMouseFromEvent(event);
+                self.__lastPos = pkg.MouseObservable.getMouseFromEvent(event);
                 if (checkInTooltip(self)) {
                     clearCheckTipTimer(self);
                     self.__checkTID = setTimeout(
@@ -162,7 +162,7 @@
                 
                 this.callSuper(parent, attrs);
                 
-                this._tipText = new pkg.Text(this, {
+                this.__tipTxt = new pkg.Text(this, {
                     fontSize:'12px', x:this.insetH, y:this.insetV,
                     textColor:this.tipTextColor, whiteSpace:'inherit'
                 });
@@ -184,29 +184,26 @@
             /** @override myt.BaseTooltip. */
             showTip: function() {
                 const self = this,
-                    tt = self.tooltip,
-                    txt = tt.text,
-                    ttp = tt.parent,
-                    tipText = self._tipText,
-                    edgeSize = self.edgeSize,
-                    shadowSize = self.shadowSize;
+                    {tooltip, __tipTxt, edgeSize, shadowSize} = self,
+                    txt = tooltip.text,
+                    ttp = tooltip.parent;
                 
                 // Size tip text and size it to fit within the maximum text width.
-                if (tipText.text !== txt) tipText.setText(txt);
-                tipText.setWidth('auto');
-                const tipTextWidth = mathMin(tipText.measureNoWrapWidth(), tt.maxTextWidth),
-                    tipWidth = tipTextWidth + 2*tipText.x,
+                if (__tipTxt.text !== txt) __tipTxt.setText(txt);
+                __tipTxt.setWidth('auto');
+                const tipTextWidth = mathMin(__tipTxt.measureNoWrapWidth(), tooltip.maxTextWidth),
+                    tipWidth = tipTextWidth + 2*__tipTxt.x,
                     tipExtentX = tipWidth + 2*edgeSize;
-                tipText.setWidth(tipTextWidth);
-                tipText.sizeViewToDom();
+                __tipTxt.setWidth(tipTextWidth);
+                __tipTxt.sizeViewToDom();
                 
                 // Determine position
                 const parentPos = ttp.getPagePosition(),
-                    tipHeight = tipText.height + 2*tipText.y,
+                    tipHeight = __tipTxt.height + 2*__tipTxt.y,
                     tipExtentY = tipHeight + 2*edgeSize,
-                    tipY = parentPos.y - tipExtentY + (tt.tipvalign === 'below' ? ttp.height + tipExtentY : 0);
+                    tipY = parentPos.y - tipExtentY + (tooltip.tipvalign === 'below' ? ttp.height + tipExtentY : 0);
                 let tipX = parentPos.x;
-                switch (tt.tipalign) {
+                switch (tooltip.tipalign) {
                     case 'right':
                         tipX -= tipExtentX;
                         // Fall through

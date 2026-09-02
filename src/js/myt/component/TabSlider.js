@@ -123,7 +123,7 @@
                 }]);
                 
                 if (!noWrapperContainer) {
-                    self._wrapperLayout = new pkg.SizeToChildren(wrapper.container = new View(wrapper), {axis:'y', paddingY:self.layoutPaddingY});
+                    self.__wrapperLayout = new pkg.SizeToChildren(wrapper.container = new View(wrapper), {axis:'y', paddingY:self.layoutPaddingY});
                 }
                 
                 self.constrain('__updateHeight', [wrapper, 'y', wrapper, 'height']);
@@ -147,7 +147,7 @@
             
             setLayoutPaddingY: function(v) {
                 this.layoutPaddingY = v;
-                if (this.inited) this._wrapperLayout?.setPaddingY(v);
+                if (this.inited) this.__wrapperLayout?.setPaddingY(v);
             },
             
             setMinContainerHeight: function(v) {this.minContainerHeight = v;},
@@ -309,24 +309,24 @@
             this.labelValign = 'middle';
             this.labelFontSize = '16px';
             this.labelFontWeight = 'bold';
-
+            
             attrs.labelTextColorChecked ??= '#fff';
             attrs.labelTextColor ??= '#333';
             attrs.labelAlign ??= 'center';
             attrs.labelValign ??= 'middle';
             attrs.labelFontSize ??= '16px';
             attrs.labelFontWeight ??= 'bold';
-
+            
             this.callSuper(parent, attrs);
-
+            
             this.button.label = new pkg.Text(this.button, {
                 ignorePlacement:true, fontSize:this.labelFontSize, fontWeight:this.labelFontWeight,
                 text:this.text, align:this.labelAlign, valign:this.labelValign, 
                 textColor:this.__getTextColor()
             });
         },
-
-
+        
+        
         // Accessors ///////////////////////////////////////////////////////////
         setLabelTextColorChecked: function(v) {
             if (this.labelTextColorChecked !== v) {
@@ -345,14 +345,14 @@
         setLabelFontSize: function(v) {updateLabelAttr(this, 'labelFontSize', 'fontSize', v);},
         setLabelFontWeight: function(v) {updateLabelAttr(this, 'labelFontWeight', 'fontWeight', v);},
         setText: function(v) {updateLabelAttr(this, 'text', 'text', v);},
-
-
+        
+        
         // Methods /////////////////////////////////////////////////////////////
         /** @overrides myt.TabSlider */
         notifyButtonRedraw: function() {
             this.button?.label?.setTextColor(this.__getTextColor());
         },
-
+        
         /** @private
             @returns {string} */
         __getTextColor: function() {
@@ -370,26 +370,26 @@
         @class */
     pkg.TabSliderContainer = new JS.Module('TabSliderContainer', {
         include: [pkg.SelectionManager],
-
-
+        
+        
         // Life Cycle //////////////////////////////////////////////////////////
         initNode: function(parent, attrs) {
             const self = this;
-
-            self._tabSliders = [];
-
+            
+            self.__tabSliders = [];
+            
             attrs.defaultPlacement = 'container';
-
+            
             attrs.spacing ??= pkg.theme.TabSliderContainerSpacing;
             attrs.overflow ??= 'autoy';
             attrs.itemSelectionId ??= 'tabId';
             attrs.maxSelected ??= 1;
             attrs.duration ??= 500;
-
+            
             self.updateLayout = debounce(self.updateLayout);
-
+            
             self.callSuper(parent, attrs);
-
+            
             const container = self.container = new View(self, {
                 ignorePlacement:true, percentOfParentWidth:100
             }, [SizeToParent, {
@@ -397,15 +397,15 @@
                 subnodeAdded: function(node) {
                     this.callSuper(node);
                     if (node instanceof TabSlider) {
-                        self._tabSliders.push(node);
+                        self.__tabSliders.push(node);
                         self.attachTo(node, 'updateLayout', 'selected');
                     }
                 },
-
+                
                 /** @overrides myt.View */
                 subnodeRemoved: function(node) {
                     if (node instanceof TabSlider) {
-                        const tabSliders = self._tabSliders,
+                        const tabSliders = self.__tabSliders,
                             idx = tabSliders.indexOf(node);
                         if (idx > -1) {
                             self.detachFrom(node, 'updateLayout', 'selected');
@@ -416,42 +416,42 @@
                 }
             }]);
             container.layout = new pkg.SpacedLayout(container, {axis:'y', spacing:self.spacing, collapseParent:true});
-
+            
             self.attachTo(self, 'updateLayout', 'height');
         },
-
-
+        
+        
         // Accessors ///////////////////////////////////////////////////////////
         setPersistenceId: function(v) {this.persistenceId = v;},
-        getTabSliders: function() {return this._tabSliders;},
+        getTabSliders: function() {return this.__tabSliders;},
         getTabSliderById: function(sliderId) {
-            for (const tabSlider of this._tabSliders) {
+            for (const tabSlider of this.__tabSliders) {
                 if (tabSlider.tabId === sliderId) return tabSlider;
             }
         },
-
+        
         setSpacing: function(v) {
             if (this.spacing !== v) {
                 this.spacing = v;
                 this.layout?.setSpacing(v);
             }
         },
-
+        
         setDuration: function(v) {this.duration = v;},
-
-
+        
+        
         // Methods /////////////////////////////////////////////////////////////
         /** @param {!Object} ignoredEvent
             @param {number} [temporaryDuration]
             @returns {void} */
         updateLayout: function(ignoredEvent, temporaryDuration) {
-            const tabSliders = this._tabSliders,
+            const tabSliders = this.__tabSliders,
                 tabSlidersLen = tabSliders.length;
             let i = tabSlidersLen, 
                 min = 0, 
                 preferred = 0, 
                 visCount = 0;
-
+            
             while (i) {
                 const tabSlider = tabSliders[--i];
                 if (tabSlider.visible) {
@@ -466,20 +466,20 @@
                     }
                 }
             }
-
+            
             const layout = this.container.layout,
                 layoutOverage = layout.inset + layout.outset + layout.spacing * (visCount - 1);
             min += layoutOverage;
             preferred += layoutOverage;
-
+            
             const h = this.height,
                 minIsOver = min > h,
                 preferredIsOver = preferred > h,
                 existingDuration = this.duration;
             let overage = preferred - h;
-
+            
             if (temporaryDuration > 0) this.setDuration(temporaryDuration);
-
+            
             i = tabSlidersLen;
             while (i) {
                 const tabSlider = tabSliders[--i];
@@ -491,7 +491,7 @@
                         } else if (preferredIsOver) {
                             const tabPreferred = tabSlider.getPreferredExpandedHeight(),
                                 tabMin = tabSlider.getMinimumExpandedHeight();
-
+                            
                             newVal = tabPreferred - overage;
                             if (tabMin > newVal) {
                                 overage -= tabPreferred - tabMin;
@@ -508,11 +508,11 @@
                     }
                 }
             }
-
+            
             // Restore duration
             if (temporaryDuration > 0) this.setDuration(existingDuration);
         },
-
+        
         // Persistence
         readState: persistenceId => LocalStorage.getDatum(persistenceId),
         writeState: (persistenceId, componentState) => {LocalStorage.setDatum(persistenceId, componentState);},

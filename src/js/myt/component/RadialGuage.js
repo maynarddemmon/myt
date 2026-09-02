@@ -35,12 +35,12 @@
                 
                 self.callSuper(parent, attrs);
                 
-                self._progressView = new pkg.Annulus(self, {
+                self.__prgsVw = new pkg.Annulus(self, {
                     x:-thickness, y:-thickness,
                     radius:radius, thickness:thickness, startAngle:self.startAngle
                 });
                 
-                self._valueView = new pkg.Text(self, {
+                self.__valVw = new pkg.Text(self, {
                     fontSize:fontSize + 'px', align:'center', valign:'middle'
                 });
                 
@@ -66,15 +66,13 @@
             
             // Methods /////////////////////////////////////////////////////////
             redraw: function() {
-                const progressView = this._progressView,
-                    valueView = this._valueView,
-                    value = this.value,
+                const {__prgsVw, __valVw, value} = this,
                     percent = value / (this.maxValue - this.minValue),
                     color = this.getColorByValue(value, percent);
-                progressView.setEndAngle(this.startAngle + 360 * percent);
-                progressView.setColor(color);
-                valueView.setText(this.getTextByValue(value));
-                valueView.setTextColor(color);
+                __prgsVw.setEndAngle(this.startAngle + 360 * percent);
+                __prgsVw.setColor(color);
+                __valVw.setText(this.getTextByValue(value));
+                __valVw.setTextColor(color);
                 this.setTooltip(this.getTooltipByValue(value));
             },
             

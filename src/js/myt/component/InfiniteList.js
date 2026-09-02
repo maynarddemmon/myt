@@ -21,7 +21,7 @@
         },
         
         updateRowExtent = infiniteList => {
-            infiniteList._rowExtent = infiniteList.rowSpacing + infiniteList.rowHeight;
+            infiniteList.__rwExt = infiniteList.rowSpacing + infiniteList.rowHeight;
         },
         
         getDomScrollTop = infiniteList => infiniteList.getIDE().scrollTop,
@@ -32,7 +32,7 @@
         
         getSubview = (gridRow, columnHeader) => gridRow.getRef(columnHeader.columnId),
         
-        getVisibleRowsIterator = infiniteList => infiniteList._visibleRowsByIdx.values(),
+        getVisibleRowsIterator = infiniteList => infiniteList.__visRowsByIdx.values(),
         
         /*  Build a sort storage key from a hash of the grid header's columnIds sorted
             and comma joined. */
@@ -89,13 +89,13 @@
                 rowSpacing
             
             Private Attributes:
-                _listData:array The data for the rows in the list.
-                _startIdx:int The index into the data of the first row shown
-                _endIdx:int The index into the data of the last row shown
-                _visibleRowsByIdx:Map - A cache of what rows are currently shown by the index of 
+                __listData:array The data for the rows in the list.
+                __startIdx:int The index into the data of the first row shown
+                __endIdx:int The index into the data of the last row shown
+                __visRowsByIdx:Map - A cache of what rows are currently shown by the index of 
                     the data for the row. This provides faster performance when refreshing the list.
-                _listView:myt.View The view that contains the rows in the list.
-                _itemPool:myt.TrackActivesPool The pool for row views.
+                __listView:myt.View The view that contains the rows in the list.
+                __itemPool:myt.TrackActivesPool The pool for row views.
             
             @class */
         InfiniteList = pkg.InfiniteList = new JSClass('InfiniteList', View, {
@@ -122,15 +122,15 @@
                 attrs.rowHeight ??= 30;
                 attrs.overscrollBehavior ??= 'auto contain';
                 
-                self._rowExtent = self.rowSpacing = self.rowHeight = 0;
-                self._startIdx = self._endIdx = -1;
-                self._visibleRowsByIdx = new Map();
+                self.__rwExt = self.rowSpacing = self.rowHeight = 0;
+                self.__startIdx = self.__endIdx = -1;
+                self.__visRowsByIdx = new Map();
                 
                 self.callSuper(parent, attrs);
                 
                 // Build UI
-                const listView = self._listView = new View(self);
-                self._itemPool = self.makePool(rowClasses, listView);
+                const listView = self.__listView = new View(self);
+                self.__itemPool = self.makePool(rowClasses, listView);
                 
                 self.attachTo(self, 'refreshListUI', 'height');
                 self.attachToDom(self, 'refreshListUI', 'scroll');
@@ -156,13 +156,16 @@
                 updateRowExtent(this);
             },
             
-            getListData: function() {return this._listData;},
+            getListData: function() {return this.__listData;},
+            setListData: function(data) {this.__listData = data;},
+            
+            getListView: function() {return this.__listView;},
             
             setWidth: function(v) {
                 if (v > 0) {
                     this.callSuper(v);
                     if (this.inited) {
-                        const listView = this._listView,
+                        const listView = this.__listView,
                             w = this.width;
                         listView.setWidth(w);
                         for (const sv of listView.getSubviews()) sv.setWidth(w);
@@ -175,18 +178,21 @@
             },*/
             
             getVisibleRowForModel: function(model) {
-                for (const row of this._visibleRowsByIdx.values()) {
+                for (const row of this.__visRowsByIdx.values()) {
                     if (row.model === model) return row;
                 }
             },
             
-            getListViewHeight: function() {return this._listView.height;},
+            getListViewHeight: function() {return this.__listView.height;},
             
             
             // Methods /////////////////////////////////////////////////////////
             /** @returns {void} */
+            destroyPooledInstances: function() {this.__itemPool.destroyPooledInstances();},
+            
+            /** @returns {void} */
             isScrolledToEnd: function() {
-                return getDomScrollTop(this) + this.height === this._listView.height;
+                return getDomScrollTop(this) + this.height === this.__listView.height;
             },
             
             getSortFunction: function() {
@@ -208,11 +214,11 @@
                     idx = self.getIndexOfModelInData(model);
                 let retval = false;
                 if (idx >= 0) {
-                    const rowExtent = self._rowExtent,
+                    const __rwExt = self.__rwExt,
                         viewportTop = getDomScrollTop(self),
                         viewportBottom = viewportTop + self.height,
-                        rowTop = self.rowInset + idx * rowExtent,
-                        rowBottom = rowTop + rowExtent;
+                        rowTop = self.rowInset + idx * __rwExt,
+                        rowBottom = rowTop + __rwExt;
                     
                     // Only scroll if not overlapping visible area.
                     if (rowTop <= viewportTop) {
@@ -228,7 +234,7 @@
                         if (row) {
                             row.focus();
                         } else {
-                            self._focusToModel = model;
+                            self.__fcs2Model = model;
                         }
                     }
                 }
@@ -291,7 +297,7 @@
             
             getActiveRowForModel: function(model) {
                 if (model) {
-                    const activeRows = this._itemPool.getActives(),
+                    const activeRows = this.__itemPool.getActives(),
                         areModelsEqual = this.areModelsEqual.bind(this);
                     let i = activeRows.length;
                     while (i) {
@@ -302,7 +308,7 @@
             },
             
             refreshListData: function(preserveScroll, forceFullReset) {
-                this._listData = this.collectionModel.getAsSortedList(this.getSortFunction(), this.getFilterFunction());
+                this.setListData(this.collectionModel.getAsSortedList(this.getSortFunction(), this.getFilterFunction()));
                 this.resetListUI(preserveScroll, forceFullReset);
             },
             
@@ -310,13 +316,13 @@
                 const self = this,
                     data = self.getListData(),
                     len = data.length,
-                    listView = self._listView;
+                    listView = self.__listView;
                 
                 // Resize the listView to the height to accomodate all rows
-                listView.setHeight(len * self._rowExtent - (len > 0 ? self.rowSpacing : 0) + self.rowInset + self.rowOutset);
+                listView.setHeight(len * self.__rwExt - (len > 0 ? self.rowSpacing : 0) + self.rowInset + self.rowOutset);
                 
                 // Ensure the next refreshListUI actually refreshes
-                self._startIdx = self._endIdx = -1;
+                self.__startIdx = self.__endIdx = -1;
                 
                 // Reset scroll position
                 self.forceFullResetOnNextRefresh = forceFullReset;
@@ -344,41 +350,36 @@
                 }
                 
                 row.setVisible(false);
-                this._itemPool.putInstance(row);
+                this.__itemPool.putInstance(row);
             },
             
             refreshListUI: function(_event) {
                 const self = this,
-                    rowExtent = self._rowExtent,
-                    rowInset = self.rowInset,
-                    forceFullReset = self.forceFullResetOnNextRefresh,
+                    {rowInset, __rwExt, forceFullResetOnNextRefresh:forceFullReset} = self,
                     scrollY = getDomScrollTop(self),
                     data = self.getListData() ?? [],
-                    startIdx = mathMax(0, mathFloor((scrollY - rowInset) / rowExtent)),
-                    endIdx = mathMin(data.length, mathCeil((scrollY - rowInset + self.height) / rowExtent));
+                    startIdx = mathMax(0, mathFloor((scrollY - rowInset) / __rwExt)),
+                    endIdx = mathMin(data.length, mathCeil((scrollY - rowInset + self.height) / __rwExt));
                 
                 if (self.forceFullResetOnNextRefresh) self.forceFullResetOnNextRefresh = false;
                 
-                if (self._startIdx !== startIdx || self._endIdx !== endIdx || forceFullReset) {
-                    const rowWidth = self.width,
-                        rowHeight = self.rowHeight,
-                        visibleRowsByIdx = self._visibleRowsByIdx,
-                        focusToModel = self._focusToModel,
+                if (self.__startIdx !== startIdx || self.__endIdx !== endIdx || forceFullReset) {
+                    const {width, rowHeight, __visRowsByIdx, __fcs2Model} = self,
                         areModelsEqual = self.areModelsEqual.bind(self);
                     
-                    self._startIdx = startIdx;
-                    self._endIdx = endIdx;
+                    self.__startIdx = startIdx;
+                    self.__endIdx = endIdx;
                     
                     // Put all visible rows that are not within the idx range back into the pool
-                    for (const [idx, row] of visibleRowsByIdx) {
+                    for (const [idx, row] of __visRowsByIdx) {
                         if (idx < startIdx || idx >= endIdx) {
                             self.putRowBackInPool(row);
-                            visibleRowsByIdx.delete(idx);
+                            __visRowsByIdx.delete(idx);
                         }
                     }
                     
                     for (let i = startIdx; i < endIdx; i++) {
-                        let row = visibleRowsByIdx.get(i);
+                        let row = __visRowsByIdx.get(i);
                         
                         const model = data[i],
                             classKey = self.getClassKey(model);
@@ -386,13 +387,13 @@
                         if (!row || row.classKey !== classKey) {
                             if (row) self.putRowBackInPool(row);
                             
-                            visibleRowsByIdx.set(i, row = self._itemPool.getInstance(classKey));
+                            __visRowsByIdx.set(i, row = self.__itemPool.getInstance(classKey));
                             
                             row.setInfiniteOwner(self);
                             row.setClassKey(classKey);
-                            row.setWidth(rowWidth);
+                            row.setWidth(width);
                             row.setHeight(rowHeight);
-                            row.setY(rowInset + i * rowExtent);
+                            row.setY(rowInset + i * __rwExt);
                             row.setVisible(true);
                             
                             mustUpdateRow = true;
@@ -410,9 +411,9 @@
                         // Maintain tab ordering by updating the underlying dom order.
                         row.bringToFront();
                         
-                        if (focusToModel && areModelsEqual(focusToModel, model)) {
+                        if (__fcs2Model && areModelsEqual(__fcs2Model, model)) {
                             row.focus();
-                            self._focusToModel = null;
+                            self.__fcs2Model = null;
                         }
                         
                         // Works around a bizarre bug that started in early 2026 where the 
@@ -767,7 +768,7 @@
         notifyHdrXChange: function(columnHeader) {
             if (!this.isLocked()) {
                 this.grid.notifyXChange(columnHeader);
-                this._notifyHdrChange('X', columnHeader);
+                this.__ntfyHdrChng('X', columnHeader);
             }
         },
         
@@ -775,7 +776,7 @@
         notifyHdrWidthChange: function(columnHeader) {
             if (!this.isLocked()) {
                 this.grid.notifyWidthChange(columnHeader);
-                this._notifyHdrChange('Width', columnHeader);
+                this.__ntfyHdrChng('Width', columnHeader);
             }
         },
         
@@ -783,7 +784,7 @@
         updateRowsForVisibilityChange: function(columnHeader) {
             this.grid.notifyVisibilityChange(columnHeader);
             if (!this.isLocked()) {
-                this._notifyHdrChange('Visibility', columnHeader);
+                this.__ntfyHdrChng('Visibility', columnHeader);
             }
         }
     });

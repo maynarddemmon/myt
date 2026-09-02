@@ -140,10 +140,10 @@
             const self = this,
                 clearAllThreshold = self.clearAllThreshold;
             if (clearAllThreshold > 0 && self.growlCount >= clearAllThreshold) {
-                self._clearAllBtn ??= self.makeClearAll();
-                self._clearAllBtn.setVisible(true);
+                self.__clrAllBtn ??= self.makeClearAll();
+                self.__clrAllBtn.setVisible(true);
             } else {
-                self._clearAllBtn?.setVisible(false);
+                self.__clrAllBtn?.setVisible(false);
             }
         },
         
@@ -162,7 +162,7 @@
                     const layout = self.getFirstLayout();
                     layout.incrementLockedCounter();
                     self.growlCount = 0;
-                    delete self._clearAllBtn;
+                    delete self.__clrAllBtn;
                     layout.setInset(0);
                     self.destroyAllSubviews();
                     layout.decrementLockedCounter();

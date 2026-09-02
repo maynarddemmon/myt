@@ -185,7 +185,7 @@
                 placeholder:string Text that will be shown if the value is empty.
             
             Private Attributes:
-                _selRange:object Stores the start and end of the selection.
+                __selRng:object Stores the start and end of the selection.
             
             @class */
         BaseInputText = pkg.BaseInputText = new JSClass('BaseInputText', NativeInputWrapper, {
@@ -371,11 +371,11 @@
             },
             
             saveSelection: function(selection) {
-                this._selRange = selection || this.getSelection() || this._selRange;
+                this.__selRng = selection || this.getSelection() || this.__selRng;
             },
             
             restoreSelection: function() {
-                this.setSelection(this._selRange);
+                this.setSelection(this.__selRng);
             }
         }),
         
