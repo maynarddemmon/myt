@@ -13,15 +13,14 @@
         "jsdom": "^26.0.0"
     },
     "scripts": {
-        "build-loader": "./bin/build bin/loader-browser-manifest.js dist/loader-browser.js ./src true true JS && rm ./dist/loader-browser.js",
-        "build-expressionParser": "node ./src/js/expression_parser/build.js ./src/js/expression_parser/grammar false",
-        "build-myt": "./bin/build src/js/myt/manifest.js dist/myt.js ./src true true myt.all",
-        "build-tym": "./bin/build src/js/tym/manifest.js dist/tym.js ./src true true tym.all",
+        "build-expressionParser": "node ./src/js/expression_parser/build.js ./src/js/expression_parser/grammar",
+        "build-loader": "./bin/build src/js/jsclass/loader-browser-manifest.js dist/loader-browser.js ./src true true JS",
+        "build-myt":    "./bin/build src/js/myt/manifest.js                    dist/myt.js            ./src true true myt.all",
+        "build-tym":    "./bin/build src/js/tym/manifest.js                    dist/tym.js            ./src true true tym.all",
         "lint": "eslint src",
         "test": "node ./bin/run-tests.js",
         "test-all": "node ./bin/run-tests.js --all",
         "buildAndTest-myt": "npm run build-myt && npm test && npm run lint",
-        "buildAndTest-expressionParser": "node ./src/js/expression_parser/build.js ./src/js/expression_parser/grammar true",
-        "enchilada": "npm run build-loader && npm run buildAndTest-expressionParser && npm run build-tym && npm run buildAndTest-myt"
+        "enchilada": "npm run build-loader && npm run build-expressionParser && npm run build-tym && npm run buildAndTest-myt"
     }
 }

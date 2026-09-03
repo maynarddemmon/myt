@@ -22,7 +22,7 @@ module.exports = {
     Blob: "readonly",
 	test: "readonly",
 	ok: "readonly",
-	BrowserDetect: "readonly",
+	deepEqual: "readonly",
 	QUnit: "readonly",
 	tym: "readonly"
   },

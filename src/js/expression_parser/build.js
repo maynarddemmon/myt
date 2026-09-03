@@ -3,8 +3,7 @@ const fs = require('fs'),
     PEGGY_VESION = '5.1.0',
     peggy = require('./peggy-' + PEGGY_VESION + '.min.js'),
     args = process.argv.splice(2),
-    grammarFile = args[0],
-    runTests = args[1] === 'true';
+    grammarFile = args[0];
 
 let indentLevel = 0;
 const indent = (txt, adj = 0) => {
@@ -44,57 +43,5 @@ fs.writeFile(targetFile, expressionParser, err => {
     }
 });
 
-// Testing
-if (runTests) {
-    const parser = peggy.generate(grammar);
-    
-    console.log(parser.parse("true"));
-    console.log(parser.parse("false"));
-    console.log(parser.parse("!false"));
-    console.log(parser.parse("!!true"));
-    
-    console.log(parser.parse("null"));
-    
-    console.log(parser.parse("''"));
-    console.log(parser.parse('""'));
-    console.log(parser.parse('"    "'));
-    console.log(parser.parse("'this is escaped:\\'\"'"));
-    console.log(parser.parse('"this is escaped:\\"\'"'));
-    console.log(parser.parse("'asdf'"));
-    console.log(parser.parse('"foo bar baz"'));
-    
-    console.log(parser.parse("2"));
-    console.log(parser.parse("10"));
-    console.log(parser.parse("-2"));
-    console.log(parser.parse("123.7"));
-    console.log(parser.parse("0.5678"));
-    console.log(parser.parse(".5"));
-    console.log(parser.parse("-0.5"));
-    console.log(parser.parse("-.5"));
-    console.log(parser.parse("+1"));
-
-    console.log(parser.parse("  foo.bar + 5"));
-    console.log(parser.parse("foo.bar + 5 - 2* (1 + 1)   "));
-    console.log(parser.parse("!(foo === true && bar == false || biz < -2) ? 5 : 10 % 3"));
-    console.log(parser.parse(" this.bar "));
-    
-    console.log(parser.parse("foo[baz + 2].bar"));
-    
-    console.log(parser.parse("Math.min( )"));
-    console.log(parser.parse("Math.min( foo * 0.75, 100)"));
-    
-    console.log(parser.parse("this.parent.innerHeight * 0.75"));
-    
-    console.log(parser.parse('true ? [0,1,2+4] : {foo:"b","bar":"d"+"ent"}'));
-    
-    const before = Date.now();
-    let result,
-      i = 1000;
-    while (--i) {
-        result = parser.parse("this.parent.innerHeight * 0.75");
-        result = parser.parse("this.parent.height - (this.parent.children[1].top + this.parent.children[1].height + 5)");
-    }
-    const delta = Date.now() - before;
-    console.log(result);
-    console.log("delta", delta);
-}
+// The parser's behavior is verified by src/test/tests/component/test-ExpressionParser.js
+// (run via `npm test`) rather than by ad hoc output here.

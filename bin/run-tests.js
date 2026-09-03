@@ -39,8 +39,9 @@ const fs = require('fs'),
         'util/test-URI.js',
         'shim/test-language.js',
         'component/test-BoundedRangeComponent.js',
+        'component/test-Path.js',
         'component/test-Color.js',
-        'component/test-Path.js'
+        'component/test-ExpressionParser.js'
     ],
     
     // Suites that need real layout or a real user agent. Run with --all.

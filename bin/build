@@ -108,8 +108,7 @@ const BUILD_VERSION_MARKER = '// <<< BUILD_VERSION_THIS',
     makeStamp = () => {
         const d = new Date(),
             pad = n => String(n).padStart(2, '0');
-        return '' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) +
-            '.' + pad(d.getHours()) + pad(d.getMinutes());
+        return '' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + pad(d.getHours()) + pad(d.getMinutes());
     },
     
     /*  If the existing build is identical to the new concatenation apart from 
