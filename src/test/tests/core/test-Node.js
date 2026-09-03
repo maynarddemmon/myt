@@ -1,5 +1,19 @@
 module('Node');
 
+// Verifies myt.Destructible.destroy nulled out every own property. Note that
+// destroy sets properties to null rather than deleting them, so the keys
+// remain enumerable.
+const okAllNulled = function(obj, label) {
+    var notNulled = Object.keys(obj).filter(function(key) {
+        return key !== 'destroyed' && obj[key] !== null;
+    });
+    ok(
+        notNulled.length === 0,
+        "All properties except 'destroyed' should be null" + label +
+            (notNulled.length > 0 ? '. Not nulled: ' + notNulled.join(', ') : '.')
+    );
+};
+
 test("Create and destroy a myt.Node that has no parent", function() {
     var n = new myt.Node();
     
@@ -20,7 +34,7 @@ test("Create and destroy a myt.Node that has no parent", function() {
     n.destroy();
     
     ok(n.destroyed === true, "The destroyed property of the new node should be true.");
-    ok(Object.keys(n).length === 1, "All properties except 'destroyed' should be deleted.");
+    okAllNulled(n, " on the Node");
 });
 
 test("Add and remove child nodes on a root node", function() {
@@ -98,19 +112,19 @@ test("Add and remove child nodes on a root node", function() {
     
     ok(rootNode.subnodes.length === 2, "Subnodes should be back to a length of 2.");
     ok(childNode.destroyed === true, "The destroyed property of the child node should be true.");
-    ok(Object.keys(childNode).length === 1, "All properties except 'destroyed' should be deleted on the child node.");
+    okAllNulled(childNode, " on the child Node");
     
     // Destroy the root which should cascade
     rootNode.destroy();
     
     ok(orphanNode.destroyed === true, "The destroyed property of the orphan node should be true.");
-    ok(Object.keys(orphanNode).length === 1, "All properties except 'destroyed' should be deleted on the orphan node.");
+    okAllNulled(orphanNode, " on the orphan Node");
     
     ok(anotherChildNode.destroyed === true, "The destroyed property of the other child node should be true.");
-    ok(Object.keys(anotherChildNode).length === 1, "All properties except 'destroyed' should be deleted on the other child node.");
+    okAllNulled(anotherChildNode, " on the other child Node");
     
     ok(rootNode.destroyed === true, "The destroyed property of the root node should be true.");
-    ok(Object.keys(rootNode).length === 1, "All properties except 'destroyed' should be deleted on the root node.");
+    okAllNulled(rootNode, " on the root Node");
 });
 
 test("Create granchildren and do reparenting", function() {
@@ -165,7 +179,7 @@ test("Don't allow reparenting to destroyed nodes", function() {
     r.destroy();
     
     ok(r.destroyed === true, "The destroyed property of the root node should be true.");
-    ok(Object.keys(r).length === 1, "All properties except 'destroyed' should be deleted on the root node.");
+    okAllNulled(r, " on the root Node");
     
     var c1 = new myt.Node(r);
     

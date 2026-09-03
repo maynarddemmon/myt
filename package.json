@@ -9,7 +9,8 @@
         "eslint": "^8.57.1",
         "globals": "^16.5.0",
         "google-closure-compiler": "^20230802.0.0",
-        "google-closure-compiler-osx": "^20240317.0.0"
+        "google-closure-compiler-osx": "^20240317.0.0",
+        "jsdom": "^26.0.0"
     },
     "scripts": {
         "build-loader": "./bin/build bin/loader-browser-manifest.js dist/loader-browser.js ./src true true JS && rm ./dist/loader-browser.js && stat -f%z ./dist/loader-browser.min.js",
@@ -17,6 +18,8 @@
         "build-tym": "./bin/build src/js/tym/manifest.js dist/tym.js ./src true true tym.all && stat -f%z ./dist/tym.min.js",
         "lint": "eslint src",
         "build-expressionParser": "node ./src/js/expression_parser/build.js ./src/js/expression_parser/grammar false",
-        "buildAndTest-expressionParser": "node ./src/js/expression_parser/build.js ./src/js/expression_parser/grammar true"
+        "buildAndTest-expressionParser": "node ./src/js/expression_parser/build.js ./src/js/expression_parser/grammar true",
+        "test": "node ./bin/run-tests.js",
+        "test-all": "node ./bin/run-tests.js --all"
     }
 }
