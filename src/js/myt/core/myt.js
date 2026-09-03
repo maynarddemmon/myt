@@ -263,7 +263,7 @@
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
-            version:20250728.1019,
+            version:NaN, // <<< BUILD_VERSION_THIS
             
             generateGuid: generateGuid,
             

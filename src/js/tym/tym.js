@@ -52,7 +52,7 @@
         
         tym = pkg.tym = {
             /** A version number based on the time this distribution of tym was created. */
-            version:20230602.1558,
+            version:NaN, // <<< BUILD_VERSION_THIS
             
             generateGuid: generateGuid,
             

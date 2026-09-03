@@ -637,7 +637,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
-            version:20250728.1019,
+            version:20260903.1447, // <<< BUILD_VERSION_THIS
             
             generateGuid: generateGuid,
             

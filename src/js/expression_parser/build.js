@@ -17,7 +17,7 @@ if (!grammarFile) {
     process.exit();
 }
 
-console.info('Build Constraint Parser:');
+console.info('\nBuild Constraint Parser:');
 const path = grammarFile + '.pegjs',
     grammar = fs.readFileSync(path, 'utf8'),
     parserSource = peggy.generate(grammar, {output:'source'});
@@ -38,9 +38,9 @@ expressionParser = expressionParser.replace('/** @type {any} */','');
 const targetFile = './src/js/myt/component/ExpressionParser.js';
 fs.writeFile(targetFile, expressionParser, err => {
     if (!err) {
-        console.info(indent('Parser JS file written to: ' + targetFile, 0));
+        console.info('\nParser JS file written to: ' + targetFile + '\n');
     } else {
-        console.error(indent('Unable to write CSS file: ' + err.message, 0));
+        console.error('\nUnable to write JS file: ' + err.message + '\n');
     }
 });
 

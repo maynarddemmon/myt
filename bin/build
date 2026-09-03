@@ -7,16 +7,22 @@ const fs = require('fs'),
     [
         manifestFile, targetFile, rootPath, outputSourceMap, doLintChecks, 
         ...requiredFiles
-    ] = process.argv.slice(2);
+    ] = process.argv.slice(2),
+    
+    fail = msg => {
+        console.error(styleText(['bold', 'red'], ' [ERROR] ') + msg);
+        process.exit(1);
+    };
 
 // Basic argument validation
-if (!manifestFile) return console.error('No manifest file provided.');
-if (!targetFile) return console.error('No target file provided.');
-if (!rootPath) return console.error('No root path provided.');
-if (!requiredFiles.length > 0) return console.error('No required file provided.');
+if (!manifestFile) fail('No manifest file provided.');
+if (!targetFile) fail('No target file provided.');
+if (!rootPath) fail('No root path provided.');
+if (requiredFiles.length === 0) fail('No required file provided.');
 
 // We now know we have a targetFile so generate the minified filename.
-const minifiedFilePath = targetFile.substring(0, targetFile.length - 2) + 'min.js';
+const minifiedFilePath = targetFile.substring(0, targetFile.length - 2) + 'min.js',
+    mapFilePath = minifiedFilePath + '.map';
 
 // JS Build
 const jsBuild = (manifest, root, include, callback) => {
@@ -91,10 +97,43 @@ const jsBuild = (manifest, root, include, callback) => {
     bundle(P.ROOT, P.extractFilePaths(include), 0);
 };
 
-// Remove old files
-console.info("Try to remove old files:");
+// Version Stamping ////////////////////////////////////////////////////////////
+/*  The src holds "version:NaN, // <<< BUILD_VERSION_THIS" so no stale or 
+    misleading version can ever exist there, and unbuilt src still parses. The 
+    build replaces the NaN with the build time. */
+const BUILD_VERSION_MARKER = '// <<< BUILD_VERSION_THIS',
+    UNSTAMPED = /^([ \t]*version:)NaN(,?[ \t]*\/\/ <<< BUILD_VERSION_THIS)[ \t]*$/gm,
+    STAMPED = /^([ \t]*version:)[\d.]+(,?[ \t]*\/\/ <<< BUILD_VERSION_THIS)[ \t]*$/gm,
+    
+    makeStamp = () => {
+        const d = new Date(),
+            pad = n => String(n).padStart(2, '0');
+        return '' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) +
+            '.' + pad(d.getHours()) + pad(d.getMinutes());
+    },
+    
+    /*  If the existing build is identical to the new concatenation apart from 
+        its version stamp, returns that old version so the build can be skipped 
+        entirely and nothing on disk changes. Returns null otherwise. */
+    reusableVersion = (data, priorData) => {
+        if (!priorData) return null;
+        const found = priorData.match(STAMPED);
+        if (found?.length !== 1) return null;
+        if (priorData.replace(STAMPED, '$1NaN$2') !== data) return null;
+        return /[\d.]+/.exec(found[0])[0];
+    };
 
+// File Helpers ////////////////////////////////////////////////////////////////
 const priorSizes = {},
+    
+    readOrNull = path => {
+        try {
+            return fs.readFileSync(path, 'utf8');
+        } catch (e) {
+            return null;
+        }
+    },
+    
     removeFile = path => {
         try {
             priorSizes[path] = fs.statSync(path).size;
@@ -103,16 +142,69 @@ const priorSizes = {},
         } catch (e) {
             console.info('  Could not remove: ' + path);
         }
+    },
+    
+    commas = n => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','),
+    
+    reportSize = path => {
+        const size = fs.statSync(path).size,
+            gzipped = zlib.gzipSync(fs.readFileSync(path)).length,
+            prior = priorSizes[path];
+        let delta = '';
+        if (prior != null) {
+            const diff = size - prior;
+            if (diff === 0) {
+                delta = styleText('dim', '  (unchanged)');
+            } else {
+                const txt = '  (' + (diff > 0 ? '+' : '') + commas(diff) + ', ' +
+                    (diff > 0 ? '+' : '') + (100 * diff / prior).toFixed(2) + '%)';
+                delta = styleText(diff > 0 ? 'red' : 'green', txt);
+            }
+        }
+        console.info(
+            '\n' + styleText('bold', path) + ': ' +
+            styleText(['bold', 'cyan'], commas(size)) + ' bytes, ' +
+            styleText('dim', commas(gzipped) + ' gzipped') + delta + '\n'
+        );
     };
 
-removeFile(targetFile);
-removeFile(minifiedFilePath);
-removeFile(minifiedFilePath + '.map');
-
 // Now use jsbuild to combine files
-console.info("Concatenating files:");
+console.info('\nConcatenating files:');
 jsBuild(manifestFile, rootPath, requiredFiles, concatenatedData => {
-    fs.writeFileSync(targetFile, concatenatedData, {"encoding":'utf8'});
+    // Fail loudly if the version placeholder is missing or ambiguous rather than 
+    // silently shipping a build with no version.
+    const markers = concatenatedData.match(UNSTAMPED) ?? [];
+    if (markers.length !== 1) {
+        fail(
+            'Expected exactly 1 line matching "version:NaN ' + BUILD_VERSION_MARKER + 
+            '" but found ' + markers.length + '. The src must hold NaN, not a version.'
+        );
+    }
+    
+    // Skip the whole build when the only thing that would change is the version 
+    // stamp. Nothing is removed or written so git sees no change at all.
+    const reused = reusableVersion(concatenatedData, readOrNull(targetFile)),
+        outputsPresent = fs.existsSync(minifiedFilePath) &&
+            (outputSourceMap !== 'true' || fs.existsSync(mapFilePath));
+    if (reused && outputsPresent) {
+        console.info(
+            '\n' + styleText(['bold', 'green'], 'No changes.') + ' Version ' + 
+            styleText(['bold', 'cyan'], reused) + ' — nothing written.'
+        );
+        priorSizes[minifiedFilePath] = fs.statSync(minifiedFilePath).size;
+        reportSize(minifiedFilePath);
+        return;
+    }
+    if (reused) console.info(styleText('yellow', '\nSource unchanged but an output is missing. Rebuilding.\n'));
+    
+    console.info('\nTry to remove old files:');
+    removeFile(targetFile);
+    removeFile(minifiedFilePath);
+    removeFile(mapFilePath);
+    
+    const stamp = makeStamp();
+    console.info('\nVersion stamped: ' + styleText(['bold', 'cyan'], stamp));
+    fs.writeFileSync(targetFile, concatenatedData.replace(UNSTAMPED, '$1' + stamp + '$2'), {"encoding":'utf8'});
     
     // Setup opts
     const opts = {
@@ -126,7 +218,7 @@ jsBuild(manifestFile, rootPath, requiredFiles, concatenatedData => {
         const parts = minifiedFilePath.split('/');
         
         opts.source_map_format = 'V3';
-        opts.create_source_map = minifiedFilePath + '.map';
+        opts.create_source_map = mapFilePath;
         opts.output_wrapper = '%output%\n//# sourceMappingURL=./' + parts[parts.length - 1] + '.map';
     }
     
@@ -143,41 +235,16 @@ jsBuild(manifestFile, rootPath, requiredFiles, concatenatedData => {
     compilerInstance.javaPath = require('google-closure-compiler-' + compilerPlatform);
     compilerInstance.JAR_PATH = null;
     
-    const commas = n => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','),
-        reportSize = path => {
-            const size = fs.statSync(path).size,
-                gzipped = zlib.gzipSync(fs.readFileSync(path)).length,
-                prior = priorSizes[path];
-            let delta = '';
-            if (prior != null) {
-                const diff = size - prior;
-                if (diff === 0) {
-                    delta = styleText('dim', '  (unchanged)');
-                } else {
-                    const txt = '  (' + (diff > 0 ? '+' : '') + commas(diff) + ', ' +
-                        (diff > 0 ? '+' : '') + (100 * diff / prior).toFixed(2) + '%)';
-                    delta = styleText(diff > 0 ? 'red' : 'green', txt);
-                }
-            }
-            console.info(
-                '\n' + styleText('bold', path) + ': ' +
-                styleText(['bold', 'cyan'], commas(size)) + ' bytes, ' +
-                styleText('dim', commas(gzipped) + ' gzipped') + delta + 
-                '\n'
-            );
-        };
-    
-    console.info("Executing native compilation for platform: " + compilerPlatform + ":" + process.arch + " with opts:", opts);
+    console.info("\nExecuting native compilation for platform: " + compilerPlatform + ":" + process.arch + " with opts:", opts);
     compilerInstance.run((exitCode, stdOut, stdErr) => {
-        if (exitCode) console.error('exitCode: ' + exitCode);
         if (stdOut) console.info('stdout: ' + stdOut);
         if (stdErr) console.error('stderr: ' + stdErr);
+        if (exitCode) fail('Closure compilation failed with exit code ' + exitCode + '.');
         
         // Inject a sourceRoot into the source map file.
         if (outputSourceMap === 'true') {
-            const src = minifiedFilePath + '.map',
-                fileData = fs.readFileSync(src, 'utf8');
-            fs.writeFileSync(src, '{\n"sourceRoot":"../",' + fileData.substring(1), {"encoding":'utf8'});
+            const fileData = fs.readFileSync(mapFilePath, 'utf8');
+            fs.writeFileSync(mapFilePath, '{\n"sourceRoot":"../",' + fileData.substring(1), {"encoding":'utf8'});
         }
         
         reportSize(minifiedFilePath);

@@ -168,7 +168,14 @@
                 for (const arg of args) deps.add(arg);
                 return self;
             };
+        },
+        
+        /* A version number based on the time this distribution of the myt loader was created. */
+        VERSION = {
+            version:NaN // <<< BUILD_VERSION_THIS
         };
+    
+    exports.loader_version = VERSION.version;
     
     exports.Packages = manifestFunc => {
         manifestFunc(

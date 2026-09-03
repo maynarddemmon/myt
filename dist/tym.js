@@ -307,7 +307,7 @@ const global = module.exports = {};
         
         tym = pkg.tym = {
             /** A version number based on the time this distribution of tym was created. */
-            version:20230602.1558,
+            version:20260903.1431, // <<< BUILD_VERSION_THIS
             
             generateGuid: generateGuid,
             
