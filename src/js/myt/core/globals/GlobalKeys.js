@@ -9,8 +9,6 @@
         /*  A set of codes of the keys currently pressed down. */
         keysDown = new Set(),
         
-        isFirefox = BrowserDetect.browser === 'Firefox',
-        
         CODE_TAB = 'Tab',
         CODE_SHIFT_LEFT = 'ShiftLeft',
         CODE_SHIFT_RIGHT = 'ShiftRight',
@@ -18,8 +16,8 @@
         CODE_ALT_RIGHT = 'AltRight',
         CODE_CONTROL_LEFT = 'ControlLeft',
         CODE_CONTROL_RIGHT = 'ControlRight',
-        CODE_META_LEFT = isFirefox ? 'OSLeft' : 'MetaLeft',
-        CODE_META_RIGHT = isFirefox ? 'OSRight' : 'MetaRight',
+        CODE_META_LEFT = 'MetaLeft',
+        CODE_META_RIGHT = 'MetaRight',
         CODE_BACKSPACE = 'Backspace',
         
         
@@ -133,19 +131,19 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        isShiftKeyDown: isShiftKeyDown,
-        isControlKeyDown: isControlKeyDown,
-        isAltKeyDown: isAltKeyDown,
-        isMetaKeyDown: isMetaKeyDown,
+        isShiftKeyDown,
+        isControlKeyDown,
+        isAltKeyDown,
+        isMetaKeyDown,
         
-        isShiftCode: isShiftCode,
-        isControlCode: isControlCode,
-        isAltCode: isAltCode,
+        isShiftCode,
+        isControlCode,
+        isAltCode,
         
         /** Tests if the platform specific "accelerator" key is down. */
-        isAcceleratorKeyDown: () => BrowserDetect.os === 'Mac' ? isMetaKeyDown() : isControlKeyDown(),
+        isAcceleratorKeyDown: () => pkg.IS_MAC ? isMetaKeyDown() : isControlKeyDown(),
         
-        ignoreFocusTrap: ignoreFocusTrap,
+        ignoreFocusTrap,
         
         /** Switch what is being listened to as focus changes. By default the document is listened 
             to for key events.

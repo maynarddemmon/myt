@@ -48,8 +48,7 @@ const fs = require('fs'),
     NEEDS_BROWSER = [
         'core/test-myt-dom.js',
         'core/view/test-DomElementProxy.js',
-        'core/view/test-View.js',
-        'shim/test-BrowserDetect.js'
+        'core/view/test-View.js'
     ],
     
     // Minimal QUnit 1.x globals. The test files use the old global-function

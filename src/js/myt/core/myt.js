@@ -271,6 +271,10 @@
             FALSE_FUNC: () => false,
             NOOP: () => {},
             
+            // Environment Detection
+            IS_MAC: navigator.userAgentData ? navigator.userAgentData.platform === 'macOS' : /^mac/i.test(navigator.platform),
+            IS_FIREFOX: /firefox/i.test(navigator.userAgent),
+            
             /** Theme properties for various components.
                 IMPORTANT! Don't import these directly into packages. That would make them
                     difficult to override in projects that use myt. It is OK to import the

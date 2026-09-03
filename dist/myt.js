@@ -1,73 +1,3 @@
-(pkg => {
-    /* Based on browser detection from: http://www.quirksmode.org/js/detect.html
-        
-        Events:
-            none
-        
-        Attributes:
-            browser:string The browser name.
-            version:number The browser version number.
-            os:string The operating system.
-    */
-    let versionSearchString,
-        dom,
-        pre;
-    
-    const searchString = data => {
-            let i = data.length;
-            while (i) {
-                const dataItem = data[--i];
-                versionSearchString = dataItem.ver ?? dataItem.id;
-                if (dataItem.str?.includes(dataItem.sub) || dataItem.prop) return dataItem.id;
-            }
-        },
-        
-        searchVersion = dataString => {
-            const index = dataString.indexOf(versionSearchString);
-            if (index >= 0) return parseFloat(dataString.slice(index + versionSearchString.length + 1));
-        },
-        
-        userAgent = navigator.userAgent, 
-        platform = navigator.platform, 
-        unknown = 'UNKNOWN',
-        
-        BrowserDetect = pkg.BrowserDetect = {
-            browser:searchString([
-                {prop:window.opera,                   id:'Opera',    ver:'Version'},
-                {str:navigator.vendor, sub:'Apple',   id:'Safari',   ver:'Version'},
-                {str:userAgent,        sub:'Firefox', id:'Firefox'},
-                {str:userAgent,        sub:'Chrome',  id:'Chrome'},
-                {str:userAgent,        sub:'MSIE',    id:'Explorer', ver:'MSIE'}
-            ]) ?? unknown,
-            
-            version:searchVersion(userAgent) || searchVersion(navigator.appVersion) || unknown,
-            
-            os:searchString([
-                {str:userAgent, sub:'iPhone', id:'iPhone/iPod'},
-                {str:platform,  sub:'Linux',  id:'Linux'},
-                {str:platform,  sub:'Mac',    id:'Mac'},
-                {str:platform,  sub:'Win',    id:'Windows'}
-            ]) ?? unknown
-        };
-    
-    switch (BrowserDetect.browser) {
-        case 'Chrome': case 'Safari': dom = 'WebKit'; break;
-        case 'Explorer': dom = 'MS'; break;
-        case 'Firefox': dom = 'Moz'; break;
-        case 'Opera': dom = 'O'; break;
-        default: dom = unknown; break;
-    }
-    pre = dom.toLowerCase();
-    
-    BrowserDetect.prefix = {
-        dom:dom,
-        lowercase:pre,
-        css:'-' + pre + '-',
-        js:pre[0].toUpperCase() + pre.substr(1)
-    };
-})(globalThis);
-
-
 /** Formats a date using a pattern.
   * Implementation from: https://github.com/jacwright/date.format
   * 
@@ -714,6 +644,10 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             TRUE_FUNC: () => true,
             FALSE_FUNC: () => false,
             NOOP: () => {},
+            
+            // Environment Detection
+            IS_MAC: navigator.userAgentData ? navigator.userAgentData.platform === 'macOS' : /^mac/i.test(navigator.platform),
+            IS_FIREFOX: /firefox/i.test(navigator.userAgent),
             
             /** Theme properties for various components.
                 IMPORTANT! Don't import these directly into packages. That would make them
@@ -4479,8 +4413,6 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         /*  A set of codes of the keys currently pressed down. */
         keysDown = new Set(),
         
-        isFirefox = BrowserDetect.browser === 'Firefox',
-        
         CODE_TAB = 'Tab',
         CODE_SHIFT_LEFT = 'ShiftLeft',
         CODE_SHIFT_RIGHT = 'ShiftRight',
@@ -4488,8 +4420,8 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         CODE_ALT_RIGHT = 'AltRight',
         CODE_CONTROL_LEFT = 'ControlLeft',
         CODE_CONTROL_RIGHT = 'ControlRight',
-        CODE_META_LEFT = isFirefox ? 'OSLeft' : 'MetaLeft',
-        CODE_META_RIGHT = isFirefox ? 'OSRight' : 'MetaRight',
+        CODE_META_LEFT = 'MetaLeft',
+        CODE_META_RIGHT = 'MetaRight',
         CODE_BACKSPACE = 'Backspace',
         
         
@@ -4603,19 +4535,19 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         
         // Methods /////////////////////////////////////////////////////////////
-        isShiftKeyDown: isShiftKeyDown,
-        isControlKeyDown: isControlKeyDown,
-        isAltKeyDown: isAltKeyDown,
-        isMetaKeyDown: isMetaKeyDown,
+        isShiftKeyDown,
+        isControlKeyDown,
+        isAltKeyDown,
+        isMetaKeyDown,
         
-        isShiftCode: isShiftCode,
-        isControlCode: isControlCode,
-        isAltCode: isAltCode,
+        isShiftCode,
+        isControlCode,
+        isAltCode,
         
         /** Tests if the platform specific "accelerator" key is down. */
-        isAcceleratorKeyDown: () => BrowserDetect.os === 'Mac' ? isMetaKeyDown() : isControlKeyDown(),
+        isAcceleratorKeyDown: () => pkg.IS_MAC ? isMetaKeyDown() : isControlKeyDown(),
         
-        ignoreFocusTrap: ignoreFocusTrap,
+        ignoreFocusTrap,
         
         /** Switch what is being listened to as focus changes. By default the document is listened 
             to for key events.

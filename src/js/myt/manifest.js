@@ -6,7 +6,7 @@ JS.Packages(file => {
     file(MYT_ROOT+'../jsclass/core.js').provides('JS.Class','JS.Module','JS.Singleton');
     
     // Shims and Polyfills
-    file(MYT_ROOT+'shim/BrowserDetect.js',MYT_ROOT+'shim/language.js').provides('BrowserDetect','Date.prototype.format');
+    file(MYT_ROOT+'shim/language.js').provides('Date.prototype.format');
     
     // Util
     const UTIL_ROOT = MYT_ROOT+'util/';
@@ -15,7 +15,7 @@ JS.Packages(file => {
     
     // Core
     const MYT_CORE_ROOT = MYT_ROOT + 'core/';
-    file(MYT_CORE_ROOT + 'myt.js'             ).provides('myt').requires('BrowserDetect','Date.prototype.format','JS.Class','JS.Module','JS.Singleton');
+    file(MYT_CORE_ROOT + 'myt.js'             ).provides('myt').requires('Date.prototype.format','JS.Class','JS.Module','JS.Singleton');
     file(MYT_CORE_ROOT + 'AccessorSupport.js' ).provides('myt.AccessorSupport').requires('myt');
     file(MYT_CORE_ROOT + 'Destructible.js'    ).provides('myt.Destructible').requires('myt');
     file(MYT_CORE_ROOT + 'Events.js'          ).provides('myt.Observable','myt.Observer').requires('myt');
