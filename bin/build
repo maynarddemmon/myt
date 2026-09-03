@@ -2,6 +2,8 @@
 
 // Gather Arguments
 const fs = require('fs'),
+    zlib = require('zlib'),
+    {styleText} = require('util'),
     [
         manifestFile, targetFile, rootPath, outputSourceMap, doLintChecks, 
         ...requiredFiles
@@ -91,14 +93,18 @@ const jsBuild = (manifest, root, include, callback) => {
 
 // Remove old files
 console.info("Try to remove old files:");
-const removeFile = path => {
-    try {
-        fs.unlinkSync(path);
-        console.info('  Removed: ' + path);
-    } catch (e) {
-        console.info('  Could not remove: ' + path);
-    }
-};
+
+const priorSizes = {},
+    removeFile = path => {
+        try {
+            priorSizes[path] = fs.statSync(path).size;
+            fs.unlinkSync(path);
+            console.info('  Removed: ' + path);
+        } catch (e) {
+            console.info('  Could not remove: ' + path);
+        }
+    };
+
 removeFile(targetFile);
 removeFile(minifiedFilePath);
 removeFile(minifiedFilePath + '.map');
@@ -137,6 +143,30 @@ jsBuild(manifestFile, rootPath, requiredFiles, concatenatedData => {
     compilerInstance.javaPath = require('google-closure-compiler-' + compilerPlatform);
     compilerInstance.JAR_PATH = null;
     
+    const commas = n => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','),
+        reportSize = path => {
+            const size = fs.statSync(path).size,
+                gzipped = zlib.gzipSync(fs.readFileSync(path)).length,
+                prior = priorSizes[path];
+            let delta = '';
+            if (prior != null) {
+                const diff = size - prior;
+                if (diff === 0) {
+                    delta = styleText('dim', '  (unchanged)');
+                } else {
+                    const txt = '  (' + (diff > 0 ? '+' : '') + commas(diff) + ', ' +
+                        (diff > 0 ? '+' : '') + (100 * diff / prior).toFixed(2) + '%)';
+                    delta = styleText(diff > 0 ? 'red' : 'green', txt);
+                }
+            }
+            console.info(
+                '\n' + styleText('bold', path) + ': ' +
+                styleText(['bold', 'cyan'], commas(size)) + ' bytes, ' +
+                styleText('dim', commas(gzipped) + ' gzipped') + delta + 
+                '\n'
+            );
+        };
+    
     console.info("Executing native compilation for platform: " + compilerPlatform + ":" + process.arch + " with opts:", opts);
     compilerInstance.run((exitCode, stdOut, stdErr) => {
         if (exitCode) console.error('exitCode: ' + exitCode);
@@ -149,5 +179,7 @@ jsBuild(manifestFile, rootPath, requiredFiles, concatenatedData => {
                 fileData = fs.readFileSync(src, 'utf8');
             fs.writeFileSync(src, '{\n"sourceRoot":"../",' + fileData.substring(1), {"encoding":'utf8'});
         }
+        
+        reportSize(minifiedFilePath);
     });
 });
