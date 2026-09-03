@@ -258,7 +258,7 @@
         },
         
         CURLY_BRACES_WITH_ESCAPES_REGEX = /\\([{}])|\{([^{}]+)\}/g,
-        CSV_OBJECT_REGEX = /(\,|\r?\n|\r|^)(?:"((?:\\.|""|[^\\"])*)"|([^\,"\r\n]*))/gi,
+        CSV_OBJECT_REGEX = /(,|\r?\n|\r|^)(?:"((?:\\.|""|[^\\"])*)"|([^,"\r\n]*))/g,
         CSV_UNESCAPE_REGEX = /[\\"](.)/g,
         
         myt = pkg.myt = {
@@ -1178,7 +1178,7 @@
                 // Split names on regex whitespace, dash or apostrophe, workaround for
                 // Javascript regex word boundary \b splitting on unicode characters
                 // http://stackoverflow.com/questions/5311618/javascript-regular-expression-problem-with-b-and-international-characters
-                nameStr = nameStr.trim().toLowerCase().split(/([\s\-'’"“”().,\/])/).reduce(
+                nameStr = nameStr.trim().toLowerCase().split(/([\s\-'’"“”().,/])/).reduce(
                     (accumulator, token) => accumulator + (token[0] ?? '').toUpperCase() + token.slice(1), ''
                 );
                 

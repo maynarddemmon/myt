@@ -104,7 +104,7 @@
                 try {
                     new URL(value);
                     return true;
-                } catch(e) {
+                } catch {
                     errorMessages?.push('Invalid URL.');
                     return false;
                 }
@@ -330,14 +330,14 @@
         /** Gets a Validator for the ID.
             @param {string} id - the ID of the Validator to get.
             @returns {?Obect} - An myt.Validator or undefined if not found. */
-        getValidator: getValidator,
+        getValidator,
         
         
         // Methods /////////////////////////////////////////////////////////////
         /** Adds a Validator to this registry.
             @param {!Object} identifiable - The myt.Validator to add.
             @returns {void} */
-        register: register,
+        register,
         
         /** Removes a Validator from this registery.
             @param {!Object} identifiable - The myt.Validator to remove.

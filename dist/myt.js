@@ -104,6 +104,10 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             const offset = date.getTimezoneOffset();
             return (offset > 0 ? '-' : '+') + zeroPad(mathFloor(mathAbs(offset / 60))) + (useColon ? ':' : '') + (mathAbs(offset % 60) == 0 ? '00' : zeroPad(mathAbs(offset % 60)));
         },
+        isLeapYear = date => {
+            const year = date.getFullYear();
+            return (year % 400 == 0 || (year % 100 != 0 && year % 4 == 0));
+        },
         
         replaceChars = {
             // Day
@@ -117,10 +121,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 return (dayOfMonth % 10 == 1 && dayOfMonth != 11 ? 'st' : (dayOfMonth % 10 == 2 && dayOfMonth != 12 ? 'nd' : (dayOfMonth % 10 == 3 && dayOfMonth != 13 ? 'rd' : 'th')));
             },
             w: date => date.getDay(),
-            z: date => {
-                const d = new Date(date.getFullYear(), 0, 1);
-                return mathCeil((date - d) / 86400000);
-            },
+            z: date => mathFloor((Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) - Date.UTC(date.getFullYear(), 0, 1)) / 86400000),
             // Week
             W: date => {
                 const target = new Date(date.valueOf()), dayNr = (date.getDay() + 6) % 7;
@@ -135,27 +136,16 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             m: date => zeroPad(date.getMonth() + 1),
             M: date => shortMonths[date.getMonth()],
             n: date => date.getMonth() + 1,
-            t: date => {
-                let year = date.getFullYear(),
-                    nextMonth = date.getMonth() + 1;
-                if (nextMonth === 12) {
-                    year = year++;
-                    nextMonth = 0;
-                }
-                return new Date(year, nextMonth, 0).getDate();
-            },
+            t: date => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate(),
             // Year
-            L: date => {
-                const year = date.getFullYear();
-                return (year % 400 == 0 || (year % 100 != 0 && year % 4 == 0));
-            },
+            L: isLeapYear,
             o: date => {
                 const d = new Date(date.valueOf());
                 d.setDate(d.getDate() - ((date.getDay() + 6) % 7) + 3);
                 return d.getFullYear();
             },
             Y: date => date.getFullYear(),
-            y: date => ('' + date.getFullYear()).substr(2),
+            y: date => ('' + date.getFullYear()).slice(-2),
             // Time
             a: date => date.getHours() < 12 ? 'am' : 'pm',
             A: date => date.getHours() < 12 ? 'AM' : 'PM',
@@ -712,7 +702,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         },
         
         CURLY_BRACES_WITH_ESCAPES_REGEX = /\\([{}])|\{([^{}]+)\}/g,
-        CSV_OBJECT_REGEX = /(\,|\r?\n|\r|^)(?:"((?:\\.|""|[^\\"])*)"|([^\,"\r\n]*))/gi,
+        CSV_OBJECT_REGEX = /(,|\r?\n|\r|^)(?:"((?:\\.|""|[^\\"])*)"|([^,"\r\n]*))/g,
         CSV_UNESCAPE_REGEX = /[\\"](.)/g,
         
         myt = pkg.myt = {
@@ -1632,7 +1622,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 // Split names on regex whitespace, dash or apostrophe, workaround for
                 // Javascript regex word boundary \b splitting on unicode characters
                 // http://stackoverflow.com/questions/5311618/javascript-regular-expression-problem-with-b-and-international-characters
-                nameStr = nameStr.trim().toLowerCase().split(/([\s\-'’"“”().,\/])/).reduce(
+                nameStr = nameStr.trim().toLowerCase().split(/([\s\-'’"“”().,/])/).reduce(
                     (accumulator, token) => accumulator + (token[0] ?? '').toUpperCase() + token.slice(1), ''
                 );
                 
@@ -20583,7 +20573,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 try {
                     new URL(value);
                     return true;
-                } catch(e) {
+                } catch {
                     errorMessages?.push('Invalid URL.');
                     return false;
                 }
@@ -20809,14 +20799,14 @@ myt.Destructible = new JS.Module('Destructible', {
         /** Gets a Validator for the ID.
             @param {string} id - the ID of the Validator to get.
             @returns {?Obect} - An myt.Validator or undefined if not found. */
-        getValidator: getValidator,
+        getValidator,
         
         
         // Methods /////////////////////////////////////////////////////////////
         /** Adds a Validator to this registry.
             @param {!Object} identifiable - The myt.Validator to add.
             @returns {void} */
-        register: register,
+        register,
         
         /** Removes a Validator from this registery.
             @param {!Object} identifiable - The myt.Validator to remove.
