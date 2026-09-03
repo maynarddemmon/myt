@@ -10432,15 +10432,15 @@ myt.Destructible = new JS.Module('Destructible', {
         Color = pkg.Color = new JS.Class('Color', {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                toUnitRange:toUnitRange,
-                rgbToHsv:rgbToHsv,
-                hsvToRgb:hsvToRgb,
+                toUnitRange,
+                rgbToHsv,
+                hsvToRgb,
                 
                 /** Converts a number or string representation of a number to a two character 
                     hex string.
                     @param {number|string} value - The number or string to convert.
                     @returns {string} A two character hex string such as: '0c' or 'c9'. */
-                toHex: toHex,
+                toHex,
                 
                 /** Converts red, green, and blue color channel numbers to a six character 
                     hex string.
@@ -10450,32 +10450,32 @@ myt.Destructible = new JS.Module('Destructible', {
                     @param {boolean} [prependHash] - If true a '#' character will be prepended to 
                         the return value.
                     @returns {string} Something like: '#ff9c02' or 'ff9c02' */
-                rgbToHex: rgbToHex,
+                rgbToHex,
                 
                 /** Limits a channel value to integers between 0 and 255.
                     @param {number} value - The channel value to clean up.
                     @returns {number} */
-                cleanChannelValue: cleanChannelValue,
+                cleanChannelValue,
                 
                 /** Gets the red channel from a "color" number.
                     @param {string} value
                     @returns {number} */
-                getRedChannel: getRedChannel,
+                getRedChannel,
                 
                 /** Gets the green channel from a "color" number.
                     @param {string} value
                     @returns {number} */
-                getGreenChannel: getGreenChannel,
+                getGreenChannel,
                 
                 /** Gets the blue channel from a "color" number.
                     @param {string} value
                     @returns {number} */
-                getBlueChannel: getBlueChannel,
+                getBlueChannel,
                 
                 /** Creates an myt.Color from a "color" number.
                     @param {string} value
                     @returns {!Object} myt.Color */
-                makeColorFromNumber: makeColorFromNumber,
+                makeColorFromNumber,
                 
                 /** Creates an myt.Color from an html color string.
                     @param {string} value - A hex string representation of a color, such 
@@ -10530,7 +10530,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     @param {number} green - The green channel
                     @param {number} blue - The blue channel
                     @returns {number} */
-                makeColorNumberFromChannels: makeColorNumberFromChannels,
+                makeColorNumberFromChannels,
                 
                 /** Creates a new myt.Color object that is a blend of the two provided colors.
                     @param {!Object} fromColor - The first myt.Color to blend.
@@ -16904,9 +16904,9 @@ myt.Destructible = new JS.Module('Destructible', {
         Form = pkg.Form = new JSModule('Form', {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                ACCELERATOR_SCOPE_ROOT:ACCELERATOR_SCOPE_ROOT,
-                ACCELERATOR_SCOPE_ELEMENT:ACCELERATOR_SCOPE_ELEMENT,
-                ACCELERATOR_SCOPE_NONE:ACCELERATOR_SCOPE_NONE
+                ACCELERATOR_SCOPE_ROOT,
+                ACCELERATOR_SCOPE_ELEMENT,
+                ACCELERATOR_SCOPE_NONE
             },
             
             
@@ -17980,7 +17980,7 @@ myt.Destructible = new JS.Module('Destructible', {
     /** An myt.InputSelect that is also a FormElement.
         
         Private Attributes:
-            __abortSetValue:boolean Prevents setValue from being called again when performing 
+            __noSetV:boolean Prevents setValue from being called again when performing 
                 operations from within setValue.
         
         @class */
@@ -17991,15 +17991,15 @@ myt.Destructible = new JS.Module('Destructible', {
         // Accessors ///////////////////////////////////////////////////////////
         /** @overrides myt.FormElement */
         setValue: function(v) {
-            if (this.__abortSetValue) return;
+            if (this.__noSetV) return;
             
             const retval = this.callSuper(v);
             
             // Clear Selection and then reselect
-            this.__abortSetValue = true;
+            this.__noSetV = true;
             this.deselectAll();
             this.selectValues(retval);
-            this.__abortSetValue = false;
+            this.__noSetV = false;
             
             this.verifyValidState();
             
@@ -25047,7 +25047,7 @@ myt.Destructible = new JS.Module('Destructible', {
         Attributes:
             vectors:array The data is stored in a single array with the x coordinate first and 
                 the y coordinate second.
-            __bndBx:object the cached bounding box if it has been calculated.
+            __bbx:object the cached bounding box if it has been calculated.
         
         @class */
     pkg.Path = new JS.Class('Path', {
@@ -25062,7 +25062,7 @@ myt.Destructible = new JS.Module('Destructible', {
         
         // Accessors ///////////////////////////////////////////////////////////
         setVectors: function(v) {
-            this.__bndBx = null;
+            this.__bbx = null;
             this.vectors = v;
         },
         
@@ -25073,7 +25073,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @returns {void} */
         copyFrom: function(path) {
             this.vectors = path.vectors.slice();
-            this.__bndBx = null;
+            this.__bbx = null;
         },
         
         /** Draws this path into the provided drawview.
@@ -25100,7 +25100,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 vecs[--i] += dy;
                 vecs[--i] += dx;
             }
-            this.__bndBx = null;
+            this.__bbx = null;
         },
         
         /** Scales the path by the provided amount.
@@ -25113,7 +25113,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 vecs[--i] *= magnitude;
                 vecs[--i] *= magnitude;
             }
-            this.__bndBx = null;
+            this.__bbx = null;
         },
         
         /** Rotates this path around 0,0 by the provided angle in radians.
@@ -25130,7 +25130,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 vecs[i++] = xNew;
                 vecs[i++] = yNew;
             }
-            this.__bndBx = null;
+            this.__bbx = null;
         },
         
         /** Rotates this path around the provided origin by the provided angle in radians.
@@ -25148,7 +25148,7 @@ myt.Destructible = new JS.Module('Destructible', {
             @returns {!Object} with properties x, y, width and height or null if no bounding box 
                 could be calculated. */
         getBoundingBox: function() {
-            if (this.__bndBx) return this.__bndBx;
+            if (this.__bbx) return this.__bbx;
             
             const vecs = this.vectors;
             let i = vecs.length, minX, maxX, minY, maxY;
@@ -25163,10 +25163,10 @@ myt.Destructible = new JS.Module('Destructible', {
                     minX = mathMin(x, minX);
                     maxX = mathMax(x, maxX);
                 }
-                return this.__bndBx = {x:minX, y:minY, width:maxX - minX, height:maxY - minY};
+                return this.__bbx = {x:minX, y:minY, width:maxX - minX, height:maxY - minY};
             }
             
-            return this.__bndBx = null;
+            return this.__bbx = null;
         },
         
         /** Gets the center point of the bounding box for the path.

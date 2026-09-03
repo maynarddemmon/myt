@@ -5,8 +5,7 @@ select.mytNativeInput{margin:0px;}
 .mytButtonText{font-size:12px;font-weight:bold;}
 .mytUnselectable{user-select:none;}
 
-/* For some reason placeholder text is selectable if you click and 
-   drag just right. These rules prevent that. */
+/* Somehow placeholder text gets selected if you click and drag just right. These rules prevent that. */
 ::placeholder{user-select:none;}
 :-ms-input-placeholder{user-select:none;}
 

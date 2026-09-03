@@ -78,15 +78,15 @@
         Color = pkg.Color = new JS.Class('Color', {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                toUnitRange:toUnitRange,
-                rgbToHsv:rgbToHsv,
-                hsvToRgb:hsvToRgb,
+                toUnitRange,
+                rgbToHsv,
+                hsvToRgb,
                 
                 /** Converts a number or string representation of a number to a two character 
                     hex string.
                     @param {number|string} value - The number or string to convert.
                     @returns {string} A two character hex string such as: '0c' or 'c9'. */
-                toHex: toHex,
+                toHex,
                 
                 /** Converts red, green, and blue color channel numbers to a six character 
                     hex string.
@@ -96,32 +96,32 @@
                     @param {boolean} [prependHash] - If true a '#' character will be prepended to 
                         the return value.
                     @returns {string} Something like: '#ff9c02' or 'ff9c02' */
-                rgbToHex: rgbToHex,
+                rgbToHex,
                 
                 /** Limits a channel value to integers between 0 and 255.
                     @param {number} value - The channel value to clean up.
                     @returns {number} */
-                cleanChannelValue: cleanChannelValue,
+                cleanChannelValue,
                 
                 /** Gets the red channel from a "color" number.
                     @param {string} value
                     @returns {number} */
-                getRedChannel: getRedChannel,
+                getRedChannel,
                 
                 /** Gets the green channel from a "color" number.
                     @param {string} value
                     @returns {number} */
-                getGreenChannel: getGreenChannel,
+                getGreenChannel,
                 
                 /** Gets the blue channel from a "color" number.
                     @param {string} value
                     @returns {number} */
-                getBlueChannel: getBlueChannel,
+                getBlueChannel,
                 
                 /** Creates an myt.Color from a "color" number.
                     @param {string} value
                     @returns {!Object} myt.Color */
-                makeColorFromNumber: makeColorFromNumber,
+                makeColorFromNumber,
                 
                 /** Creates an myt.Color from an html color string.
                     @param {string} value - A hex string representation of a color, such 
@@ -176,7 +176,7 @@
                     @param {number} green - The green channel
                     @param {number} blue - The blue channel
                     @returns {number} */
-                makeColorNumberFromChannels: makeColorNumberFromChannels,
+                makeColorNumberFromChannels,
                 
                 /** Creates a new myt.Color object that is a blend of the two provided colors.
                     @param {!Object} fromColor - The first myt.Color to blend.

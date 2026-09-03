@@ -269,9 +269,9 @@
         Form = pkg.Form = new JSModule('Form', {
             // Class Methods and Attributes ////////////////////////////////////
             extend: {
-                ACCELERATOR_SCOPE_ROOT:ACCELERATOR_SCOPE_ROOT,
-                ACCELERATOR_SCOPE_ELEMENT:ACCELERATOR_SCOPE_ELEMENT,
-                ACCELERATOR_SCOPE_NONE:ACCELERATOR_SCOPE_NONE
+                ACCELERATOR_SCOPE_ROOT,
+                ACCELERATOR_SCOPE_ELEMENT,
+                ACCELERATOR_SCOPE_NONE
             },
             
             
@@ -1345,7 +1345,7 @@
     /** An myt.InputSelect that is also a FormElement.
         
         Private Attributes:
-            __abortSetValue:boolean Prevents setValue from being called again when performing 
+            __noSetV:boolean Prevents setValue from being called again when performing 
                 operations from within setValue.
         
         @class */
@@ -1356,15 +1356,15 @@
         // Accessors ///////////////////////////////////////////////////////////
         /** @overrides myt.FormElement */
         setValue: function(v) {
-            if (this.__abortSetValue) return;
+            if (this.__noSetV) return;
             
             const retval = this.callSuper(v);
             
             // Clear Selection and then reselect
-            this.__abortSetValue = true;
+            this.__noSetV = true;
             this.deselectAll();
             this.selectValues(retval);
-            this.__abortSetValue = false;
+            this.__noSetV = false;
             
             this.verifyValidState();
             
