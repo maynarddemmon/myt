@@ -1,3 +1,4 @@
+/* eslint-disable */
 const global = module.exports = {};
 
 
@@ -206,14 +207,14 @@ const global = module.exports = {};
         
         // The klass extends from this.
         for (const field in this) {
-            if (klass[field] !== this[field] && !klass.hasOwnProperty(field)) klass[field] = this[field];
+            if (klass[field] !== this[field] && !Object.hasOwn(klass, field)) klass[field] = this[field];
         }
         
         klass.prototype.constructor = klass.prototype.klass = klass;
         eigenFunc(klass).include(parent.__meta__);
         klass.__tgt__ = klass.prototype;
         
-        const parentModule = parent === Object ? {} : (parent.__fns__ ? parent : new Module(parent.prototype, true));
+        const parentModule = parent === Object ? {} : (parent.__fns__ ? parent : new Module(null, parent.prototype));
         klass.include(Kernel, true).include(parentModule, true).include(methods, true);
         
         resolveModule(klass);
@@ -232,7 +233,7 @@ const global = module.exports = {};
         
         // The klass extends from Class.prototype.
         for (const field in classProto) {
-            if (klass[field] !== classProto[field] && !klass.hasOwnProperty(field)) klass[field] = classProto[field];
+            if (klass[field] !== classProto[field] && !Object.hasOwn(klass, field)) klass[field] = classProto[field];
         }
         
         klass.include(parent);
@@ -250,8 +251,9 @@ const global = module.exports = {};
     exports.Singleton = new Class('Singleton', {
         initialize: (name, parent, methods) => new (new Class(name, parent, methods))
     });
-})(global.JS = {});
+})(globalThis.JS ?? (globalThis.JS = {}));
 
+/* eslint-disable no-unused-vars */
 (pkg => {
     /*
      * http://github.com/maynarddemmon/myt
@@ -631,10 +633,11 @@ const global = module.exports = {};
                 @returns {string} */
             formatAsPercentage: (num, fixed=2) => {
                 switch (typeof num) {
-                    case 'number':
+                    case 'number': {
                         fixed = mathMin(16, mathMax(0, fixed));
                         const percent = math.round(mathMax(0, mathMin(1, num)) * mathPow(10, 2+fixed)) / mathPow(10, fixed);
                         return (percent % 1 === 0 ? percent : percent.toFixed(fixed)) + '%';
+                    }
                     case 'string':
                         // Assume a string passed to this function is already correctly formatted 
                         // so pass it through unchanged.
@@ -1540,10 +1543,6 @@ tym.Destructible = new JS.Module('Destructible', {
             }
         },
         
-        /*  Gets the animation pool if it exists, or lazy instantiates it 
-            first if necessary. Returns a myt.TrackActivesPool */
-        getAnimPool = node => node.__animPool ??= new pkg.TrackActivesPool(pkg.Animator, node),
-        
         /*  Lazy instantiate the references store on a scope object.
             @returns {!Object} */
         getRefs = scope => scope.__REFS ??= {};
@@ -1896,16 +1895,16 @@ tym.Destructible = new JS.Module('Destructible', {
         
         /** Called when a subnode is added to this node. Provides a hook for subclasses. No need for
             subclasses to call super. Do not call this method to add a subnode. Instead call setParent.
-            @param {!Object} node - The sub myt.Node that was added.
+            @param {!Object} _node - The sub myt.Node that was added.
             @returns {undefined} */
-        subnodeAdded: node => {},
+        subnodeAdded: _node => {},
         
         /** Called when a subnode is removed from this node. Provides a hook for subclasses. No need
             for subclasses to call super. Do not call this method to remove a subnode. Instead 
             call setParent.
-            @param {!Object} node - The sub myt.Node that was removed.
+            @param {!Object} _node - The sub myt.Node that was removed.
             @returns {undefined} */
-        subnodeRemoved: node => {},
+        subnodeRemoved: _node => {},
         
         
         // Reference Store //
