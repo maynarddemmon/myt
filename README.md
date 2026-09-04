@@ -27,7 +27,7 @@ other frameworks.
   `InfiniteList`, `Tab`, `TabSlider`, `Tooltip`, `Uploader`, `FloatingPanel`,
   `Spinner`, `Growl`, `Divider`, `PanelStack`, `StateMachine`, `Validator`,
   `DragAndDrop`, `SelectionManager`, `Canvas`, `SVG`, `Path`, `Annulus`,
-  `RadialGuage`, `Color`, and more.
+  `RadialGauge`, `Color`, and more.
 - **tym.js** — a micro version of Myt for use in Node. It contains only the 
   core: the class system, the observable/observer layer, Node, and the object 
   pools. Nothing that touches the DOM.
