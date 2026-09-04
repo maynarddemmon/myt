@@ -316,7 +316,7 @@
             // Parse msg.msg JSON
             try {
                 msg.msg = JSON.parse(msg.msg);
-            } catch (ex) {
+            } catch {
                 this.onError(msg);
                 return;
             }
