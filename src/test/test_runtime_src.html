@@ -3,44 +3,19 @@
 <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-1.15.0.css" integrity="sha384-M/bQMa1clMmsIIv4d2arnm//i6rj6i8sKVszLuB8CP/q3t8cUBWNjq8m630kFwNP" crossorigin="anonymous">
 <script src="https://code.jquery.com/qunit/qunit-1.15.0.js" integrity="sha384-V0OIPpPZ6k2Chio2VTqUPjkADxTaahinso02ypJrUQe/bMbwv+D8So2f9YQTY/jb" crossorigin="anonymous"></script>
 <script>window.QUnit || document.write('<script src="./qunit/qunit-1.15.0.js">\x3C/script><link rel="stylesheet" href="./qunit/qunit-1.15.0.css"/>');</script>
-
 <link rel="stylesheet" href="../css/myt.css"/>
-
-<script>var ROOT = '../js/';</script>
-<script src="../js/boilerplate.js"></script>
+<script>globalThis.ROOT = '../js/';</script>
 <script src="../../dist/loader-browser.min.js"></script>
 <script src="../js/myt/manifest.js"></script>
+<script src="test-manifest.js"></script>
 </head>
 <body>
 <div id="qunit"></div>
 <div id="qunit-fixture"></div>
-
 <script>
-    JS.require('myt.all', function() {
-        QUnit.config.reorder = false;
-        
-        // Run tests after source has been loaded
-        myt.loadScript('tests/shim/test-language.js');
-        
-        myt.loadScript('tests/util/test-URI.js');
-        myt.loadScript('tests/util/test-Cookie.js');
-        myt.loadScript('tests/util/test-Geometry.js');
-        
-        myt.loadScript('tests/core/test-ClassSystem.js');
-        myt.loadScript('tests/core/test-myt-dom.js');
-        myt.loadScript('tests/core/test-myt.js');
-        myt.loadScript('tests/core/test-Node.js');
-        myt.loadScript('tests/core/test-Node_placement.js');
-        myt.loadScript('tests/core/test-Observable.js');
-        myt.loadScript('tests/core/test-Observer.js');
-        
-        myt.loadScript('tests/core/view/test-DomElementProxy.js');
-        myt.loadScript('tests/core/view/test-View.js');
-        
-        myt.loadScript('tests/component/test-BoundedRangeComponent.js');
-        myt.loadScript('tests/component/test-Path.js');
-        myt.loadScript('tests/component/test-Color.js');
-        myt.loadScript('tests/component/test-ExpressionParser.js');
-    });
+JS.require('myt.all', () => {
+    QUnit.config.reorder = false;
+    MYT_TEST_MANIFEST.allPaths().forEach(path => {myt.loadScript(path);});
+});
 </script>
 </body></html>

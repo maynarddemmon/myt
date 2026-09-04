@@ -244,3 +244,119 @@ test("Attach once.", function() {
     observable.destroy();
     observer.destroy();
 });
+
+test("Constrain attaches to every observable and syncs once, then detach from every observable.", function() {
+    var observableA = new myt.Node(),
+        observableB = new myt.Node(),
+        count = 0;
+    
+    var observer = new myt.Node(null, null, [{
+        updateIt: function() {count++;}
+    }]);
+    
+    observer.constrain('updateIt', [observableA, 'foo', observableB, 'bar']);
+    
+    ok(count === 1, "Constrain should call the method once to sync. Was: " + count);
+    ok(observer.isAttachedTo(observableA, 'updateIt', 'foo') === true, "Should be attached to the first observable.");
+    ok(observer.isAttachedTo(observableB, 'updateIt', 'bar') === true, "Should be attached to the second observable.");
+    
+    count = 0;
+    observableA.fireEvent('foo', 1);
+    ok(count === 1, "Firing the first observable should run the constraint method once. Was: " + count);
+    
+    observableB.fireEvent('bar', 1);
+    ok(count === 2, "Firing the second observable should run the constraint method again. Was: " + count);
+    
+    // Now test release
+    observer.releaseConstraint('updateIt');
+    
+    ok(observer.isAttachedTo(observableA, 'updateIt', 'foo') === false, "Should be detached from the first observable.");
+    ok(observer.isAttachedTo(observableB, 'updateIt', 'bar') === false, "Should be detached from the second observable.");
+    
+    ok(observableA.hasObservers('foo') === false, "The first observable should have no observers left.");
+    ok(observableB.hasObservers('bar') === false, "The second observable should have no observers left.");
+    
+    count = 0;
+    observableA.fireEvent('foo', 1);
+    observableB.fireEvent('bar', 1);
+    ok(count === 0, "A released constraint should not run when the observables fire. Ran " + count + " times.");
+});
+
+test("Re-constraining after a release does not double attach.", function() {
+    var observable = new myt.Node(),
+        count = 0;
+    
+    var observer = new myt.Node(null, null, [{
+        updateIt: function() {count++;}
+    }]);
+    
+    observer.constrain('updateIt', [observable, 'foo']);
+    observer.releaseConstraint('updateIt');
+    observer.constrain('updateIt', [observable, 'foo']);
+    
+    count = 0;
+    observable.fireEvent('foo', 1);
+    ok(count === 1, "The constraint method should run exactly once per event, not once per stale attachment. Ran " + count + " times.");
+    
+    var observers = observable.getObservers('foo');
+    ok(observers.length === 2, "The observable should hold exactly one observer entry. Array length was: " + observers.length);
+});
+
+test("Releasing all constraints detaches every one of them.", function() {
+    var observableA = new myt.Node(),
+        observableB = new myt.Node(),
+        countOne = 0,
+        countTwo = 0;
+    
+    var observer = new myt.Node(null, null, [{
+        updateOne: function() {countOne++;},
+        updateTwo: function() {countTwo++;}
+    }]);
+    
+    observer.constrain('updateOne', [observableA, 'foo']);
+    observer.constrain('updateTwo', [observableB, 'bar']);
+    
+    observer.releaseAllConstraints();
+    
+    ok(observer.isAttachedTo(observableA, 'updateOne', 'foo') === false, "The first constraint should be detached.");
+    ok(observer.isAttachedTo(observableB, 'updateTwo', 'bar') === false, "The second constraint should be detached.");
+    
+    countOne = countTwo = 0;
+    observableA.fireEvent('foo', 1);
+    observableB.fireEvent('bar', 1);
+    ok(countOne === 0, "The first constraint method should not run. Ran " + countOne + " times.");
+    ok(countTwo === 0, "The second constraint method should not run. Ran " + countTwo + " times.");
+});
+
+test("Constrain rejects bad input and refuses to clobber.", function() {
+    var observable = new myt.Node(),
+        count = 0;
+    
+    var observer = new myt.Node(null, null, [{
+        updateIt: function() {count++;}
+    }]);
+    
+    // An uneven observables array is rejected outright.
+    observer.constrain('updateIt', [observable, 'foo', observable]);
+    ok(count === 0, "An uneven observables array should not sync the method. Was: " + count);
+    ok(observer.isAttachedTo(observable, 'updateIt', 'foo') === false, "An uneven observables array should not attach.");
+    
+    // A missing method name or observables array is a no-op.
+    observer.constrain('', [observable, 'foo']);
+    observer.constrain('updateIt', null);
+    ok(count === 0, "Constrain with missing arguments should do nothing. Was: " + count);
+    
+    // A second constrain for the same method is refused rather than clobbering.
+    observer.constrain('updateIt', [observable, 'foo']);
+    observer.constrain('updateIt', [observable, 'bar']);
+    ok(observer.isAttachedTo(observable, 'updateIt', 'bar') === false, "A second constrain should not add a new attachment.");
+    
+    count = 0;
+    observable.fireEvent('foo', 1);
+    ok(count === 1, "The original constraint should still run exactly once. Ran " + count + " times.");
+    
+    // Releasing an unknown method name is harmless.
+    observer.releaseConstraint('neverConstrained');
+    observer.releaseConstraint();
+    ok(true, "Releasing an unknown or missing method name should not throw.");
+});

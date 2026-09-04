@@ -454,8 +454,8 @@
                     if (constraint) {
                         let i = constraint.length;
                         while (i >= 2) {
-                            const type = constraint[i--],
-                                observable = constraint[i--];
+                            const type = constraint[--i],
+                                observable = constraint[--i];
                             this.detachFrom(observable, methodName, type);
                         }
                         constraint.length = 0;

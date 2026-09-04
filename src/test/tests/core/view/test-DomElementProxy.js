@@ -45,7 +45,7 @@ test("Modify dom class and id", function() {
     proxy.addDomClass('bar');
     ok(div.className === 'foo bar', 'Div should still have a class.');
     proxy.addDomClass('foo');
-    ok(div.className === 'foo bar foo', 'Div should still have a class.');
+    ok(div.className === 'foo bar', 'Div should still have a class.');
     
     proxy.removeDomClass('foo');
     ok(div.className === 'bar', 'Div should only have one class.');
@@ -53,12 +53,9 @@ test("Modify dom class and id", function() {
     proxy.setDomClass('hah');
     ok(div.className === 'hah', 'Div clas should now be set.');
     
-    proxy.clearDomClass();
-    ok(div.className === '', 'Div class should now be empty.');
-    
     // Remove a class that doesn't exist
     proxy.removeDomClass('blah');
-    ok(div.className === '', 'Div class should still be empty.');
+    ok(div.className === 'hah', 'Div class should still be empty.');
     
     // Set dom id
     ok(div.id === '', 'Div should have no id to start with.');

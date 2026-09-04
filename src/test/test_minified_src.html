@@ -3,41 +3,16 @@
 <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-1.15.0.css" integrity="sha384-M/bQMa1clMmsIIv4d2arnm//i6rj6i8sKVszLuB8CP/q3t8cUBWNjq8m630kFwNP" crossorigin="anonymous">
 <script src="https://code.jquery.com/qunit/qunit-1.15.0.js" integrity="sha384-V0OIPpPZ6k2Chio2VTqUPjkADxTaahinso02ypJrUQe/bMbwv+D8So2f9YQTY/jb" crossorigin="anonymous"></script>
 <script>window.QUnit || document.write('<script src="./qunit/qunit-1.15.0.js">\x3C/script><link rel="stylesheet" href="./qunit/qunit-1.15.0.css"/>');</script>
-
 <link rel="stylesheet" href="../css/myt.css"/>
-
-<script>var ROOT = '../js/';</script>
-<script src="../js/boilerplate.js"></script>
+<script>const ROOT = '../js/';</script>
 <script src="../../dist/myt.min.js"></script>
+<script src="test-manifest.js"></script>
 </head>
 <body>
 <div id="qunit"></div>
 <div id="qunit-fixture"></div>
-
 <script>
-    QUnit.config.reorder = false;
+QUnit.config.reorder = false;
+MYT_TEST_MANIFEST.allPaths().forEach(path => {myt.loadScript(path);});
 </script>
-
-<script src="tests/shim/test-language.js"></script>
-
-<script src="tests/util/test-URI.js"></script>
-<script src="tests/util/test-Cookie.js"></script>
-<script src="tests/util/test-Geometry.js"></script>
-
-<script src="tests/core/test-ClassSystem.js"></script>
-<script src="tests/core/test-myt-dom.js"></script>
-<script src="tests/core/test-myt.js"></script>
-<script src="tests/core/test-Node.js"></script>
-<script src="tests/core/test-Node_placement.js"></script>
-<script src="tests/core/test-Observable.js"></script>
-<script src="tests/core/test-Observer.js"></script>
-
-<script src="tests/core/view/test-DomElementProxy.js"></script>
-<script src="tests/core/view/test-View.js"></script>
-
-<script src="tests/component/test-BoundedRangeComponent.js"></script>
-<script src="tests/component/test-Path.js"></script>
-<script src="tests/component/test-Color.js"></script>
-<script src="tests/component/test-ExpressionParser.js"></script>
-
 </body></html>

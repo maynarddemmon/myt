@@ -307,7 +307,7 @@ const global = module.exports = {};
         
         tym = pkg.tym = {
             /** A version number based on the time this distribution of tym was created. */
-            version:20260903.1431, // <<< BUILD_VERSION_THIS
+            version:202609031806, // <<< BUILD_VERSION_THIS
             
             generateGuid: generateGuid,
             
@@ -1447,8 +1447,8 @@ tym.Destructible = new JS.Module('Destructible', {
                     if (constraint) {
                         let i = constraint.length;
                         while (i >= 2) {
-                            const type = constraint[i--],
-                                observable = constraint[i--];
+                            const type = constraint[--i],
+                                observable = constraint[--i];
                             this.detachFrom(observable, methodName, type);
                         }
                         constraint.length = 0;

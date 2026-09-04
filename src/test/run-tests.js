@@ -6,50 +6,26 @@
     is needed. Loads dist/myt.js, so run a build first if you've changed src.
 
     Usage:
-      node bin/run-tests.js              Run the DOM-independent suites (default)
-      node bin/run-tests.js --all        Also run the suites that need real layout
-      node bin/run-tests.js --verbose    Show framework console output
-      node bin/run-tests.js <file>...    Run specific test files
+      node src/test/run-tests.js              Run the DOM-independent suites (default)
+      node src/test/run-tests.js --all        Also run the suites that need real layout
+      node src/test/run-tests.js --verbose    Show framework console output
+      node src/test/run-tests.js <file>...    Run specific test files
 
     Exits 1 if any assertion fails, so it can gate a build or CI step.
 
     Note on --all: jsdom implements the DOM but performs no layout, so
     offsetLeft/offsetWidth/getBoundingClientRect are always 0. The view suites
     therefore report failures that a real browser would not. Those suites still
-    need src/test/test_runtime_src.html in a browser. */
+    need test_runtime_src.html in a browser. */
 
 const fs = require('fs'),
     path = require('path'),
     {JSDOM, VirtualConsole} = require('jsdom'),
     
-    ROOT = path.resolve(__dirname, '..'),
-    TEST_ROOT = path.join(ROOT, 'src/test/tests'),
+    ROOT = path.resolve(__dirname, '../..'),
+    TEST_ROOT = __dirname,
     MYT_DIST = path.join(ROOT, 'dist/myt.js'),
-    
-    // Suites that pass under jsdom because they don't depend on layout.
-    DOM_INDEPENDENT = [
-        'core/test-ClassSystem.js',
-        'core/test-Node.js',
-        'core/test-Node_placement.js',
-        'core/test-Observable.js',
-        'core/test-Observer.js',
-        'core/test-myt.js',
-        'util/test-Cookie.js',
-        'util/test-Geometry.js',
-        'util/test-URI.js',
-        'shim/test-language.js',
-        'component/test-BoundedRangeComponent.js',
-        'component/test-Path.js',
-        'component/test-Color.js',
-        'component/test-ExpressionParser.js'
-    ],
-    
-    // Suites that need real layout or a real user agent. Run with --all.
-    NEEDS_BROWSER = [
-        'core/test-myt-dom.js',
-        'core/view/test-DomElementProxy.js',
-        'core/view/test-View.js'
-    ],
+    MANIFEST = require('./test-manifest.js'),
     
     // Minimal QUnit 1.x globals. The test files use the old global-function
     // style, so this is all that's needed to run them unmodified.
@@ -130,7 +106,7 @@ const main = () => {
     if (explicit.length > 0) {
         suites = explicit.map(f => path.resolve(f));
     } else {
-        suites = DOM_INDEPENDENT.concat(runAll ? NEEDS_BROWSER : [])
+        suites = (runAll ? MANIFEST.allPaths() : MANIFEST.headlessPaths())
             .map(f => path.join(TEST_ROOT, f));
     }
     
@@ -165,7 +141,7 @@ const main = () => {
     
     console.log('\n' + totalPass + ' assertions passed, ' + totalFail + ' failed, ' + suites.length + ' suites');
     if (!runAll && explicit.length === 0) {
-        console.log('(' + NEEDS_BROWSER.length + ' layout-dependent suites skipped; --all to include, or use test_runtime_src.html in a browser)');
+        console.log('(' + MANIFEST.browserOnlyPaths().length + ' browser-only suites skipped; --all to include, or use test_runtime_src.html in a browser)');
     }
     
     process.exit(totalFail > 0 ? 1 : 0);

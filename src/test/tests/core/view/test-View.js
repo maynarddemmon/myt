@@ -246,8 +246,8 @@ test("Test getSubviews, getSiblingViews, getLayouts", function() {
     var child2 = new myt.View(v);
     var child3 = new myt.View(v);
     
-    // var layout1 = new myt.ConstantLayout(v);
-    // var layout2 = new myt.ConstantLayout(v);
+    new myt.ConstantLayout(v);
+    new myt.ConstantLayout(v);
     
     ok(v.getSubviews().length === 3, "Root view should have 3 subviews.");
     ok(v.getLayouts().length === 2, "Root view should have 2 layouts.");

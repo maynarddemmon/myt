@@ -637,7 +637,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
-            version:20260903.1447, // <<< BUILD_VERSION_THIS
+            version:202609031758, // <<< BUILD_VERSION_THIS
             
             generateGuid: generateGuid,
             
@@ -2927,8 +2927,8 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     if (constraint) {
                         let i = constraint.length;
                         while (i >= 2) {
-                            const type = constraint[i--],
-                                observable = constraint[i--];
+                            const type = constraint[--i],
+                                observable = constraint[--i];
                             this.detachFrom(observable, methodName, type);
                         }
                         constraint.length = 0;
