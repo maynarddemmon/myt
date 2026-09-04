@@ -1,6 +1,10 @@
 ((global, exports) => {
-    const pkgByName = {}, // Each entry will be: <name>:{pkg:<Package>, obj:Object}
-        getPkgByName = name => pkgByName[name] ??= {},
+    const pkgByName = new Map(), // Each entry will be: <name>:{pkg:<Package>, obj:Object}
+        getPkgByName = name => {
+            let entry = pkgByName.get(name);
+            if (entry === undefined) pkgByName.set(name, entry = {});
+            return entry;
+        },
         
         getPkgObject = name => {
             if (typeof name === 'string') {
@@ -14,6 +18,22 @@
                 }
                 return pkg.obj;
             }
+        },
+        
+        findCycle = (pkg, path=[]) => {
+            if (path.includes(pkg)) {
+                return [...path, pkg].map(p => Array.from(p._names).join('/') || '(unnamed)');
+            }
+            path.push(pkg);
+            for (const depName of pkg._deps) {
+                const depPkg = getPkgByName(depName).pkg;
+                if (depPkg) {
+                    const found = findCycle(depPkg, path);
+                    if (found) return found;
+                }
+            }
+            path.pop();
+            return null;
         },
         
         Deferred = function() {
@@ -67,25 +87,27 @@
                     // Load
                     if (!pkg.request) {
                         pkg.request = true;
+                        
+                        const cycle = findCycle(pkg);
+                        if (cycle) throw new Error('Circular dependency detected: ' + cycle.join(' -> '));
+                        
                         const paths = pkg._paths;
                         if (!isLoaded(pkg) && !pkg._source) {
                             const source = pkg._source = [];
                             for (const path of paths) {
                                 const deferred = new Deferred();
                                 source.push(deferred);
-                                fetch(path, {method:'GET'}).then(
-                                    response => {
-                                        if (response.ok) {
-                                            return response.text();
-                                        } else {
-                                            throw new Error('Manifest load error:' + path);
-                                        }
+                                fetch(path, {method:'GET'}).then(response => {
+                                    if (response.ok) {
+                                        return response.text();
+                                    } else {
+                                        throw new Error('Manifest load error:' + path + ' (' + response.status + ' ' + response.statusText + ')');
                                     }
-                                ).then(
-                                    response => {
-                                        deferred.succeed(response + '\n//# sourceURL=' + path);
-                                    }
-                                );
+                                }).then(response => {
+                                    deferred.succeed(response + '\n//# sourceURL=' + path);
+                                }).catch(error => {
+                                    console.error('Failed to load ' + path + ': ' + error.message);
+                                });
                             }
                         }
                         
@@ -106,6 +128,9 @@
                                 } else {
                                     const loadNext = () => {
                                         if (n === 0) {
+                                            // Warm the isLoaded cache now that the source has 
+                                            // actually run; the return value itself isn't needed 
+                                            // here since fire() below is what signals completion.
                                             isLoaded(pkg);
                                             fire(pkg, 'load');
                                         } else {
@@ -137,14 +162,14 @@
         },
         
         isLoaded = pkg => {
-            if (pkg._isLoaded === undefined) {
-                for (const name of pkg._names) {
-                    if (getPkgObject(name) === undefined) return pkg._isLoaded = false;
-                }
-                return pkg._isLoaded = true;
-            } else {
-                return pkg._isLoaded;
+            // Once true this can never become false again, so it's safe to cache
+            // permanently. A false result is never cached: a package that isn't
+            // loaded yet may still be loaded by the time this is asked again.
+            if (pkg._isLoaded) return true;
+            for (const name of pkg._names) {
+                if (getPkgObject(name) === undefined) return false;
             }
+            return pkg._isLoaded = true;
         },
         
         Package = function(paths) {
