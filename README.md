@@ -47,7 +47,7 @@ Load the built framework, then build your UI:
 
 ```html
 <!doctype html><html><head>
-<link rel="stylesheet" href="src/css/myt.css"/>
+<link rel="stylesheet" href="dist/myt.css"/>
 <script src="dist/myt.min.js"></script>
 </head><body>
 <script>
@@ -103,6 +103,7 @@ loader-browser.min.js.map  myt.min.js.map  tym.min.js.map
 | `npm test` | Runs the test suite headlessly. |
 | `npm run test-all` | Runs all test suites including those that need a real browser. |
 | `npm run lint` | Runs ESLint over `src`. |
+| `npm run build-css` | Builds `dist/myt.css` from `src/sass/myt.scss`. |
 
 A build that would produce no change other than a new version stamp is skipped
 entirely, so rebuilding without editing anything leaves `dist/` untouched.

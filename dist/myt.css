@@ -1,0 +1,61 @@
+html, body {
+  height: 100%;
+  margin: 0px;
+  padding: 0px;
+  border: 0px none;
+}
+
+input, textarea, select {
+  box-sizing: border-box;
+}
+
+input.mytNativeInput:not([type=button]), textarea.mytNativeInput {
+  margin: 0px;
+  padding: 1px;
+  border: 0px none;
+}
+
+select.mytNativeInput {
+  margin: 0px;
+}
+
+.mytButtonText {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.mytUnselectable {
+  user-select: none;
+}
+
+/* For some reason placeholder text is selectable if you click and 
+   drag just right. These rules prevent that. */
+::placeholder {
+  user-select: none;
+}
+
+:-ms-input-placeholder {
+  user-select: none;
+}
+
+.mytCheckerboardPattern {
+  background: repeating-conic-gradient(#808080 0% 25%, transparent 0% 50%) 50%/4px 4px;
+}
+
+.myt-DatePicker {
+  font: 13px/22.5px Arial, Helvetica, sans-serif;
+  user-select: none;
+}
+
+/* Spinner */
+@keyframes centerspin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.mytCenterSpin {
+  animation: centerspin 2s linear infinite;
+}

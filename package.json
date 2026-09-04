@@ -5,6 +5,7 @@
     "description": "The myt UI framework.",
     "license": "MIT",
     "devDependencies": {
+        "sass": "^1.104",
         "@eslint/js": "^9.39.1",
         "eslint": "^9.39.0",
         "globals": "^16.5.0",
@@ -15,6 +16,7 @@
         "google-closure-compiler-osx": "^20240317.0.0"
     },
     "scripts": {
+        "build-css": "sass src/sass/myt.scss dist/myt.css --no-source-map --style=expanded",
         "build-expressionParser": "node ./src/js/expression_parser/build.js ./src/js/expression_parser/grammar",
         "build-loader": "./bin/build src/js/jsclass/loader-browser-manifest.js dist/loader-browser.js ./src true true JS",
         "build-myt":    "./bin/build src/js/myt/manifest.js                    dist/myt.js            ./src true true myt.all",
@@ -22,7 +24,7 @@
         "lint": "eslint src",
         "test": "node ./src/test/run-tests.js",
         "test-all": "node ./src/test/run-tests.js --all",
-        "buildAndTest-myt": "npm run build-myt && npm test && npm run lint",
+        "buildAndTest-myt": "npm run build-css && npm run build-myt && npm test && npm run lint",
         "enchilada": "npm run build-expressionParser && npm run build-loader && npm run build-tym && npm run buildAndTest-myt"
     }
 }
