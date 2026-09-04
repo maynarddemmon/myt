@@ -44,8 +44,8 @@
             myt.SizeToDom super mixin.
         
         Attributes:
-            text:string|event(string) The text to be displayed. The value will be assigned to the 
-                inner html of the div.
+            text:string|event(string) The text to be displayed. How the value reaches the DOM
+                depends on the noMarkup attribute; see below.
             textOverflow:string How text will be treated when it overflows the bounds. Supported 
                 values: 'ellipsis', 'clip', 'inherit'.
             textAlign:string How text will be aligned within the bounds. Supported values: 'left', 
@@ -80,11 +80,22 @@
             userUnselectable:boolean If set to true the CSS property user-select will be set to 
                 'none' thus making text selection not work. Furthermore, the cursor will be set to 
                 the default so it no longer appears as an i-beam.
+            noMarkup:boolean (init only) Controls how text is written to the DOM. Leave unset
+                (the default) to write via Element.setHTML, which sanitizes the markup where
+                that API is available. Set to true to write via textContent so markup is never
+                interpreted; the PlainTextSupport mixin does this and is preferred where markup
+                isn't needed. Set to false to write via innerHTML with no sanitization at all,
+                even on browsers that would otherwise sanitize. Only pass false for markup from
+                a trusted source. There is no setter, so this is only honored in the attrs
+                passed to initNode.
         
         Private Attributes:
-            __noMarkup:boolean Determines if text will be set via innerHTML or textContent.
-                Defaults to false which corresponds to innerHTML. The PlainTextSupport mixin will
-                set this to true and should be used where you know markup isn't needed.
+            __noMarkup:boolean|undefined The stored form of the noMarkup attribute, and the
+                value setText branches on. Tri-state: true selects textContent, false selects
+                unsanitized innerHTML, undefined (the default) selects sanitized setHTML with
+                an unsanitized innerHTML fallback where setHTML is unavailable. Assigning this
+                name directly in attrs also works, via the generic setter in AccessorSupport,
+                which is why PlainTextSupport deletes both it and noMarkup.
         
         @class */
     pkg.TextSupport = new JSModule('TextSupport', {
@@ -125,7 +136,9 @@
                 if (this.__noMarkup === true) {
                     ide.textContent = v;
                 } else if (this.__noMarkup === false) {
-                    // Specifically allow setting arbitrary markup if so indicated.
+                    // Explicitly opted out of sanitization. Unlike the default path below,
+                    // this does not use setHTML even where it is available. This is necessary for
+                    // injecting markup that would otherwise get sanitized.
                     ide.innerHTML = v;
                 } else if (ide.setHTML) {
                     // Sanitize text by default when the API is available.
