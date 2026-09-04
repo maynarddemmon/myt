@@ -139,15 +139,27 @@ const global = module.exports = {};
                     const len = include.length;
                     for (let i = 0; i < len;) this.include(include[i++], true);
                 }
-                for (const field of Object.keys(module)) {
+                
+                for (const field of Object.getOwnPropertyNames(module)) {
+                    // ES6 Class compatibility: Every prototype has a constructor; it is never a 
+                    // mixin method.
+                    if (field === 'constructor') continue;
+                    
+                    // ES6 Class compatibility: Accessors are only read when enumerable, which 
+                    // preserves the historical behavior for object literals. Reading a 
+                    // non-enumerable accessor would invoke a native class getter against the 
+                    // prototype itself.
+                    const descriptor = Object.getOwnPropertyDescriptor(module, field);
+                    if ((descriptor.get || descriptor.set) && !descriptor.enumerable) continue;
+                    
                     const value = module[field];
                     if ((field !== 'extend' && field !== 'include') || (!value.__fns__ && typeof value === 'function')) {
-                        // Adds a single named method to a JS.Class/JS.Module. If you’re modifying a 
-                        // class, the method instantly becomes available in instances of the class, 
-                        // and in its subclasses.
+                        // Adds a single named method to a JS.Class/JS.Module. If you’re modifying 
+                        // a class, the method instantly becomes available in instances of the 
+                        // class, and in its subclasses.
                         if (this.__fns__.has(field)) {
-                            // Handles the case where the new function would clobber an existing one.
-                            // This can occur by using Module.extend twice with the same named
+                            // Handles the case where the new function would clobber an existing 
+                            // one. This can occur by using Module.extend twice with the same named
                             // function. By turning it into a formal Module it gets put into the
                             // ancestor chain and thus callSuper will work as expected.
                             console.warn('JS.Module already has field: "' + field + '" auto generating a JS.Module from the field for inclusion.');
@@ -307,7 +319,7 @@ const global = module.exports = {};
         
         tym = pkg.tym = {
             /** A version number based on the time this distribution of tym was created. */
-            version:202609031806, // <<< BUILD_VERSION_THIS
+            version:202609041220, // <<< BUILD_VERSION_THIS
             
             generateGuid: generateGuid,
             

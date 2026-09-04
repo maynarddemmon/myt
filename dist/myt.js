@@ -258,15 +258,27 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     const len = include.length;
                     for (let i = 0; i < len;) this.include(include[i++], true);
                 }
-                for (const field of Object.keys(module)) {
+                
+                for (const field of Object.getOwnPropertyNames(module)) {
+                    // ES6 Class compatibility: Every prototype has a constructor; it is never a 
+                    // mixin method.
+                    if (field === 'constructor') continue;
+                    
+                    // ES6 Class compatibility: Accessors are only read when enumerable, which 
+                    // preserves the historical behavior for object literals. Reading a 
+                    // non-enumerable accessor would invoke a native class getter against the 
+                    // prototype itself.
+                    const descriptor = Object.getOwnPropertyDescriptor(module, field);
+                    if ((descriptor.get || descriptor.set) && !descriptor.enumerable) continue;
+                    
                     const value = module[field];
                     if ((field !== 'extend' && field !== 'include') || (!value.__fns__ && typeof value === 'function')) {
-                        // Adds a single named method to a JS.Class/JS.Module. If you’re modifying a 
-                        // class, the method instantly becomes available in instances of the class, 
-                        // and in its subclasses.
+                        // Adds a single named method to a JS.Class/JS.Module. If you’re modifying 
+                        // a class, the method instantly becomes available in instances of the 
+                        // class, and in its subclasses.
                         if (this.__fns__.has(field)) {
-                            // Handles the case where the new function would clobber an existing one.
-                            // This can occur by using Module.extend twice with the same named
+                            // Handles the case where the new function would clobber an existing 
+                            // one. This can occur by using Module.extend twice with the same named
                             // function. By turning it into a formal Module it gets put into the
                             // ancestor chain and thus callSuper will work as expected.
                             console.warn('JS.Module already has field: "' + field + '" auto generating a JS.Module from the field for inclusion.');
@@ -637,7 +649,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
-            version:202609041045, // <<< BUILD_VERSION_THIS
+            version:202609041220, // <<< BUILD_VERSION_THIS
             
             generateGuid: generateGuid,
             
@@ -9010,8 +9022,8 @@ myt.Destructible = new JS.Module('Destructible', {
             myt.SizeToDom super mixin.
         
         Attributes:
-            text:string|event(string) The text to be displayed. The value will be assigned to the 
-                inner html of the div.
+            text:string|event(string) The text to be displayed. How the value reaches the DOM
+                depends on the noMarkup attribute; see below.
             textOverflow:string How text will be treated when it overflows the bounds. Supported 
                 values: 'ellipsis', 'clip', 'inherit'.
             textAlign:string How text will be aligned within the bounds. Supported values: 'left', 
@@ -9046,11 +9058,22 @@ myt.Destructible = new JS.Module('Destructible', {
             userUnselectable:boolean If set to true the CSS property user-select will be set to 
                 'none' thus making text selection not work. Furthermore, the cursor will be set to 
                 the default so it no longer appears as an i-beam.
+            noMarkup:boolean (init only) Controls how text is written to the DOM. Leave unset
+                (the default) to write via Element.setHTML, which sanitizes the markup where
+                that API is available. Set to true to write via textContent so markup is never
+                interpreted; the PlainTextSupport mixin does this and is preferred where markup
+                isn't needed. Set to false to write via innerHTML with no sanitization at all,
+                even on browsers that would otherwise sanitize. Only pass false for markup from
+                a trusted source. There is no setter, so this is only honored in the attrs
+                passed to initNode.
         
         Private Attributes:
-            __noMarkup:boolean Determines if text will be set via innerHTML or textContent.
-                Defaults to false which corresponds to innerHTML. The PlainTextSupport mixin will
-                set this to true and should be used where you know markup isn't needed.
+            __noMarkup:boolean|undefined The stored form of the noMarkup attribute, and the
+                value setText branches on. Tri-state: true selects textContent, false selects
+                unsanitized innerHTML, undefined (the default) selects sanitized setHTML with
+                an unsanitized innerHTML fallback where setHTML is unavailable. Assigning this
+                name directly in attrs also works, via the generic setter in AccessorSupport,
+                which is why PlainTextSupport deletes both it and noMarkup.
         
         @class */
     pkg.TextSupport = new JSModule('TextSupport', {
@@ -9091,7 +9114,9 @@ myt.Destructible = new JS.Module('Destructible', {
                 if (this.__noMarkup === true) {
                     ide.textContent = v;
                 } else if (this.__noMarkup === false) {
-                    // Specifically allow setting arbitrary markup if so indicated.
+                    // Explicitly opted out of sanitization. Unlike the default path below,
+                    // this does not use setHTML even where it is available. This is necessary for
+                    // injecting markup that would otherwise get sanitized.
                     ide.innerHTML = v;
                 } else if (ide.setHTML) {
                     // Sanitize text by default when the API is available.
