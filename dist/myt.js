@@ -637,7 +637,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
-            version:202609031758, // <<< BUILD_VERSION_THIS
+            version:202609041045, // <<< BUILD_VERSION_THIS
             
             generateGuid: generateGuid,
             
@@ -24608,7 +24608,7 @@ myt.Destructible = new JS.Module('Destructible', {
 (pkg => {
     const JSClass = JS.Class,
         
-        RadialGuage = pkg.RadialGuage = new JSClass('RadialGuage', pkg.View, {
+        RadialGauge = pkg.RadialGauge = new JSClass('RadialGauge', pkg.View, {
             include:[pkg.BoundedValueComponent],
             
             
@@ -24694,7 +24694,7 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         });
     
-    pkg.ColorThresholdRadialGuage = new JSClass('ColorThresholdRadialGuage', RadialGuage, {
+    pkg.ColorThresholdRadialGauge = new JSClass('ColorThresholdRadialGauge', RadialGauge, {
         initNode: function(parent, attrs) {
             attrs.thresholdType ??= 'percent';
             attrs.thresholds ??= [];

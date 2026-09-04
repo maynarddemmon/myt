@@ -1,7 +1,7 @@
 (pkg => {
     const JSClass = JS.Class,
         
-        RadialGuage = pkg.RadialGuage = new JSClass('RadialGuage', pkg.View, {
+        RadialGauge = pkg.RadialGauge = new JSClass('RadialGauge', pkg.View, {
             include:[pkg.BoundedValueComponent],
             
             
@@ -87,7 +87,7 @@
             }
         });
     
-    pkg.ColorThresholdRadialGuage = new JSClass('ColorThresholdRadialGuage', RadialGuage, {
+    pkg.ColorThresholdRadialGauge = new JSClass('ColorThresholdRadialGauge', RadialGauge, {
         initNode: function(parent, attrs) {
             attrs.thresholdType ??= 'percent';
             attrs.thresholds ??= [];

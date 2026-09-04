@@ -19,7 +19,7 @@
         "build-tym":    "./bin/build src/js/tym/manifest.js                    dist/tym.js            ./src true true tym.all",
         "lint": "eslint src",
         "test": "node ./src/test/run-tests.js",
-        "test-all": "node ./bin/run-tests.js --all",
+        "test-all": "node ./src/test/run-tests.js --all",
         "buildAndTest-myt": "npm run build-myt && npm test && npm run lint",
         "enchilada": "npm run build-expressionParser && npm run build-loader && npm run build-tym && npm run buildAndTest-myt"
     }
