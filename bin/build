@@ -165,6 +165,18 @@ const priorSizes = {},
             styleText(['bold', 'cyan'], commas(size)) + ' bytes, ' +
             styleText('dim', commas(gzipped) + ' gzipped') + delta + '\n'
         );
+    },
+    
+    // Make sure callSuper didn't get removed by over-zealous minification.
+    assertCallSuperSurvived = (sourceText, minifiedPath) => {
+        const CALL_SUPER = 'callSuper';
+        if (!sourceText.includes(CALL_SUPER)) return; // Nothing to guard for this build.
+        if (!fs.readFileSync(minifiedPath, 'utf8').includes(CALL_SUPER)) {
+            fail(
+                minifiedPath + ' does not contain "' + CALL_SUPER + '" even though the source does. ' +
+                'Closure has likely mangled it away — check for a raised optimization level.'
+            );
+        }
     };
 
 // Now use jsbuild to combine files
@@ -186,6 +198,7 @@ jsBuild(manifestFile, rootPath, requiredFiles, concatenatedData => {
         outputsPresent = fs.existsSync(minifiedFilePath) &&
             (outputSourceMap !== 'true' || fs.existsSync(mapFilePath));
     if (reused && outputsPresent) {
+        assertCallSuperSurvived(concatenatedData, minifiedFilePath);
         console.info(
             '\n' + styleText(['bold', 'green'], 'No changes.') + ' Version ' + 
             styleText(['bold', 'cyan'], reused) + ' — nothing written.'
@@ -239,6 +252,8 @@ jsBuild(manifestFile, rootPath, requiredFiles, concatenatedData => {
         if (stdOut) console.info('stdout: ' + stdOut);
         if (stdErr) console.error('stderr: ' + stdErr);
         if (exitCode) fail('Closure compilation failed with exit code ' + exitCode + '.');
+        
+        assertCallSuperSurvived(concatenatedData, minifiedFilePath);
         
         // Inject a sourceRoot into the source map file.
         if (outputSourceMap === 'true') {
