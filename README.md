@@ -89,6 +89,7 @@ You should now see these files in `dist/`:
 loader-browser.js          myt.js          tym.js
 loader-browser.min.js      myt.min.js      tym.min.js
 loader-browser.min.js.map  myt.min.js.map  tym.min.js.map
+myt.css
 ```
 
 ### Individual scripts
