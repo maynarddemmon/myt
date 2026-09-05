@@ -129,7 +129,7 @@ const main = () => {
         totalFail += result.fail;
         
         console.log(
-            '  ' + (result.fail === 0 ? 'ok  ' : 'FAIL') + ' ' + label.padEnd(42) +
+            '  ' + (result.fail === 0 ? 'ok  ' : 'FAIL') + ' ' + label.padEnd(50) +
             String(result.pass).padStart(4) + ' passed' +
             (result.fail ? ', ' + result.fail + ' failed' : '')
         );

@@ -503,7 +503,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 if (integrity) {
                     elem.integrity = integrity;
                     elem.crossOrigin = 'anonymous';
-                    elem.referrerpolicy = 'no-referrer';
+                    elem.referrerPolicy = 'no-referrer';
                 }
                 
                 const executeCallbacks = success => {
@@ -606,15 +606,26 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             // First do a quick reference check and tests primitives.
             if (a !== b) {
                 // Make Dates something easy to compare.
-                if (a instanceof Date && b instanceof Date) return a.getTime() === b.getTime();
+                const aIsDate = a instanceof Date,
+                    bIsDate = b instanceof Date;
+                if (aIsDate || bIsDate) {
+                    if (aIsDate && bIsDate) {
+                        const timeA = a.getTime(),
+                            timeB = b.getTime();
+                        return timeA === timeB || (isNaN(timeA) && isNaN(timeB));
+                    }
+                    return false;
+                }
+                
+                // Treat NaNs as equivalent
+                if (Number.isNaN(a) && Number.isNaN(b)) return true;
                 
                 // Ensure we're now dealing with two Objects (or Arrays).
                 if (a === null || b === null || typeof a !== 'object' || typeof b !== 'object') return false;
                 
                 // Prevent cycles
-                if (seenA.has(a)) return seenB.get(b) === seenA.get(a);
+                if (seenA.get(a) === b) return true;
                 seenA.set(a, b);
-                seenB.set(b, a);
                 
                 // Quick check for Array vs Object.
                 const isArrA = isArray(a),
@@ -649,9 +660,9 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
-            version:202609041220, // <<< BUILD_VERSION_THIS
+            version:202609051343, // <<< BUILD_VERSION_THIS
             
-            generateGuid: generateGuid,
+            generateGuid,
             
             TRUE_FUNC: () => true,
             FALSE_FUNC: () => false,
@@ -863,7 +874,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 return true;
             },
             
-            deepEqual:deepEqual,
+            deepEqual,
             
             
             // Random numbers //////////////////////////////////////////////////
@@ -1113,7 +1124,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             
             /** Gets the file extension from a file name.
                 @param {string} fileName - The filename to extract the extension from.
-                @returns {string) - The file extension, or null if a falsy fileName argument was 
+                @returns {string} - The file extension, or null if a falsy fileName argument was 
                     provided. */
             getExtension: fileName => {
                 if (fileName) {
@@ -1213,12 +1224,10 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             /** Convert a number to a string of a minimum length. Zero or more of a padding 
                 character are prepended to achieve the minimum length.
                 @param {number} num - The number to format.
-                @param {number} length - The minimum length of the formatted
-                    return string.
-                @param {string} [padChar] - The character to left pad with.
-                    Defaults to the string "0".
-                @param {number} [base] - The base for the formatted number.
-                    Defaults to base 10.
+                @param {number} length - The minimum length of the formatted return string.
+                @param {string} [padChar] - The character to left pad with. Defaults to the 
+                    string "0".
+                @param {number} [base] - The base for the formatted number. Defaults to base 10.
                 @returns {string} - The formatted number. */
             leftPadNumber: (num, length, padChar='0', base=10) => {
                 const numStr = num.toString(base);
@@ -1256,7 +1265,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             /** Memoize a function.
                 @param {!Function} func - The function to memoize
                 @returns {!Function} - The memoized function. */
-            memoize: memoize,
+            memoize,
             
             /** Creates a debounced function that delays invoking the provided function until after
                 the specified wait time has elapsed since the last time it was invoked.
@@ -1545,16 +1554,13 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 }
             ).catch(
                 error => {
-                    if (errorFunc) {
-                        // Convert non FetchErrors into FetchErrors
-                        if (error.name !== 'FetchError') {
-                            const fetchError = new FetchError(0, url, error.message);
-                            fetchError.stack = error.stack;
-                            error = fetchError;
-                        }
-                        
-                        errorFunc(error);
+                    // Convert non FetchErrors into FetchErrors
+                    if (error.name !== 'FetchError') {
+                        const fetchError = new FetchError(0, url, error.message);
+                        fetchError.stack = error.stack;
+                        error = fetchError;
                     }
+                    (errorFunc ?? console.error)(error);
                 }
             ).finally(
                 () => {finallyFunc?.();}
@@ -1643,7 +1649,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     // Somewhat arbitrary rule where two letter combos not containing vowels should be capitalized
                     // fixes /JJ Abrams/ and /JD Salinger/
                     // With some exceptions
-                    .replace(/(?:^|\\s)[bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ]{2}\s/, v => v.toUpperCase())
+                    .replace(/(?:^|\s)[bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ]{2}\s/, v => v.toUpperCase())
                     .replace(/\bMR\.?\b/, 'Mr')
                     .replace(/\bMS\.?\b/, 'Ms')
                     .replace(/\bDR\.?\b/, 'Dr')
@@ -1656,7 +1662,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     .replace(/\bThe\b/g, 'the')
                     .replace(/\bOf\b/g, 'of')
                     .replace(/\bAnd\b/g, 'and')
-                    .replace(/\bY\s/g, 'y')
+                    .replace(/\bY\b(?!\.)/g, 'y')
                     
                     // strip extra spaces
                     .replace(/\s{2,}/g, ' ');
@@ -1679,6 +1685,19 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     currentLocale = locale ?? (navigator.language || 'en').split('-')[0].toLowerCase(); // English is the default locale.
                     activeDictionary = dictionaries[currentLocale];
                     activeResourceDictionary = resourceDictionaries[currentLocale];
+                    
+                    // When the provided locale was not found use the first dictionary.
+                    let firstLoadedLocale;
+                    if (!activeDictionary) {
+                        firstLoadedLocale = Object.keys(dictionaries)[0];
+                        activeDictionary = dictionaries[firstLoadedLocale] ?? {};
+                        consoleWarn('I18N:No dictionary found for ' + currentLocale + ' attempting to use ' + firstLoadedLocale + ' instead.');
+                    }
+                    if (!activeResourceDictionary) {
+                        firstLoadedLocale ??= Object.keys(resourceDictionaries)[0];
+                        activeResourceDictionary = resourceDictionaries[firstLoadedLocale];
+                        consoleWarn('I18N:No resource dictionary found for ' + currentLocale + ' attempting to use ' + firstLoadedLocale + ' instead.');
+                    }
                 },
                 
                 // Get the current locale, detect one if missing.

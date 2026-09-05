@@ -24,7 +24,7 @@ test("Test areFloatsEqual", function() {
 });
 
 test("Test getRandomInt", function() {
-    var r, count = 10; // Repeat a few times since the results are random.
+    let r, count = 10; // Repeat a few times since the results are random.
     while (count--) {
         r = myt.getRandomInt(0, 0);
         ok(r === 0, "Random number should always be 0");
@@ -56,7 +56,7 @@ test("Test getRandomInt", function() {
 });
 
 test("Test getRandomArbitrary", function() {
-    var r, count = 10; // Repeat a few times since the results are random.
+    let r, count = 10; // Repeat a few times since the results are random.
     while (count--) {
         r = myt.getRandomArbitrary(0, 0);
         ok(r === 0, "Random number should always be 0");

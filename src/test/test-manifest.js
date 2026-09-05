@@ -23,6 +23,8 @@
         {path:'tests/core/test-ClassSystem.js'},
         {path:'tests/core/test-myt-dom.js', needsBrowser:true},
         {path:'tests/core/test-myt.js'},
+        {path:'tests/core/test-myt-toNameCase.js'},
+        {path:'tests/core/test-myt-deepEqual.js'},
         {path:'tests/core/test-Node.js'},
         {path:'tests/core/test-Node_placement.js'},
         {path:'tests/core/test-Observable.js'},
