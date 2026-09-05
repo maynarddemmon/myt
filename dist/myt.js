@@ -602,7 +602,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         /*  Test if two values are deeply equal to each other. Handles primitives, Dates, Objects
             and Arrays. Tracks Objects it has seen to prevent stack overflows from cycles. */
-        deepEqual = (a, b, seenA=new WeakMap(), seenB=new WeakMap()) => {
+        deepEqual = (a, b, seenA=new WeakMap()) => {
             // First do a quick reference check and tests primitives.
             if (a !== b) {
                 // Make Dates something easy to compare.
@@ -637,7 +637,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                     const lenA = a.length;
                     if (lenA !== b.length) return false;
                     for (let i = 0; i < lenA; i++) {
-                        if (!deepEqual(a[i], b[i], seenA, seenB)) return false;
+                        if (!deepEqual(a[i], b[i], seenA)) return false;
                     }
                     return true;
                 }
@@ -648,7 +648,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 if (keysA.length !== keysB.length) return false;
                 for (const key of keysA) {
                     if (!Object.hasOwn(b, key)) return false;
-                    if (!deepEqual(a[key], b[key], seenA, seenB)) return false;
+                    if (!deepEqual(a[key], b[key], seenA)) return false;
                 }
             }
             return true;
@@ -660,7 +660,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
-            version:202609051343, // <<< BUILD_VERSION_THIS
+            version:202609051354, // <<< BUILD_VERSION_THIS
             
             generateGuid,
             
