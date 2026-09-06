@@ -123,7 +123,7 @@
                                 }).then(response => {
                                     deferred.succeed(response + '\n//# sourceURL=' + path);
                                 }).catch(error => {
-                                    console.error('Failed to load ' + path + ': ' + error.message);
+                                    console.error('Failed to load ' + path + ': ' + error.message, error);
                                 });
                             }
                         }
@@ -223,7 +223,7 @@
         
         /* A version number based on the time this distribution of the myt loader was created. */
         VERSION = {
-            version:202609061329 // <<< BUILD_VERSION_THIS
+            version:202609061431 // <<< BUILD_VERSION_THIS
         };
     
     exports.loader_version = VERSION.version;

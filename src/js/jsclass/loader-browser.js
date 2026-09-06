@@ -123,7 +123,7 @@
                                 }).then(response => {
                                     deferred.succeed(response + '\n//# sourceURL=' + path);
                                 }).catch(error => {
-                                    console.error('Failed to load ' + path + ': ' + error.message);
+                                    console.error('Failed to load ' + path + ': ' + error.message, error);
                                 });
                             }
                         }
