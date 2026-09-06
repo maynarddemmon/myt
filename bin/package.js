@@ -17,6 +17,10 @@
             for (const name of names) this.dependencies.add(name);
             return this;
         }
+        requiresNotNullish = (...names) => {
+            for (const name of names) this.dependencies.add(name);
+            return this;
+        }
     }
     
     exports.Packages = manifestFunc => {
@@ -52,4 +56,3 @@
         return filePaths;
     };
 })(global, exports);
-

@@ -6,10 +6,27 @@
             return entry;
         },
         
+        // Names that at least one requiresNotNullish() call has asked to have treated this way. 
+        // Keyed by name rather than by the providing package, since it's the requiring package(s) 
+        // that declare this, and isLoaded is only ever computed once for a given name regardless 
+        // of who triggers it.
+        strictNullishNames = new Set(),
+        
+        // The default only treats undefined as "not yet loaded", so a value like null, 0, false, 
+        // or '' that was assigned to a name BEFORE that package's own file has run (e.g. a 
+        // defensive placeholder) is mistaken for a real, already-loaded value, and the package is 
+        // silently never fetched. Two ways to opt a name into treating null the same as undefined:
+        //   - globalThis.LOADER_CHECK_NULLISH = true applies to every name.
+        //   - .requiresNotNullish(name, ...) applies to just those names.
+        // Read live (not cached), so either can be set at any point before the packages that need 
+        // it are required.
+        isUnset = (value, name) => value === undefined ||
+            (value === null && (globalThis.LOADER_CHECK_NULLISH || strictNullishNames.has(name))),
+        
         getPkgObject = name => {
             if (typeof name === 'string') {
                 const pkg = getPkgByName(name);
-                if (pkg.obj === undefined) {
+                if (isUnset(pkg.obj, name)) {
                     const parts = name.split('.');
                     let object = global,
                         part;
@@ -135,7 +152,9 @@
                                             fire(pkg, 'load');
                                         } else {
                                             n--;
-                                            source[pathsLen - 1 - n].callback(code => {
+                                            const idx = pathsLen - 1 - n;
+                                            if (globalThis.LOADER_IS_VERBOSE) console.log('Loading: ' + paths[idx]);
+                                            source[idx].callback(code => {
                                                 (new Function(code))();
                                                 loadNext();
                                             });
@@ -167,7 +186,7 @@
             // loaded yet may still be loaded by the time this is asked again.
             if (pkg._isLoaded) return true;
             for (const name of pkg._names) {
-                if (getPkgObject(name) === undefined) return false;
+                if (isUnset(getPkgObject(name), name)) return false;
             }
             return pkg._isLoaded = true;
         },
@@ -193,11 +212,18 @@
                 for (const arg of args) deps.add(arg);
                 return self;
             };
+            self.requiresNotNullish = (...args) => {
+                for (const arg of args) {
+                    deps.add(arg);
+                    strictNullishNames.add(arg);
+                }
+                return self;
+            };
         },
         
         /* A version number based on the time this distribution of the myt loader was created. */
         VERSION = {
-            version:202609041552 // <<< BUILD_VERSION_THIS
+            version:202609061329 // <<< BUILD_VERSION_THIS
         };
     
     exports.loader_version = VERSION.version;
