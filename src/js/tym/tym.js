@@ -1,5 +1,4 @@
-/* eslint-disable no-unused-vars */
-(pkg => {
+(global => {
     /*
      * http://github.com/maynarddemmon/myt
      * Maynard Demmon <maynarddemmon@gmail.com>
@@ -50,7 +49,7 @@
         CSV_OBJECT_REGEX = /(\,|\r?\n|\r|^)(?:"((?:\\.|""|[^\\"])*)"|([^\,"\r\n]*))/gi,
         CSV_UNESCAPE_REGEX = /[\\"](.)/g,
         
-        tym = pkg.tym = {
+        tym = global.tym = {
             /** A version number based on the time this distribution of tym was created. */
             version:NaN, // <<< BUILD_VERSION_THIS
             
@@ -72,7 +71,7 @@
             resolveName: (objName, scope) => {
                 if (!objName || objName.length === 0) return undefined;
                 
-                scope = scope ?? global;
+                scope = scope ?? globalThis;
                 
                 const parts = isArray(objName) ? objName : objName.split('.'), 
                     len = parts.length;
@@ -532,7 +531,6 @@
                 }
             }
         };
-})(global);
+})(globalThis);
 
-const JS = global.JS,
-    tym = global.tym;
+module.exports = {JS:globalThis.JS, tym:globalThis.tym};

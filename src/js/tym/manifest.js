@@ -2,10 +2,8 @@ JS.Packages(file => {
     // Package:tym
     const TYM_ROOT = '../src/js/tym/';
     
-    file(TYM_ROOT + '_prefix.js').provides('global');
-    
     // JS.Class
-    file(TYM_ROOT+'../jsclass/core.js').provides('JS.Class','JS.Module','JS.Singleton').requires('global');
+    file(TYM_ROOT+'../jsclass/core.js').provides('JS.Class','JS.Module','JS.Singleton');
     
     // tym
     file(TYM_ROOT + 'tym.js').provides('tym').requires('JS.Class','JS.Module','JS.Singleton');

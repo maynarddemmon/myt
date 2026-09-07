@@ -1,7 +1,3 @@
-/* eslint-disable */
-const global = module.exports = {};
-
-
 (exports => {
     const 
         /*  Gets an array of JS.Methods for the provided method name.
@@ -265,8 +261,7 @@ const global = module.exports = {};
     });
 })(globalThis.JS ?? (globalThis.JS = {}));
 
-/* eslint-disable no-unused-vars */
-(pkg => {
+(global => {
     /*
      * http://github.com/maynarddemmon/myt
      * Maynard Demmon <maynarddemmon@gmail.com>
@@ -317,9 +312,9 @@ const global = module.exports = {};
         CSV_OBJECT_REGEX = /(\,|\r?\n|\r|^)(?:"((?:\\.|""|[^\\"])*)"|([^\,"\r\n]*))/gi,
         CSV_UNESCAPE_REGEX = /[\\"](.)/g,
         
-        tym = pkg.tym = {
+        tym = global.tym = {
             /** A version number based on the time this distribution of tym was created. */
-            version:202609041220, // <<< BUILD_VERSION_THIS
+            version:202609070124, // <<< BUILD_VERSION_THIS
             
             generateGuid: generateGuid,
             
@@ -339,7 +334,7 @@ const global = module.exports = {};
             resolveName: (objName, scope) => {
                 if (!objName || objName.length === 0) return undefined;
                 
-                scope = scope ?? global;
+                scope = scope ?? globalThis;
                 
                 const parts = isArray(objName) ? objName : objName.split('.'), 
                     len = parts.length;
@@ -799,10 +794,9 @@ const global = module.exports = {};
                 }
             }
         };
-})(global);
+})(globalThis);
 
-const JS = global.JS,
-    tym = global.tym;
+module.exports = {JS:globalThis.JS, tym:globalThis.tym};
 
 
 (pkg => {
