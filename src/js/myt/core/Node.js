@@ -162,9 +162,9 @@
         
         // Class Methods and Attributes ////////////////////////////////////////
         extend: {
-            getMatchingAncestorOrSelf: getMatchingAncestorOrSelf,
-            getMatchingAncestor: getMatchingAncestor,
-            DEFAULT_PLACEMENT: DEFAULT_PLACEMENT
+            getMatchingAncestorOrSelf,
+            getMatchingAncestor,
+            DEFAULT_PLACEMENT
         },
         
         

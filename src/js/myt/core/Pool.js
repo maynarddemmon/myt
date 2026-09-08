@@ -15,6 +15,17 @@
             @returns {!Array} */
         getActiveObjArray = (trackActivesPool, lazy) => lazy ? trackActivesPool.__actives ??= [] : trackActivesPool.__actives,
         
+        destroyObjectPool = objPool => {
+            if (objPool) {
+                let i = objPool.length;
+                while (i) {
+                    const obj = objPool[--i];
+                    if (typeof obj.destroy === 'function') obj.destroy();
+                }
+                objPool.length = 0;
+            }
+        },
+        
         /** Implements an object pool. Subclasses must, at a minimum, implement the 
             createInstance method.
             
@@ -76,15 +87,7 @@
                 destroy function.
                 @returns {void} */
             destroyPooledInstances: function() {
-                const objPool = getObjPool(this);
-                if (objPool) {
-                    let i = objPool.length;
-                    while (i) {
-                        const obj = objPool[--i];
-                        if (typeof obj.destroy === 'function') obj.destroy();
-                    }
-                    objPool.length = 0;
-                }
+                destroyObjectPool(getObjPool(this));
             }
         }),
         

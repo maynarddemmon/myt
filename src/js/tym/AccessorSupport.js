@@ -4,7 +4,7 @@
         GETTER_NAMES = new Map(), // Caches getter names.
         SETTER_NAMES = new Map(), // Caches setter names.
         
-        generateName = (attrName, prefix) => prefix + attrName.charAt(0).toUpperCase() + attrName.slice(1),
+        generateName = (attrName, prefix) => prefix + (attrName[0] ?? '').toUpperCase() + attrName.slice(1),
         generateSetterName = attrName => SETTER_NAMES.get(attrName) ?? (SETTER_NAMES.set(attrName, generateName(attrName, 'set')), SETTER_NAMES.get(attrName)),
         generateGetterName = attrName => GETTER_NAMES.get(attrName) ?? (GETTER_NAMES.set(attrName, generateName(attrName, 'get')), GETTER_NAMES.get(attrName)),
         
@@ -68,13 +68,13 @@
                 assumes the target is an myt.Observable.
                 @param {!Object} target
                 @param {string} attrName
-                @returns {undefined} */
+                @returns {void} */
             createSetterFunction: createSetterFunction,
             
             /** Creates a standard getter function for the provided attrName on the target.
                 @param {!Object} target
                 @param {string} attrName
-                @returns {undefined} */
+                @returns {void} */
             createGetterFunction: createGetterFunction,
             
             createSetterMixin: (propNames, alsoGetters) => {
@@ -89,16 +89,16 @@
         
         
         // Methods /////////////////////////////////////////////////////////////
-        appendToEarlyAttrs: function() {(this.earlyAttrs ??= []).push(...arguments);},
-        prependToEarlyAttrs: function() {(this.earlyAttrs ??= []).unshift(...arguments);},
-        appendToLateAttrs: function() {(this.lateAttrs ??= []).push(...arguments);},
-        prependToLateAttrs: function() {(this.lateAttrs ??= []).unshift(...arguments);},
+        appendToEarlyAttrs: function(...args) {(this.earlyAttrs ??= []).push(...args);},
+        prependToEarlyAttrs: function(...args) {(this.earlyAttrs ??= []).unshift(...args);},
+        appendToLateAttrs: function(...args) {(this.lateAttrs ??= []).push(...args);},
+        prependToLateAttrs: function(...args) {(this.lateAttrs ??= []).unshift(...args);},
         
         /** Used to quickly extract and set attributes from the attrs object passed to 
             an initializer.
             @param {?Array} attrNames - An array of attribute names.
             @param {?Object} attrs - The attrs Object to extract values from.
-            @returns {undefined}. */
+            @returns {void} */
         quickSet: function(attrNames, attrs) {
             if (attrNames) {
                 for (const attrName of attrNames) {
@@ -110,7 +110,7 @@
         
         /** Calls a setter function for each attribute in the provided map.
             @param {?Object} attrs - A map of attributes to set.
-            @returns {undefined}. */
+            @returns {void} */
         callSetters: function(attrs) {
             const self = this,
                 earlyAttrs = self.earlyAttrs,
@@ -178,7 +178,7 @@
             @param {boolean} [skipSetter] - If true no attempt will be made to invoke a setter 
                 function. Useful when you want to invoke standard setter behavior. Defaults to 
                 undefined which is equivalent to false.
-            @returns {undefined} */
+            @returns {void} */
         set: function(attrName, v, skipSetter) {
             const self = this;
             

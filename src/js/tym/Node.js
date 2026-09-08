@@ -1,6 +1,8 @@
 (pkg => {
     const JSClass = JS.Class,
         
+        NOOP = pkg.NOOP,
+        
         consoleWarn = console.warn,
         
         /*  Common mixins for Eventable and Node. */
@@ -30,7 +32,7 @@
         
         /*  Get the closest ancestor of the provided Node or the Node itself for which the matcher 
             function returns true. Returns a Node or undefined if no match is found.
-                param node:myt.Node the Node to start searching from.
+                param node:tym.Node the Node to start searching from.
                 param matcher:function the function to test for matching Nodes with. */
         getMatchingAncestorOrSelf = (node, matcherFunc) => {
             if (matcherFunc) {
@@ -43,7 +45,7 @@
         
         /*  Get the youngest ancestor of the provided Node for which the matcher function returns 
             true. Returns a Node or undefined if no match is found.
-                param node:myt.Node the Node to start searching from. This Node is not tested, but 
+                param node:tym.Node the Node to start searching from. This Node is not tested, but 
                     its parent is.
                 param matcher:function the function to test for matching Nodes with. */
         getMatchingAncestor = (node, matcherFunc) => getMatchingAncestorOrSelf(node ? node.parent : null, matcherFunc),
@@ -77,7 +79,7 @@
         getRefs = scope => scope.__REFS ??= {};
         
     /** An object that provides accessors, events and simple lifecycle management. Useful as a 
-        light weight alternative to myt.Node when parent child relationships are not needed.
+        light weight alternative to tym.Node when parent child relationships are not needed.
         
         Attributes:
             inited:boolean Set to true after this Eventable has completed initialization.
@@ -91,7 +93,7 @@
         /** The standard JSClass initializer function.
             @param {?Object} [attrs] - A map of attribute names and values.
             @param {?Array} [mixins] - A list of mixins to be added onto the new instance.
-            @returns {undefined} */
+            @returns {void} */
         initialize: function(attrs, mixins) {
             initializer(this, mixins);
             this.init(attrs ?? {});
@@ -102,13 +104,13 @@
         /** Called during initialization. Calls setter methods and lastly, sets inited to true. 
             Subclasses must callSuper.
             @param {?Object} attrs - A map of attribute names and values.
-            @returns {undefined} */
+            @returns {void} */
         init: function(attrs) {
             this.callSetters(attrs);
             this.inited = true;
         },
         
-        /** @overrides myt.Destructible. */
+        /** @overrides tym.Destructible. */
         destroy: function() {
             this.releaseAllConstraints();
             this.detachFromAllObservables();
@@ -127,11 +129,11 @@
         'destroyAfterOrphaning' methods.
         
         Events:
-            parent:myt.Node Fired when the parent is set.
+            parent:tym.Node Fired when the parent is set.
         
         Attributes:
             inited:boolean Set to true after this Node has completed initializing.
-            parent:myt.Node The parent of this Node.
+            parent:tym.Node The parent of this Node.
             name:string The name of this node. Used to reference this Node from its parent Node.
             isBeingDestroyed:boolean Indicates that this node is in the process of being destroyed. 
                 Set to true at the beginning of the destroy lifecycle phase. Undefined before that.
@@ -145,7 +147,7 @@
                 when it is added to a parent Node.
         
         Private Attributes:
-            __animPool:array An myt.TrackActivesPool used by the 'animate' method.
+            __animPool:array An tym.TrackActivesPool used by the 'animate' method.
             subnodes:array The array of child nodes for this node. Should be accessed through the 
                 getSubnodes method.
         
@@ -156,19 +158,19 @@
         
         // Class Methods and Attributes ////////////////////////////////////////
         extend: {
-            getMatchingAncestorOrSelf: getMatchingAncestorOrSelf,
-            getMatchingAncestor: getMatchingAncestor,
-            DEFAULT_PLACEMENT: DEFAULT_PLACEMENT
+            getMatchingAncestorOrSelf,
+            getMatchingAncestor,
+            DEFAULT_PLACEMENT
         },
         
         
         // Constructor /////////////////////////////////////////////////////////
         /** The standard JSClass initializer function. Subclasses should not override this function.
-            @param {?Object} [parent] - The myt.Node (or dom element for RootViews) that will be 
-                set as the parent of this myt.Node.
+            @param {?Object} [parent] - The tym.Node (or dom element for RootViews) that will be 
+                set as the parent of this tym.Node.
             @param {?Object} [attrs] - A map of attribute names and values.
             @param {?Array} [mixins] - A list of mixins to be added onto the new instance.
-            @returns {undefined} */
+            @returns {void} */
         initialize: function(parent, attrs, mixins) {
             initializer(this, mixins);
             this.initNode(parent, attrs ?? {});
@@ -178,17 +180,17 @@
         // Life Cycle //////////////////////////////////////////////////////////
         /** Called during initialization. Sets initial state for life cycle attrs, calls setter 
             methods, sets parent and lastly, sets inited to true. Subclasses must callSuper.
-            @param {?Object} [parent] - The myt.Node (or dom element for RootViews) the parent of 
+            @param {?Object} [parent] - The tym.Node (or dom element for RootViews) the parent of 
                 this Node.
             @param {?Object} attrs - A map of attribute names and values.
-            @returns {undefined} */
+            @returns {void} */
         initNode: function(parent, attrs) {
             this.callSetters(attrs);
             this.setParent(parent);
             this.inited = true;
         },
         
-        /** @overrides myt.Destructible. */
+        /** @overrides tym.Destructible. */
         destroy: function() {
             const self = this,
                 subs = self.subnodes;
@@ -214,8 +216,8 @@
         
         /** Provides a hook for subclasses to do destruction of their internals. This method is 
             called after the parent has been unset. Subclasses must call super.
-            @returns {undefined} */
-        destroyAfterOrphaning: () => {/* Subclasses to implement as needed. */},
+            @returns {void} */
+        destroyAfterOrphaning: NOOP, // () => {/* Subclasses to implement as needed. */},
         
         
         // Structural Accessors ////////////////////////////////////////////////
@@ -226,7 +228,7 @@
         /** Sets the provided Node as the new parent of this Node. This is the most direct method 
             to do reparenting.
             @param {?Object} newParent
-            @returns {undefined} */
+            @returns {void} */
         setParent: function(newParent) {
             const self = this;
             
@@ -269,7 +271,7 @@
             example a Node named 'foo' that is a child of a Node stored in the variable 'bar' 
             would be referenced like this: bar.foo or bar['foo'].
             @param {string} name
-            @returns {undefined} */
+            @returns {void} */
         setName: function(name) {
             if (this.name !== name) {
                 // Remove "name" reference from parent.
@@ -289,7 +291,7 @@
             Subclasses will not typically override this method, but if they do, they probably won't 
             need to call super.
             @param {string} placement - The placement path to use.
-            @param {!Object} subnode - The sub myt.Node being placed.
+            @param {!Object} subnode - The sub tym.Node being placed.
             @returns {!Object} - The Node to place a subnode into. */
         determinePlacement: function(placement, subnode) {
             // Parse "active" placement and remaining placement.
@@ -326,7 +328,7 @@
         // Tree Methods //
         /** Gets the root Node for this Node. The root Node is the oldest ancestor or self that 
             has no parent.
-            @returns {!Object} - The root myt.Node. */
+            @returns {!Object} - The root tym.Node. */
         getRoot: function() {
             return this.parent?.getRoot() ?? this;
         },
@@ -338,7 +340,7 @@
         },
         
         /** Tests if this Node is a descendant of the provided Node or is the node itself.
-            @param {!Object} node - The myt.Node to check for descent from.
+            @param {!Object} node - The tym.Node to check for descent from.
             @returns {boolean} */
         isDescendantOf: function(node) {
             const self = this;
@@ -355,14 +357,14 @@
         },
         
         /** Tests if this Node is an ancestor of the provided Node or is the node itself.
-            @param {!Object} node - The myt.Node to check for.
+            @param {!Object} node - The tym.Node to check for.
             @returns {boolean} */
         isAncestorOf: function(node) {
             return node ? node.isDescendantOf(this) : false;
         },
         
         /** Gets the youngest common ancestor of this Node and the provided Node.
-            @param {!Object} node - The myt.Node to look for a common ancestor with.
+            @param {!Object} node - The tym.Node to look for a common ancestor with.
             @returns {?Object} The youngest common Node or undefined if none exists. */
         getLeastCommonAncestor: function(node) {
             while (node) {
@@ -373,30 +375,30 @@
         
         /** Find the youngest ancestor Node that is an instance of the class.
             @param {?Function} klass - The Class to search for.
-            @returns {?Object} - The myt.Node or undefined if no klass is provided or match found. */
+            @returns {?Object} - The tym.Node or undefined if no klass is provided or match found. */
         searchAncestorsForClass: function(klass) {
             if (klass) return this.searchAncestors(node => node instanceof klass);
         },
         
         /** Find the youngest ancestor Node that includes the JS.Module.
             @param {?Object} jsmodule - The JS.Module to search for.
-            @returns {?Object} - The myt.Node or undefined if no klass is provided or match found. */
+            @returns {?Object} - The tym.Node or undefined if no klass is provided or match found. */
         searchAncestorsForModule: function(jsmodule) {
             if (jsmodule) return this.searchAncestors(node => node.isA(jsmodule));
         },
         
         /** Get the youngest ancestor of this Node for which the matcher function returns true. 
-            This is a simple wrapper around myt.Node.getMatchingAncestor(this, matcherFunc).
+            This is a simple wrapper around tym.Node.getMatchingAncestor(this, matcherFunc).
             @param {!Function} matcherFunc - The function to test for matching Nodes with.
-            @returns {?Object} - The myt.Node or undefined if no match is found. */
+            @returns {?Object} - The tym.Node or undefined if no match is found. */
         searchAncestors: function(matcherFunc) {
             return getMatchingAncestor(this, matcherFunc);
         },
         
         /** Get the youngest ancestor of this Node or the Node itself for which the matcher function 
-            returns true. This is a simple wrapper around myt.Node.getMatchingAncestorOrSelf(this, matcherFunc).
+            returns true. This is a simple wrapper around tym.Node.getMatchingAncestorOrSelf(this, matcherFunc).
             @param {!Function} matcherFunc - The function to test for matching Nodes with.
-            @returns {?Object} - The myt.Node or undefined if no match is found. */
+            @returns {?Object} - The tym.Node or undefined if no match is found. */
         searchAncestorsOrSelf: function(matcherFunc) {
             return getMatchingAncestorOrSelf(this, matcherFunc);
         },
@@ -424,16 +426,16 @@
         
         /** Called when a subnode is added to this node. Provides a hook for subclasses. No need for
             subclasses to call super. Do not call this method to add a subnode. Instead call setParent.
-            @param {!Object} _node - The sub myt.Node that was added.
-            @returns {undefined} */
-        subnodeAdded: _node => {},
+            @param {!Object} node - The sub tym.Node that was added.
+            @returns {void} */
+        subnodeAdded: NOOP, // node => {},
         
         /** Called when a subnode is removed from this node. Provides a hook for subclasses. No need
             for subclasses to call super. Do not call this method to remove a subnode. Instead 
             call setParent.
-            @param {!Object} _node - The sub myt.Node that was removed.
-            @returns {undefined} */
-        subnodeRemoved: _node => {},
+            @param {!Object} node - The sub tym.Node that was removed.
+            @returns {void} */
+        subnodeRemoved: NOOP, // node => {},
         
         
         // Reference Store //

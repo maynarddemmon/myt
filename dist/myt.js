@@ -576,8 +576,10 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         /*  Creates a memoized version of the provided function.
             @param {!Function} func - The function to memoize.
-            @param {Function} [keyResolver] - Optional function to generate custom keys. Defaults to JSON.stringify.
-            @param {number} [cacheLimit] - Optional maximum size of the cache. Defaults to unlimited.
+            @param {Function} [keyResolver] - Optional function to generate custom keys. Defaults 
+                to JSON.stringify.
+            @param {number} [cacheLimit] - Optional maximum size of the cache. Defaults 
+                to unlimited.
             @returns {!Function} - The memoized function. */
         memoize = (func, keyResolver=JSON.stringify, cacheLimit=Infinity) => {
             const cache = new Map();
@@ -660,7 +662,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
-            version:202609051354, // <<< BUILD_VERSION_THIS
+            version:202609072223, // <<< BUILD_VERSION_THIS
             
             generateGuid,
             
@@ -5555,6 +5557,17 @@ myt.Destructible = new JS.Module('Destructible', {
             @returns {!Array} */
         getActiveObjArray = (trackActivesPool, lazy) => lazy ? trackActivesPool.__actives ??= [] : trackActivesPool.__actives,
         
+        destroyObjectPool = objPool => {
+            if (objPool) {
+                let i = objPool.length;
+                while (i) {
+                    const obj = objPool[--i];
+                    if (typeof obj.destroy === 'function') obj.destroy();
+                }
+                objPool.length = 0;
+            }
+        },
+        
         /** Implements an object pool. Subclasses must, at a minimum, implement the 
             createInstance method.
             
@@ -5616,15 +5629,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 destroy function.
                 @returns {void} */
             destroyPooledInstances: function() {
-                const objPool = getObjPool(this);
-                if (objPool) {
-                    let i = objPool.length;
-                    while (i) {
-                        const obj = objPool[--i];
-                        if (typeof obj.destroy === 'function') obj.destroy();
-                    }
-                    objPool.length = 0;
-                }
+                destroyObjectPool(getObjPool(this));
             }
         }),
         
@@ -5992,9 +5997,9 @@ myt.Destructible = new JS.Module('Destructible', {
         
         // Class Methods and Attributes ////////////////////////////////////////
         extend: {
-            getMatchingAncestorOrSelf: getMatchingAncestorOrSelf,
-            getMatchingAncestor: getMatchingAncestor,
-            DEFAULT_PLACEMENT: DEFAULT_PLACEMENT
+            getMatchingAncestorOrSelf,
+            getMatchingAncestor,
+            DEFAULT_PLACEMENT
         },
         
         

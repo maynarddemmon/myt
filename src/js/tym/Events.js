@@ -65,7 +65,7 @@
         },
         
         /** Removes all observers from this Observable.
-            @returns {undefined} */
+            @returns {void} */
         detachAllObservers: function() {
             const observersByType = this.__obsbt;
             if (observersByType) {
@@ -124,7 +124,7 @@
             @param value:* The value to set on the event.
             @param observers:array (Optional) If provided the event will be sent to this specific 
                 list of observers and no others.
-            @returns {undefined} */
+            @returns {void} */
         fireEvent: function(type, value, observers) {
             // Determine observers to use but avoid using getObservers since that lazy instantiates 
             // __obsbt and fireEvent will get called predominantly when no observers were
@@ -171,7 +171,7 @@
                                 if (typeof methodName === 'function') {
                                     if (methodName.call(observer, event)) break;
                                 } else {
-                                    if (observer[methodName](event)) break;
+                                    if (observer[methodName]?.(event)) break;
                                 }
                             } catch (err) {
                                 dumpStack(err);
@@ -211,7 +211,7 @@
             @param {*} v The candidate event or value to get the value from. An event like value 
                 is a non-null Object with a truthy "type" property.
             @returns {*} the provided event or the event's value if found. */
-        valueFromEvent: v => v && typeof v === 'object' && v.type ? v.value : v,
+        valueFromEvent: v => v?.type ? v.value : v,
         
         /** Does the same thing as this.attachTo and also immediately calls the method with an 
             event containing the attributes value. If 'once' is true no attachment will occur 
@@ -223,7 +223,7 @@
                 of the attribute on the Observable to pull the value from.
             @param once:boolean (optional) if true  this Observer will detach from the Observable 
                 after the event is handled once.
-            @returns {undefined} */
+            @returns {void} */
         syncTo: function(observable, methodName, eventType, attrName, once) {
             attrName ??= eventType;
             try {
@@ -268,6 +268,38 @@
         getObservables: function(eventType) {
             const observablesByType = this.__obt ??= {};
             return observablesByType[eventType] ??= [];
+        },
+        
+        /** Gets all the Observables this Observer is attached to regardless of event type.
+            @param filterFunc:function (optional) If provided it will be called for each 
+                methodName/observable/eventType attachment and only those for which it returns a 
+                truthy value will be included. Called as filterFunc(observable, methodName, 
+                eventType).
+            @param accumulator:Set|Array (optional) If provided, Observables will be added to it 
+                and it will be returned rather than a new Set. Anything with an "add" function is 
+                filled using that, otherwise "push" is used. Note that a Set accumulator will 
+                contain each Observable only once while an Array accumulator will contain one entry 
+                per matching attachment, so an Observable attached to for several event types will 
+                appear more than once.
+            @returns {!Set|!Array} the accumulator if one was provided, otherwise a new Set of 
+                myt.Observable instances. */
+        getAllObservables: function(filterFunc, accumulator) {
+            const retval = accumulator ?? new Set(),
+                // Duck type the accumulator so Sets, Arrays, subclasses and custom collectors all work.
+                add = typeof retval.add === 'function' ? retval.add : retval.push,
+                observablesByType = this.__obt;
+            if (observablesByType) {
+                for (const [eventType, observables] of Object.entries(observablesByType)) {
+                    for (let i = 0, len = observables.length; i < len;) {
+                        const methodName = observables[i++],
+                            observable = observables[i++];
+                        if (!filterFunc || filterFunc(observable, methodName, eventType)) {
+                            add.call(retval, observable);
+                        }
+                    }
+                }
+            }
+            return retval;
         },
         
         /** Checks if any observables exist for the provided event type.
@@ -352,7 +384,7 @@
         },
         
         /** Tries to detach this Observer from all Observables it is attached to.
-            @returns {undefined} */
+            @returns {void} */
         detachFromAllObservables: function() {
             const observablesByType = this.__obt;
             if (observablesByType) {
@@ -374,7 +406,7 @@
             @param {string} methodName - The name of the method to call on this object.
             @param {?Array} observables - An array of observable/type pairs. An observer will 
                 attach to each observable for the event type.
-            @returns {undefined} */
+            @returns {void} */
         constrain: function(methodName, observables) {
             if (methodName && observables) {
                 // Make sure an even number of observable/type was provided
@@ -412,7 +444,7 @@
         
         /** Removes a constraint.
             @param {string} methodName
-            @returns {undefined} */
+            @returns {void} */
         releaseConstraint: function(methodName) {
             if (methodName) {
                 // No need to remove if the constraint is already empty.
@@ -433,7 +465,7 @@
         },
         
         /** Removes all constraints.
-            @returns {undefined} */
+            @returns {void} */
         releaseAllConstraints: function() {
             const constraints = this.__cbmn;
             if (constraints) {

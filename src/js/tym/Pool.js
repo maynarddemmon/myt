@@ -1,16 +1,16 @@
 (pkg => {
     const {Class:JSClass, Module:JSModule} = JS,
         
+        NOOP = pkg.NOOP,
+        
         consoleWarn = console.warn,
         
         /*  Get the object pool.
-            @private
             @param {boolean} lazy - If true a pool will be lazily instantiated.
             @returns {!Object} */
         getObjPool = (abstractPool, lazy) => lazy ? abstractPool.__op ??= [] : abstractPool.__op,
         
         /*  Get the active objects array.
-            @private
             @param {boolean} lazy - If true a list will be lazily instantiated.
             @returns {!Array} */
         getActiveObjArray = (trackActivesPool, lazy) => lazy ? trackActivesPool.__actives ??= [] : trackActivesPool.__actives,
@@ -41,12 +41,12 @@
             
             // Constructor /////////////////////////////////////////////////////
             /** Initialize does nothing.
-                @returns {undefined} */
+                @returns {void} */
             initialize: () => {},
             
             
             // Life Cycle //////////////////////////////////////////////////////
-            /** @overrides myt.Destructible */
+            /** @overrides tym.Destructible */
             destroy: function() {
                 const objPool = getObjPool(this);
                 if (objPool) objPool.length = 0;
@@ -68,11 +68,11 @@
             /** Creates a new object that can be stored in the pool. The default implementation 
                 does nothing.
                 @returns {?Object} */
-            createInstance: () => null,
+            createInstance: NOOP,
             
             /** Puts the object back in the pool. The object will be "cleaned" before it is stored.
                 @param {!Object} obj - The object to put in the pool.
-                @returns {undefined} */
+                @returns {void} */
             putInstance: function(obj) {
                 getObjPool(this, true).push(this.cleanInstance(obj));
             },
@@ -89,27 +89,27 @@
             
             /** Calls the destroy method on all object stored in the pool if they have a 
                 destroy function.
-                @returns {undefined} */
+                @returns {void} */
             destroyPooledInstances: function() {
                 destroyObjectPool(getObjPool(this));
             }
         }),
         
-        /** An implementation of an myt.AbstractPool.
+        /** An implementation of an tym.AbstractPool.
             
             Attributes:
                 instanceClass:JS.Class (initializer only) the class to use for new instances. 
                     Defaults to Object.
-                instanceParent:myt.Node (initializer only) The node to create new instances on.
+                instanceParent:tym.Node (initializer only) The node to create new instances on.
             
             @class */
         SimplePool = pkg.SimplePool = new JSClass('SimplePool', AbstractPool, {
             // Constructor /////////////////////////////////////////////////////
-            /** Create a new myt.SimplePool
+            /** Create a new tym.SimplePool
                 @param {!Function} instanceClass - The JS.Class to create instances from.
                 @param {?Object} [instanceParent] - The place to create instances on. When 
-                    instanceClass is an myt.Node this will be the node parent.
-                @returns {undefined} */
+                    instanceClass is an tym.Node this will be the node parent.
+                @returns {void} */
             initialize: function(instanceClass, instanceParent) {
                 this.callSuper();
                 
@@ -119,11 +119,11 @@
             
             
             // Methods /////////////////////////////////////////////////////////
-            /** @overrides myt.AbstractPool
+            /** @overrides tym.AbstractPool
                 Creates an instance of this.instanceClass and passes in this.instanceParent as the 
                 first argument if it exists.
                 arguments[0]:object (optional) the attrs to be passed to a 
-                created myt.Node.
+                created tym.Node.
                 @returns {?Object} */
             createInstance: function() {
                 return makeInstance(this.instanceParent, this.instanceClass, arguments[0]);
@@ -139,7 +139,7 @@
             @class */
         TrackActives = new JSModule('TrackActives', {
             // Life Cycle //////////////////////////////////////////////////////
-            /** @overrides myt.Destructible */
+            /** @overrides tym.Destructible */
             destroy: function() {
                 const actives = getActiveObjArray(this);
                 if (actives) actives.length = 0;
@@ -149,14 +149,14 @@
             
             
             // Methods /////////////////////////////////////////////////////////
-            /** @overrides myt.AbstractPool */
+            /** @overrides tym.AbstractPool */
             getInstance: function() {
                 const instance = this.callSuper();
                 getActiveObjArray(this, true).push(instance);
                 return instance;
             },
             
-            /** @overrides myt.AbstractPool */
+            /** @overrides tym.AbstractPool */
             putInstance: function(obj) {
                 const actives = getActiveObjArray(this);
                 let warningType;
@@ -195,7 +195,7 @@
             },
             
             /** Puts all the active instances back in the pool.
-                @returns {undefined} */
+                @returns {void} */
             putActives: function() {
                 const actives = getActiveObjArray(this);
                 if (actives) {
@@ -205,7 +205,7 @@
             }
         }),
         
-        /** An myt.SimplePool that tracks which objects are "active".
+        /** An tym.SimplePool that tracks which objects are "active".
             
             @class */
         TrackActivesPool = pkg.TrackActivesPool = new JSClass('TrackActivesPool', SimplePool, {
@@ -282,14 +282,14 @@
         }
     });
     
-    /** Objects that can be used in an myt.AbstractPool should use this mixin and implement the 
+    /** Objects that can be used in an tym.AbstractPool should use this mixin and implement the 
         "clean" method.
         
         @class */
     pkg.Reusable = new JSModule('Reusable', {
         // Methods /////////////////////////////////////////////////////////////
-        /** Puts this object back into a default state suitable for storage in an myt.AbstractPool
-            @returns {undefined} */
-        clean: () => {}
+        /** Puts this object back into a default state suitable for storage in an tym.AbstractPool
+            @returns {void} */
+        clean: NOOP
     });
 })(tym);

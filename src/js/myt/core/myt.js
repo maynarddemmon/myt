@@ -190,8 +190,10 @@
         
         /*  Creates a memoized version of the provided function.
             @param {!Function} func - The function to memoize.
-            @param {Function} [keyResolver] - Optional function to generate custom keys. Defaults to JSON.stringify.
-            @param {number} [cacheLimit] - Optional maximum size of the cache. Defaults to unlimited.
+            @param {Function} [keyResolver] - Optional function to generate custom keys. Defaults 
+                to JSON.stringify.
+            @param {number} [cacheLimit] - Optional maximum size of the cache. Defaults 
+                to unlimited.
             @returns {!Function} - The memoized function. */
         memoize = (func, keyResolver=JSON.stringify, cacheLimit=Infinity) => {
             const cache = new Map();
