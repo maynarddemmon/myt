@@ -295,15 +295,12 @@
             },
             
             setId: function(id) {
-                // FIXME: it might be better to not allow an ID to be changed after it has been set.
-                // Or, we could make this configurable behavior on the ModelCollection if it exists.
-                // The default should probably be not have IDs be editable after they've been set.
-                const existing = this.id;
-                if (id !== existing) {
-                    const mc = this.__mc;
-                    if (existing && mc) mc.removeById(existing);
-                    this.set('id', id, true);
-                    if (this.inited && id && mc) mc.addModel(this);
+                if (id !== this.id) {
+                    if (this.__mc && this.inited) {
+                        console.warn('Attempt to change ID while managed by a BaseModelCollection.', this.id, id);
+                    } else {
+                        this.set('id', id, true);
+                    }
                 }
             },
             
@@ -507,6 +504,7 @@
                 existingModel = modelsById[id];
             if (existingModel) {
                 delete modelsById[id];
+                existingModel.__mc = null;
                 this.fireRemovedEvent(existingModel);
                 if (destructive) existingModel.destroy();
                 return existingModel;

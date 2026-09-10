@@ -302,36 +302,53 @@ test("Destroying a collection destroys the models it holds.", function() {
 });
 
 // BaseModelCollection: setId //////////////////////////////////////////////////
-test("setId rekeys the model within its collection.", function() {
-    const collection = new myt.BaseModelCollection(),
-        model = collection.addModel({id:'old'});
-    model.setId('new');
-    ok(model.id === 'new', 'The id changed.');
-    ok(collection.getById('new') === model, 'It is stored under the new id.');
-    ok(collection.getById('old') === undefined, 'The old id is gone.');
-    ok(collection.getCount() === 1, 'Still one model.');
-});
-
-test("setId on a model with no collection just changes the id.", function() {
+test("setId sets the id when the model is not in a collection.", function() {
     const model = new myt.BaseModel({id:'a'});
     model.setId('b');
     ok(model.id === 'b', 'The id changed.');
 });
 
-test("setId onto an id that is already taken drops the renamed model.", function() {
-    /*  Documents current behavior rather than endorsing it. The renamed model is
-        removed from its old slot, then addModel finds the id already taken and
-        updates the existing model instead, so the renamed model ends up in no
-        collection at all and the count silently drops. See the FIXME on setId
-        about whether ids should be mutable once set. */
+test("setId is ignored while the model is in a collection.", function() {
+    const collection = new myt.BaseModelCollection(),
+        model = collection.addModel({id:'a'});
+    model.setId('b');
+    ok(model.id === 'a', 'The id did not change.');
+    ok(collection.getById('a') === model, 'It is still stored under the original id.');
+    ok(collection.getById('b') === undefined, 'Nothing was stored under the new id.');
+});
+
+test("A collision cannot displace an existing model.", function() {
     const collection = new myt.BaseModelCollection(),
         first = collection.addModel({id:'a'}),
         second = collection.addModel({id:'b'});
-    
     first.setId('b');
+    ok(first.id === 'a', 'The rename was refused.');
+    ok(collection.getById('b') === second, 'The existing model is untouched.');
+    ok(collection.getCount() === 2, 'Both models are still in the collection.');
+});
+
+test("removeById detaches the model so it can be rekeyed and re-added.", function() {
+    const collection = new myt.BaseModelCollection(),
+        model = collection.addModel({id:'a'});
+    collection.removeById('a');
+    ok(model.__mc === null, 'The collection reference was cleared.');
     
-    ok(first.id === 'b', 'The renamed model has the new id.');
-    ok(collection.getById('b') === second, 'But the id still maps to the model that already had it.');
-    ok(collection.getById('a') === undefined, 'The old id is gone.');
-    ok(collection.getCount() === 1, 'The renamed model is no longer in the collection.');
+    model.setId('a2');
+    ok(model.id === 'a2', 'A detached model can be rekeyed.');
+    
+    collection.addModel(model);
+    ok(collection.getById('a2') === model, 'And re-added under the new id.');
+});
+
+test("A removed model no longer notifies its old collection.", function() {
+    const collection = new myt.BaseModelCollection(),
+        model = collection.addModel({id:'a'}),
+        observer = new myt.Eventable(),
+        fired = [];
+    observer.onUpdated = event => {fired.push('updated:' + event.value.id);};
+    observer.attachTo(collection, 'onUpdated', 'updated');
+    
+    collection.removeById('a');
+    model.setAndNotifyCollection('id', 'zzz');
+    deepEqual(fired, [], 'Nothing fired on the collection it left.');
 });

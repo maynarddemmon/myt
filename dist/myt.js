@@ -662,7 +662,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
-            version:202609101511, // <<< BUILD_VERSION_THIS
+            version:202609101528, // <<< BUILD_VERSION_THIS
             
             generateGuid,
             
@@ -16603,15 +16603,12 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             setId: function(id) {
-                // FIXME: it might be better to not allow an ID to be changed after it has been set.
-                // Or, we could make this configurable behavior on the ModelCollection if it exists.
-                // The default should probably be not have IDs be editable after they've been set.
-                const existing = this.id;
-                if (id !== existing) {
-                    const mc = this.__mc;
-                    if (existing && mc) mc.removeById(existing);
-                    this.set('id', id, true);
-                    if (this.inited && id && mc) mc.addModel(this);
+                if (id !== this.id) {
+                    if (this.__mc && this.inited) {
+                        console.warn('Attempt to change ID while managed by a BaseModelCollection.', this.id, id);
+                    } else {
+                        this.set('id', id, true);
+                    }
                 }
             },
             
@@ -16815,6 +16812,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 existingModel = modelsById[id];
             if (existingModel) {
                 delete modelsById[id];
+                existingModel.__mc = null;
                 this.fireRemovedEvent(existingModel);
                 if (destructive) existingModel.destroy();
                 return existingModel;
