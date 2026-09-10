@@ -174,7 +174,7 @@
             to a defined setter if it exists. The implementation assumes this object is an 
             Observable so it will have a 'fireEvent' method.
             @param {string} attrName - The name of the attribute to set.
-            @param {*} v -The value to set.
+            @param {*} v - The value to set.
             @param {boolean} [skipSetter] - If true no attempt will be made to invoke a setter 
                 function. Useful when you want to invoke standard setter behavior. Defaults to 
                 undefined which is equivalent to false.

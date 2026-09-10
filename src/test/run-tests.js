@@ -21,6 +21,7 @@
 const fs = require('fs'),
     path = require('path'),
     {JSDOM, VirtualConsole} = require('jsdom'),
+    {styleText} = require('util'),
     
     ROOT = path.resolve(__dirname, '../..'),
     TEST_ROOT = __dirname,
@@ -118,7 +119,7 @@ const main = () => {
     for (const suite of suites) {
         const label = path.relative(TEST_ROOT, suite);
         if (!fs.existsSync(suite)) {
-            console.log('  ?? ' + label.padEnd(42) + 'not found');
+            console.log('  ??   ' + label.padEnd(52) + styleText(['bold', 'yellow'], 'NOT FOUND'));
             totalFail++;
             failedSuites.push(label);
             continue;
@@ -129,7 +130,7 @@ const main = () => {
         totalFail += result.fail;
         
         console.log(
-            '  ' + (result.fail === 0 ? 'ok  ' : 'FAIL') + ' ' + label.padEnd(50) +
+            '  ' + (result.fail === 0 ? styleText(['bold', 'greenBright'], 'OK  ') : styleText(['bold', 'red'], 'FAIL')) + ' ' + label.padEnd(50) +
             String(result.pass).padStart(4) + ' passed' +
             (result.fail ? ', ' + result.fail + ' failed' : '')
         );

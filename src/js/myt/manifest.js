@@ -94,7 +94,7 @@ JS.Packages(file => {
         .requires('myt.Reusable','myt.Selectable','myt.SimpleButton','myt.GridController','myt.global.focus','myt.global.keys','myt.ArrowKeyActivation');
     file(MYT_COMPONENT_ROOT + 'ListView.js'        ).provides('myt.ListView','myt.ListViewAnchor','myt.ListViewItemMixin','myt.ListViewSeparator','myt.ListViewItem')
         .requires('myt.FloatingPanel','myt.FloatingPanelAnchor','myt.SimpleTextButton','myt.global.focus','myt.global.keys','myt.ArrowKeyActivation');
-    file(MYT_COMPONENT_ROOT + 'ModelMixins.js'     ).provides('myt.ValueComponent','myt.RangeComponent','myt.BoundedValueComponent','myt.BoundedRangeComponent').requires('myt');
+    file(MYT_COMPONENT_ROOT + 'ModelMixins.js'     ).provides('myt.ValueComponent','myt.RangeComponent','myt.BoundedValueComponent','myt.BoundedRangeComponent','myt.BaseModel','myt.BaseModelCollection').requires('myt.Eventable');
     file(MYT_COMPONENT_ROOT + 'NativeInput.js'     )
         .provides('myt.NativeInputWrapper','myt.BaseInputText','myt.InputText','myt.ComboBox','myt.InputTextArea','myt.EditableText','myt.InputSelect','myt.InputSelectOption')
         .requires('myt.Button','myt.InputObservable','myt.ListViewAnchor','myt.SizeToDom','myt.Selectable');

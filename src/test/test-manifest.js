@@ -36,7 +36,8 @@
         {path:'tests/component/test-BoundedRangeComponent.js'},
         {path:'tests/component/test-Path.js'},
         {path:'tests/component/test-Color.js'},
-        {path:'tests/component/test-ExpressionParser.js'}
+        {path:'tests/component/test-ExpressionParser.js'},
+        {path:'tests/component/test-ModelMixins.js'}
     ];
     
     /** All suite paths in declaration order. Used by the browser runners. */

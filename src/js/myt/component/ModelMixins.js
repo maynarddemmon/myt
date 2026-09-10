@@ -1,5 +1,9 @@
 (pkg => {
-    const JSModule = JS.Module,
+    const {Class:JSClass, Module:JSModule} = JS,
+        
+        Eventable = pkg.Eventable,
+        
+        objValues = Object.values,
         
         mathRound = Math.round,
         
@@ -243,6 +247,94 @@
             setValue: function(v) {
                 this.callSuper(this.snapToInt && v != null && !isNaN(v) ? mathRound(v) : v);
             }
+        }),
+        
+        /** A base class for "Business Object" type Models. A BaseModel is often collected
+            together into a BaseModelCollection where each BaseModel is stored by an ID of
+            some kind.
+            
+            Events:
+                id:string
+            
+            Attributes:
+                id:string - The unique ID of this BaseModel. Uniqueness is only relative to the 
+                    any BaseModelCollection it is stored within.
+                modelCollection:BaseModelCollection - (optional) The BaseModelCollection this
+                    BaseModel will be stored and managed by. This gets stored internally in the
+                    private attribute __mc.
+            
+            Private Attributes:
+                __mc:BaseModelCollection - (optional) The BaseModelCollection this BaseModel is
+                    currently stored within and managed by. The BaseModelCollection is the only
+                    external things that should reach into this private attribute and modify it.
+            
+            @class */
+        BaseModel = pkg.BaseModel = new JSClass('BaseModel', Eventable, {
+            init: function(attrs) {
+                if (attrs.modelCollection) {
+                    this.__mc = attrs.modelCollection;
+                    delete attrs.modelCollection;
+                }
+                
+                this.callSuper(attrs);
+            },
+            
+            /** Used to set an attr and percolate change events up from a BaseModel to the 
+                BaseModelCollection to simplify monitoring an entire BaseModelCollection for 
+                changes. This is a wrapper around AccessorSuport.set with the same params 
+                provided here.
+                @param {string} attrName - The name of the attribute to set.
+                @param {*} v - The value to set.
+                @param {boolean} [skipSetter] - If true no attempt will be made to invoke a setter 
+                    function. Useful when you want to invoke standard setter behavior. Defaults to 
+                    undefined which is equivalent to false.
+                @returns {void} */
+            setAndNotifyCollection: function(attrName, v, skipSetter) {
+                this.set(attrName, v, skipSetter);
+                this.__mc?.fireUpdatedEvent(this);
+            },
+            
+            setId: function(id) {
+                // FIXME: it might be better to not allow an ID to be changed after it has been set.
+                // Or, we could make this configurable behavior on the ModelCollection if it exists.
+                // The default should probably be not have IDs be editable after they've been set.
+                const existing = this.id;
+                if (id !== existing) {
+                    const mc = this.__mc;
+                    if (existing && mc) mc.removeById(existing);
+                    this.set('id', id, true);
+                    if (this.inited && id && mc) mc.addModel(this);
+                }
+            },
+            
+            /** Gets a POJO representation of this BaseModel.
+                @param _cfg:Object - (optional) A configuration that can be used to control how
+                    the Object is constructed. Implementation dependent.
+                @returns {!Object} The POJO representation of this BaseModel. */
+            getAsObj: function(_cfg) {
+                // Subclasses should implement to return all data needed to instantiate but
+                // not the BaseModelCollection.
+                return {id:this.id};
+            },
+            
+            /** Checks if a provided BaseModel or POJO represents essentially the same data as
+                this BaseModel.
+                @param attrsOrModel:Object|BaseModel - The target to compare against.
+                @returns {boolean} */
+            similarTo: function(attrsOrModel) {
+                // Never similar to nullish
+                if (attrsOrModel == null) return false;
+                
+                // Always similar to self
+                if (attrsOrModel === this) return true;
+                
+                return pkg.shallowEqual(
+                    this.getAsObj(),
+                    typeof attrsOrModel.getAsObj === 'function' ? 
+                        attrsOrModel.getAsObj() : // Assume we were provided a BaseModel
+                        attrsOrModel // Assume we were provided a POJO
+                );
+            }
         });
     
     /** A numeric value component that stays within an upper and lower value and where the value 
@@ -279,6 +371,150 @@
                 if (v.upper != null && !isNaN(v.upper)) v.upper = mathRound(v.upper);
             }
             this.callSuper(v);
+        }
+    });
+    
+    /** A base class for collections of BaseModel instances where they can be uniquely identified
+        by a string based ID attr of some kind.
+        
+        Events:
+            added:BaseModel - Fired when a BaseModel is added to this collection. The value
+                provided in the event is the added model.
+            updated:BaseModel - Fired when a BaseModel managed by this collection is changed. The
+                value provided in the event is the modified model.
+            removed:BaseModel - Fired when a BaseModel is removed from this collection. The value
+                provided in the event is the removed model.
+        
+        Attributes:
+            idField:string - The name of the field on a BaseModel used as an ID. Defaults to "id".
+            modelClass:JS.Class - The JS.Class BaseModel used to instantiate new models in
+                this collection.
+        
+        Private Attributes:
+            __mbid:Object - The Object used to store the managed BaseModel instances.
+        
+        
+        @class */
+    pkg.BaseModelCollection = new JSClass('BaseModelCollection', Eventable, {
+        // Life Cycle //////////////////////////////////////////////////////
+        init: function(attrs) {
+            this.__mbid = {};
+            
+            attrs.idField ??= 'id';
+            attrs.modelClass ??= BaseModel;
+            
+            this.callSuper(attrs);
+        },
+        
+        destroy: function() {
+            const models = this.__mbid;
+            for (const id in models) models[id].destroy();
+            this.callSuper();
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////
+        setIdField: function(v) {this.idField = v;},
+        setModelClass: function(v) {this.modelClass = v;},
+        
+        
+        // Methods /////////////////////////////////////////////////////////
+        fireAddedEvent: function(model) {this.fireEvent('added', model);},
+        fireUpdatedEvent: function(model) {this.fireEvent('updated', model);},
+        fireRemovedEvent: function(model) {this.fireEvent('removed', model);},
+        
+        addModel: function(attrsOrModel) {
+            const self = this,
+                id = attrsOrModel[self.idField],
+                attrsAreModel = typeof attrsOrModel.isA === 'function' && attrsOrModel.isA(self.modelClass);
+            let model = self.getById(id);
+            if (model) {
+                if (!model.similarTo(attrsOrModel)) {
+                    model.callSetters(attrsAreModel ? attrsOrModel.getAsObj() : attrsOrModel);
+                    self.fireUpdatedEvent(model);
+                }
+            } else {
+                model = attrsAreModel ? attrsOrModel : self.createModel(attrsOrModel);
+                if (model.__mc !== self) model.__mc = self;
+                if (id == null) {
+                    console.warn('addModel failed, no ID.', attrsOrModel);
+                } else {
+                    self.fireAddedEvent(self.__mbid[id] = model);
+                }
+            }
+            return model;
+        },
+        
+        createModel: function(attrs={}) {
+            attrs.modelCollection = this;
+            return new this.modelClass(attrs);
+        },
+        
+        getById: function(id) {return this.__mbid[id];},
+        
+        getByIds: function(arrOfIds) {
+            const retval = [];
+            if (arrOfIds) {
+                for (const id of arrOfIds) {
+                    const model = this.getById(id);
+                    if (model) retval.push(model);
+                }
+            }
+            return retval;
+        },
+        
+        isUniqueID: function(v) {return this.getById(v) == null;},
+        
+        getAll: function(copyOf) {
+            return copyOf ? {...this.__mbid} : this.__mbid;
+        },
+        
+        getCount: function(filterFunc) {
+            if (filterFunc) {
+                return objValues(this.__mbid).reduce((acc, model) => filterFunc(model) ? acc + 1 : acc, 0);
+            } else {
+                return Object.keys(this.__mbid).length;
+            }
+        },
+        
+        getAsList: function(filterFunc) {
+            if (filterFunc) {
+                return objValues(this.__mbid).filter(filterFunc);
+            } else {
+                return objValues(this.__mbid);
+            }
+        },
+        
+        getAsSortedList: function(sortFunc, filterFunc) {
+            const listOfModels = this.getAsList(filterFunc);
+            return sortFunc ? listOfModels.sort(sortFunc) : listOfModels;
+        },
+        
+        getFirst: function(filterFunc) {
+            const modelsById = this.__mbid;
+            for (const id in modelsById) {
+                const model = modelsById[id];
+                if (filterFunc) {
+                    if (filterFunc(model)) return model;
+                } else {
+                    return model;
+                }
+            }
+        },
+        
+        removeById: function(id, destructive) {
+            const modelsById = this.__mbid, 
+                existingModel = modelsById[id];
+            if (existingModel) {
+                delete modelsById[id];
+                this.fireRemovedEvent(existingModel);
+                if (destructive) existingModel.destroy();
+                return existingModel;
+            }
+        },
+        
+        removeAll: function(destructive) {
+            for (const id in this.__mbid) this.removeById(id, destructive);
         }
     });
 })(myt);
