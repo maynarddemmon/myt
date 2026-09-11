@@ -49,43 +49,6 @@ test("Verify initializer with arguments gets run.", function() {
     ok(inst.fieldThree === 'you', 'The constructor passed in two args.');
 });
 
-test("Super calls", function() {
-    const classOne = new JS.Class('ClassOne', {
-            initialize: function(v1, v2) {
-                this.fieldOne = 'foo';
-                this.fieldTwo = v1;
-                this.fieldThree = v2;
-            },
-            
-            methodOne: function(v) {
-                return 'bar' + v;
-            }
-        }),
-        classTwo = new JS.Class('ClassTwo', classOne, {
-            initialize: function(v1, v2) {
-                this.fieldOneChild = 'bar';
-                this.fieldTwoChild = v1;
-                this.fieldThreeChild = v2;
-                
-                this.callSuper(v1, v2);
-            },
-            
-            methodOne: function(v) {
-                return 'foo' + this.callSuper(v);
-            }
-        }),
-        inst = new classTwo('hey','you');
-    ok(inst.fieldOne === 'foo', 'The constructor got run.');
-    ok(inst.fieldTwo === 'hey', 'The constructor passed in at least the first arg.');
-    ok(inst.fieldThree === 'you', 'The constructor passed in two args.');
-    
-    ok(inst.fieldOneChild === 'bar', 'The constructor got run.');
-    ok(inst.fieldTwoChild === 'hey', 'The constructor passed in at least the first arg.');
-    ok(inst.fieldThreeChild === 'you', 'The constructor passed in two args.');
-    
-    ok(inst.methodOne('x') === 'foobarx', 'The method exists.');
-});
-
 test("Create a singleton.", function() {
     const sing = new JS.Singleton('SingOne', {
         initialize: function() {
@@ -122,18 +85,6 @@ test("Add a mixin (module)", function() {
     ok(inst.fieldOne === 'foo', 'The constructor got run.');
     ok(inst.methodOne('x') === 'barx', 'The method exists.');
     ok(inst.methodTwo('x') === 'bazx', 'The mixin method exists.');
-});
-
-test("callSuper works when the parent is a native ES6 class.", function() {
-    const ES6Parent = eval("(class ES6Parent { greet() {return 'parent';} })"),
-        sub = new JS.Class('ES6Sub', ES6Parent, {
-            initialize: function() {},
-            greet: function() {return 'sub->' + this.callSuper();}
-        }),
-        inst = new sub();
-    ok(inst instanceof ES6Parent, 'Is an instance of the ES6 parent.');
-    ok(typeof inst.callSuper === 'undefined', 'callSuper is not exposed outside a super call.');
-    ok(inst.greet() === 'sub->parent', 'callSuper reached the ES6 prototype method.');
 });
 
 test("Inherited ES6 methods work without an override.", function() {

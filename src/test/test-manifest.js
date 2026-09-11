@@ -22,13 +22,15 @@
         
         {path:'tests/core/test-ClassSystem.js'},
         {path:'tests/core/test-ClassSystem-isA.js'},
+        {path:'tests/core/test-ClassSystem-callSuper.js'},
+        {path:'tests/core/test-ClassSystem-methods.js'},
         
         {path:'tests/core/test-myt-dom.js', needsBrowser:true},
         {path:'tests/core/test-myt.js'},
         {path:'tests/core/test-myt-toNameCase.js'},
         {path:'tests/core/test-myt-deepEqual.js'},
         {path:'tests/core/test-Node.js'},
-        {path:'tests/core/test-Node_placement.js'},
+        {path:'tests/core/test-Node-placement.js'},
         {path:'tests/core/test-Observable.js'},
         {path:'tests/core/test-Observer.js'},
         
