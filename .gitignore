@@ -1,5 +1,7 @@
 WEB-INF/logs
 
+*.sublime-*
+
 # NPM generated files #
 ######################
 node_modules
