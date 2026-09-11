@@ -46,13 +46,6 @@ const Storable = new JS.Module('Storable', {}),
     
     makeCollection = () => new PolymorphicCollection({modelClass:Storable});
 
-test("isA works with a JS.Module so a mixin can be used as modelClass.", function() {
-    const foo = new FooClass({id:'f', kind:'foo'}),
-        unrelated = new myt.BaseModel({id:'u'});
-    ok(foo.isA(Storable) === true, 'A class that includes the mixin matches.');
-    ok(unrelated.isA(Storable) === false, 'A class that does not include it does not match.');
-});
-
 test("addModel routes new instances through createModel.", function() {
     // If addModel ever constructs modelClass directly instead of calling
     // createModel, this fails, and with a mixin as modelClass it would throw

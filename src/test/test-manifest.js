@@ -21,6 +21,8 @@
         {path:'tests/util/test-Geometry.js'},
         
         {path:'tests/core/test-ClassSystem.js'},
+        {path:'tests/core/test-ClassSystem-isA.js'},
+        
         {path:'tests/core/test-myt-dom.js', needsBrowser:true},
         {path:'tests/core/test-myt.js'},
         {path:'tests/core/test-myt-toNameCase.js'},
