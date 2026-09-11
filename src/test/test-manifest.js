@@ -37,7 +37,9 @@
         {path:'tests/component/test-Path.js'},
         {path:'tests/component/test-Color.js'},
         {path:'tests/component/test-ExpressionParser.js'},
-        {path:'tests/component/test-ModelMixins.js'}
+        {path:'tests/component/test-ModelMixins.js'},
+        {path:'tests/component/test-ModelMixins-crossCollection.js'},
+        {path:'tests/component/test-ModelMixins-polymorphic.js'}
     ];
     
     /** All suite paths in declaration order. Used by the browser runners. */

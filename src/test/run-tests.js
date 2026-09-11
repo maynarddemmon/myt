@@ -119,7 +119,7 @@ const main = () => {
     for (const suite of suites) {
         const label = path.relative(TEST_ROOT, suite);
         if (!fs.existsSync(suite)) {
-            console.log('  ??   ' + label.padEnd(52) + styleText(['bold', 'yellow'], 'NOT FOUND'));
+            console.log('  ??   ' + label.padEnd(57) + styleText(['bold', 'yellow'], 'NOT FOUND'));
             totalFail++;
             failedSuites.push(label);
             continue;
@@ -130,7 +130,7 @@ const main = () => {
         totalFail += result.fail;
         
         console.log(
-            '  ' + (result.fail === 0 ? styleText(['bold', 'greenBright'], 'OK  ') : styleText(['bold', 'red'], 'FAIL')) + ' ' + label.padEnd(50) +
+            '  ' + (result.fail === 0 ? styleText(['bold', 'greenBright'], 'OK  ') : styleText(['bold', 'red'], 'FAIL')) + ' ' + label.padEnd(55) +
             String(result.pass).padStart(4) + ' passed' +
             (result.fail ? ', ' + result.fail + ' failed' : '')
         );

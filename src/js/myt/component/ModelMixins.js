@@ -422,24 +422,34 @@
         
         addModel: function(attrsOrModel) {
             const self = this,
-                id = attrsOrModel[self.idField],
-                attrsAreModel = typeof attrsOrModel.isA === 'function' && attrsOrModel.isA(self.modelClass);
-            let model = self.getById(id);
-            if (model) {
-                if (!model.similarTo(attrsOrModel)) {
-                    model.callSetters(attrsAreModel ? attrsOrModel.getAsObj() : attrsOrModel);
-                    self.fireUpdatedEvent(model);
-                }
+                id = attrsOrModel[self.idField];
+            if (id == null) {
+                console.warn('addModel failed, no ID.', attrsOrModel);
             } else {
-                model = attrsAreModel ? attrsOrModel : self.createModel(attrsOrModel);
-                if (model.__mc !== self) model.__mc = self;
-                if (id == null) {
-                    console.warn('addModel failed, no ID.', attrsOrModel);
+                const attrsAreModel = typeof attrsOrModel.isA === 'function' && attrsOrModel.isA(self.modelClass);
+                let model = self.getById(id);
+                if (model) {
+                    // A model with the provided ID already exists in this collection. Let's attempt
+                    // to update it.
+                    if (!model.similarTo(attrsOrModel)) {
+                        model.callSetters(attrsAreModel ? attrsOrModel.getAsObj() : attrsOrModel);
+                        self.fireUpdatedEvent(model);
+                    }
                 } else {
+                    // Don't add if the provided model is already in a collection
+                    if (attrsAreModel && attrsOrModel.__mc != null) {
+                        console.warn('addModel failed, already in another collection.', attrsOrModel);
+                        return;
+                    }
+                    
+                    // No model with the provided ID yet exists in this collection. Let's attempt to
+                    // add or create a new one.
+                    model = attrsAreModel ? attrsOrModel : self.createModel(attrsOrModel);
+                    if (model.__mc !== self) model.__mc = self;
                     self.fireAddedEvent(self.__mbid[id] = model);
                 }
+                return model;
             }
-            return model;
         },
         
         createModel: function(attrs={}) {

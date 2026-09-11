@@ -113,7 +113,7 @@ test("addModel with an existing id updates the model in place.", function() {
 test("addModel without an id does not store anything.", function() {
     const collection = new myt.BaseModelCollection(),
         model = collection.addModel({name:'no id here'});
-    ok(model != null, 'A model is still returned.');
+    ok(model == null, 'No model should be returned.');
     ok(collection.getCount() === 0, 'But nothing was stored.');
 });
 
