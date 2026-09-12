@@ -662,7 +662,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
-            version:202609101657, // <<< BUILD_VERSION_THIS
+            version:202609111857, // <<< BUILD_VERSION_THIS
             
             generateGuid,
             
@@ -3313,7 +3313,25 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 const scrollbarSize = elem.offsetWidth - elem.clientWidth;
                 body.removeChild(elem);
                 return scrollbarSize;
-            })
+            }),
+            
+            /** Scrolls a dom element or View into view.
+                @param {?Object} domElementOrView - The dom element or myt.View to scroll to.
+                @param {boolean} [smoothly] - If true the scroll will be animated.
+                @returns {void} */
+            scrollIntoView: (domElementOrView, smoothly) => {
+                if (domElementOrView) {
+                    const domElement = domElementOrView.getODE ? domElementOrView.getODE() : domElementOrView;
+                    if (smoothly) {
+                        domElement.scrollIntoView({block:'nearest', behavior:'smooth'});
+                    } else if (domElement.scrollIntoViewIfNeeded) {
+                        // Non-standard Blink/WebKit API that just works better.
+                        domElement.scrollIntoViewIfNeeded(false);
+                    } else {
+                        domElement.scrollIntoView({block:'nearest'});
+                    }
+                }
+            }
         },
         
         
@@ -3498,9 +3516,55 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             @param {number} [value] - The value to scroll to.
             @param {boolean} [scrollInner] - Indicates if the inner dom element should be used 
                 instead of the outer dom element.
+            @param {boolean} [smoothly] - If true the scroll will be animated.
             @returns {void} */
-        scrollYTo: function(value, scrollInner) {
-            (scrollInner ? this.__iE : this.__oE).scrollTop = value || 0;
+        scrollXTo: function(value, scrollInner=true, smoothly=false) {
+            const elem = scrollInner ? this.__iE : this.__oE;
+            if (smoothly) {
+                elem.scrollTo({left:value || 0, behavior:'smooth'});
+            } else {
+                elem.scrollLeft = value || 0;
+            }
+        },
+        
+        /** Scrolls the dom element to the provided position or zero if no value is provided.
+            @param {number} [value] - The value to scroll to.
+            @param {boolean} [scrollInner] - Indicates if the inner dom element should be used 
+                instead of the outer dom element.
+            @param {boolean} [smoothly] - If true the scroll will be animated.
+            @returns {void} */
+        scrollYTo: function(value, scrollInner=true, smoothly=false) {
+            const elem = scrollInner ? this.__iE : this.__oE;
+            if (smoothly) {
+                elem.scrollTo({top:value || 0, behavior:'smooth'});
+            } else {
+                elem.scrollTop = value || 0;
+            }
+        },
+        
+        /** Scrolls the dom element to the provided position or zero if no value is provided.
+            @param {number} [valueX] - The X value to scroll to.
+            @param {number} [valueY] - The Y value to scroll to.
+            @param {boolean} [scrollInner] - Indicates if the inner dom element should be used 
+                instead of the outer dom element.
+            @param {boolean} [smoothly] - If true the scroll will be animated.
+            @returns {void} */
+        scrollXYTo: function(valueX, valueY, scrollInner=true, smoothly=false) {
+            const elem = scrollInner ? this.__iE : this.__oE;
+            if (smoothly) {
+                elem.scrollTo({left:valueX || 0, top:valueY || 0, behavior:'smooth'});
+            } else {
+                elem.scrollLeft = valueX || 0;
+                elem.scrollTop = valueY || 0;
+            }
+        },
+        
+        /** Scrolls any scrollable regions such that that this DomElementProxy is within the
+            browser's viewport.
+            @param {boolean} [smoothly] - If true the scroll will be animated.
+            @returns {void} */
+        scrollIntoView: function(smoothly) {
+            DomElementProxy.scrollIntoView(this, smoothly);
         }
     });
 })(myt);
