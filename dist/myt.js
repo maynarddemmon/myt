@@ -662,7 +662,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
-            version:202609111857, // <<< BUILD_VERSION_THIS
+            version:202609121813, // <<< BUILD_VERSION_THIS
             
             generateGuid,
             
@@ -16651,6 +16651,12 @@ myt.Destructible = new JS.Module('Destructible', {
                 this.callSuper(attrs);
             },
             
+            getModelCollection: function() {return this.__mc;},
+            
+            notifyCollectionOfUpdate: function() {
+                this.__mc?.fireUpdatedEvent(this);
+            },
+            
             /** Used to set an attr and percolate change events up from a BaseModel to the 
                 BaseModelCollection to simplify monitoring an entire BaseModelCollection for 
                 changes. This is a wrapper around AccessorSuport.set with the same params 
@@ -16663,7 +16669,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 @returns {void} */
             setAndNotifyCollection: function(attrName, v, skipSetter) {
                 this.set(attrName, v, skipSetter);
-                this.__mc?.fireUpdatedEvent(this);
+                this.notifyCollectionOfUpdate();
             },
             
             setId: function(id) {

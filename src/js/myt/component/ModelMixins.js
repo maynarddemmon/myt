@@ -279,6 +279,12 @@
                 this.callSuper(attrs);
             },
             
+            getModelCollection: function() {return this.__mc;},
+            
+            notifyCollectionOfUpdate: function() {
+                this.__mc?.fireUpdatedEvent(this);
+            },
+            
             /** Used to set an attr and percolate change events up from a BaseModel to the 
                 BaseModelCollection to simplify monitoring an entire BaseModelCollection for 
                 changes. This is a wrapper around AccessorSuport.set with the same params 
@@ -291,7 +297,7 @@
                 @returns {void} */
             setAndNotifyCollection: function(attrName, v, skipSetter) {
                 this.set(attrName, v, skipSetter);
-                this.__mc?.fireUpdatedEvent(this);
+                this.notifyCollectionOfUpdate();
             },
             
             setId: function(id) {
