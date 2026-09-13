@@ -662,7 +662,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
-            version:202609121813, // <<< BUILD_VERSION_THIS
+            version:202609122300, // <<< BUILD_VERSION_THIS
             
             generateGuid,
             
@@ -2606,6 +2606,38 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         getObservers: function(type) {
             const observersByType = this.__obsbt ??= {};
             return observersByType[type] ??= [];
+        },
+        
+        /** Gets all the Observers attached to this Observable regardless of event type.
+            @param filterFunc:function (optional) If provided it will be called for each 
+                methodName/observer/eventType attachment and only those for which it returns a 
+                truthy value will be included. Called as filterFunc(observer, methodName, 
+                eventType).
+            @param accumulator:Set|Array (optional) If provided, Observers will be added to it 
+                and it will be returned rather than a new Set. Anything with an "add" function is 
+                filled using that, otherwise "push" is used. Note that a Set accumulator will 
+                contain each Observer only once while an Array accumulator will contain one entry 
+                per matching attachment, so an Observer attached for several event types will 
+                appear more than once.
+            @returns {!Set|!Array} the accumulator if one was provided, otherwise a new Set of 
+                myt.Observer instances. */
+        getAllObservers: function(filterFunc, accumulator) {
+            const retval = accumulator ?? new Set(),
+                // Duck type the accumulator so Sets, Arrays, subclasses and custom collectors all work.
+                add = typeof retval.add === 'function' ? retval.add : retval.push,
+                observersByType = this.__obsbt;
+            if (observersByType) {
+                for (const [eventType, observers] of Object.entries(observersByType)) {
+                    for (let i = 0, len = observers.length; i < len;) {
+                        const methodName = observers[i++],
+                            observer = observers[i++];
+                        if (!filterFunc || filterFunc(observer, methodName, eventType)) {
+                            add.call(retval, observer);
+                        }
+                    }
+                }
+            }
+            return retval;
         },
         
         /** Checks if any observers exist for the provided event type.

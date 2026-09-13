@@ -1,11 +1,10 @@
 module('Observable');
 
 test("Attach and Remove event observers.", function() {
-    var observable = new myt.Node();
-    
-    var observer = new myt.Node(null, null, [{
-        handleFooEvent: function(_e) {}
-    }]);
+    const observable = new myt.Node(),
+        observer = new myt.Node(null, null, [{
+            handleFooEvent: function(_e) {}
+        }]);
     
     // No observers yet
     ok(observable.hasObservers('foo') === false, "Should have no 'foo' event observers yet.");
@@ -32,7 +31,7 @@ test("Attach and Remove event observers.", function() {
     ok(observable.detachObserver(observer, 'handleFooEvent', 'foo') === true, "Detach observer worked");
     
     ok(observable.hasObservers('foo') === false, "After detach should have no 'foo' event observers now.");
-    var fooObserversAgain = observable.getObservers('foo');
+    const fooObserversAgain = observable.getObservers('foo');
     ok(fooObserversAgain.length === 0, "Should have a 'foo' event array of length 0. Was length: " + fooObserversAgain.length);
     
     // Detach when nothing was ever added for an event
@@ -44,17 +43,15 @@ test("Attach and Remove event observers.", function() {
 });
 
 test("Test detachAllObservers.", function() {
-    var observable = new myt.Node();
-    
-    var observer = new myt.Node(null, null, [{
-        handleFooEvent: function(_e) {},
-        handleBarEvent: function(_e) {}
-    }]);
-    
-    var otherObserver = new myt.Node(null, null, [{
-        handleOtherFooEvent: function(_e) {},
-        handleOtherBarEvent: function(_e) {}
-    }]);
+    const observable = new myt.Node(),
+        observer = new myt.Node(null, null, [{
+            handleFooEvent: function(_e) {},
+            handleBarEvent: function(_e) {}
+        }]),
+        otherObserver = new myt.Node(null, null, [{
+            handleOtherFooEvent: function(_e) {},
+            handleOtherBarEvent: function(_e) {}
+        }]);
     
     observable.attachObserver(observer, 'handleFooEvent', 'foo');
     observable.attachObserver(observer, 'handleBarEvent', 'bar');
@@ -62,16 +59,16 @@ test("Test detachAllObservers.", function() {
     
     ok(observable.hasObservers('foo') === true, "Should have 'foo' event observers now.");
     ok(observable.hasObservers('bar') === true, "Should have 'bar' event observers now.");
-    var fooObservers = observable.getObservers('foo');
+    const fooObservers = observable.getObservers('foo');
     ok(fooObservers.length === 4, "Should have a 'foo' event array of length 4. Was length: " + fooObservers.length);
-    var barObservers = observable.getObservers('bar');
+    const barObservers = observable.getObservers('bar');
     ok(barObservers.length === 2, "Should have a 'bar' event array of length 2. Was length: " + barObservers.length);
     
     observable.detachAllObservers();
     
     ok(observable.hasObservers('foo') === false, "Should have no 'foo' event observers now.");
     ok(observable.hasObservers('bar') === false, "Should have no 'bar' event observers now.");
-    var fooObserversAgain = observable.getObservers('foo');
+    const fooObserversAgain = observable.getObservers('foo');
     ok(fooObservers.length === 0, "Should have a 'foo' event array of length 0. Was length: " + fooObserversAgain.length);
     
     observable.destroy();
@@ -79,17 +76,15 @@ test("Test detachAllObservers.", function() {
 });
 
 test("Node destruction should clean up observer for Observable.", function() {
-    var observable = new myt.Node();
-    
-    var observer = new myt.Node(null, null, [{
-        handleFooEvent: function(_e) {},
-        handleBarEvent: function(_e) {}
-    }]);
-    
-    var otherObserver = new myt.Node(null, null, [{
-        handleOtherFooEvent: function(_e) {},
-        handleOtherBarEvent: function(_e) {}
-    }]);
+    const observable = new myt.Node(),
+        observer = new myt.Node(null, null, [{
+            handleFooEvent: function(_e) {},
+            handleBarEvent: function(_e) {}
+        }]),
+        otherObserver = new myt.Node(null, null, [{
+            handleOtherFooEvent: function(_e) {},
+            handleOtherBarEvent: function(_e) {}
+        }]);
     
     // No observers yet
     ok(observable.hasObservers('foo') === false, "Should have no 'foo' event observers yet.");
@@ -102,12 +97,12 @@ test("Node destruction should clean up observer for Observable.", function() {
     ok(observable.hasObservers('foo') === true, "Should have 'foo' event observers now.");
     ok(observable.hasObservers('bar') === true, "Should have 'bar' event observers now.");
     
-    var fooObservers = observable.getObservers('foo');
+    const fooObservers = observable.getObservers('foo');
     ok(fooObservers.length === 2, "Should have a 'foo' event array of length 2. Was length: " + fooObservers.length);
     
     // Adding the same observer again is not prohibited
     observable.attachObserver(observer, 'handleFooEvent', 'foo');
-    var fooObservers2 = observable.getObservers('foo');
+    const fooObservers2 = observable.getObservers('foo');
     ok(fooObservers2.length === 4, "Should have a 'foo' event array of length 4. Was length: " + fooObservers2.length);
     ok(fooObservers2[0] === 'handleFooEvent', "Method name should be first in observers array.");
     ok(fooObservers2[1] === observer, "Observer object should be second in observers array.");
@@ -117,7 +112,7 @@ test("Node destruction should clean up observer for Observable.", function() {
     // Adding another observer should work and it should be pushed onto the
     // end of the observer array.
     observable.attachObserver(otherObserver, 'handleOtherFooEvent', 'foo');
-    var fooObservers3 = observable.getObservers('foo');
+    const fooObservers3 = observable.getObservers('foo');
     ok(fooObservers3.length === 6, "Should have a 'foo' event array of length 6. Was length: " + fooObservers3.length);
     ok(fooObservers2[0] === 'handleFooEvent', "Method name should be first in observers array.");
     ok(fooObservers2[1] === observer, "Observer object should be second in observers array.");
@@ -130,7 +125,7 @@ test("Node destruction should clean up observer for Observable.", function() {
     
     ok(observable.hasObservers('foo') === false, "Should have no 'foo' event observers now.");
     ok(observable.hasObservers('bar') === false, "Should have no 'bar' event observers now.");
-    var fooObserversAgain = observable.getObservers('foo');
+    const fooObserversAgain = observable.getObservers('foo');
     ok(fooObserversAgain.length === 0, "Should have a 'foo' event array of length 0. Was length: " + fooObserversAgain.length);
     
     observer.destroy();
@@ -138,21 +133,20 @@ test("Node destruction should clean up observer for Observable.", function() {
 });
 
 test("Fire an event.", function() {
-    var observable = new myt.Node();
-    
-    var observer = new myt.Node(null, null, [{
-        initNode: function(parent, attrs) {
-            this.fooEventCount = 0;
-            this.lastFooEvent = null;
+    const observable = new myt.Node(),
+        observer = new myt.Node(null, null, [{
+            initNode: function(parent, attrs) {
+                this.fooEventCount = 0;
+                this.lastFooEvent = null;
+                
+                this.callSuper(parent, attrs);
+            },
             
-            this.callSuper(parent, attrs);
-        },
-        
-        handleFooEvent: function(e) {
-            this.fooEventCount++;
-            this.lastFooEvent = e;
-        }
-    }]);
+            handleFooEvent: function(e) {
+                this.fooEventCount++;
+                this.lastFooEvent = e;
+            }
+        }]);
     
     // Fire event once before attachment just to make sure the observer
     // is not somehow registered or being notified on attach.
@@ -175,44 +169,43 @@ test("Fire an event.", function() {
 });
 
 test("Verify infinite event loop protection.", function() {
-    var n1 = new myt.Node(null, null, [{
-        initNode: function(parent, attrs) {
-            this.fooEventCount = 0;
-            this.lastFooEvent = null;
+    const n1 = new myt.Node(null, null, [{
+            initNode: function(parent, attrs) {
+                this.fooEventCount = 0;
+                this.lastFooEvent = null;
+                
+                this.callSuper(parent, attrs);
+            },
             
-            this.callSuper(parent, attrs);
-        },
-        
-        handleFooEvent: function(e) {
-            this.fooEventCount++;
-            this.lastFooEvent = e;
+            handleFooEvent: function(e) {
+                this.fooEventCount++;
+                this.lastFooEvent = e;
+                
+                this.fireEvent('foo','bar');
+            }
+        }]),
+        n2 = new myt.Node(null, null, [{
+            initNode: function(parent, attrs) {
+                this.fooEventCount = 0;
+                this.lastFooEvent = null;
+                this.eventLoopFiredCount = 0;
+                
+                this.attachTo(myt.global.error, 'handleEventLoop', 'eventLoop');
+                
+                this.callSuper(parent, attrs);
+            },
             
-            this.fireEvent('foo','bar');
-        }
-    }]);
-    
-    var n2 = new myt.Node(null, null, [{
-        initNode: function(parent, attrs) {
-            this.fooEventCount = 0;
-            this.lastFooEvent = null;
-            this.eventLoopFiredCount = 0;
+            handleFooEvent: function(e) {
+                this.fooEventCount++;
+                this.lastFooEvent = e;
+                
+                this.fireEvent('foo','bar');
+            },
             
-            this.attachTo(myt.global.error, 'handleEventLoop', 'eventLoop');
-            
-            this.callSuper(parent, attrs);
-        },
-        
-        handleFooEvent: function(e) {
-            this.fooEventCount++;
-            this.lastFooEvent = e;
-            
-            this.fireEvent('foo','bar');
-        },
-        
-        handleEventLoop: function(e) {
-            if (e.type === 'eventLoop') this.eventLoopFiredCount++;
-        }
-    }]);
+            handleEventLoop: function(e) {
+                if (e.type === 'eventLoop') this.eventLoopFiredCount++;
+            }
+        }]);
     
     // Cross register them
     n1.attachObserver(n2, 'handleFooEvent', 'foo');
@@ -235,35 +228,33 @@ test("Verify infinite event loop protection.", function() {
 });
 
 test("Fire an event to a specific list of observers.", function() {
-    var observable = new myt.Node();
-    
-    var observer1 = new myt.Node(null, null, [{
-        initNode: function(parent, attrs) {
-            this.fooEventCount = 0;
-            this.lastFooEvent = null;
+    const observable = new myt.Node(),
+        observer1 = new myt.Node(null, null, [{
+            initNode: function(parent, attrs) {
+                this.fooEventCount = 0;
+                this.lastFooEvent = null;
+                
+                this.callSuper(parent, attrs);
+            },
             
-            this.callSuper(parent, attrs);
-        },
-        
-        handleFooEvent: function(e) {
-            this.fooEventCount++;
-            this.lastFooEvent = e;
-        }
-    }]);
-    
-    var observer2 = new myt.Node(null, null, [{
-        initNode: function(parent, attrs) {
-            this.fooEventCount = 0;
-            this.lastFooEvent = null;
+            handleFooEvent: function(e) {
+                this.fooEventCount++;
+                this.lastFooEvent = e;
+            }
+        }]),
+        observer2 = new myt.Node(null, null, [{
+            initNode: function(parent, attrs) {
+                this.fooEventCount = 0;
+                this.lastFooEvent = null;
+                
+                this.callSuper(parent, attrs);
+            },
             
-            this.callSuper(parent, attrs);
-        },
-        
-        handleFooEvent: function(e) {
-            this.fooEventCount++;
-            this.lastFooEvent = e;
-        }
-    }]);
+            handleFooEvent: function(e) {
+                this.fooEventCount++;
+                this.lastFooEvent = e;
+            }
+        }]);
     
     // Attach first observer only
     observable.attachObserver(observer1, 'handleFooEvent', 'foo');
@@ -289,15 +280,13 @@ test("Fire an event to a specific list of observers.", function() {
 });
 
 test("Attach and Remove event observers where methodNames are functions.", function() {
-    var observable = new myt.Node();
-    
-    var observer = new myt.Node(null, null, [{
-        handleFooEvent: function(_e) {}
-    }]);
-    
-    var funcHandleFoo = function(event) {
-        this.handleFooEvent(event);
-    };
+    const observable = new myt.Node(),
+        observer = new myt.Node(null, null, [{
+            handleFooEvent: function(_e) {}
+        }]),
+        funcHandleFoo = function(event) {
+            this.handleFooEvent(event);
+        };
     
     // No observers yet
     ok(observable.hasObservers('foo') === false, "Should have no 'foo' event observers yet.");
@@ -311,7 +300,7 @@ test("Attach and Remove event observers where methodNames are functions.", funct
     ok(observable.attachObserver(observer, funcHandleFoo, '') === false, "Attach observer should not work when event type is missing.");
     
     ok(observable.hasObservers('foo') === true, "Should have 'foo' event observers now.");
-    var fooObservers = observable.getObservers('foo');
+    const fooObservers = observable.getObservers('foo');
     ok(fooObservers.length === 2, "Should have a 'foo' event array of length 2. Was length: " + fooObservers.length);
     ok(fooObservers[0] === funcHandleFoo, "Method name should be first in observers array.");
     ok(fooObservers[1] === observer, "Observer object should be second in observers array.");
@@ -324,7 +313,7 @@ test("Attach and Remove event observers where methodNames are functions.", funct
     ok(observable.detachObserver(observer, funcHandleFoo, 'foo') === true, "Detach observer worked");
     
     ok(observable.hasObservers('foo') === false, "After detach should have no 'foo' event observers now.");
-    var fooObserversAgain = observable.getObservers('foo');
+    const fooObserversAgain = observable.getObservers('foo');
     ok(fooObserversAgain.length === 0, "Should have a 'foo' event array of length 0. Was length: " + fooObserversAgain.length);
     
     // Detach when nothing was ever added for an event
@@ -336,26 +325,24 @@ test("Attach and Remove event observers where methodNames are functions.", funct
 });
 
 test("Provide a function instead of a method name", function() {
-    var observable = new myt.Node();
-    var observable2 = new myt.Node();
-    
-    var observer = new myt.Node(null, null, [{
-        initNode: function(parent, attrs) {
-            this.fooEventCount = 0;
-            this.lastFooEvent = null;
+    const observable = new myt.Node(),
+        observable2 = new myt.Node(),
+        observer = new myt.Node(null, null, [{
+            initNode: function(parent, attrs) {
+                this.fooEventCount = 0;
+                this.lastFooEvent = null;
+                
+                this.callSuper(parent, attrs);
+            },
             
-            this.callSuper(parent, attrs);
-        },
-        
-        handleFooEvent: function(e) {
-            this.fooEventCount++;
-            this.lastFooEvent = e;
-        }
-    }]);
-    
-    var funcHandleFoo = function(event) {
-        this.handleFooEvent(event);
-    };
+            handleFooEvent: function(e) {
+                this.fooEventCount++;
+                this.lastFooEvent = e;
+            }
+        }]),
+        funcHandleFoo = function(event) {
+            this.handleFooEvent(event);
+        };
     
     ok(observer.fooEventCount === 0, "Ensure observer initialization of fooEventCount was correct.");
     ok(observer.lastFooEvent === null, "Ensure observer initialization lastFooEvent was correct.");
@@ -375,4 +362,102 @@ test("Provide a function instead of a method name", function() {
     observable.destroy();
     observable2.destroy();
     observer.destroy();
+});
+
+test("getAllObservers with no attachments returns an empty Set.", function() {
+    const observable = new myt.Node();
+    
+    ok(observable.getAllObservers().size === 0, "A fresh Observable has no observers.");
+    
+    observable.destroy();
+});
+
+test("getAllObservers collects observers across event types.", function() {
+    const observable = new myt.Node(),
+        obsA = new myt.Node(null, null, [{onFoo:function() {}}]),
+        obsB = new myt.Node(null, null, [{onBar:function() {}}]);
+    
+    observable.attachObserver(obsA, 'onFoo', 'foo');
+    observable.attachObserver(obsB, 'onBar', 'bar');
+    observable.attachObserver(obsA, 'onFoo', 'baz'); // Same observer, a second event type.
+    
+    const all = observable.getAllObservers();
+    ok(all.size === 2, "The Set dedupes obsA even though it is attached for two event types. Size: " + all.size);
+    ok(all.has(obsA), "obsA is included.");
+    ok(all.has(obsB), "obsB is included.");
+    
+    observable.destroy();
+    obsA.destroy();
+    obsB.destroy();
+});
+
+test("getAllObservers with an Array accumulator keeps one entry per attachment.", function() {
+    const observable = new myt.Node(),
+        obsA = new myt.Node(null, null, [{onFoo:function() {}}]);
+    
+    observable.attachObserver(obsA, 'onFoo', 'foo');
+    observable.attachObserver(obsA, 'onFoo', 'baz');
+    
+    const asArray = observable.getAllObservers(null, []);
+    ok(asArray.length === 2, "An Array accumulator has one entry per attachment, not per unique observer. Length: " + asArray.length);
+    ok(asArray[0] === obsA && asArray[1] === obsA, "Both entries are the same observer.");
+    
+    observable.destroy();
+    obsA.destroy();
+});
+
+test("getAllObservers passes filterFunc the observer, methodName and eventType.", function() {
+    const observable = new myt.Node(),
+        obsA = new myt.Node(null, null, [{onFoo:function() {}}]),
+        seen = [];
+    
+    observable.attachObserver(obsA, 'onFoo', 'foo');
+    observable.getAllObservers(function(observer, methodName, eventType) {
+        seen.push(observer === obsA ? 'obsA' : 'other', methodName, eventType);
+        return true;
+    });
+    
+    deepEqual(seen, ['obsA', 'onFoo', 'foo'], "filterFunc received the arguments in the documented order.");
+    
+    observable.destroy();
+    obsA.destroy();
+});
+
+test("getAllObservers only includes attachments the filterFunc approves.", function() {
+    const observable = new myt.Node(),
+        obsA = new myt.Node(null, null, [{onFoo:function() {}}]),
+        obsB = new myt.Node(null, null, [{onBar:function() {}}]);
+    
+    observable.attachObserver(obsA, 'onFoo', 'foo');
+    observable.attachObserver(obsB, 'onBar', 'bar');
+    
+    const onlyB = observable.getAllObservers(function(observer) {return observer === obsB;});
+    ok(onlyB.has(obsA) === false, "obsA was filtered out.");
+    ok(onlyB.has(obsB) === true, "obsB was kept.");
+    
+    observable.destroy();
+    obsA.destroy();
+    obsB.destroy();
+});
+
+test("getAllObservers reflects detachObserver and detachAllObservers.", function() {
+    const observable = new myt.Node(),
+        obsA = new myt.Node(null, null, [{onFoo:function() {}}]),
+        obsB = new myt.Node(null, null, [{onBar:function() {}}]);
+    
+    observable.attachObserver(obsA, 'onFoo', 'foo');
+    observable.attachObserver(obsA, 'onFoo', 'baz');
+    observable.attachObserver(obsB, 'onBar', 'bar');
+    
+    observable.detachObserver(obsA, 'onFoo', 'foo');
+    const afterOneDetach = observable.getAllObservers();
+    ok(afterOneDetach.has(obsA), "obsA is still attached via the 'baz' event type.");
+    ok(afterOneDetach.has(obsB), "obsB is unaffected.");
+    
+    observable.detachAllObservers();
+    ok(observable.getAllObservers().size === 0, "detachAllObservers empties the result.");
+    
+    observable.destroy();
+    obsA.destroy();
+    obsB.destroy();
 });
