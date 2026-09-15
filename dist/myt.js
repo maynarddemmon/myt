@@ -662,7 +662,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
-            version:202609122300, // <<< BUILD_VERSION_THIS
+            version:202609141747, // <<< BUILD_VERSION_THIS
             
             generateGuid,
             
@@ -6504,6 +6504,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     let i = deferredLayouts.length;
                     while (i) {
                         const layout = deferredLayouts[--i];
+                        if (layout.destroyed) continue;
                         layout.__deferredLayout = false;
                         layout.update();
                     }

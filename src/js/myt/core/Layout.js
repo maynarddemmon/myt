@@ -22,6 +22,7 @@
                     let i = deferredLayouts.length;
                     while (i) {
                         const layout = deferredLayouts[--i];
+                        if (layout.destroyed) continue;
                         layout.__deferredLayout = false;
                         layout.update();
                     }
