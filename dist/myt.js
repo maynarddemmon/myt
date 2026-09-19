@@ -662,7 +662,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
-            version:202609141747, // <<< BUILD_VERSION_THIS
+            version:202609190253, // <<< BUILD_VERSION_THIS
             
             generateGuid,
             
@@ -21265,6 +21265,53 @@ myt.Destructible = new JS.Module('Destructible', {
             }
         }),
         
+        BaseProgressBar = pkg.BaseProgressBar = new JSClass('BaseProgressBar', View, {
+            // Life Cycle //////////////////////////////////////////////////////
+            /** @overrides myt.View */
+            initNode: function(parent, attrs) {
+                attrs.axis ??= 'x';
+                if (attrs.axis === 'x') {
+                    attrs.width ??= 100;
+                    attrs.height ??= 18;
+                } else {
+                    attrs.width ??= 18;
+                    attrs.height ??= 100;
+                }
+                attrs.bgColor ??= '#999';
+                attrs.roundedCorners ??= 9;
+                attrs.trackInset ??= 9;
+                attrs.trackOutset ??= 9;
+                
+                this.callSuper(parent, attrs);
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setAxis: function(v) {this.axis = v;},
+            setTrackInset: function(v) {this.trackInset = v;},
+            setTrackOutset: function(v) {this.trackOutset = v;},
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            convertValueToPixels: function(v) {
+                const self = this,
+                    minV = self.minValue,
+                    trackInset = self.trackInset,
+                    pxRange = (self.axis === 'x' ? self.width : self.height) - trackInset - self.trackOutset,
+                    valueRange = self.maxValue - minV;
+                return trackInset + ((v - minV) * (pxRange / valueRange));
+            },
+            
+            convertPixelsToValue: function(px) {
+                const self = this,
+                    minV = self.minValue,
+                    trackInset = self.trackInset,
+                    pxRange = (self.axis === 'x' ? self.width : self.height) - trackInset - self.trackOutset,
+                    valueRange = self.maxValue - minV;
+                return ((px - trackInset) * (valueRange / pxRange)) + minV;
+            }
+        }),
+        
         /** A base class for slider components.
             
             Attributes:
@@ -21285,25 +21332,13 @@ myt.Destructible = new JS.Module('Destructible', {
                 __lockSync:boolean Used internally to prevent infinite loops.
             
             @class */
-        BaseSlider = pkg.BaseSlider = new JSClass('BaseSlider', View, {
+        BaseSlider = pkg.BaseSlider = new JSClass('BaseSlider', BaseProgressBar, {
             include: [pkg.Disableable],
             
             
             // Life Cycle //////////////////////////////////////////////////////
             /** @overrides myt.View */
             initNode: function(parent, attrs) {
-                attrs.axis ??= 'x';
-                if (attrs.axis === 'x') {
-                    attrs.width ??= 100;
-                    attrs.height ??= 18;
-                } else {
-                    attrs.width ??= 18;
-                    attrs.height ??= 100;
-                }
-                attrs.bgColor ??= '#999';
-                attrs.roundedCorners ??= 9;
-                attrs.trackInset ??= 9;
-                attrs.trackOutset ??= 9;
                 attrs.thumbWidth ??= 16;
                 attrs.thumbHeight ??= 16;
                 attrs.thumbOffset ??= 1;
@@ -21317,9 +21352,6 @@ myt.Destructible = new JS.Module('Destructible', {
             
             
             // Accessors ///////////////////////////////////////////////////////
-            setAxis: function(v) {this.axis = v;},
-            setTrackInset: function(v) {this.trackInset = v;},
-            setTrackOutset: function(v) {this.trackOutset = v;},
             setThumbWidth: function(v) {this.thumbWidth = v;},
             setThumbHeight: function(v) {this.thumbHeight = v;},
             setThumbOffset: function(v) {this.thumbOffset = v;},
@@ -21333,6 +21365,7 @@ myt.Destructible = new JS.Module('Destructible', {
                 return retval;
             },
             
+            
             // Methods /////////////////////////////////////////////////////////
             allowSnap: function(thumb) {
                 const lastMousePosition = thumb.__lastMousePosition,
@@ -21342,24 +21375,6 @@ myt.Destructible = new JS.Module('Destructible', {
                     diff = isXAxis ? lastMousePosition.y - elemPos.y : lastMousePosition.x - elemPos.x;
                 // We only do snapping if the mouse is within the cross axis bounds of the thumb.
                 return diff > 0 && diff < crossSize;
-            },
-            
-            convertValueToPixels: function(v) {
-                const self = this,
-                    minV = self.minValue,
-                    trackInset = self.trackInset,
-                    pxRange = (self.axis === 'x' ? self.width : self.height) - trackInset - self.trackOutset,
-                    valueRange = self.maxValue - minV;
-                return trackInset + ((v - minV) * (pxRange / valueRange));
-            },
-            
-            convertPixelsToValue: function(px) {
-                const self = this,
-                    minV = self.minValue,
-                    trackInset = self.trackInset,
-                    pxRange = (self.axis === 'x' ? self.width : self.height) - trackInset - self.trackOutset,
-                    valueRange = self.maxValue - minV;
-                return ((px - trackInset) * (valueRange / pxRange)) + minV;
             },
             
             nudgeValueLeft: function(thumb) {
@@ -21562,6 +21577,73 @@ myt.Destructible = new JS.Module('Destructible', {
             return this.convertValueToPixels(
                 thumb === this.thumbLower ? this.getValue().upper : this.maxValue
             );
+        }
+    });
+    
+    pkg.ProgressBar = new JSClass('ProgressBar', BaseProgressBar, {
+        include: [pkg.BoundedValueComponent],
+        
+        // Life Cycle //////////////////////////////////////////////////////////
+        /** @overrides myt.BaseSlider */
+        initNode: function(parent, attrs) {
+            attrs.trackInset ??= 1;
+            attrs.trackOutset ??= 1;
+            attrs.valueColor ??= '#333';
+            const roundedCorners = attrs.roundedCorners ??= 9;
+            
+            this.callSuper(parent, attrs);
+            
+            const isHorizontal = this.axis === 'x',
+                trackInset = this.trackInset;
+            this.valueView = new View(this, {
+                x:trackInset, y:trackInset,
+                width:isHorizontal ? 0 : this.width - 2*trackInset,
+                height:isHorizontal ? this.height - 2*trackInset : 0,
+                roundedCorners:roundedCorners - trackInset
+            });
+            this.updateValueView();
+        },
+        
+        
+        // Accessors ///////////////////////////////////////////////////////////
+        /** @overrides */
+        setValue: function(v) {
+            this.callSuper(v);
+            if (this.inited) this.updateValueView();
+        },
+        /** @overrides */
+        setMinValue: function(v) {
+            this.callSuper(v);
+            if (this.inited) this.updateValueView();
+        },
+        /** @overrides */
+        setMaxValue: function(v) {
+            this.callSuper(v);
+            if (this.inited) this.updateValueView();
+        },
+        
+        /** @overrides */
+        setValueColor: function(v) {
+            this.set('valueColor', v, true);
+            if (this.inited) this.updateValueView();
+        },
+        
+        setWidth: function(v) {
+            const existing = this.width;
+            this.callSuper(v);
+            if (this.inited && this.axis === 'x' && this.width !== existing) this.updateValueView();
+        },
+        setHeight: function(v) {
+            const existing = this.height;
+            this.callSuper(v);
+            if (this.inited && this.axis === 'y' && this.height !== existing) this.updateValueView();
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        updateValueView: function() {
+            this.valueView.setBgColor(this.valueColor);
+            this.valueView.set(this.axis === 'x' ? 'width' : 'height', this.convertValueToPixels(this.value) - this.trackInset);
         }
     });
     
