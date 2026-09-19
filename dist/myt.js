@@ -662,7 +662,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
-            version:202609190253, // <<< BUILD_VERSION_THIS
+            version:202609191458, // <<< BUILD_VERSION_THIS
             
             generateGuid,
             
@@ -21299,7 +21299,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     trackInset = self.trackInset,
                     pxRange = (self.axis === 'x' ? self.width : self.height) - trackInset - self.trackOutset,
                     valueRange = self.maxValue - minV;
-                return trackInset + ((v - minV) * (pxRange / valueRange));
+                return trackInset + (valueRange === 0 ? 0 : ((v - minV) * (pxRange / valueRange)));
             },
             
             convertPixelsToValue: function(px) {
@@ -21308,7 +21308,7 @@ myt.Destructible = new JS.Module('Destructible', {
                     trackInset = self.trackInset,
                     pxRange = (self.axis === 'x' ? self.width : self.height) - trackInset - self.trackOutset,
                     valueRange = self.maxValue - minV;
-                return ((px - trackInset) * (valueRange / pxRange)) + minV;
+                return (valueRange === 0 ? 0 : ((px - trackInset) * (valueRange / pxRange))) + minV;
             }
         }),
         

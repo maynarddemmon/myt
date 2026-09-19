@@ -154,7 +154,7 @@
                     trackInset = self.trackInset,
                     pxRange = (self.axis === 'x' ? self.width : self.height) - trackInset - self.trackOutset,
                     valueRange = self.maxValue - minV;
-                return trackInset + ((v - minV) * (pxRange / valueRange));
+                return trackInset + (valueRange === 0 ? 0 : ((v - minV) * (pxRange / valueRange)));
             },
             
             convertPixelsToValue: function(px) {
@@ -163,7 +163,7 @@
                     trackInset = self.trackInset,
                     pxRange = (self.axis === 'x' ? self.width : self.height) - trackInset - self.trackOutset,
                     valueRange = self.maxValue - minV;
-                return ((px - trackInset) * (valueRange / pxRange)) + minV;
+                return (valueRange === 0 ? 0 : ((px - trackInset) * (valueRange / pxRange))) + minV;
             }
         }),
         
