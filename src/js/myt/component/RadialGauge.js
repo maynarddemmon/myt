@@ -67,7 +67,8 @@
             // Methods /////////////////////////////////////////////////////////
             redraw: function() {
                 const {__prgsVw, __valVw, value} = this,
-                    percent = value / (this.maxValue - this.minValue),
+                    range = this.maxValue - this.minValue,
+                    percent = range === 0 ? 0 : value / range,
                     color = this.getColorByValue(value, percent);
                 __prgsVw.setEndAngle(this.startAngle + 360 * percent);
                 __prgsVw.setColor(color);

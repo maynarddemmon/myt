@@ -662,7 +662,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
-            version:202609191458, // <<< BUILD_VERSION_THIS
+            version:202609212352, // <<< BUILD_VERSION_THIS
             
             generateGuid,
             
@@ -25152,7 +25152,8 @@ myt.Destructible = new JS.Module('Destructible', {
             // Methods /////////////////////////////////////////////////////////
             redraw: function() {
                 const {__prgsVw, __valVw, value} = this,
-                    percent = value / (this.maxValue - this.minValue),
+                    range = this.maxValue - this.minValue,
+                    percent = range === 0 ? 0 : value / range,
                     color = this.getColorByValue(value, percent);
                 __prgsVw.setEndAngle(this.startAngle + 360 * percent);
                 __prgsVw.setColor(color);
