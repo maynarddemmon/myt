@@ -287,10 +287,12 @@
             
             getIndexOfModelInData: function(model) {
                 if (model) {
-                    const data = this.getListData(),
-                        areModelsEqual = this.areModelsEqual.bind(this);
-                    let i = data.length;
-                    while (i) if (areModelsEqual(data[--i], model)) return i;
+                    const data = this.getListData();
+                    if (data) {
+                        const areModelsEqual = this.areModelsEqual.bind(this);
+                        let i = data.length;
+                        while (i) if (areModelsEqual(data[--i], model)) return i;
+                    }
                 }
                 return -1;
             },

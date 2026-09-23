@@ -662,7 +662,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
-            version:202609212352, // <<< BUILD_VERSION_THIS
+            version:202609221714, // <<< BUILD_VERSION_THIS
             
             generateGuid,
             
@@ -23549,10 +23549,12 @@ myt.Destructible = new JS.Module('Destructible', {
             
             getIndexOfModelInData: function(model) {
                 if (model) {
-                    const data = this.getListData(),
-                        areModelsEqual = this.areModelsEqual.bind(this);
-                    let i = data.length;
-                    while (i) if (areModelsEqual(data[--i], model)) return i;
+                    const data = this.getListData();
+                    if (data) {
+                        const areModelsEqual = this.areModelsEqual.bind(this);
+                        let i = data.length;
+                        while (i) if (areModelsEqual(data[--i], model)) return i;
+                    }
                 }
                 return -1;
             },
