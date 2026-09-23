@@ -662,7 +662,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
-            version:202609231539, // <<< BUILD_VERSION_THIS
+            version:202609231632, // <<< BUILD_VERSION_THIS
             
             generateGuid,
             
@@ -25833,7 +25833,7 @@ myt.Destructible = new JS.Module('Destructible', {
         /*  A wrapper on roundRect that draws with the reversed winding order. This is useful
             for punching rounded rectangular holes in a path. */
         roundRectReversed: function(x, y, width, height, radii) {
-            if (Array.isArray(radii)) {
+            if (Array.isArray(radii) && radii.length > 1) {
                 const [tl, tr, br, bl] = radii;
                 radii = [tr, tl, bl, br];
             }
