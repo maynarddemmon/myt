@@ -2,8 +2,6 @@
     const consoleWarn = console.warn,
         
         PI = Math.PI,
-        HALF_PI = PI / 2,
-        ONE_AND_A_HALF_PI = PI * 3 / 2,
         AccessorSupport = pkg.AccessorSupport,
         
         mixin = {};
@@ -11,7 +9,7 @@
     for (const funcName of [
         'save','restore','scale','rotate','translate','transform','setTransform',
         'clearRect','fillRect','strokeRect','beginPath','closePath','moveTo','lineTo',
-        'quadraticCurveTo','bezierCurveTo','arcTo','rect','arc','fill','stroke','clip',
+        'quadraticCurveTo','bezierCurveTo','arcTo','rect','roundRect','arc','fill','stroke','clip',
         'isPointInPath','fillText','strokeText','drawImage','createImageData','putImageData'
     ]) {
         mixin[funcName] = function(...args) {
@@ -153,66 +151,10 @@
             this.__ctx.arc(x, y, radius, 0, 2 * PI);
         },
         
-        /** Draws a rounded rect into the provided drawview.
-            @param {number} r - The radius of the corners.
-            @param {number} thickness - The thickness of the line. If thickness is zero or less a 
-                fill will be done rather than an outline.
-            @param {number} left
-            @param {number} top
-            @param {number} w
-            @param {number} h
-            @returns {!Object} The canvas for function chaining. */
-        drawRoundedRect: function(r, thickness, left, top, w, h) {
-            const self = this,
-                lineTo = self.lineTo.bind(self),
-                arc = self.arc.bind(self);
-            
-            let bottom = top + h,
-                right = left + w;
-            
-            // We create a single path for both an outer and inner rounded rect. The reason for 
-            // this is that filling looks much better than stroking.
-            self.beginPath();
-            
-            self.moveTo(left, top + r);
-            
-            lineTo(left, bottom - r);
-            arc(left + r, bottom - r, r, PI, HALF_PI, true);
-            
-            lineTo(right - r, bottom);
-            arc(right - r, bottom - r, r, HALF_PI, 0, true);
-            
-            lineTo(right, top + r);
-            arc(right - r, top + r, r, 0, ONE_AND_A_HALF_PI, true);
-            
-            lineTo(left + r, top);
-            arc(left + r, top + r, r, ONE_AND_A_HALF_PI, PI, true);
-            
-            self.closePath();
-            
-            if (thickness > 0) {
-                r -= thickness;
-                left += thickness;
-                right -= thickness;
-                top += thickness;
-                bottom -= thickness;
-                
-                self.moveTo(left, top + r);
-                
-                arc(left + r, top + r, r, PI, ONE_AND_A_HALF_PI);
-                
-                lineTo(right - r, top);
-                arc(right - r, top + r, r, ONE_AND_A_HALF_PI, 0);
-                
-                lineTo(right, bottom - r);
-                arc(right - r, bottom - r, r, 0, HALF_PI);
-                
-                lineTo(left + r, bottom);
-                arc(left + r, bottom - r, r, HALF_PI, PI);
-                
-                self.closePath();
-            }
-            return self;
+        /*  A wrapper on roundRect that draws with the reversed winding order. This is useful
+            for punching rounded rectangular holes in a path. */
+        roundRectReversed: function(x, y, width, height, radii) {
+            this.__ctx.roundRect(x + width, y, -width, height, radii);
         },
         
         /** Draws a rect outline into the provided drawview.
@@ -248,43 +190,6 @@
             
             self.closePath();
             
-            return self;
-        },
-        
-        /** Draws a rounded rect with one or more flat corners.
-            @param {number} rTL - the radius for the top left corner.
-            @param {number} rTR - the radius for the top right corner.
-            @param {number} rBL - the radius for the bottom left corner.
-            @param {number} rBR - the radius for the bottom right corner.
-            @param {number} left
-            @param {number} top
-            @param {number} w
-            @param {number} h
-            @returns {!Object} The canvas for function chaining. */
-        drawPartiallyRoundedRect: function(rTL, rTR, rBL, rBR, left, top, w, h) {
-            const self = this,
-                bottom = top + h, 
-                right = left + w,
-                lineTo = self.lineTo.bind(self),
-                quadraticCurveTo = self.quadraticCurveTo.bind(self);
-            
-            self.beginPath();
-            
-            self.moveTo(left, top + rTL);
-            
-            lineTo(left, bottom - rBL);
-            if (rBL > 0) quadraticCurveTo(left, bottom, left + rBL, bottom);
-            
-            lineTo(right - rBR, bottom);
-            if (rBR > 0) quadraticCurveTo(right, bottom, right, bottom - rBR);
-            
-            lineTo(right, top + rTR);
-            if (rTR > 0) quadraticCurveTo(right, top, right - rTR, top);
-            
-            lineTo(left + rTL, top);
-            if (rTL > 0) quadraticCurveTo(left, top, left, top + rTL);
-            
-            self.closePath();
             return self;
         },
         
