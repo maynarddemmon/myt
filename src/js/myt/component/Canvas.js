@@ -154,6 +154,10 @@
         /*  A wrapper on roundRect that draws with the reversed winding order. This is useful
             for punching rounded rectangular holes in a path. */
         roundRectReversed: function(x, y, width, height, radii) {
+            if (Array.isArray(radii)) {
+                const [tl, tr, br, bl] = radii;
+                radii = [tr, tl, bl, br];
+            }
             this.__ctx.roundRect(x + width, y, -width, height, radii);
         },
         
