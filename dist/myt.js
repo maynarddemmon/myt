@@ -662,7 +662,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
-            version:202609231632, // <<< BUILD_VERSION_THIS
+            version:202609241612, // <<< BUILD_VERSION_THIS
             
             generateGuid,
             
@@ -23572,7 +23572,7 @@ myt.Destructible = new JS.Module('Destructible', {
             },
             
             refreshListData: function(preserveScroll, forceFullReset) {
-                this.setListData(this.collectionModel.getAsSortedList(this.getSortFunction(), this.getFilterFunction()));
+                this.setListData(this.collectionModel?.getAsSortedList(this.getSortFunction(), this.getFilterFunction()) ?? []);
                 this.resetListUI(preserveScroll, forceFullReset);
             },
             

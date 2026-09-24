@@ -310,7 +310,7 @@
             },
             
             refreshListData: function(preserveScroll, forceFullReset) {
-                this.setListData(this.collectionModel.getAsSortedList(this.getSortFunction(), this.getFilterFunction()));
+                this.setListData(this.collectionModel?.getAsSortedList(this.getSortFunction(), this.getFilterFunction()) ?? []);
                 this.resetListUI(preserveScroll, forceFullReset);
             },
             
