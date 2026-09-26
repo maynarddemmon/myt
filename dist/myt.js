@@ -662,7 +662,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
-            version:202609241612, // <<< BUILD_VERSION_THIS
+            version:202609252227, // <<< BUILD_VERSION_THIS
             
             generateGuid,
             
@@ -19217,10 +19217,10 @@ myt.Destructible = new JS.Module('Destructible', {
                 
                 self.makeHighestZIndex();
                 
+                self.setVisible(true);
+                
                 // Prevent focus traversing
                 if (self.focusable) self.focus();
-                
-                self.setVisible(true);
             },
             
             /** Hides the dimmer and restores focus if necessary.

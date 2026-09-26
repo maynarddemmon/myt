@@ -77,10 +77,10 @@
                 
                 self.makeHighestZIndex();
                 
+                self.setVisible(true);
+                
                 // Prevent focus traversing
                 if (self.focusable) self.focus();
-                
-                self.setVisible(true);
             },
             
             /** Hides the dimmer and restores focus if necessary.
