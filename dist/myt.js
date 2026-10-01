@@ -664,7 +664,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
-            version:202609301952, // <<< BUILD_VERSION_THIS
+            version:202609302046, // <<< BUILD_VERSION_THIS
             
             generateGuid,
             
@@ -18700,6 +18700,56 @@ myt.Destructible = new JS.Module('Destructible', {
             _onChange: NOOP, // event => {/* Subclasses to implement. */}
         }),
         
+        HiddenImporter = pkg.HiddenImporter = new JSClass('HiddenImporter', FileInput, {
+            // Life Cycle //////////////////////////////////////////////////////
+            initNode: function(parent, attrs) {
+                const self = this;
+                
+                attrs.maxFiles = 1;
+                attrs.visible = attrs.focusable = false;
+                attrs.ignoreLayout = true;
+                
+                self.readAs = attrs.readAs ?? 'text';
+                delete attrs.readAs;
+                
+                self.callSuper(parent, attrs);
+            },
+            
+            
+            // Accessors ///////////////////////////////////////////////////////
+            setUploadedFileName: function(v) {this.uploadedFileName = v;},
+            
+            
+            // Methods /////////////////////////////////////////////////////////
+            /** Opens the browser's file picker. Must be called from within a user gesture
+                such as a click or key handler. */
+            promptForFile: function() {this.getIDE().click();},
+            
+            /** @private */
+            _onChange: function(_event) {
+                const file = this.getIDE().files?.[0];
+                if (file) this.processFile(file);
+            },
+            
+            processFile: function(file) {
+                const self = this;
+                self.setUploadedFileName(file.name);
+                
+                // Clear now rather than after reading so picking the same file again still
+                // fires a change event, even if this read fails.
+                self.clearValue();
+                
+                Uploader.readFile(file, result => {
+                    self.beforeProcessOnLoad();
+                    self.processFileData(result);
+                    self.clearValue();
+                }, self.readAs);
+            },
+            
+            beforeProcessOnLoad: NOOP, // () => {}
+            processFileData: NOOP // fileData => {}
+        }),
+        
         /** Component to upload files.
             
             @class */
@@ -19031,6 +19081,38 @@ myt.Destructible = new JS.Module('Destructible', {
                 return this.files.length ? {width:this.nativeWidth, height:this.nativeHeight} : null;
             }
         });
+    
+    /** A HiddenImporter that reads a .json file and parses it.
+        
+        @class */
+    pkg.HiddenJSONImporter = new JSClass('HiddenJSONImporter', HiddenImporter, {
+        // Life Cycle //////////////////////////////////////////////////////////
+        initNode: function(parent, attrs) {
+            attrs.accept ??= '.json,application/json';
+            attrs.readAs = 'text';
+            this.callSuper(parent, attrs);
+        },
+        
+        
+        // Methods /////////////////////////////////////////////////////////////
+        /** @overrides */
+        processFileData: function(fileData) {
+            let json;
+            try {
+                json = JSON.parse(fileData);
+            } catch (err) {
+                this.handleJSONParsingError(err);
+                return;
+            }
+            this.processJSON(json);
+        },
+        
+        processJSON: NOOP, // json => {}
+        
+        handleJSONParsingError: function(err) {
+            console.warn('Could not parse', this.uploadedFileName, 'as JSON:', err);
+        }
+    });
 })(myt);
 
 
