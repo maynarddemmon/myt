@@ -435,6 +435,8 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         math = Math,
         {abs:mathAbs, min:mathMin, max:mathMax, pow:mathPow} = math,
         
+        JSONStringify = JSON.stringify,
+        
         isArray = Array.isArray,
         
         documentElem = document,
@@ -581,7 +583,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             @param {number} [cacheLimit] - Optional maximum size of the cache. Defaults 
                 to unlimited.
             @returns {!Function} - The memoized function. */
-        memoize = (func, keyResolver=JSON.stringify, cacheLimit=Infinity) => {
+        memoize = (func, keyResolver=JSONStringify, cacheLimit=Infinity) => {
             const cache = new Map();
             return (...args) => {
                 const key = keyResolver(args);
@@ -662,7 +664,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
         
         myt = pkg.myt = {
             /** A version number based on the time this distribution of myt was created. */
-            version:202609252227, // <<< BUILD_VERSION_THIS
+            version:202609301952, // <<< BUILD_VERSION_THIS
             
             generateGuid,
             
@@ -806,7 +808,7 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 }
             },
             
-            stableStringify: obj => JSON.stringify(obj, (key_ignored, value) => {
+            stableStringify: obj => JSONStringify(obj, (key_ignored, value) => {
                 /* Only re-order plain objects; leave arrays and primitives untouched.
                    This works because iteration order is insertion order of String based keys.
                    Note: you can't have both a numeric and string key in an Object that serializes
@@ -1292,20 +1294,19 @@ Date.prototype.format = Date.prototype.format ?? (() => {
             
             
             // Misc ////////////////////////////////////////////////////////////
-            dataURIToBlob: dataURI => {
-                const idx = dataURI.indexOf(','),
-                    mimeStr = dataURI.slice(0, idx).split(':')[1].split(';')[0];
-                let data = dataURI.slice(idx + 1);
-                if (mimeStr.startsWith('text/')) {
-                    data = decodeURIComponent(data);
-                } else {
-                    const binStr = atob(data);
-                    let i = binStr.length;
-                    const intArr = new Uint8Array(i);
-                    while (i) intArr[--i] = binStr.charCodeAt(i);
-                    data = intArr;
+            dataURIToBlob: uri => {
+                const commaIdx = uri.indexOf(','),
+                    meta = uri.slice(5, commaIdx), // after "data:"
+                    type = meta.split(';')[0],
+                    data = uri.slice(commaIdx + 1);
+                if (meta.toLowerCase().endsWith(';base64')) { // The spec treats ";BASE64" the same.
+                    const bin = atob(data);
+                    let i = bin.length;
+                    const bytes = new Uint8Array(i);
+                    while (i) bytes[--i] = bin.charCodeAt(i);
+                    return new Blob([bytes], {type});
                 }
-                return new Blob([data], {type:mimeStr});
+                return new Blob([decodeURIComponent(data)], {type:type || 'text/plain'});
             },
             
             /** Runs code in a Worker for better encapsulation.
@@ -1512,6 +1513,35 @@ Date.prototype.format = Date.prototype.format ?? (() => {
                 return 'data:text/csv;charset=utf-8' + 
                     header + ',' + 
                     encodeURIComponent(csvData);
+            },
+            
+            /** Downloads a Blob to the client machine without involving the server.
+                @param {!Blob} blob
+                @param {string} [filename] - Defaults to the current time with a generic .file extension.
+                @returns {void} */
+            downloadBlob: (blob, filename) => {
+                const href = URL.createObjectURL(blob),
+                    link = createElement('a');
+                link.href = href;
+                link.download = filename || Date.now() + '.file';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                // Firefox can still be reading the URL after click() returns, so don't revoke immediately.
+                setTimeout(() => URL.revokeObjectURL(href), 1000);
+            },
+            
+            prettyFormatJSON: (obj, indent=2) => JSONStringify(obj ?? null, null, indent),
+            
+            /** Downloads an object as a pretty printed .json file.
+                @param {*} obj
+                @param {string} [filename] - A .json extension is added if missing.
+                @returns {void} */
+            downloadObjectAsJSON: (obj, filename='data') => {
+                myt.downloadBlob(
+                    new Blob([myt.prettyFormatJSON(obj)], {type:'application/json'}),
+                    filename.endsWith('.json') ? filename : filename + '.json'
+                );
             },
             
             
