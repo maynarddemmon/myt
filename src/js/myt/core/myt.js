@@ -906,6 +906,32 @@
                 };
             },
             
+            /*  Like debounce, but rather than waiting a set time, it calls the func once at the 
+                end of the current burst of synchronous work. Calls in the same burst are
+                merged into one, with the last call's arguments, separately for each "this", 
+                so it suits methods. An error thrown by func is logged, since one in a microtask 
+                is otherwise easy to miss.
+                @param {!Function} func - The function to debounce as a microtask.
+                @returns {!Function} - A microtask debounced version of the provided function. */
+            debounceMicrotask: func => {
+                const pending = new Map(); // "this" -> the last call's arguments.
+                return function(...args) {
+                    const isQueued = pending.has(this);
+                    pending.set(this, args);
+                    if (!isQueued) {
+                        queueMicrotask(() => {
+                            const lastArgs = pending.get(this);
+                            pending.delete(this);
+                            try {
+                                func.apply(this, lastArgs);
+                            } catch (err) {
+                                console.error('debounceMicrotask: the call threw', err);
+                            }
+                        });
+                    }
+                };
+            },
+            
             
             // Misc ////////////////////////////////////////////////////////////
             dataURIToBlob: uri => {
